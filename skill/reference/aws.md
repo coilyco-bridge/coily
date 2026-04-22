@@ -1349,4 +1349,3 @@ Returns a set of temporary security credentials (consisting of an access key ID,
 ### `coily aws sts get-session-token`
 
 Returns a set of temporary credentials for an Amazon Web Services account or IAM user.
-

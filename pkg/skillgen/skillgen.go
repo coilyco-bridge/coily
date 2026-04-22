@@ -76,19 +76,27 @@ func Generate(opt Options) error {
 		return fmt.Errorf("skillgen: mkdir refdir: %w", err)
 	}
 
-	skill := renderSkillMD(manifests, opt.Verbs)
+	skill := finalizeMarkdown(renderSkillMD(manifests, opt.Verbs))
 	if err := os.WriteFile(filepath.Join(opt.OutDir, "SKILL.md"), []byte(skill), 0o644); err != nil {
 		return fmt.Errorf("skillgen: write SKILL.md: %w", err)
 	}
 
 	for _, m := range manifests {
-		ref := renderReferenceMD(m)
+		ref := finalizeMarkdown(renderReferenceMD(m))
 		p := filepath.Join(refDir, m.Binary+".md")
 		if err := os.WriteFile(p, []byte(ref), 0o644); err != nil {
 			return fmt.Errorf("skillgen: write %s: %w", p, err)
 		}
 	}
 	return nil
+}
+
+// finalizeMarkdown normalizes the tail of a rendered markdown file to a single
+// trailing newline. Writer helpers append "\n\n" after every block for visual
+// spacing, which leaves a blank line at EOF that pre-commit's end-of-file-fixer
+// would otherwise rewrite on every run.
+func finalizeMarkdown(s string) string {
+	return strings.TrimRight(s, "\n") + "\n"
 }
 
 func loadManifests(dir string) ([]Manifest, error) {
