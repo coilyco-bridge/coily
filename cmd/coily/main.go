@@ -29,12 +29,33 @@ func registerCommand(c *cli.Command)        { registeredCommands = append(regist
 func registerDevOnlyCommand(c *cli.Command) { devOnlyCommands = append(devOnlyCommands, c) }
 
 func main() {
+	builtIns := append(append([]*cli.Command{}, registeredCommands...), devOnlyCommands...)
+
+	reserved := map[string]bool{}
+	for _, c := range builtIns {
+		reserved[c.Name] = true
+	}
+	repoCmds := loadRepoCommands(reserved)
+
 	cmd := &cli.Command{
 		Name:                  "coily",
 		Usage:                 "Operator CLI for Kai's homelab.",
 		Version:               Version,
-		Commands:              append(append([]*cli.Command{}, registeredCommands...), devOnlyCommands...),
+		Commands:              append(append([]*cli.Command{}, builtIns...), repoCmds...),
 		EnableShellCompletion: true,
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:  "list",
+				Usage: "print every command coily can run (built-in + repo) and exit",
+			},
+		},
+		Action: func(_ context.Context, c *cli.Command) error {
+			if c.Bool("list") {
+				listCommand(builtIns, repoCmds)
+				return nil
+			}
+			return cli.ShowAppHelp(c)
+		},
 	}
 
 	if err := cmd.Run(context.Background(), os.Args); err != nil {

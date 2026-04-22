@@ -56,8 +56,9 @@ type Writer struct {
 	// Compress gzips rotated files.
 	Compress bool
 
-	mu  sync.Mutex
-	log *lumberjack.Logger
+	mu        sync.Mutex
+	log       *lumberjack.Logger
+	warnedErr bool // true after the first write/mkdir failure has been reported to stderr
 }
 
 // NewWriter returns a Writer with Now set to time.Now and Session populated
@@ -147,9 +148,25 @@ func (w *Writer) Wrap(_ context.Context, verb string, argv []string, fn func() e
 		rec.Error = err.Error()
 	}
 	if aerr := w.Append(rec); aerr != nil {
-		fmt.Fprintf(os.Stderr, "audit: failed to record %s: %v\n", verb, aerr)
+		w.warnOnce(aerr)
 	}
 	return err
+}
+
+// warnOnce prints aerr to stderr the first time it is called on this Writer
+// and suppresses subsequent calls. The message identifies the configured path
+// and the underlying error (errno when the OS surfaces one). Subsequent
+// Append attempts still happen - we just do not spam stderr per invocation.
+// If permissions are fixed mid-session, logging resumes silently.
+func (w *Writer) warnOnce(aerr error) {
+	w.mu.Lock()
+	warned := w.warnedErr
+	w.warnedErr = true
+	w.mu.Unlock()
+	if warned {
+		return
+	}
+	fmt.Fprintf(os.Stderr, "audit: cannot write %s: %v (subsequent audit failures this session will be silent)\n", w.Path, aerr)
 }
 
 func (w *Writer) now() time.Time {

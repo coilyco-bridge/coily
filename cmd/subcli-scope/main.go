@@ -400,9 +400,17 @@ func firstLine(s string) string {
 }
 
 var (
-	// Man-page page header like "ROUTE53()                        ROUTE53()".
-	// Present as line 1 of aws help output after groff overstrikes are stripped.
+	// Man-page page header/footer like "ROUTE53()                        ROUTE53()".
+	// Present as line 1 (and also the final line) of aws help output after
+	// groff overstrikes are stripped. Matches an all-line occurrence so it can
+	// be removed as noise wherever it appears.
 	manPageHeaderRE = regexp.MustCompile(`^[A-Z][A-Z0-9-]*\(\)`)
+	// Groff page header and footer lines. The header is two copies of
+	// `NAME()` separated by whitespace; the footer is the same token indented
+	// on its own. Stripping both removes garbage like `S3API()    S3API()` and
+	// the trailing `S3API()` line that otherwise leak into parsed output.
+	manPageHeaderLineRE = regexp.MustCompile(`(?m)^\s*[A-Z][A-Z0-9-]*\(\)\s+[A-Z][A-Z0-9-]*\(\)\s*$\n?`)
+	manPageFooterLineRE = regexp.MustCompile(`(?m)^\s*[A-Z][A-Z0-9-]*\(\)\s*$\n?`)
 	// docutils parser warnings that aws's help sometimes emits inline,
 	// e.g. "<string>:272: (WARNING/2) Inline substitution_reference ...".
 	docutilsWarningRE = regexp.MustCompile(`(?m)^<string>:\d+: \([A-Z]+/\d+\).*$\n?`)
@@ -412,44 +420,59 @@ var (
 // text is for. Handles three shapes.
 //
 //   - aws man-style: line 1 is `COMMAND()   COMMAND()`. Pull from the
-//     DESCRIPTION section body, skipping NAME and other preamble.
+//     DESCRIPTION section body, falling back to SYNOPSIS then NAME when
+//     DESCRIPTION is missing or empty (aws s3api is the motivating case).
 //   - gh/kubectl: line 1 IS the description. Take the first sentence.
 //   - empty: return empty.
 //
-// Also strips docutils parser warnings that leak into aws help text.
+// Also strips docutils parser warnings and groff page header/footer lines
+// that leak into aws help text.
 func summary(help string) string {
 	help = docutilsWarningRE.ReplaceAllString(help, "")
+	// Detect mannish shape BEFORE stripping groff header/footer lines so we
+	// don't false-positive on kubectl fixtures that happen to start with a
+	// bare "NAME" line (broken captures).
+	wasMannish := manPageHeaderRE.MatchString(firstLine(strings.TrimSpace(help)))
+	help = manPageHeaderLineRE.ReplaceAllString(help, "")
+	help = manPageFooterLineRE.ReplaceAllString(help, "")
 	help = strings.TrimSpace(help)
 	if help == "" {
 		return ""
 	}
 
-	if manPageHeaderRE.MatchString(firstLine(help)) {
-		if d := mannishDescription(help); d != "" {
-			return d
+	if wasMannish {
+		// Try DESCRIPTION first, then SYNOPSIS, then NAME. Any empty or
+		// placeholder-only section is skipped so we don't return "foo -".
+		for _, section := range []string{"DESCRIPTION", "SYNOPSIS", "NAME"} {
+			if d := mannishSection(help, section); d != "" {
+				return d
+			}
 		}
+		// Mannish but every section is empty. Don't fall through to
+		// firstSentence, which would return the groff header line.
+		return ""
 	}
 	return firstSentence(help)
 }
 
-// mannishDescription walks the text of a man-style help page and returns the
-// first sentence of its DESCRIPTION section body, or "" if no DESCRIPTION
-// block is present.
-func mannishDescription(help string) string {
+// mannishSection walks a man-style help page and returns the first sentence
+// of the requested section's body, or "" if the section is missing, empty,
+// or contains only a placeholder like "s3api -".
+func mannishSection(help, header string) string {
 	scanner := bufio.NewScanner(strings.NewReader(help))
-	inDescription := false
+	inSection := false
 	var buf strings.Builder
 	for scanner.Scan() {
 		line := scanner.Text()
 		trimmed := strings.TrimSpace(line)
-		if !inDescription {
-			if trimmed == "DESCRIPTION" {
-				inDescription = true
+		if !inSection {
+			if trimmed == header {
+				inSection = true
 			}
 			continue
 		}
-		// We're in DESCRIPTION. A blank line after we've collected text ends
-		// the first paragraph, which is where the summary sentence lives.
+		// We're inside the section. A blank line after we've collected text
+		// ends the first paragraph, which is where the summary sentence lives.
 		if trimmed == "" {
 			if buf.Len() > 0 {
 				break
@@ -465,7 +488,23 @@ func mannishDescription(help string) string {
 		}
 		buf.WriteString(trimmed)
 	}
-	return firstSentence(buf.String())
+	body := strings.TrimSpace(buf.String())
+	// NAME bodies look like "s3api -" or "s3api - manage S3 at the API level".
+	// Strip the leading "name -" prefix so we don't emit a dangling dash.
+	// When the body is just "name" or "name -", treat it as an empty
+	// placeholder (aws s3api shape) so the caller can fall through to other
+	// sections or return empty.
+	if header == "NAME" {
+		if i := strings.Index(body, " - "); i >= 0 {
+			body = strings.TrimSpace(body[i+3:])
+		} else if strings.HasSuffix(body, " -") {
+			body = ""
+		} else if !strings.ContainsAny(body, " \t") {
+			// Single token, no description. Placeholder.
+			body = ""
+		}
+	}
+	return firstSentence(body)
 }
 
 // isAllCapsHeader matches section headers like "DESCRIPTION", "SYNOPSIS",

@@ -31,6 +31,25 @@ make dev               # builds ./bin/coily-dev (different binary name, not on P
 
 The agent's allowlist only trusts `coily`, never `coily-dev`. Dev builds have `-tags dev` with extra diagnostics. Production builds use `-tags prod` which strips dev code paths.
 
+## Per-repo commands (`coily.yaml`)
+
+Each repo can drop a `coily.yaml` at its root to declare the dev commands an operator (human or agent) should run from that tree. `coily test`, `coily lint`, `coily build`. This replaces per-repo Makefiles and `pyinvoke` tasks without widening the security boundary.
+
+```yaml
+commands:
+  test: go test ./...
+  lint:
+    run: golangci-lint run ./...
+    description: Lint with golangci-lint.
+```
+
+- `coily` walks up from the cwd to discover `coily.yaml`. Run from a subdirectory and it still finds the root. `$COILY_REPO_CONFIG` overrides the walk.
+- `coily --list` prints built-ins and repo commands, grouped. `coily <cmd> --help` shows what a repo command expands to.
+- Every declared token plus any user-supplied extras pass through `policy.ValidateArg`. Shell metacharacters are rejected at load time and at invocation. No carve-outs.
+- Audit records use verb `repo.<cmd>`. Same log file as privileged ops.
+- Repo commands that collide with a built-in (`aws`, `kubectl`, etc.) are skipped with a stderr warning. Built-ins always win.
+- Binaries are resolved via `$PATH` (unlike the embedded `aws`/`kubectl`/`gh`). Repo-level dev tools vary per repo. Their authenticity is the repo's problem, not coily's.
+
 ## Architectural decisions
 
 - **Single binary**, single trust boundary. One entry in the Claude allowlist, `Bash(coily:*)`.

@@ -157,6 +157,115 @@ Use "kubectl <command> --help" for more information about a given command.
 	}
 }
 
+// TestSummaryFallback covers the DESCRIPTION -> SYNOPSIS -> NAME fallback
+// chain and groff-artifact stripping in summary(). Motivating case is
+// `aws s3api`, whose help has no DESCRIPTION body and previously leaked a
+// groff page header into the manifest as `S3API()    S3API()`.
+func TestSummaryFallback(t *testing.T) {
+	cases := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{
+			name: "s3api empty description empty name returns empty",
+			in: `S3API()                                                                S3API()
+
+NAME
+       s3api -
+
+DESCRIPTION
+AVAILABLE COMMANDS
+
+       o abort-multipart-upload
+
+                                                                       S3API()
+`,
+			want: "",
+		},
+		{
+			name: "description present wins over name",
+			in: `ROUTE53()                                                            ROUTE53()
+
+NAME
+       route53 -
+
+DESCRIPTION
+       Amazon Route 53 is a highly available and scalable Domain Name System
+       (DNS) web service.
+`,
+			want: "Amazon Route 53 is a highly available and scalable Domain Name System (DNS) web service.",
+		},
+		{
+			name: "name populated falls back when description empty",
+			in: `FOO()                                                                    FOO()
+
+NAME
+       foo - does the foo thing really well
+
+DESCRIPTION
+SYNOPSIS
+`,
+			want: "does the foo thing really well",
+		},
+		{
+			name: "synopsis fallback when description missing and name placeholder",
+			in: `BAR()                                                                    BAR()
+
+NAME
+       bar -
+
+SYNOPSIS
+       bar is a command that does bar-y operations.
+`,
+			want: "bar is a command that does bar-y operations.",
+		},
+		{
+			name: "docutils warnings stripped",
+			in: `BAZ()                                                                    BAZ()
+
+<string>:42: (WARNING/2) Inline substitution_reference start-string
+NAME
+       baz - something useful
+
+DESCRIPTION
+       Baz handles the baz workflow end to end.
+`,
+			want: "Baz handles the baz workflow end to end.",
+		},
+		{
+			name: "non-mannish help uses first sentence",
+			in: `Authenticate gh and git with GitHub.
+
+USAGE
+  gh auth <command>
+`,
+			want: "Authenticate gh and git with GitHub.",
+		},
+		{
+			name: "footer page header line stripped",
+			in: `S3API()                                                                S3API()
+
+NAME
+       s3api -
+
+DESCRIPTION
+                                                                       S3API()
+`,
+			want: "",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := summary(tc.in)
+			if got != tc.want {
+				t.Errorf("summary() = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
 // TestStripOverstrike checks groff-style backspace-overstrike removal used
 // when ingesting aws help (which renders through man-style formatting).
 func TestStripOverstrike(t *testing.T) {

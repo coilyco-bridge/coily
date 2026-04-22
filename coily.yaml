@@ -1,0 +1,31 @@
+# Per-repo command allowlist. Loaded at runtime by pkg/repocfg when coily is
+# invoked anywhere inside this checkout. See pkg/repocfg/repocfg.go for the
+# loader, docs/threat-model.md for the security story.
+#
+# Rules:
+#   - Every token parses via strings.Fields and must pass policy.ValidateArg.
+#     No shell metacharacters anywhere. Pipes, redirects, and $(subshells)
+#     are rejected at load time.
+#   - Extra positional args appended at invocation are validated the same way.
+#   - Repo commands cannot shadow a built-in verb; collisions are skipped with
+#     a warning on stderr.
+#
+# Commands that need shell features (heredocs, pipes, env munging) live in a
+# dedicated script file that these commands exec by name.
+
+commands:
+  test:
+    run: go test ./...
+    description: Run the unit test suite.
+  vet:
+    run: go vet ./...
+    description: go vet across the tree.
+  lint:
+    run: golangci-lint run ./...
+    description: Lint with golangci-lint.
+  lint-fix:
+    run: golangci-lint run --fix ./...
+    description: Autofix lint issues where possible.
+  cover:
+    run: go test -coverprofile=coverage.out ./...
+    description: Unit tests with a coverage profile.

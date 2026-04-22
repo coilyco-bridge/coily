@@ -411,7 +411,6 @@ commands:
       help: Set the website configuration for a bucket.
     - path:
         - s3api
-      help: S3API()                                                                S3API()
       children:
         - abort-multipart-upload
         - complete-multipart-upload

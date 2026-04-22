@@ -194,6 +194,114 @@ func TestAppend_RotatesOnSize(t *testing.T) {
 	}
 }
 
+func TestAppend_CreatesNestedParentDirectories(t *testing.T) {
+	// Simulate the "parent directory does not exist" path. tempWriter already
+	// nests a single "subdir" level; this test goes deeper and verifies the
+	// whole chain is created with 0700 perms.
+	dir := t.TempDir()
+	nested := filepath.Join(dir, "a", "b", "c")
+	w := &audit.Writer{
+		Path:    filepath.Join(nested, "audit.jsonl"),
+		Now:     func() time.Time { return time.Date(2026, 4, 22, 12, 0, 0, 0, time.UTC) },
+		Session: "test-session",
+	}
+	if err := w.Append(audit.Record{Verb: "test.verb"}); err != nil {
+		t.Fatalf("Append: %v", err)
+	}
+	info, err := os.Stat(nested)
+	if err != nil {
+		t.Fatalf("stat %s: %v", nested, err)
+	}
+	if !info.IsDir() {
+		t.Fatalf("%s is not a directory", nested)
+	}
+	if perm := info.Mode().Perm(); perm != 0o700 {
+		t.Errorf("dir perm = %o, want 0700", perm)
+	}
+	fi, err := os.Stat(w.Path)
+	if err != nil {
+		t.Fatalf("stat audit file: %v", err)
+	}
+	if perm := fi.Mode().Perm(); perm != 0o600 {
+		t.Errorf("file perm = %o, want 0600", perm)
+	}
+}
+
+func TestAppend_FailsWhenParentDirUnwritable(t *testing.T) {
+	if os.Geteuid() == 0 {
+		t.Skip("running as root; permission checks are bypassed")
+	}
+	// Parent directory exists but lacks write permission. Append should
+	// return an error (mkdir or open will fail with EACCES). The Wrap layer
+	// will surface it to stderr exactly once.
+	dir := t.TempDir()
+	locked := filepath.Join(dir, "locked")
+	if err := os.Mkdir(locked, 0o500); err != nil {
+		t.Fatalf("mkdir locked: %v", err)
+	}
+	t.Cleanup(func() {
+		// Restore writability so t.TempDir cleanup succeeds.
+		_ = os.Chmod(locked, 0o700)
+	})
+	w := &audit.Writer{
+		Path: filepath.Join(locked, "audit.jsonl"),
+		Now:  func() time.Time { return time.Date(2026, 4, 22, 12, 0, 0, 0, time.UTC) },
+	}
+	err := w.Append(audit.Record{Verb: "test.verb"})
+	if err == nil {
+		t.Fatal("Append on unwritable parent dir: got nil err, want permission error")
+	}
+	if !strings.Contains(err.Error(), "audit:") {
+		t.Errorf("err = %q, want wrapped audit error", err)
+	}
+}
+
+func TestWrap_StderrWarningLatchesAfterFirstFailure(t *testing.T) {
+	if os.Geteuid() == 0 {
+		t.Skip("running as root; permission checks are bypassed")
+	}
+	// Point Path at an unwritable directory so every Append fails. Capture
+	// stderr across several Wrap calls; we should see exactly one warning
+	// line even though Append itself is attempted every time.
+	dir := t.TempDir()
+	locked := filepath.Join(dir, "locked")
+	if err := os.Mkdir(locked, 0o500); err != nil {
+		t.Fatalf("mkdir locked: %v", err)
+	}
+	t.Cleanup(func() { _ = os.Chmod(locked, 0o700) })
+
+	origStderr := os.Stderr
+	r, pw, err := os.Pipe()
+	if err != nil {
+		t.Fatalf("pipe: %v", err)
+	}
+	os.Stderr = pw
+	t.Cleanup(func() { os.Stderr = origStderr })
+
+	w := &audit.Writer{
+		Path: filepath.Join(locked, "audit.jsonl"),
+		Now:  func() time.Time { return time.Date(2026, 4, 22, 12, 0, 0, 0, time.UTC) },
+	}
+	for i := 0; i < 3; i++ {
+		_ = w.Wrap(context.Background(), "v", []string{"x"}, func() error { return nil })
+	}
+	if err := pw.Close(); err != nil {
+		t.Fatalf("close pipe writer: %v", err)
+	}
+	var captured bytes.Buffer
+	if _, err := captured.ReadFrom(r); err != nil {
+		t.Fatalf("read stderr: %v", err)
+	}
+	got := captured.String()
+	count := strings.Count(got, "audit: cannot write")
+	if count != 1 {
+		t.Errorf("got %d stderr warnings, want exactly 1. captured:\n%s", count, got)
+	}
+	if !strings.Contains(got, w.Path) {
+		t.Errorf("warning does not name the path %q. captured:\n%s", w.Path, got)
+	}
+}
+
 func TestReadAll_DecodesMultipleRecords(t *testing.T) {
 	input := `{"ts":"2026-04-22T12:00:00Z","verb":"a"}
 {"ts":"2026-04-22T12:00:01Z","verb":"b"}
