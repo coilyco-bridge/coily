@@ -28,7 +28,11 @@ type KaiServer struct {
 }
 
 type Audit struct {
-	LogPath string `yaml:"log_path"`
+	LogPath    string `yaml:"log_path"`
+	MaxSizeMB  int    `yaml:"max_size_mb"`
+	MaxBackups int    `yaml:"max_backups"`
+	MaxAgeDays int    `yaml:"max_age_days"`
+	Compress   bool   `yaml:"compress"`
 }
 
 type AWS struct {

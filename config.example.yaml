@@ -11,6 +11,13 @@ kai_server:
 audit:
   # Append-only JSONL log. Directory must be writable only by the coily process user.
   log_path: /var/log/coily/audit.jsonl
+  # Rotation via lumberjack. 10MB per file, keep 10 backups or 30 days
+  # (whichever cap hits first). Rotated files are named
+  # audit-<timestamp>.jsonl, plain text.
+  max_size_mb: 10
+  max_backups: 10
+  max_age_days: 30
+  compress: false
 
 aws:
   # Profile to use for SDK calls. Credentials come from ~/.aws/, not from this file.

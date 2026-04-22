@@ -9,6 +9,11 @@ kai_server:
 
 audit:
   log_path: /var/log/coily/audit.jsonl
+  # Rotation. 10MB per file, keep 10 backups or 30 days (whichever hits first).
+  max_size_mb: 10
+  max_backups: 10
+  max_age_days: 30
+  compress: false
 
 aws:
   profile: default

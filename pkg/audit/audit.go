@@ -3,14 +3,15 @@
 // audit log is the forensic trail if an agent (or a confused human) invokes
 // something destructive.
 //
-// The writer is cheap and safe to call from anywhere, including concurrent
-// verb execution. Each call opens the file in O_APPEND|O_CREATE|O_WRONLY
-// with 0600 perms, writes one JSON line, and closes. No buffering, no
-// global state. If the target directory does not exist it is created with
-// 0700.
+// Rotation is handled by lumberjack: when the active file reaches MaxSizeMB
+// it is renamed with a timestamp suffix and a fresh file is started. Old
+// backups past MaxBackups or MaxAgeDays are pruned. All files are written
+// with 0600 perms. If the target directory does not exist it is created
+// with 0700.
 package audit
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -18,7 +19,10 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
+
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 // Record is one line in the audit log.
@@ -43,10 +47,22 @@ type Writer struct {
 	// Session is the value used for SessionID on records that do not set it.
 	// Typically populated from CLAUDE_SESSION_ID or similar.
 	Session string
+	// MaxSizeMB is the rotation trigger. Zero uses lumberjack's default (100).
+	MaxSizeMB int
+	// MaxBackups caps the number of rotated files retained. Zero keeps all.
+	MaxBackups int
+	// MaxAgeDays prunes rotated files older than this. Zero disables.
+	MaxAgeDays int
+	// Compress gzips rotated files.
+	Compress bool
+
+	mu  sync.Mutex
+	log *lumberjack.Logger
 }
 
 // NewWriter returns a Writer with Now set to time.Now and Session populated
-// from the CLAUDE_SESSION_ID env var if present.
+// from the CLAUDE_SESSION_ID env var if present. Rotation fields default to
+// zero (lumberjack defaults apply) and can be set by the caller.
 func NewWriter(path string) *Writer {
 	return &Writer{
 		Path:    path,
@@ -74,12 +90,42 @@ func (w *Writer) Append(r Record) error {
 	if err := os.MkdirAll(filepath.Dir(w.Path), 0o700); err != nil {
 		return fmt.Errorf("audit: mkdir %s: %w", filepath.Dir(w.Path), err)
 	}
-	f, err := os.OpenFile(w.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
-	if err != nil {
-		return fmt.Errorf("audit: open %s: %w", w.Path, err)
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(&r); err != nil {
+		return fmt.Errorf("audit: encode: %w", err)
 	}
-	defer func() { _ = f.Close() }()
-	return json.NewEncoder(f).Encode(&r)
+
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if w.log == nil {
+		w.log = &lumberjack.Logger{
+			Filename:   w.Path,
+			MaxSize:    w.MaxSizeMB,
+			MaxBackups: w.MaxBackups,
+			MaxAge:     w.MaxAgeDays,
+			Compress:   w.Compress,
+			LocalTime:  true,
+		}
+	}
+	if _, err := w.log.Write(buf.Bytes()); err != nil {
+		return fmt.Errorf("audit: write %s: %w", w.Path, err)
+	}
+	return nil
+}
+
+// Close releases the underlying log file. Safe to call multiple times and
+// on a Writer that was never used. Call at process exit if you want to be
+// tidy; coily's short-lived CLI model doesn't require it.
+func (w *Writer) Close() error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if w.log == nil {
+		return nil
+	}
+	err := w.log.Close()
+	w.log = nil
+	return err
 }
 
 // Wrap records an invocation by running fn and logging the result. If fn

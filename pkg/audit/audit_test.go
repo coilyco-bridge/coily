@@ -160,6 +160,40 @@ func TestNewWriter_ReadsEnv(t *testing.T) {
 	}
 }
 
+func TestAppend_RotatesOnSize(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "audit.jsonl")
+	w := &audit.Writer{
+		Path:       path,
+		Now:        func() time.Time { return time.Date(2026, 4, 22, 12, 0, 0, 0, time.UTC) },
+		MaxSizeMB:  1,
+		MaxBackups: 3,
+	}
+	// 1MB cap. Each record is ~60 bytes; pad argv to force rotation without
+	// writing millions of records.
+	big := strings.Repeat("x", 4096)
+	for i := 0; i < 400; i++ {
+		if err := w.Append(audit.Record{Verb: "v", Argv: []string{big}}); err != nil {
+			t.Fatalf("Append %d: %v", i, err)
+		}
+	}
+	if err := w.Close(); err != nil {
+		t.Fatalf("Close: %v", err)
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatalf("ReadDir: %v", err)
+	}
+	// Expect at least one rotated backup alongside the active file.
+	if len(entries) < 2 {
+		t.Fatalf("got %d files in %s, want >=2 after rotation: %v", len(entries), dir, entries)
+	}
+	// And at most MaxBackups + 1 (active + backups).
+	if len(entries) > 4 {
+		t.Errorf("got %d files, want <=4 (MaxBackups=3 plus active): %v", len(entries), entries)
+	}
+}
+
 func TestReadAll_DecodesMultipleRecords(t *testing.T) {
 	input := `{"ts":"2026-04-22T12:00:00Z","verb":"a"}
 {"ts":"2026-04-22T12:00:01Z","verb":"b"}

@@ -75,9 +75,15 @@ func getRuntime() *runtime {
 			issuerKey = defaultStatePath("token-issuer.key")
 		}
 
+		aw := audit.NewWriter(auditPath)
+		aw.MaxSizeMB = cfg.Audit.MaxSizeMB
+		aw.MaxBackups = cfg.Audit.MaxBackups
+		aw.MaxAgeDays = cfg.Audit.MaxAgeDays
+		aw.Compress = cfg.Audit.Compress
+
 		rtInst = &runtime{
 			cfg:    cfg,
-			audit:  audit.NewWriter(auditPath),
+			audit:  aw,
 			issuer: auth.NewIssuer(issuerKey),
 			runner: &shell.Runner{
 				Stdout: os.Stdout,
