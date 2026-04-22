@@ -1,0 +1,26 @@
+View the summary of a workflow
+
+USAGE
+  gh workflow view [<workflow-id> | <workflow-name> | <filename>] [flags]
+
+FLAGS
+  -r, --ref string   The branch or tag name which contains the version of the workflow file you'd like to view
+  -w, --web          Open workflow in the browser
+  -y, --yaml         View the workflow yaml file
+
+INHERITED FLAGS
+      --help                     Show help for command
+  -R, --repo [HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format
+
+EXAMPLES
+  # Interactively select a workflow to view
+  $ gh workflow view
+  
+  # View a specific workflow
+  $ gh workflow view 0451
+
+LEARN MORE
+  Use `gh <command> <subcommand> --help` for more information about a command.
+  Read the manual at https://cli.github.com/manual
+  Learn about exit codes using `gh help exit-codes`
+

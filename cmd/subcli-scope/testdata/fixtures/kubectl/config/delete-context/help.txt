@@ -1,0 +1,2 @@
+warning: this removed your active context, use "kubectl config use-context" to select a different one
+deleted context help from /Users/kai/.kube/config

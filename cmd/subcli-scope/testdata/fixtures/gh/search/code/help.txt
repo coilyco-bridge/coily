@@ -1,0 +1,61 @@
+freebsd/freebsd-src:contrib/less/NEWS: * Fix bug where # substitution failed after viewing help (github #420).
+freebsd/freebsd-src:contrib/less/NEWS: searching, to help when viewing syntax-highlighted code.
+happypeter/haoduoshipin:7.md: - [help](http://help.github.com/)
+happypeter/haoduoshipin:7.md: - [ssh issues](http://help.github.com/ssh-issues/)
+trstringer/cli-debugging-cheatsheets:c.md: ## Help
+trstringer/cli-debugging-cheatsheets:c.md: - List available command classes from the debugger: `help`
+trstringer/cli-debugging-cheatsheets:c.md: - List available commands in a class from the debugger: `help <class_name>`
+dbrant/ftape:BUGS: standard FDC). Apparently it doesn't help to try to disable the DMA
+namhyung/uftrace:NEWS: add -h short option for help message
+namhyung/uftrace:NEWS: add basic gdb (python) script to help debugging
+schani/mathmap:TODO: When the user presses "Help", those files should be used, unless
+desihub/desimodules:17.9: # This function is part of the Modules help system.  You can modify
+desihub/desimodules:17.9: # The line below is another part of the Modules help system.  You can
+yuki/pandoc-templates:1.md: Sometimes we need inline console code like [ls path]{.commandbox} , other times we need to talk about some configuration file like [/etc/hosts]{.configfile} , config directory [/etc]{.configdir} inline text [help]{.inlineconsole}, [int("5")]{.verbatim} (verbatim text/code), or a movie [[The Imitation Game](https://www.imdb.com/title/tt2084970/)]{.movie}.
+PeterXiao/books_list_backup_2018_2019:2019/3/files/book/principles-zh/5.md: > For example, if you are dumb or ugly, you are unlikely to acknowledge it, even though doing so would help you better deal with that reality. Recognizing such “harsh realities” is both very painful and very productive.
+PeterXiao/books_list_backup_2018_2019:2019/3/files/book/principles-zh/5.md: As I mentioned in the first chapter, you don’t have to know everything to get what you want. You just have to be honest with yourself about what you don’t know and know who to ask for help.
+uno-isqa-8950/fitgirl-inc:2.4: Type 'Wagtail help' for usage.
+dsw0214/linux-commands:w.md: # w --help
+dsw0214/linux-commands:w.md: --help     display this help and exit
+bewest/unapy:att: goals often get some help, especially when it comes to
+bewest/unapy:att: or without their help.  They've said they want to
+Unique-Usman/sorting_algorithm:1: *help.txt*	For Vim version 8.2.  Last change: 2021 Dec 27
+Unique-Usman/sorting_algorithm:1: VIM - main help file
+Unique-Usman/sorting_algorithm:1: Get specific help:  It is possible to go directly to whatever you want help
+Unique-Usman/sorting_algorithm:1: on, by giving an argument to the |:help| command.
+jambun/pas:pas: if $h { help; exit; }
+jambun/pas:pas: sub help {
+shalomb/hl:hl: sub display_help() {
+shalomb/hl:hl: --help - show this message
+walles/bubblemon:FAQ: may very well contain some information to help you get started.
+okken/testandcode_transcripts:8.md: <em>[PRs welcome](https://github.com/okken/testandcode_transcripts) if you want to help fix any errors.</em><br/>
+okken/testandcode_transcripts:8.md: But, beyond the grammar problem, there's a bigger issue. Once the Manifesto became popular, the word agile became a magnet for anyone with points to espouse, hours to bill, or products to sell. It became a marketing term, coopted to improve sales in the same way that words such as eco and natural are. A word that is abused in this way becomes useless - it stops having meaning as it transitions into a brand. This hurts everyone, but I'm particularly sensitive to the damage it does to developers. It isn't easy writing code, and developers naturally are on the lookout for things that will help them deliver value more effectively. I still firmly believe that sticking to the values and practices of the manifesto will help them in this endeavor. But once the word agile becomes meaningless, developers can no longer use it as a guide to what is useful in their practice. We may as well simply globally replace the word agile with whitespace.
+awwaiid/icfp2016:api: multi MAIN("help") {
+prakhar1989/Ticketee::q: Get specific help:  It is possible to go directly to whatever you want help
+prakhar1989/Ticketee::q: on, by giving an argument to the |:help| command.
+prakhar1989/Ticketee::q: Vim command argument	  -	   :help -r
+prakhar1989/Ticketee::q: Option			  '	   :help 'textwidth'
+prakhar1989/Ticketee::q: Search for help:  Type ":help word", then hit CTRL-D to see matching
+Mihonarium/80kHours-old-career-guide-ru:3.md: Moreover, as we saw in an <a href="/career-guide/job-satisfaction">earlier article</a>, once you start earning more than about $40,000 a year as an individual, any extra income won’t affect your happiness that much, while acts that help others like giving to charity probably do make you happier.
+Mihonarium/80kHours-old-career-guide-ru:3.md: There’s no reason to be embarrassed by this fact, but it does emphasise how important it is to consider how you can use your good fortune to help others. In a more equal and intuitive world, we could just focus on helping those around us, and making our own lives go well. But it turns out we have an enormous opportunity to help other people with little cost to ourselves &#8211; and it would be a terrible shame to squander it.
+chinanf-boy/robinson-zh:6.md: Browsers usually implement rasterization with the help of graphics APIs and libraries like Skia, Cairo, Direct2D, and so on. These APIs provide functions for painting polygons, lines, curves, gradients, and text. For now, I'm going to write my own rasterizer that can only paint one thing: rectangles.
+chinanf-boy/robinson-zh:6.md: To paint a rectangle on the canvas, we just loop through its rows and columns, using a [helper method](https://github.com/mbrubeck/robinson/blob/619a03bea918a0c756655fae02a004e6b4a3974c/src/painting.rs#L133-L135) to make sure we don't go outside the bounds of our canvas.
+hhirsch/armagetron:Changelog.md: - /help command that supports multiple help topics. Use
+hhirsch/armagetron:Changelog.md: HELP_INTRODUCTORY_BLURB and ADD_HELP_TOPIC to control its contents
+hhirsch/armagetron:Changelog.md: - /rtfm command that allows moderators to send help messages to newbies
+Ylia639/cpp:5.2: int Help() {
+Ylia639/cpp:5.2: Help();
+umersanii/Jazba:1.1: "Jazba is a fitness tracking application designed to help users log workouts, set fitness goals, monitor progress, and receive personalized notifications. It features distinct admin and user roles, with functionalities such as exercise selection, workout logging, and achievement tracking. This project was developed as part of the Software Development and Analysis course, with contributions from [Taha, Sajid](https://github.com/TahaSAwan), Mian Abdullah, [Umer Sani](https://github.com/umersanii)."
+umersanii/Jazba:1.1: │   └── helpers
+umersanii/Jazba:1.1: │       ├── NotificationHelper.java
+soltrinox/FACINGTHEDRAGON:0.md: But the differences go beyond biology. The social stigma that men are raised under is wholly separate from the social stigma that women experience. Men are taught that their value is tied to their ability to provide, protect, and perform. They are taught that emotional expression is weakness, that vulnerability is dangerous, and that asking for help is failure. These lessons are not the same as the lessons women receive, even when both groups are navigating trauma or emotional pain.
+soltrinox/FACINGTHEDRAGON:0.md: The mental health crisis among young men is not a minor issue. It is an epidemic. Suicide rates among men are significantly higher than among women. Men are less likely to seek help for mental health issues, and when they do seek help, they are less likely to find resources that speak to their specific needs. Men are overrepresented in addiction, violence, and incarceration, all of which are often symptoms of untreated trauma and emotional pain.
+Sprinting/example-blog-dump:f.md: description: Strategies to help you make the most of your time and increase productivity
+thonghue10032006-cloud/Ky-Thuat-Lap-Trinh:5.6: helpmenu = Menu(menu)
+thonghue10032006-cloud/Ky-Thuat-Lap-Trinh:5.6: menu.add_cascade(label="Help", menu=helpmenu)
+thonghue10032006-cloud/Ky-Thuat-Lap-Trinh:5.6: helpmenu.add_command(label="About...", command=About)
+24AWP-FAVICON/frontend:2.7: ^[[96mThe project needs your help! Please consider supporting of core-js on Open Collective or Patreon: ^[[0m
+Nikitagreb2/-.-.-:5.4: @bot.message_handler(commands=['start', 'help'])
+Nikitagreb2/-.-.-:5.4: /help - Информация о командах
+happypeter/haoduoshipin:7.md: - [help](http://help.github.com/)
+happypeter/haoduoshipin:7.md: - [ssh issues](http://help.github.com/ssh-issues/)

@@ -1,0 +1,14 @@
+binary: gh
+mode: allow
+# Core ops surface we actually use daily — skipping alias/config/extension/gist
+# and anything GraphQL-schema-ish that isn't load-relevant.
+roots:
+  - api
+  - issue
+  - pr
+  - release
+  - repo
+  - run
+  - search
+  - secret
+  - workflow

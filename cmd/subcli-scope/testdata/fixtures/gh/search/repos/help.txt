@@ -1,0 +1,30 @@
+nodejs/help	:sparkles: Need help with Node.js? File an Issue here. :rocket:	public	2026-04-21T15:22:10Z
+shadowrocketHelp/help	【史上最详细的SS/SSR/v2ray/trojan/clash/Android/iOS节点使用教程】魔法上网/科学上网/正确上网/免费梯子	public	2026-04-21T15:29:54Z
+yuaotian/go-cursor-help	解决Cursor在免费订阅期间出现以下提示的问题: Your request has been blocked as our system has detected suspicious activity / You've reached your trial request limit. / Too many free trial accounts used on this machine.	public	2026-04-22T05:54:38Z
+pagehelper-org/Mybatis-PageHelper	Mybatis通用分页插件	public	2026-04-22T00:50:48Z
+CymChad/BaseRecyclerViewAdapterHelper	BRVAH:Powerful and flexible RecyclerAdapter	public	2026-04-22T03:47:01Z
+jupyter/help	:sparkles: Need some help or have some questions? Please visit our Discourse page.	public, archived	2026-02-28T16:18:01Z
+zxlie/FeHelper	😍FeHelper--Web前端助手（Awesome！Chrome & Firefox & MS-Edge Extension, All in one Toolbox!）	public	2026-04-21T14:36:57Z
+barryvdh/laravel-ide-helper	IDE Helper for Laravel	public	2026-04-21T19:19:26Z
+JoshClose/CsvHelper	Library to help reading and writing CSV files	public	2026-04-20T13:29:59Z
+obsidianmd/obsidian-help	Help documentation for Obsidian.	public	2026-04-22T04:27:08Z
+bitwarden/help	The help website/knowledgebase (bitwarden.com/help).	public, archived	2026-03-24T08:54:16Z
+frappe/helpdesk	Modern, Streamlined, Free and Open Source Customer Service Software	public	2026-04-22T05:42:52Z
+HZJQF/help_tool	推理算法助手(降维打击)	public	2026-04-22T02:46:39Z
+seerge/g-helper	Lightweight, open-source control tool for ASUS laptops and ROG Ally. Manage performance modes, fans, GPU, battery, and RGB lighting across Zephyrus, Flow, TUF, Strix, Scar, and other models.	public	2026-04-22T05:58:02Z
+Wilfred/helpful	A better Emacs *help* buffer	public	2026-04-16T02:37:04Z
+loveBabbar/CodeHelp-DSA-Busted-Series	This repo is creating providing students easy access to all the programs taught under Codehelp's DSA Busted Series.	public	2026-04-21T11:08:06Z
+helpyio/helpy	Helpy is a modern, open source helpdesk customer support application. Features include knowledgebase, community discussions and support tickets integrated with email.	public	2026-04-19T21:01:50Z
+rking32/HelperScript		public	2025-11-25T11:10:46Z
+landalfYao/help		public	2025-12-17T14:57:00Z
+waylau/github-help	Chinese translation of the Github Help(https://help.github.com/index.html) and the other article collection. 《Github 帮助文档》 中文翻译（包含了官方文档以及其他文章）。	public	2026-04-18T16:39:18Z
+majodev/google-webfonts-helper	A Hassle-Free Way to Self-Host Google Fonts. Get eot, ttf, svg, woff and woff2 files + CSS snippets	public	2026-04-22T05:28:54Z
+django-helpdesk/django-helpdesk	A Django application to manage tickets for an internal helpdesk. Formerly known as Jutda Helpdesk.	public	2026-04-20T16:26:05Z
+rubensousa/GravitySnapHelper	A SnapHelper that snaps a RecyclerView to an edge.	public	2026-04-14T03:53:29Z
+lemoex/oci-help	甲骨文实例管理工具	public	2026-04-20T03:29:30Z
+tasmota/docs	Documentation for Tasmota (https://github.com/arendst/Tasmota)	public	2026-04-14T23:26:19Z
+zfdang/Android-Touch-Helper	AdSkip — an Android assistant for automatically skipping app launch ads	public	2026-04-22T01:02:39Z
+iDerekLi/juejin-helper	稀土掘金助手：签到、抽奖、沾喜气、消除Bug、海底掘金游戏、自动化工作流。	public	2026-04-09T09:25:48Z
+XiaoMiku01/fansMedalHelper	新版B站粉丝牌助手 全自动升级粉丝牌	public, archived	2026-04-22T01:03:06Z
+faveosuite/faveo-helpdesk	Faveo Open source ticketing system build on Laravel framework	public	2026-04-13T03:03:17Z
+skywind3000/RenderHelp	:zap: 可编程渲染管线实现，帮助初学者学习渲染	public	2026-04-21T07:33:31Z

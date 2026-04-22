@@ -1,0 +1,30 @@
+GCA-Classroom/08-prj-loreal-chatbot	19	open	HELP		2026-04-21T03:51:04Z
+ReyerV/ITL-Workshop	1	open	help		2026-04-17T20:42:59Z
+vim/vim	20024	open	runtime(help): make help omnifunc global	runtime	2026-04-21T19:50:38Z
+tenstorrent/tt-metal	42803	open	Matmul Helpers		2026-04-21T21:22:34Z
+MCSR-Ranked/Wiki	46	open	tech help -> public help		2026-04-03T08:48:43Z
+Nusrath2345/Run	5	open	Help/FAQ		2026-04-20T23:08:59Z
+sapronovn97-rgb/Windows-Cleaner	3	open	Helpers editons		2026-04-21T04:43:46Z
+JumboCode/mhd	255	open	Help Documentation	enhancement	2026-04-21T00:39:47Z
+Shelflife-Project/Frontend	153	open	Help page		2026-04-21T17:11:29Z
+mantis00/hivemind	89	open	Help page		2026-04-17T05:03:23Z
+vllm-project/vllm	40262	open	[Doc] Fix CLI help examples: remove phantom --help=listgroup and --help=page modes	documentation	2026-04-18T21:49:08Z
+sepehrmoghani/CITS3007-project	5	open	Defined helper functions		2026-04-22T04:29:57Z
+chingu-voyages/X01-team-01	19	open	Add helper button		2026-04-22T01:01:49Z
+CSE2307SP26/cse2307sp26-classroom-9bf840-project-project26	142	open	Ai help assistant		2026-04-22T03:54:34Z
+qdrant/qdrant-web-ui	376	open	Readable numbers helper		2026-04-20T14:58:12Z
+Herren/MCAmbulance	2	open	Feat/helper functions		2026-04-21T08:55:24Z
+altlinuxtest/test_pr_gh_dash	2	open	Add farewell helper		2026-04-21T07:30:55Z
+input-output-hk/antigen	12	open	Add more helpers		2026-04-21T11:38:25Z
+open-wanderer/wanderer	938	open	fix help links		2026-04-21T17:16:00Z
+Julienish14/HR-Management	87	open	helper - Error handling		2026-04-21T18:58:02Z
+rapidsai/cugraph	5497	open	Need debugging help	DO NOT MERGE	2026-04-21T21:00:47Z
+MultiCraft/MultiCraft	318	open	Helper env		2026-04-12T23:03:08Z
+MGraefe/RP-Soundboard	147	open	Improved help bubbles		2026-04-19T11:37:15Z
+osac-project/osac-operator	195	open	Relocate helpers package	approved	2026-04-21T15:30:48Z
+sszz01/pyyaml	1	open	Add quote helpers		2026-04-17T16:37:39Z
+Loping151/XutheringWavesUID	45	open	feat(help): sync change-help icon/background with ShowConfig		2026-04-20T19:06:41Z
+izhar1776-design/Mardan-help-portal	1	open	mardan help portal		2026-04-21T03:50:52Z
+moleculerjs/rfcs	12	open	fix: Testing helpers		2026-04-17T17:57:27Z
+Jero009/fitness-app	1	open	Claude code help		2026-04-21T17:49:45Z
+CommunityOx/ox_lib	100	open	HTTP Request helper		2026-04-21T11:28:35Z

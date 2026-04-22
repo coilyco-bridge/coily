@@ -1,0 +1,1037 @@
+binary: gh
+bin_version: gh version 2.66.1 (2025-01-31)
+scanned_at: "2026-04-22T06:24:07Z"
+commands:
+    - path:
+        - issue
+      help: Work with GitHub issues.
+      children:
+        - create
+        - list
+        - status
+        - close
+        - comment
+        - delete
+        - develop
+        - edit
+        - lock
+        - pin
+        - reopen
+        - transfer
+        - unlock
+        - unpin
+        - view
+    - path:
+        - issue
+        - create
+      help: Create an issue on GitHub.
+      flags:
+        - name: --assignee
+        - name: --body
+        - name: --body-file
+        - name: --editor
+        - name: --label
+        - name: --milestone
+        - name: --project
+        - name: --recover
+        - name: --template
+        - name: --title
+        - name: --web
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - list
+      help: List issues in a GitHub repository.
+      flags:
+        - name: --app
+        - name: --assignee
+        - name: --author
+        - name: --jq
+        - name: --json
+        - name: --label
+        - name: --limit
+        - name: --mention
+        - name: --milestone
+        - name: --search
+        - name: --state
+        - name: --template
+        - name: --web
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - status
+      help: Show status of relevant issues
+      flags:
+        - name: --jq
+        - name: --json
+        - name: --template
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - close
+      help: Close issue
+      flags:
+        - name: --comment
+        - name: --reason
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - comment
+      help: Add a comment to a GitHub issue.
+      flags:
+        - name: --body
+        - name: --body-file
+        - name: --edit-last
+        - name: --editor
+        - name: --web
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - delete
+      help: Delete issue
+      flags:
+        - name: --yes
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - develop
+      help: Manage linked branches for an issue.
+      flags:
+        - name: --base
+        - name: --branch-repo
+        - name: --checkout
+        - name: --list
+        - name: --name
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - edit
+      help: Edit one or more issues within the same repository.
+      flags:
+        - name: --add-assignee
+        - name: --add-label
+        - name: --add-project
+        - name: --body
+        - name: --body-file
+        - name: --milestone
+        - name: --remove-assignee
+        - name: --remove-label
+        - name: --remove-milestone
+        - name: --remove-project
+        - name: --title
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - lock
+      help: Lock issue conversation
+      flags:
+        - name: --reason
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - pin
+      help: Pin an issue to a repository.
+      flags:
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - reopen
+      help: Reopen issue
+      flags:
+        - name: --comment
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - transfer
+      help: Transfer issue to another repository
+      flags:
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - unlock
+      help: Unlock issue conversation
+      flags:
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - unpin
+      help: Unpin an issue from a repository.
+      flags:
+        - name: --help
+        - name: --repo
+    - path:
+        - issue
+        - view
+      help: Display the title, body, and other information about an issue.
+      flags:
+        - name: --comments
+        - name: --jq
+        - name: --json
+        - name: --template
+        - name: --web
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+      help: Work with GitHub pull requests.
+      children:
+        - create
+        - list
+        - status
+        - checkout
+        - checks
+        - close
+        - comment
+        - diff
+        - edit
+        - lock
+        - merge
+        - ready
+        - reopen
+        - review
+        - unlock
+        - view
+    - path:
+        - pr
+        - create
+      help: Create a pull request on GitHub.
+      flags:
+        - name: --assignee
+        - name: --base
+        - name: --body
+        - name: --body-file
+        - name: --draft
+        - name: --dry-run
+        - name: --editor
+        - name: --fill
+        - name: --fill-first
+        - name: --fill-verbose
+        - name: --head
+        - name: --label
+        - name: --milestone
+        - name: --no-maintainer-edit
+        - name: --project
+        - name: --recover
+        - name: --reviewer
+        - name: --template
+        - name: --title
+        - name: --web
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - list
+      help: List pull requests in a GitHub repository.
+      flags:
+        - name: --app
+        - name: --assignee
+        - name: --author
+        - name: --base
+        - name: --draft
+        - name: --head
+        - name: --jq
+        - name: --json
+        - name: --label
+        - name: --limit
+        - name: --search
+        - name: --state
+        - name: --template
+        - name: --web
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - status
+      help: Show status of relevant pull requests
+      flags:
+        - name: --conflict-status
+        - name: --jq
+        - name: --json
+        - name: --template
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - checkout
+      help: Check out a pull request in git
+      flags:
+        - name: --branch
+        - name: --detach
+        - name: --force
+        - name: --recurse-submodules
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - checks
+      help: Show CI status for a single pull request.
+      flags:
+        - name: --fail-fast
+        - name: --interval
+        - name: --jq
+        - name: --json
+        - name: --required
+        - name: --template
+        - name: --watch
+        - name: --web
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - close
+      help: Close a pull request
+      flags:
+        - name: --comment
+        - name: --delete-branch
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - comment
+      help: Add a comment to a GitHub pull request.
+      flags:
+        - name: --body
+        - name: --body-file
+        - name: --edit-last
+        - name: --editor
+        - name: --web
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - diff
+      help: View changes in a pull request.
+      flags:
+        - name: --color
+        - name: --name-only
+        - name: --patch
+        - name: --web
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - edit
+      help: Edit a pull request.
+      flags:
+        - name: --add-assignee
+        - name: --add-label
+        - name: --add-project
+        - name: --add-reviewer
+        - name: --base
+        - name: --body
+        - name: --body-file
+        - name: --milestone
+        - name: --remove-assignee
+        - name: --remove-label
+        - name: --remove-milestone
+        - name: --remove-project
+        - name: --remove-reviewer
+        - name: --title
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - lock
+      help: Lock pull request conversation
+      flags:
+        - name: --reason
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - merge
+      help: Merge a pull request on GitHub.
+      flags:
+        - name: --admin
+        - name: --author-email
+        - name: --auto
+        - name: --body
+        - name: --body-file
+        - name: --delete-branch
+        - name: --disable-auto
+        - name: --match-head-commit
+        - name: --merge
+        - name: --rebase
+        - name: --squash
+        - name: --subject
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - ready
+      help: Mark a pull request as ready for review.
+      flags:
+        - name: --undo
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - reopen
+      help: Reopen a pull request
+      flags:
+        - name: --comment
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - review
+      help: Add a review to a pull request.
+      flags:
+        - name: --approve
+        - name: --body
+        - name: --body-file
+        - name: --comment
+        - name: --request-changes
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - unlock
+      help: Unlock pull request conversation
+      flags:
+        - name: --help
+        - name: --repo
+    - path:
+        - pr
+        - view
+      help: Display the title, body, and other information about a pull request.
+      flags:
+        - name: --comments
+        - name: --jq
+        - name: --json
+        - name: --template
+        - name: --web
+        - name: --help
+        - name: --repo
+    - path:
+        - release
+      help: Manage releases
+      children:
+        - create
+        - list
+        - delete
+        - download
+        - edit
+        - upload
+        - view
+    - path:
+        - release
+        - create
+      help: Create a new GitHub Release for a repository.
+      flags:
+        - name: --discussion-category
+        - name: --draft
+        - name: --generate-notes
+        - name: --latest
+        - name: --notes
+        - name: --notes-file
+        - name: --notes-from-tag
+        - name: --notes-start-tag
+        - name: --prerelease
+        - name: --target
+        - name: --title
+        - name: --verify-tag
+        - name: --help
+        - name: --repo
+    - path:
+        - release
+        - list
+      help: List releases in a repository
+      flags:
+        - name: --exclude-drafts
+        - name: --exclude-pre-releases
+        - name: --jq
+        - name: --json
+        - name: --limit
+        - name: --order
+        - name: --template
+        - name: --help
+        - name: --repo
+    - path:
+        - release
+        - delete
+      help: Delete a release
+      flags:
+        - name: --cleanup-tag
+        - name: --yes
+        - name: --help
+        - name: --repo
+    - path:
+        - release
+        - download
+      help: Download assets from a GitHub release.
+      flags:
+        - name: --archive
+        - name: --clobber
+        - name: --dir
+        - name: --output
+        - name: --pattern
+        - name: --skip-existing
+        - name: --help
+        - name: --repo
+    - path:
+        - release
+        - edit
+      help: Edit a release
+      flags:
+        - name: --discussion-category
+        - name: --draft
+        - name: --latest
+        - name: --notes
+        - name: --notes-file
+        - name: --prerelease
+        - name: --tag
+        - name: --target
+        - name: --title
+        - name: --verify-tag
+        - name: --help
+        - name: --repo
+    - path:
+        - release
+        - upload
+      help: Upload asset files to a GitHub Release.
+      flags:
+        - name: --clobber
+        - name: --help
+        - name: --repo
+    - path:
+        - release
+        - view
+      help: View information about a GitHub Release.
+      flags:
+        - name: --jq
+        - name: --json
+        - name: --template
+        - name: --web
+        - name: --help
+        - name: --repo
+    - path:
+        - repo
+      help: Work with GitHub repositories.
+      children:
+        - create
+        - list
+        - archive
+        - autolink
+        - clone
+        - delete
+        - deploy-key
+        - edit
+        - fork
+        - gitignore
+        - license
+        - rename
+        - sync
+        - unarchive
+        - view
+    - path:
+        - repo
+        - create
+      help: Create a new GitHub repository.
+      flags:
+        - name: --add-readme
+        - name: --clone
+        - name: --description
+        - name: --disable-issues
+        - name: --disable-wiki
+        - name: --gitignore
+        - name: --homepage
+        - name: --include-all-branches
+        - name: --internal
+        - name: --license
+        - name: --private
+        - name: --public
+        - name: --push
+        - name: --remote
+        - name: --source
+        - name: --team
+        - name: --template
+        - name: --help
+    - path:
+        - repo
+        - list
+      help: List repositories owned by a user or organization.
+      flags:
+        - name: --archived
+        - name: --fork
+        - name: --jq
+        - name: --json
+        - name: --language
+        - name: --limit
+        - name: --no-archived
+        - name: --source
+        - name: --template
+        - name: --topic
+        - name: --visibility
+        - name: --help
+    - path:
+        - repo
+        - archive
+      help: Archive a GitHub repository.
+      flags:
+        - name: --yes
+        - name: --help
+    - path:
+        - repo
+        - autolink
+      help: Autolinks link issues, pull requests, commit messages, and release descriptions to external third-party services.
+      children:
+        - create
+        - list
+        - view
+    - path:
+        - repo
+        - autolink
+        - create
+      help: Create a new autolink reference for a repository.
+      flags:
+        - name: --numeric
+        - name: --help
+        - name: --repo
+    - path:
+        - repo
+        - autolink
+        - list
+      help: Gets all autolink references that are configured for a repository.
+      flags:
+        - name: --jq
+        - name: --json
+        - name: --template
+        - name: --web
+        - name: --help
+        - name: --repo
+    - path:
+        - repo
+        - autolink
+        - view
+      help: View an autolink reference for a repository.
+      flags:
+        - name: --jq
+        - name: --json
+        - name: --template
+        - name: --help
+        - name: --repo
+    - path:
+        - repo
+        - clone
+      help: Clone a GitHub repository locally.
+      flags:
+        - name: --upstream-remote-name
+        - name: --help
+    - path:
+        - repo
+        - delete
+      help: Delete a GitHub repository.
+      flags:
+        - name: --yes
+        - name: --help
+    - path:
+        - repo
+        - deploy-key
+      help: Manage deploy keys in a repository
+      children:
+        - add
+        - delete
+        - list
+    - path:
+        - repo
+        - deploy-key
+        - add
+      help: Add a deploy key to a GitHub repository.
+      flags:
+        - name: --allow-write
+        - name: --title
+        - name: --help
+        - name: --repo
+    - path:
+        - repo
+        - deploy-key
+        - delete
+      help: Delete a deploy key from a GitHub repository
+      flags:
+        - name: --help
+        - name: --repo
+    - path:
+        - repo
+        - deploy-key
+        - list
+      help: List deploy keys in a GitHub repository
+      flags:
+        - name: --jq
+        - name: --json
+        - name: --template
+        - name: --help
+        - name: --repo
+    - path:
+        - repo
+        - edit
+      help: Edit repository settings.
+      flags:
+        - name: --accept-visibility-change-consequences
+        - name: --add-topic
+        - name: --allow-forking
+        - name: --allow-update-branch
+        - name: --default-branch
+        - name: --delete-branch-on-merge
+        - name: --description
+        - name: --enable-advanced-security
+        - name: --enable-auto-merge
+        - name: --enable-discussions
+        - name: --enable-issues
+        - name: --enable-merge-commit
+        - name: --enable-projects
+        - name: --enable-rebase-merge
+        - name: --enable-secret-scanning
+        - name: --enable-secret-scanning-push-protection
+        - name: --enable-squash-merge
+        - name: --enable-wiki
+        - name: --homepage
+        - name: --remove-topic
+        - name: --template
+        - name: --visibility
+        - name: --help
+    - path:
+        - repo
+        - fork
+      help: Create a fork of a repository.
+      flags:
+        - name: --clone
+        - name: --default-branch-only
+        - name: --fork-name
+        - name: --org
+        - name: --remote
+        - name: --remote-name
+        - name: --help
+    - path:
+        - repo
+        - gitignore
+      help: List and view available repository gitignore templates
+      children:
+        - list
+        - view
+    - path:
+        - repo
+        - gitignore
+        - list
+      help: List available repository gitignore templates
+      flags:
+        - name: --help
+    - path:
+        - repo
+        - gitignore
+        - view
+      help: View an available repository `.gitignore` template.
+      flags:
+        - name: --help
+    - path:
+        - repo
+        - license
+      help: Explore repository licenses
+      children:
+        - list
+        - view
+    - path:
+        - repo
+        - license
+        - list
+      help: List common repository licenses.
+      flags:
+        - name: --help
+    - path:
+        - repo
+        - license
+        - view
+      help: View a specific repository license by license key or SPDX ID.
+      flags:
+        - name: --web
+        - name: --help
+    - path:
+        - repo
+        - rename
+      help: Rename a GitHub repository.
+      flags:
+        - name: --repo
+        - name: --yes
+        - name: --help
+    - path:
+        - repo
+        - sync
+      help: Sync destination repository from source repository.
+      flags:
+        - name: --branch
+        - name: --force
+        - name: --source
+        - name: --help
+    - path:
+        - repo
+        - unarchive
+      help: Unarchive a GitHub repository.
+      flags:
+        - name: --yes
+        - name: --help
+    - path:
+        - repo
+        - view
+      help: Display the description and the README of a GitHub repository.
+      flags:
+        - name: --branch
+        - name: --jq
+        - name: --json
+        - name: --template
+        - name: --web
+        - name: --help
+    - path:
+        - run
+      help: List, view, and watch recent workflow runs from GitHub Actions.
+      children:
+        - cancel
+        - delete
+        - download
+        - list
+        - rerun
+        - view
+        - watch
+    - path:
+        - run
+        - cancel
+      help: Cancel a workflow run
+      flags:
+        - name: --help
+        - name: --repo
+    - path:
+        - run
+        - delete
+      help: Delete a workflow run
+      flags:
+        - name: --help
+        - name: --repo
+    - path:
+        - run
+        - download
+      help: Download artifacts generated by a GitHub Actions workflow run.
+      flags:
+        - name: --dir
+        - name: --name
+        - name: --pattern
+        - name: --help
+        - name: --repo
+    - path:
+        - run
+        - list
+      help: List recent workflow runs.
+      flags:
+        - name: --all
+        - name: --branch
+        - name: --commit
+        - name: --created
+        - name: --event
+        - name: --jq
+        - name: --json
+        - name: --limit
+        - name: --status
+        - name: --template
+        - name: --user
+        - name: --workflow
+        - name: --help
+        - name: --repo
+    - path:
+        - run
+        - rerun
+      help: Rerun an entire run, only failed jobs, or a specific job from a run.
+      flags:
+        - name: --debug
+        - name: --failed
+        - name: --job
+        - name: --help
+        - name: --repo
+    - path:
+        - run
+        - view
+      help: View a summary of a workflow run.
+      flags:
+        - name: --attempt
+        - name: --exit-status
+        - name: --job
+        - name: --jq
+        - name: --json
+        - name: --log
+        - name: --log-failed
+        - name: --template
+        - name: --verbose
+        - name: --web
+        - name: --help
+        - name: --repo
+    - path:
+        - run
+        - watch
+      help: Watch a run until it completes, showing its progress.
+      flags:
+        - name: --exit-status
+        - name: --interval
+        - name: --help
+        - name: --repo
+    - path:
+        - workflow
+      help: List, view, and run workflows in GitHub Actions.
+      children:
+        - disable
+        - enable
+        - list
+        - run
+        - view
+    - path:
+        - workflow
+        - disable
+      help: Disable a workflow, preventing it from running or showing up when listing workflows.
+      flags:
+        - name: --help
+        - name: --repo
+    - path:
+        - workflow
+        - enable
+      help: Enable a workflow, allowing it to be run and show up when listing workflows.
+      flags:
+        - name: --help
+        - name: --repo
+    - path:
+        - workflow
+        - list
+      help: List workflow files, hiding disabled workflows by default.
+      flags:
+        - name: --all
+        - name: --jq
+        - name: --json
+        - name: --limit
+        - name: --template
+        - name: --help
+        - name: --repo
+    - path:
+        - workflow
+        - run
+      help: Create a `workflow_dispatch` event for a given workflow.
+      flags:
+        - name: --field
+        - name: --json
+        - name: --raw-field
+        - name: --ref
+        - name: --help
+        - name: --repo
+    - path:
+        - workflow
+        - view
+      help: View the summary of a workflow
+      flags:
+        - name: --ref
+        - name: --web
+        - name: --yaml
+        - name: --help
+        - name: --repo
+    - path:
+        - api
+      help: Makes an authenticated HTTP request to the GitHub API and prints the response.
+      flags:
+        - name: --cache
+        - name: --field
+        - name: --header
+        - name: --hostname
+        - name: --include
+        - name: --input
+        - name: --jq
+        - name: --method
+        - name: --paginate
+        - name: --preview
+        - name: --raw-field
+        - name: --silent
+        - name: --slurp
+        - name: --template
+        - name: --verbose
+        - name: --help
+    - path:
+        - search
+      help: Search across all of GitHub.
+      children:
+        - code
+        - commits
+        - issues
+        - prs
+        - repos
+    - path:
+        - search
+        - code
+      help: 'freebsd/freebsd-src:contrib/less/NEWS: * Fix bug where # substitution failed after viewing help (github #420).'
+    - path:
+        - search
+        - commits
+      help: "Alchemists-Of-Yore/No-Mans-Land\tcdcc4e31471f1994766949d8bc23b1ab31347ebe\tTHE PARTICLES CRASH THE GAME! HELP! HELP ME! HELP!!!\tFarcr\t2026-04-08T19:19:15+02:00"
+    - path:
+        - search
+        - issues
+    - path:
+        - search
+        - prs
+      help: "GCA-Classroom/08-prj-loreal-chatbot\t19\topen\tHELP\t\t2026-04-21T03:51:04Z"
+    - path:
+        - search
+        - repos
+      help: "nodejs/help\t:sparkles: Need help with Node.js? File an Issue here."
+    - path:
+        - secret
+      help: Secrets can be set at the repository, or organization level for use in
+      children:
+        - delete
+        - list
+        - set
+    - path:
+        - secret
+        - delete
+      help: 'Delete a secret on one of the following levels:'
+      flags:
+        - name: --app
+        - name: --env
+        - name: --org
+        - name: --user
+        - name: --help
+        - name: --repo
+    - path:
+        - secret
+        - list
+      help: 'List secrets on one of the following levels:'
+      flags:
+        - name: --app
+        - name: --env
+        - name: --jq
+        - name: --json
+        - name: --org
+        - name: --template
+        - name: --user
+        - name: --help
+        - name: --repo
+    - path:
+        - secret
+        - set
+      help: 'Set a value for a secret on one of the following levels:'
+      flags:
+        - name: --app
+        - name: --body
+        - name: --env
+        - name: --env-file
+        - name: --no-store
+        - name: --org
+        - name: --repos
+        - name: --user
+        - name: --visibility
+        - name: --help
+        - name: --repo

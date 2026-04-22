@@ -1,0 +1,44 @@
+Create a new autolink reference for a repository.
+
+The `keyPrefix` argument specifies the prefix that will generate a link when it is appended by certain characters.
+
+The `urlTemplate` argument specifies the target URL that will be generated when the keyPrefix is found, which
+must contain `<num>` variable for the reference number.
+
+By default, autolinks are alphanumeric with `--numeric` flag used to create a numeric autolink.
+
+The `<num>` variable behavior differs depending on whether the autolink is alphanumeric or numeric:
+
+- alphanumeric: matches `A-Z` (case insensitive), `0-9`, and `-`
+- numeric: matches `0-9`
+
+If the template contains multiple instances of `<num>`, only the first will be replaced.
+
+
+USAGE
+  gh repo autolink create <keyPrefix> <urlTemplate> [flags]
+
+ALIASES
+  gh repo autolink new
+
+FLAGS
+  -n, --numeric   Mark autolink as numeric
+
+INHERITED FLAGS
+      --help                     Show help for command
+  -R, --repo [HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format
+
+EXAMPLES
+  # Create an alphanumeric autolink to example.com for the key prefix "TICKET-".
+  # Generates https://example.com/TICKET?query=123abc from "TICKET-123abc".
+  $ gh repo autolink create TICKET- "https://example.com/TICKET?query=<num>"
+  
+  # Create a numeric autolink to example.com for the key prefix "STORY-".
+  # Generates https://example.com/STORY?id=123 from "STORY-123".
+  $ gh repo autolink create STORY- "https://example.com/STORY?id=<num>" --numeric
+
+LEARN MORE
+  Use `gh <command> <subcommand> --help` for more information about a command.
+  Read the manual at https://cli.github.com/manual
+  Learn about exit codes using `gh help exit-codes`
+

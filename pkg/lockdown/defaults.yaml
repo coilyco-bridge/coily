@@ -1,0 +1,153 @@
+# Canonical Claude Code permission rules that coily lockdown writes into a
+# repo's .claude/settings.json. Expresses the allowlist inversion from the
+# threat model: deny broadly at the scripting/shell/tool layer, allow narrowly
+# at the coily layer plus read-only utilities.
+#
+# This file is embedded into the coily binary at build time. Changes require
+# editing here, rebuilding, and sudo-installing. Same review gate as any code
+# change.
+
+allow:
+  # coily itself is the kernel boundary.
+  - Bash(coily:*)
+
+  # Filesystem + search (read-only).
+  - Bash(ls:*)
+  - Bash(cat:*)
+  - Bash(head:*)
+  - Bash(tail:*)
+  - Bash(wc:*)
+  - Bash(file:*)
+  - Bash(stat:*)
+  - Bash(grep:*)
+  - Bash(rg:*)
+  - Bash(find:*)
+  - Bash(tree:*)
+
+  # git (read-only shapes). Write shapes (commit, push, reset, clean) require
+  # an override in per-repo .claude/settings.local.json.
+  - Bash(git status:*)
+  - Bash(git log:*)
+  - Bash(git diff:*)
+  - Bash(git show:*)
+  - Bash(git blame:*)
+  - Bash(git branch:*)
+  - Bash(git remote:*)
+  - Bash(git ls-files:*)
+  - Bash(git rev-parse:*)
+  - Bash(git config --get:*)
+
+  # kubectl read verbs. Write verbs go through coily k8s.
+  - Bash(kubectl get:*)
+  - Bash(kubectl describe:*)
+  - Bash(kubectl logs:*)
+  - Bash(kubectl explain:*)
+  - Bash(kubectl top:*)
+  - Bash(kubectl api-resources:*)
+  - Bash(kubectl api-versions:*)
+  - Bash(kubectl version:*)
+  - Bash(kubectl cluster-info:*)
+  - Bash(kubectl config view:*)
+  - Bash(kubectl config get-contexts:*)
+  - Bash(kubectl config current-context:*)
+  - Bash(kubectl auth can-i:*)
+
+deny:
+  # Scripting interpreters. Each of these can spawn a subprocess that runs
+  # anything, which defeats prefix-based allowlisting.
+  - Bash(python:*)
+  - Bash(python3:*)
+  - Bash(ruby:*)
+  - Bash(perl:*)
+  - Bash(node:*)
+  - Bash(deno:*)
+  - Bash(bun:*)
+  - Bash(osascript:*)
+  - Bash(go run:*)
+
+  # Shells. Same problem. Disallow invoking them directly.
+  - Bash(sh:*)
+  - Bash(bash:*)
+  - Bash(zsh:*)
+  - Bash(fish:*)
+  - Bash(dash:*)
+  - Bash(ksh:*)
+  - Bash(env:*)
+  - Bash(exec:*)
+  - Bash(xargs:*)
+
+  # Build runners that dispatch to arbitrary targets.
+  - Bash(make:*)
+  - Bash(npm:*)
+  - Bash(pnpm:*)
+  - Bash(yarn:*)
+  - Bash(cargo run:*)
+  - Bash(just:*)
+  - Bash(task:*)
+  - Bash(invoke:*)
+  - Bash(nox:*)
+  - Bash(tox:*)
+
+  # kubectl write verbs. These go through coily k8s, which policy-checks and
+  # audits them.
+  - Bash(kubectl apply:*)
+  - Bash(kubectl create:*)
+  - Bash(kubectl delete:*)
+  - Bash(kubectl patch:*)
+  - Bash(kubectl replace:*)
+  - Bash(kubectl edit:*)
+  - Bash(kubectl label:*)
+  - Bash(kubectl annotate:*)
+  - Bash(kubectl scale:*)
+  - Bash(kubectl autoscale:*)
+  - Bash(kubectl set:*)
+  - Bash(kubectl taint:*)
+  - Bash(kubectl cordon:*)
+  - Bash(kubectl uncordon:*)
+  - Bash(kubectl drain:*)
+  - Bash(kubectl expose:*)
+  - Bash(kubectl run:*)
+  - Bash(kubectl rollout undo:*)
+  - Bash(kubectl rollout pause:*)
+  - Bash(kubectl rollout resume:*)
+  - Bash(kubectl rollout restart:*)
+  - Bash(kubectl exec:*)
+  - Bash(kubectl port-forward:*)
+  - Bash(kubectl cp:*)
+  - Bash(kubectl attach:*)
+  - Bash(kubectl proxy:*)
+  - Bash(kubectl debug:*)
+  - Bash(kubectl kustomize:*)
+
+  # aws CLI. All ops go through coily aws.
+  - Bash(aws:*)
+
+  # gh CLI. All ops go through coily gh.
+  - Bash(gh:*)
+
+  # docker. No image builds or container execs from the agent layer.
+  - Bash(docker:*)
+
+  # ssh/scp/rsync broad. Named-host access goes through coily (eco, k8s).
+  - Bash(ssh:*)
+  - Bash(scp:*)
+  - Bash(rsync:*)
+  - Bash(sshfs:*)
+
+  # helm, terraform, gcloud. Not in v1 scope for coily, so out entirely.
+  - Bash(helm:*)
+  - Bash(terraform:*)
+  - Bash(gcloud:*)
+  - Bash(tflint:*)
+  - Bash(tfsec:*)
+
+  # git destructive shapes. Reset/clean/checkout-to-discard/push-force should
+  # never be auto-approved.
+  - Bash(git reset --hard:*)
+  - Bash(git clean -fd:*)
+  - Bash(git push --force:*)
+  - Bash(git push -f:*)
+
+deniedMcpServers:
+  - aws-eks
+  - awslabs.eks-mcp-server

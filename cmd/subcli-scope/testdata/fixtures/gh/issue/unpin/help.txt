@@ -1,0 +1,27 @@
+Unpin an issue from a repository.
+
+The issue can be specified by issue number or URL.
+
+
+USAGE
+  gh issue unpin {<number> | <url>} [flags]
+
+INHERITED FLAGS
+      --help                     Show help for command
+  -R, --repo [HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format
+
+EXAMPLES
+  # Unpin issue from the current repository
+  $ gh issue unpin 23
+  
+  # Unpin issue by URL
+  $ gh issue unpin https://github.com/owner/repo/issues/23
+  
+  # Unpin an issue from specific repository
+  $ gh issue unpin 23 --repo owner/repo
+
+LEARN MORE
+  Use `gh <command> <subcommand> --help` for more information about a command.
+  Read the manual at https://cli.github.com/manual
+  Learn about exit codes using `gh help exit-codes`
+

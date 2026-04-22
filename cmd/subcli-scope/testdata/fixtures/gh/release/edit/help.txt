@@ -1,0 +1,33 @@
+Edit a release
+
+USAGE
+  gh release edit <tag>
+
+FLAGS
+      --discussion-category string   Start a discussion in the specified category when publishing a draft
+      --draft                        Save the release as a draft instead of publishing it
+      --latest                       Explicitly mark the release as "Latest"
+  -n, --notes string                 Release notes
+  -F, --notes-file file              Read release notes from file (use "-" to read from standard input)
+      --prerelease                   Mark the release as a prerelease
+      --tag string                   The name of the tag
+      --target branch                Target branch or full commit SHA (default [main branch])
+  -t, --title string                 Release title
+      --verify-tag                   Abort in case the git tag doesn't already exist in the remote repository
+
+INHERITED FLAGS
+      --help                     Show help for command
+  -R, --repo [HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format
+
+EXAMPLES
+  Publish a release that was previously a draft
+  $ gh release edit v1.0 --draft=false
+  
+  Update the release notes from the content of a file
+  $ gh release edit v1.0 --notes-file /path/to/release_notes.md
+
+LEARN MORE
+  Use `gh <command> <subcommand> --help` for more information about a command.
+  Read the manual at https://cli.github.com/manual
+  Learn about exit codes using `gh help exit-codes`
+

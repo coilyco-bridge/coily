@@ -1,0 +1,30 @@
+aimadetools/race-claude	14	open	[HELP] HELP REQUEST	human-help, pending	2026-04-22T00:38:00Z
+aimadetools/race-codex	20	open	[HELP] Help Request	human-help, pending	2026-04-22T04:31:46Z
+aimadetools/race-codex	19	open	[HELP] Help Request	human-help, pending	2026-04-21T23:30:11Z
+aimadetools/race-codex	18	open	[HELP] Help Request	human-help, pending	2026-04-21T20:30:50Z
+aimadetools/race-codex	17	open	[HELP] Help Request	human-help, pending	2026-04-21T16:35:14Z
+jasoncrawford/brunel	609	open	Help command (`/help`)	feature, worker	2026-04-11T11:12:40Z
+Pro2021CA/DupePlusPlus	1	open	HELP		2026-04-21T14:43:41Z
+HarvestX/MG400_ROS2	309	open	help		2026-04-19T13:46:19Z
+tytsxai/IDM-Activation-Script-Chinese	4	open	[Help]	help wanted, question	2026-04-21T09:22:26Z
+wizarrrr/wizarr	1242	open	[HELP]		2026-04-20T23:55:55Z
+AbuUbaida/opentarget	2	open	help		2026-04-21T08:53:16Z
+soker1985-cmyk/emule-eagle	1	open	Help		2026-04-19T10:55:34Z
+codgodtao/CrossDiff	2	open	help		2026-04-19T11:43:41Z
+chiddy80/Vercel-V2ray-	2	open	Help		2026-04-20T21:36:25Z
+chiddy80/Vercel-V2ray-	1	open	Help		2026-04-20T21:33:58Z
+nab138/iloader	404	open	help		2026-04-18T07:24:00Z
+EsimMoe/MiniLPA	22	open	help		2026-04-16T03:28:45Z
+KevinChen222/rule-	1	open	*help		2026-04-16T12:07:03Z
+PRANAVMAHALINGAM/gh-landscaper	45	open	--help		2026-04-17T17:46:11Z
+chengpeng-wang/LLMDFA	9	open	help		2026-04-15T13:05:08Z
+navneetak16/Free-Fire-UID-Bypass	2	open	help		2026-04-16T07:12:42Z
+remittor/zapret-openwrt	780	open	[HELP]	help wanted	2026-04-18T08:08:51Z
+FigJam23/HRV-TouchLCD-CristalAir-Invision-Serial-to-HA	4	open	Help :)		2026-04-15T06:11:42Z
+Pdawg-bytes/BadBuilder	35	open	Help		2026-04-15T19:56:52Z
+web-dashers/web-dashers.github.io	23	open	Help?		2026-04-15T20:17:01Z
+fengari-lua/fengari-web	69	open	help		2026-04-11T20:50:07Z
+aimadetools/race-codex	17	open	[HELP] Help Request	human-help, pending	2026-04-21T16:35:14Z
+jasoncrawford/brunel	609	open	Help command (`/help`)	feature, worker	2026-04-11T11:12:40Z
+Pro2021CA/DupePlusPlus	1	open	HELP		2026-04-21T14:43:41Z
+aimadetools/race-codex	19	open	[HELP] Help Request	human-help, pending	2026-04-21T23:30:11Z

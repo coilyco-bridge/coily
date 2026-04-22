@@ -1,0 +1,25 @@
+# coily embedded config.
+# Copy to config.yaml (gitignored) and edit before `make build` / `make install`.
+# Changes require rebuild + sudo install — that's intentional (see docs/threat-model.md).
+
+kai_server:
+  # Tailscale hostname for the homelab box. Resolved dynamically via tailscale SDK at runtime;
+  # embed the name here, not the IP.
+  tailscale_host: kai-server
+  ssh_user: kai
+
+audit:
+  # Append-only JSONL log. Directory must be writable only by the coily process user.
+  log_path: /var/log/coily/audit.jsonl
+
+aws:
+  # Profile to use for SDK calls. Credentials come from ~/.aws/, not from this file.
+  profile: default
+  # Route53 zone IDs are discovered at runtime via the SDK (list-hosted-zones).
+  # Do not hardcode them.
+
+tokens:
+  # Confirmation tokens for destructive verbs are issued via `coily auth issue ...`
+  # and stored in a root-owned path. This file only holds the issuer config.
+  issuer_key_path: /usr/local/etc/coily/token-issuer.key
+  default_ttl: 5m

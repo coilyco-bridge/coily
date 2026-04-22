@@ -1,0 +1,34 @@
+STS()                                                                    STS()
+
+NAME
+       sts -
+
+DESCRIPTION
+       Security Token Service (STS) enables you to request temporary,
+       limited-privilege credentials for users. This guide provides
+       descriptions of the STS API. For more information about using this
+       service, see Temporary Security Credentials .
+
+AVAILABLE COMMANDS
+
+       o assume-role
+
+       o assume-role-with-saml
+
+       o assume-role-with-web-identity
+
+       o assume-root
+
+       o decode-authorization-message
+
+       o get-access-key-info
+
+       o get-caller-identity
+
+       o get-federation-token
+
+       o get-session-token
+
+       o help
+
+                                                                         STS()

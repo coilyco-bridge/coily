@@ -1,0 +1,1 @@
+deleted cluster help from /Users/kai/.kube/config

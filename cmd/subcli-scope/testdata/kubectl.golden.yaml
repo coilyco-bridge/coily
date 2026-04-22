@@ -1,0 +1,579 @@
+commands:
+    - path:
+        - rollout
+      help: Manage the rollout of one or many resources.
+      children:
+        - history
+        - pause
+        - restart
+        - resume
+        - status
+        - undo
+    - path:
+        - rollout
+        - history
+      help: View previous rollout revisions and configurations.
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --filename
+        - name: --kustomize
+        - name: --output
+        - name: --recursive
+        - name: --revision
+        - name: --selector
+        - name: --show-managed-fields
+        - name: --template
+    - path:
+        - rollout
+        - pause
+      help: Mark the provided resource as paused.
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --field-manager
+        - name: --filename
+        - name: --kustomize
+        - name: --output
+        - name: --recursive
+        - name: --selector
+        - name: --show-managed-fields
+        - name: --template
+    - path:
+        - rollout
+        - restart
+      help: Restart a resource.
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --field-manager
+        - name: --filename
+        - name: --kustomize
+        - name: --output
+        - name: --recursive
+        - name: --selector
+        - name: --show-managed-fields
+        - name: --template
+    - path:
+        - rollout
+        - resume
+      help: Resume a paused resource.
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --field-manager
+        - name: --filename
+        - name: --kustomize
+        - name: --output
+        - name: --recursive
+        - name: --selector
+        - name: --show-managed-fields
+        - name: --template
+    - path:
+        - rollout
+        - status
+      help: Show the status of the rollout.
+      flags:
+        - name: --filename
+        - name: --kustomize
+        - name: --recursive
+        - name: --revision
+        - name: --selector
+        - name: --timeout
+        - name: --watch
+    - path:
+        - rollout
+        - undo
+      help: Roll back to a previous rollout.
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --dry-run
+        - name: --filename
+        - name: --kustomize
+        - name: --output
+        - name: --recursive
+        - name: --selector
+        - name: --show-managed-fields
+        - name: --template
+        - name: --to-revision
+    - path:
+        - scale
+      help: Set a new size for a deployment, replica set, replication controller, or stateful set.
+      flags:
+        - name: --all
+        - name: --allow-missing-template-keys
+        - name: --current-replicas
+        - name: --dry-run
+        - name: --filename
+        - name: --kustomize
+        - name: --output
+        - name: --recursive
+        - name: --replicas
+        - name: --resource-version
+        - name: --selector
+        - name: --show-managed-fields
+        - name: --template
+        - name: --timeout
+    - path:
+        - autoscale
+      help: Creates an autoscaler that automatically chooses and sets the number of pods that run in a Kubernetes cluster.
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --cpu-percent
+        - name: --dry-run
+        - name: --field-manager
+        - name: --filename
+        - name: --kustomize
+        - name: --max
+        - name: --min
+        - name: --name
+        - name: --output
+        - name: --recursive
+        - name: --save-config
+        - name: --show-managed-fields
+        - name: --template
+    - path:
+        - certificate
+      help: Modify certificate resources.
+      children:
+        - approve
+        - deny
+    - path:
+        - certificate
+        - approve
+      help: Approve a certificate signing request.
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --filename
+        - name: --force
+        - name: --kustomize
+        - name: --output
+        - name: --recursive
+        - name: --show-managed-fields
+        - name: --template
+    - path:
+        - certificate
+        - deny
+      help: Deny a certificate signing request.
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --filename
+        - name: --force
+        - name: --kustomize
+        - name: --output
+        - name: --recursive
+        - name: --show-managed-fields
+        - name: --template
+    - path:
+        - cluster-info
+      help: Display addresses of the control plane and services with label kubernetes.io/cluster-service=true.
+      children:
+        - dump
+    - path:
+        - cluster-info
+        - dump
+      help: Dump cluster information out suitable for debugging and diagnosing cluster problems.
+      flags:
+        - name: --all-namespaces
+        - name: --allow-missing-template-keys
+        - name: --namespaces
+        - name: --output
+        - name: --output-directory
+        - name: --pod-running-timeout
+        - name: --show-managed-fields
+        - name: --template
+    - path:
+        - top
+      help: Display Resource (CPU/Memory) usage.
+      children:
+        - node
+        - pod
+    - path:
+        - top
+        - node
+      help: Display resource (CPU/memory) usage of nodes.
+      flags:
+        - name: --no-headers
+        - name: --selector
+        - name: --show-capacity
+        - name: --sort-by
+        - name: --use-protocol-buffers
+    - path:
+        - top
+        - pod
+      help: Display resource (CPU/memory) usage of pods.
+      flags:
+        - name: --all-namespaces
+        - name: --containers
+        - name: --field-selector
+        - name: --no-headers
+        - name: --selector
+        - name: --sort-by
+        - name: --sum
+        - name: --use-protocol-buffers
+    - path:
+        - cordon
+      help: Mark node as unschedulable.
+      flags:
+        - name: --dry-run
+        - name: --selector
+    - path:
+        - uncordon
+      help: Mark node as schedulable.
+      flags:
+        - name: --dry-run
+        - name: --selector
+    - path:
+        - drain
+      help: Drain node in preparation for maintenance.
+      flags:
+        - name: --chunk-size
+        - name: --delete-emptydir-data
+        - name: --disable-eviction
+        - name: --dry-run
+        - name: --force
+        - name: --grace-period
+        - name: --ignore-daemonsets
+        - name: --pod-selector
+        - name: --selector
+        - name: --skip-wait-for-delete-timeout
+        - name: --timeout
+    - path:
+        - taint
+      help: Update the taints on one or more nodes.
+      flags:
+        - name: --all
+        - name: --allow-missing-template-keys
+        - name: --dry-run
+        - name: --field-manager
+        - name: --output
+        - name: --overwrite
+        - name: --selector
+        - name: --show-managed-fields
+        - name: --template
+        - name: --validate
+    - path:
+        - describe
+      help: Show details of a specific resource or group of resources.
+      flags:
+        - name: --all-namespaces
+        - name: --chunk-size
+        - name: --filename
+        - name: --kustomize
+        - name: --recursive
+        - name: --selector
+        - name: --show-events
+    - path:
+        - logs
+      help: Print the logs for a container in a pod or specified resource.
+      flags:
+        - name: --all-containers
+        - name: --container
+        - name: --follow
+        - name: --ignore-errors
+        - name: --insecure-skip-tls-verify-backend
+        - name: --limit-bytes
+        - name: --max-log-requests
+        - name: --pod-running-timeout
+        - name: --prefix
+        - name: --previous
+        - name: --selector
+        - name: --since
+        - name: --since-time
+        - name: --tail
+        - name: --timestamps
+    - path:
+        - auth
+      help: Inspect authorization
+      children:
+        - can-i
+        - reconcile
+        - whoami
+    - path:
+        - auth
+        - can-i
+      help: Check whether an action is allowed.
+      flags:
+        - name: --all-namespaces
+        - name: --list
+        - name: --no-headers
+        - name: --quiet
+        - name: --subresource
+    - path:
+        - auth
+        - reconcile
+      help: Reconciles rules for RBAC role, role binding, cluster role, and cluster role binding objects.
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --dry-run
+        - name: --filename
+        - name: --kustomize
+        - name: --output
+        - name: --recursive
+        - name: --remove-extra-permissions
+        - name: --remove-extra-subjects
+        - name: --show-managed-fields
+        - name: --template
+    - path:
+        - auth
+        - whoami
+      help: 'Experimental: Check who you are and your attributes (groups, extra).'
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --output
+        - name: --show-managed-fields
+        - name: --template
+    - path:
+        - events
+      help: Display events
+      flags:
+        - name: --all-namespaces
+        - name: --allow-missing-template-keys
+        - name: --chunk-size
+        - name: --for
+        - name: --no-headers
+        - name: --output
+        - name: --show-managed-fields
+        - name: --template
+        - name: --types
+        - name: --watch
+    - path:
+        - diff
+      help: Diff configurations specified by file name or stdin between the current online configuration, and the configuration as it would be if applied.
+      flags:
+        - name: --field-manager
+        - name: --filename
+        - name: --force-conflicts
+        - name: --kustomize
+        - name: --prune
+        - name: --prune-allowlist
+        - name: --recursive
+        - name: --selector
+        - name: --server-side
+        - name: --show-managed-fields
+    - path:
+        - apply
+      help: Apply a configuration to a resource by file name or stdin.
+      children:
+        - edit-last-applied
+        - set-last-applied
+        - view-last-applied
+    - path:
+        - apply
+        - edit-last-applied
+      help: Edit the latest last-applied-configuration annotations of resources from the default editor.
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --field-manager
+        - name: --filename
+        - name: --kustomize
+        - name: --output
+        - name: --recursive
+        - name: --show-managed-fields
+        - name: --template
+        - name: --validate
+        - name: --windows-line-endings
+    - path:
+        - apply
+        - set-last-applied
+      help: Set the latest last-applied-configuration annotations by setting it to match the contents of a file.
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --create-annotation
+        - name: --dry-run
+        - name: --filename
+        - name: --output
+        - name: --show-managed-fields
+        - name: --template
+    - path:
+        - apply
+        - view-last-applied
+      help: View the latest last-applied-configuration annotations by type/name or file.
+      flags:
+        - name: --all
+        - name: --filename
+        - name: --kustomize
+        - name: --output
+        - name: --recursive
+        - name: --selector
+    - path:
+        - patch
+      help: Update fields of a resource using strategic merge patch, a JSON merge patch, or a JSON patch.
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --dry-run
+        - name: --field-manager
+        - name: --filename
+        - name: --kustomize
+        - name: --local
+        - name: --output
+        - name: --patch
+        - name: --patch-file
+        - name: --recursive
+        - name: --show-managed-fields
+        - name: --subresource
+        - name: --template
+        - name: --type
+    - path:
+        - wait
+      help: 'Experimental: Wait for a specific condition on one or many resources.'
+      flags:
+        - name: --all
+        - name: --all-namespaces
+        - name: --allow-missing-template-keys
+        - name: --field-selector
+        - name: --filename
+        - name: --for
+        - name: --local
+        - name: --output
+        - name: --recursive
+        - name: --selector
+        - name: --show-managed-fields
+        - name: --template
+        - name: --timeout
+    - path:
+        - label
+      help: Update the labels on a resource.
+      flags:
+        - name: --all
+        - name: --all-namespaces
+        - name: --allow-missing-template-keys
+        - name: --dry-run
+        - name: --field-manager
+        - name: --field-selector
+        - name: --filename
+        - name: --kustomize
+        - name: --list
+        - name: --local
+        - name: --output
+        - name: --overwrite
+        - name: --recursive
+        - name: --resource-version
+        - name: --selector
+        - name: --show-managed-fields
+        - name: --template
+    - path:
+        - annotate
+      help: Update the annotations on one or more resources.
+      flags:
+        - name: --all
+        - name: --all-namespaces
+        - name: --allow-missing-template-keys
+        - name: --dry-run
+        - name: --field-manager
+        - name: --field-selector
+        - name: --filename
+        - name: --kustomize
+        - name: --list
+        - name: --local
+        - name: --output
+        - name: --overwrite
+        - name: --recursive
+        - name: --resource-version
+        - name: --selector
+        - name: --show-managed-fields
+        - name: --template
+    - path:
+        - api-resources
+      help: Print the supported API resources on the server.
+      flags:
+        - name: --api-group
+        - name: --cached
+        - name: --categories
+        - name: --namespaced
+        - name: --no-headers
+        - name: --output
+        - name: --sort-by
+        - name: --verbs
+    - path:
+        - api-versions
+      help: Print the supported API versions on the server, in the form of "group/version".
+    - path:
+        - config
+      help: Modify kubeconfig files using subcommands like "kubectl config set current-context my-context"
+      children:
+        - current-context
+        - delete-cluster
+        - delete-context
+        - delete-user
+        - get-clusters
+        - get-contexts
+        - get-users
+        - rename-context
+        - set
+        - set-cluster
+        - set-context
+        - set-credentials
+        - unset
+        - use-context
+        - view
+    - path:
+        - config
+        - current-context
+      help: help
+    - path:
+        - config
+        - delete-cluster
+      help: deleted cluster help from /Users/kai/.kube/config
+    - path:
+        - config
+        - delete-context
+      help: 'warning: this removed your active context, use "kubectl config use-context" to select a different one'
+    - path:
+        - config
+        - delete-user
+      help: deleted user help from /Users/kai/.kube/config
+    - path:
+        - config
+        - get-clusters
+      help: NAME
+    - path:
+        - config
+        - get-contexts
+      help: Display one or many contexts from the kubeconfig file.
+      flags:
+        - name: --no-headers
+        - name: --output
+    - path:
+        - config
+        - get-users
+      help: NAME
+    - path:
+        - config
+        - rename-context
+      help: Renames a context from the kubeconfig file.
+    - path:
+        - config
+        - set
+      help: Set an individual value in a kubeconfig file.
+      flags:
+        - name: --set-raw-bytes
+    - path:
+        - config
+        - set-cluster
+      help: Cluster "help" set.
+    - path:
+        - config
+        - set-context
+      help: Context "help" created.
+    - path:
+        - config
+        - set-credentials
+      help: User "help" set.
+    - path:
+        - config
+        - unset
+      help: Unset an individual value in a kubeconfig file.
+    - path:
+        - config
+        - use-context
+      help: Switched to context "help".
+    - path:
+        - config
+        - view
+      help: Display merged kubeconfig settings or a specified kubeconfig file.
+      flags:
+        - name: --allow-missing-template-keys
+        - name: --flatten
+        - name: --merge
+        - name: --minify
+        - name: --output
+        - name: --raw
+        - name: --show-managed-fields
+        - name: --template

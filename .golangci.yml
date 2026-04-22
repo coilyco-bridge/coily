@@ -1,0 +1,156 @@
+# golangci-lint configuration for coily.
+#
+# Strict-ish. Leans on cyclomatic complexity checks because coily is a security
+# boundary and tangled branchy code is where the policy holes live.
+#
+# Run with `make lint`. Auto-fix with `make lint-fix`.
+
+version: "2"
+
+run:
+  timeout: 3m
+  tests: true
+  modules-download-mode: readonly
+  build-tags:
+    - dev
+    - prod
+    - integration
+
+linters:
+  default: none
+  enable:
+    # Correctness.
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - gosec
+    # Style.
+    - misspell
+    - unconvert
+    - unparam
+    - whitespace
+    # Complexity.
+    - gocyclo
+    - gocognit
+    - cyclop
+    - funlen
+    - nestif
+    # Reduce surprise.
+    - gocritic
+    - revive
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - errorlint
+    - exhaustive
+    - goconst
+    - nilerr
+    - nilnil
+    - predeclared
+    - wastedassign
+
+  settings:
+    gocyclo:
+      min-complexity: 12
+    gocognit:
+      min-complexity: 20
+    cyclop:
+      max-complexity: 12
+      package-average: 8
+    funlen:
+      lines: 100
+      statements: 50
+    nestif:
+      min-complexity: 5
+    goconst:
+      min-len: 5
+      min-occurrences: 3
+    gosec:
+      excludes:
+        # G204 fires on every exec.CommandContext(ctx, bin, argv...) even with
+        # argv properly constructed. We validate in pkg/policy. This is the
+        # whole point of the tool.
+        - G204
+        # G301/G302/G306 (file permissions): we manage perms deliberately per
+        # call site. The audit log is 0600, settings files 0600, dev fixtures
+        # 0644. Trust the per-site choice over a blanket rule.
+        - G301
+        - G302
+        - G304
+        - G306
+    errcheck:
+      check-type-assertions: false
+      exclude-functions:
+        - (*os.File).Close
+        - os.Remove
+        - os.RemoveAll
+    revive:
+      rules:
+        - name: blank-imports
+        - name: context-as-argument
+        - name: error-return
+        - name: error-strings
+        - name: error-naming
+        - name: if-return
+        - name: increment-decrement
+        - name: var-naming
+        - name: var-declaration
+        - name: range
+        - name: receiver-naming
+        - name: time-naming
+        - name: unexported-return
+        - name: indent-error-flow
+        - name: errorf
+        - name: empty-block
+        - name: superfluous-else
+        - name: unused-parameter
+        - name: unreachable-code
+        - name: redefines-builtin-id
+        # Deliberately disabled: "exported" and "package-comments" are too
+        # noisy for a project that is still expanding surface area. Re-enable
+        # once the command surface stabilizes.
+
+  exclusions:
+    rules:
+      # Generated files: mostly mechanical, skip most checks.
+      - path: "generated\\.go$"
+        linters:
+          - cyclop
+          - funlen
+          - gocognit
+          - gocyclo
+          - revive
+          - gocritic
+          - goconst
+          - dupl
+          - unparam
+      # Tests: relaxed complexity, long table-driven cases are fine.
+      - path: "_test\\.go$"
+        linters:
+          - funlen
+          - gocognit
+          - gocyclo
+          - cyclop
+          - gocritic
+          - goconst
+          - errcheck
+          - gosec
+      # Dev tooling (subcli-scope, install-skill) legitimately reads/writes
+      # user-controlled paths. Suppress the noisier gosec file-path rules.
+      - path: "cmd/subcli-scope/"
+        text: "G30[14-6]:"
+      - path: "cmd/gen-passthrough/"
+        text: "G(30[14-6]|703):"
+      - path: "cmd/coily/install_skill_dev\\.go$"
+        text: "G301:"
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+issues:
+  max-same-issues: 20

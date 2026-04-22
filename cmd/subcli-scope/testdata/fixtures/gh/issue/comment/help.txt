@@ -1,0 +1,28 @@
+Add a comment to a GitHub issue.
+
+Without the body text supplied through flags, the command will interactively
+prompt for the comment text.
+
+
+USAGE
+  gh issue comment {<number> | <url>} [flags]
+
+FLAGS
+  -b, --body text        The comment body text
+  -F, --body-file file   Read body text from file (use "-" to read from standard input)
+      --edit-last        Edit the last comment of the same author
+  -e, --editor           Skip prompts and open the text editor to write the body in
+  -w, --web              Open the web browser to write the comment
+
+INHERITED FLAGS
+      --help                     Show help for command
+  -R, --repo [HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format
+
+EXAMPLES
+  $ gh issue comment 12 --body "Hi from GitHub CLI"
+
+LEARN MORE
+  Use `gh <command> <subcommand> --help` for more information about a command.
+  Read the manual at https://cli.github.com/manual
+  Learn about exit codes using `gh help exit-codes`
+

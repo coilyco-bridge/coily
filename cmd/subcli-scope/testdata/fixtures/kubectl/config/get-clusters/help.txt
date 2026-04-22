@@ -1,0 +1,3 @@
+NAME
+gke_gke-test-5_us-central1_gke-test-5
+kai-server

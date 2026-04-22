@@ -1,0 +1,1658 @@
+binary: aws
+bin_version: aws-cli/2.26.5 Python/3.13.3 Darwin/24.6.0 source/arm64
+scanned_at: "2026-04-22T06:24:05Z"
+commands:
+    - path:
+        - route53
+      help: Amazon Route 53 is a highly available and scalable Domain Name System (DNS) web service.
+      children:
+        - activate-key-signing-key
+        - associate-vpc-with-hosted-zone
+        - change-cidr-collection
+        - change-resource-record-sets
+        - change-tags-for-resource
+        - create-cidr-collection
+        - create-health-check
+        - create-hosted-zone
+        - create-key-signing-key
+        - create-query-logging-config
+        - create-reusable-delegation-set
+        - create-traffic-policy
+        - create-traffic-policy-instance
+        - create-traffic-policy-version
+        - create-vpc-association-authorization
+        - deactivate-key-signing-key
+        - delete-cidr-collection
+        - delete-health-check
+        - delete-hosted-zone
+        - delete-key-signing-key
+        - delete-query-logging-config
+        - delete-reusable-delegation-set
+        - delete-traffic-policy
+        - delete-traffic-policy-instance
+        - delete-vpc-association-authorization
+        - disable-hosted-zone-dnssec
+        - disassociate-vpc-from-hosted-zone
+        - enable-hosted-zone-dnssec
+        - get-account-limit
+        - get-change
+        - get-checker-ip-ranges
+        - get-dnssec
+        - get-geo-location
+        - get-health-check
+        - get-health-check-count
+        - get-health-check-last-failure-reason
+        - get-health-check-status
+        - get-hosted-zone
+        - get-hosted-zone-count
+        - get-hosted-zone-limit
+        - get-query-logging-config
+        - get-reusable-delegation-set
+        - get-reusable-delegation-set-limit
+        - get-traffic-policy
+        - get-traffic-policy-instance
+        - get-traffic-policy-instance-count
+        - list-cidr-blocks
+        - list-cidr-collections
+        - list-cidr-locations
+        - list-geo-locations
+        - list-health-checks
+        - list-hosted-zones
+        - list-hosted-zones-by-name
+        - list-hosted-zones-by-vpc
+        - list-query-logging-configs
+        - list-resource-record-sets
+        - list-reusable-delegation-sets
+        - list-tags-for-resource
+        - list-tags-for-resources
+        - list-traffic-policies
+        - list-traffic-policy-instances
+        - list-traffic-policy-instances-by-policy
+        - list-traffic-policy-versions
+        - list-vpc-association-authorizations
+        - test-dns-answer
+        - update-health-check
+        - update-hosted-zone-comment
+        - update-traffic-policy-comment
+        - update-traffic-policy-instance
+        - wait
+    - path:
+        - route53
+        - activate-key-signing-key
+      help: Activates a key-signing key (KSK) so that it can be used for signing by DNSSEC.
+    - path:
+        - route53
+        - associate-vpc-with-hosted-zone
+      help: Associates an Amazon VPC with a private hosted zone.
+    - path:
+        - route53
+        - change-cidr-collection
+      help: Creates, changes, or deletes CIDR blocks within a collection.
+    - path:
+        - route53
+        - change-resource-record-sets
+      help: Creates, changes, or deletes a resource record set, which contains authoritative DNS information for a specified domain name or subdomain name.
+    - path:
+        - route53
+        - change-tags-for-resource
+      help: Adds, edits, or deletes tags for a health check or a hosted zone.
+    - path:
+        - route53
+        - create-cidr-collection
+      help: Creates a CIDR collection in the current Amazon Web Services account.
+    - path:
+        - route53
+        - create-health-check
+      help: Creates a new health check.
+    - path:
+        - route53
+        - create-hosted-zone
+      help: Creates a new public or private hosted zone.
+    - path:
+        - route53
+        - create-key-signing-key
+      help: Creates a new key-signing key (KSK) associated with a hosted zone.
+    - path:
+        - route53
+        - create-query-logging-config
+      help: Creates a configuration for DNS query logging.
+    - path:
+        - route53
+        - create-reusable-delegation-set
+      help: Creates a delegation set (a group of four name servers) that can be reused by multiple hosted zones that were created by the same Amazon Web Services account.
+    - path:
+        - route53
+        - create-traffic-policy
+      help: Creates a traffic policy, which you use to create multiple DNS resource record sets for one domain name (such as example.com) or one subdomain name (such as www.example.com).
+    - path:
+        - route53
+        - create-traffic-policy-instance
+      help: Creates resource record sets in a specified hosted zone based on the settings in a specified traffic policy version.
+    - path:
+        - route53
+        - create-traffic-policy-version
+      help: Creates a new version of an existing traffic policy.
+    - path:
+        - route53
+        - create-vpc-association-authorization
+      help: Authorizes the Amazon Web Services account that created a specified VPC to submit an AssociateVPCWithHostedZone request to associate the VPC with a specified hosted zone that was created by a different account.
+    - path:
+        - route53
+        - deactivate-key-signing-key
+      help: Deactivates a key-signing key (KSK) so that it will not be used for signing by DNSSEC.
+    - path:
+        - route53
+        - delete-cidr-collection
+      help: Deletes a CIDR collection in the current Amazon Web Services account.
+    - path:
+        - route53
+        - delete-health-check
+      help: Deletes a health check.
+    - path:
+        - route53
+        - delete-hosted-zone
+      help: Deletes a hosted zone.
+    - path:
+        - route53
+        - delete-key-signing-key
+      help: Deletes a key-signing key (KSK).
+    - path:
+        - route53
+        - delete-query-logging-config
+      help: Deletes a configuration for DNS query logging.
+    - path:
+        - route53
+        - delete-reusable-delegation-set
+      help: Deletes a reusable delegation set.
+    - path:
+        - route53
+        - delete-traffic-policy
+      help: Deletes a traffic policy.
+    - path:
+        - route53
+        - delete-traffic-policy-instance
+      help: Deletes a traffic policy instance and all of the resource record sets that Amazon Route 53 created when you created the instance.
+    - path:
+        - route53
+        - delete-vpc-association-authorization
+      help: Removes authorization to submit an AssociateVPCWithHostedZone request to associate a specified VPC with a hosted zone that was created by a different account.
+    - path:
+        - route53
+        - disable-hosted-zone-dnssec
+      help: Disables DNSSEC signing in a specific hosted zone.
+    - path:
+        - route53
+        - disassociate-vpc-from-hosted-zone
+      help: Disassociates an Amazon Virtual Private Cloud (Amazon VPC) from an Amazon Route 53 private hosted zone.
+    - path:
+        - route53
+        - enable-hosted-zone-dnssec
+      help: Enables DNSSEC signing in a specific hosted zone.
+    - path:
+        - route53
+        - get-account-limit
+      help: Gets the specified limit for the current account, for example, the maximum number of health checks that you can create using the account.
+    - path:
+        - route53
+        - get-change
+      help: Returns the current status of a change batch request.
+    - path:
+        - route53
+        - get-checker-ip-ranges
+      help: Route 53 does not perform authorization for this API because it retrieves information that is already available to the public.
+    - path:
+        - route53
+        - get-dnssec
+      help: Returns information about DNSSEC for a specific hosted zone, including the key-signing keys (KSKs) in the hosted zone.
+    - path:
+        - route53
+        - get-geo-location
+      help: Gets information about whether a specified geographic location is supported for Amazon Route 53 geolocation resource record sets.
+    - path:
+        - route53
+        - get-health-check
+      help: Gets information about a specified health check.
+    - path:
+        - route53
+        - get-health-check-count
+      help: Retrieves the number of health checks that are associated with the current Amazon Web Services account.
+    - path:
+        - route53
+        - get-health-check-last-failure-reason
+      help: Gets the reason that a specified health check failed most recently.
+    - path:
+        - route53
+        - get-health-check-status
+      help: Gets status of a specified health check.
+    - path:
+        - route53
+        - get-hosted-zone
+      help: Gets information about a specified hosted zone including the four name servers assigned to the hosted zone.
+    - path:
+        - route53
+        - get-hosted-zone-count
+      help: Retrieves the number of hosted zones that are associated with the current Amazon Web Services account.
+    - path:
+        - route53
+        - get-hosted-zone-limit
+      help: Gets the specified limit for a specified hosted zone, for example, the maximum number of records that you can create in the hosted zone.
+    - path:
+        - route53
+        - get-query-logging-config
+      help: Gets information about a specified configuration for DNS query logging.
+    - path:
+        - route53
+        - get-reusable-delegation-set
+      help: Retrieves information about a specified reusable delegation set, including the four name servers that are assigned to the delegation set.
+    - path:
+        - route53
+        - get-reusable-delegation-set-limit
+      help: Gets the maximum number of hosted zones that you can associate with the specified reusable delegation set.
+    - path:
+        - route53
+        - get-traffic-policy
+      help: Gets information about a specific traffic policy version.
+    - path:
+        - route53
+        - get-traffic-policy-instance
+      help: Gets information about a specified traffic policy instance.
+    - path:
+        - route53
+        - get-traffic-policy-instance-count
+      help: Gets the number of traffic policy instances that are associated with the current Amazon Web Services account.
+    - path:
+        - route53
+        - list-cidr-blocks
+      help: Returns a paginated list of location objects and their CIDR blocks.
+    - path:
+        - route53
+        - list-cidr-collections
+      help: Returns a paginated list of CIDR collections in the Amazon Web Services account (metadata only).
+    - path:
+        - route53
+        - list-cidr-locations
+      help: Returns a paginated list of CIDR locations for the given collection (metadata only, does not include CIDR blocks).
+    - path:
+        - route53
+        - list-geo-locations
+      help: Retrieves a list of supported geographic locations.
+    - path:
+        - route53
+        - list-health-checks
+      help: Retrieve a list of the health checks that are associated with the current Amazon Web Services account.
+    - path:
+        - route53
+        - list-hosted-zones
+      help: Retrieves a list of the public and private hosted zones that are associated with the current Amazon Web Services account.
+    - path:
+        - route53
+        - list-hosted-zones-by-name
+      help: Retrieves a list of your hosted zones in lexicographic order.
+    - path:
+        - route53
+        - list-hosted-zones-by-vpc
+      help: Lists all the private hosted zones that a specified VPC is associated with, regardless of which Amazon Web Services account or Amazon Web Services service owns the hosted zones.
+    - path:
+        - route53
+        - list-query-logging-configs
+      help: Lists the configurations for DNS query logging that are associated with the current Amazon Web Services account or the configuration that is associated with a specified hosted zone.
+    - path:
+        - route53
+        - list-resource-record-sets
+      help: Lists the resource record sets in a specified hosted zone.
+    - path:
+        - route53
+        - list-reusable-delegation-sets
+      help: Retrieves a list of the reusable delegation sets that are associated with the current Amazon Web Services account.
+    - path:
+        - route53
+        - list-tags-for-resource
+      help: Lists tags for one health check or hosted zone.
+    - path:
+        - route53
+        - list-tags-for-resources
+      help: Lists tags for up to 10 health checks or hosted zones.
+    - path:
+        - route53
+        - list-traffic-policies
+      help: Gets information about the latest version for every traffic policy that is associated with the current Amazon Web Services account.
+    - path:
+        - route53
+        - list-traffic-policy-instances
+      help: Gets information about the traffic policy instances that you created by using the current Amazon Web Services account.
+    - path:
+        - route53
+        - list-traffic-policy-instances-by-policy
+      help: Gets information about the traffic policy instances that you created by using a specify traffic policy version.
+    - path:
+        - route53
+        - list-traffic-policy-versions
+      help: Gets information about all of the versions for a specified traffic policy.
+    - path:
+        - route53
+        - list-vpc-association-authorizations
+      help: Gets a list of the VPCs that were created by other accounts and that can be associated with a specified hosted zone because you've submitted one or more CreateVPCAssociationAuthorization requests.
+    - path:
+        - route53
+        - test-dns-answer
+      help: Gets the value that Amazon Route 53 returns in response to a DNS request for a specified record name and type.
+    - path:
+        - route53
+        - update-health-check
+      help: Updates an existing health check.
+    - path:
+        - route53
+        - update-hosted-zone-comment
+      help: Updates the comment for a specified hosted zone.
+    - path:
+        - route53
+        - update-traffic-policy-comment
+      help: Updates the comment for a specified traffic policy version.
+    - path:
+        - route53
+        - update-traffic-policy-instance
+      help: 'NOTE: After you submit a UpdateTrafficPolicyInstance request, there''s a brief delay while Route 53 creates the resource record sets that are specified in the traffic policy definition.'
+    - path:
+        - route53
+        - wait
+      help: Wait until a particular condition is satisfied.
+      children:
+        - resource-record-sets-changed
+    - path:
+        - route53
+        - wait
+        - resource-record-sets-changed
+      help: Wait until JMESPath query ChangeInfo.Status returns INSYNC when polling with get-change.
+    - path:
+        - s3
+      help: This section explains prominent concepts and notations in the set of high-level S3 commands provided.
+      children:
+        - cp
+        - ls
+        - mb
+        - mv
+        - presign
+        - rb
+        - rm
+        - sync
+        - website
+    - path:
+        - s3
+        - cp
+      help: Copies a local file or S3 object to another location locally or in S3.
+    - path:
+        - s3
+        - ls
+      help: List S3 objects and common prefixes under a prefix or all S3 buckets.
+    - path:
+        - s3
+        - mb
+      help: Creates an S3 bucket.
+    - path:
+        - s3
+        - mv
+      help: Moves a local file or S3 object to another location locally or in S3.
+    - path:
+        - s3
+        - presign
+      help: Generate a pre-signed URL for an Amazon S3 object.
+    - path:
+        - s3
+        - rb
+      help: Deletes an empty S3 bucket.
+    - path:
+        - s3
+        - rm
+      help: Deletes an S3 object.
+    - path:
+        - s3
+        - sync
+      help: Syncs directories and S3 prefixes.
+    - path:
+        - s3
+        - website
+      help: Set the website configuration for a bucket.
+    - path:
+        - s3api
+      help: S3API()                                                                S3API()
+      children:
+        - abort-multipart-upload
+        - complete-multipart-upload
+        - copy-object
+        - create-bucket
+        - create-multipart-upload
+        - create-session
+        - delete-bucket
+        - delete-bucket-analytics-configuration
+        - delete-bucket-cors
+        - delete-bucket-encryption
+        - delete-bucket-inventory-configuration
+        - delete-bucket-lifecycle
+        - delete-bucket-metrics-configuration
+        - delete-bucket-ownership-controls
+        - delete-bucket-policy
+        - delete-bucket-replication
+        - delete-bucket-tagging
+        - delete-bucket-website
+        - delete-object
+        - delete-object-tagging
+        - delete-objects
+        - delete-public-access-block
+        - get-bucket-accelerate-configuration
+        - get-bucket-acl
+        - get-bucket-analytics-configuration
+        - get-bucket-cors
+        - get-bucket-encryption
+        - get-bucket-inventory-configuration
+        - get-bucket-lifecycle-configuration
+        - get-bucket-location
+        - get-bucket-logging
+        - get-bucket-metadata-table-configuration
+        - get-bucket-metrics-configuration
+        - get-bucket-notification-configuration
+        - get-bucket-ownership-controls
+        - get-bucket-policy
+        - get-bucket-policy-status
+        - get-bucket-replication
+        - get-bucket-request-payment
+        - get-bucket-tagging
+        - get-bucket-versioning
+        - get-bucket-website
+        - get-object
+        - get-object-acl
+        - get-object-attributes
+        - get-object-legal-hold
+        - get-object-lock-configuration
+        - get-object-retention
+        - get-object-tagging
+        - get-object-torrent
+        - get-public-access-block
+        - head-bucket
+        - head-object
+        - list-bucket-analytics-configurations
+        - list-bucket-inventory-configurations
+        - list-bucket-metrics-configurations
+        - list-buckets
+        - list-directory-buckets
+        - list-multipart-uploads
+        - list-object-versions
+        - list-objects
+        - list-objects-v2
+        - list-parts
+        - put-bucket-accelerate-configuration
+        - put-bucket-acl
+        - put-bucket-analytics-configuration
+        - put-bucket-cors
+        - put-bucket-encryption
+        - put-bucket-inventory-configuration
+        - put-bucket-lifecycle-configuration
+        - put-bucket-logging
+        - put-bucket-metrics-configuration
+        - put-bucket-notification-configuration
+        - put-bucket-ownership-controls
+        - put-bucket-policy
+        - put-bucket-replication
+        - put-bucket-request-payment
+        - put-bucket-tagging
+        - put-bucket-versioning
+        - put-bucket-website
+        - put-object
+        - put-object-acl
+        - put-object-legal-hold
+        - put-object-lock-configuration
+        - put-object-retention
+        - put-object-tagging
+        - put-public-access-block
+        - restore-object
+        - select-object-content
+        - upload-part
+        - upload-part-copy
+        - wait
+        - write-get-object-response
+    - path:
+        - s3api
+        - abort-multipart-upload
+      help: This operation aborts a multipart upload.
+    - path:
+        - s3api
+        - complete-multipart-upload
+      help: Completes a multipart upload by assembling previously uploaded parts.
+    - path:
+        - s3api
+        - copy-object
+      help: Creates a copy of an object that is already stored in Amazon S3.
+    - path:
+        - s3api
+        - create-bucket
+      help: 'NOTE: This action creates an Amazon S3 bucket.'
+    - path:
+        - s3api
+        - create-multipart-upload
+      help: This action initiates a multipart upload and returns an upload ID.
+    - path:
+        - s3api
+        - create-session
+      help: Creates a session that establishes temporary security credentials to support fast authentication and authorization for the Zonal endpoint API operations on directory buckets.
+    - path:
+        - s3api
+        - delete-bucket
+      help: Deletes the S3 bucket.
+    - path:
+        - s3api
+        - delete-bucket-analytics-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - delete-bucket-cors
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - delete-bucket-encryption
+      help: This implementation of the DELETE action resets the default encryption for the bucket as server-side encryption with Amazon S3 managed keys (SSE-S3).
+    - path:
+        - s3api
+        - delete-bucket-inventory-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - delete-bucket-lifecycle
+      help: Deletes the lifecycle configuration from the specified bucket.
+    - path:
+        - s3api
+        - delete-bucket-metrics-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - delete-bucket-ownership-controls
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - delete-bucket-policy
+      help: Deletes the policy of a specified bucket.
+    - path:
+        - s3api
+        - delete-bucket-replication
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - delete-bucket-tagging
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - delete-bucket-website
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - delete-object
+      help: Removes an object from a bucket.
+    - path:
+        - s3api
+        - delete-object-tagging
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - delete-objects
+      help: This operation enables you to delete multiple objects from a bucket using a single HTTP request.
+    - path:
+        - s3api
+        - delete-public-access-block
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-accelerate-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-acl
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-analytics-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-cors
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-encryption
+      help: Returns the default encryption configuration for an Amazon S3 bucket.
+    - path:
+        - s3api
+        - get-bucket-inventory-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-lifecycle-configuration
+      help: Returns the lifecycle configuration information set on the bucket.
+    - path:
+        - s3api
+        - get-bucket-location
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-logging
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-metadata-table-configuration
+      help: Retrieves the metadata table configuration for a general purpose bucket.
+    - path:
+        - s3api
+        - get-bucket-metrics-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-notification-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-ownership-controls
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-policy
+      help: Returns the policy of a specified bucket.
+    - path:
+        - s3api
+        - get-bucket-policy-status
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-replication
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-request-payment
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-tagging
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-versioning
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-bucket-website
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-object
+      help: Retrieves an object from Amazon S3.
+    - path:
+        - s3api
+        - get-object-acl
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-object-attributes
+      help: Retrieves all the metadata from an object without returning the object itself.
+    - path:
+        - s3api
+        - get-object-legal-hold
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-object-lock-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-object-retention
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-object-tagging
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-object-torrent
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - get-public-access-block
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - head-bucket
+      help: You can use this operation to determine if a bucket exists and if you have permission to access it.
+    - path:
+        - s3api
+        - head-object
+      help: The HEAD operation retrieves metadata from an object without returning the object itself.
+    - path:
+        - s3api
+        - list-bucket-analytics-configurations
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - list-bucket-inventory-configurations
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - list-bucket-metrics-configurations
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - list-buckets
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - list-directory-buckets
+      help: Returns a list of all Amazon S3 directory buckets owned by the authenticated sender of the request.
+    - path:
+        - s3api
+        - list-multipart-uploads
+      help: This operation lists in-progress multipart uploads in a bucket.
+    - path:
+        - s3api
+        - list-object-versions
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - list-objects
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - list-objects-v2
+      help: Returns some or all (up to 1,000) of the objects in a bucket with each request.
+    - path:
+        - s3api
+        - list-parts
+      help: Lists the parts that have been uploaded for a specific multipart upload.
+    - path:
+        - s3api
+        - put-bucket-accelerate-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-bucket-acl
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-bucket-analytics-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-bucket-cors
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-bucket-encryption
+      help: This operation configures default encryption and Amazon S3 Bucket Keys for an existing bucket.
+    - path:
+        - s3api
+        - put-bucket-inventory-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-bucket-lifecycle-configuration
+      help: Creates a new lifecycle configuration for the bucket or replaces an existing lifecycle configuration.
+    - path:
+        - s3api
+        - put-bucket-logging
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-bucket-metrics-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-bucket-notification-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-bucket-ownership-controls
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-bucket-policy
+      help: Applies an Amazon S3 bucket policy to an Amazon S3 bucket.
+    - path:
+        - s3api
+        - put-bucket-replication
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-bucket-request-payment
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-bucket-tagging
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-bucket-versioning
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-bucket-website
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-object
+      help: '<string>:: (ERROR/3) Anonymous hyperlink mismatch: 2 references but 0 targets.'
+    - path:
+        - s3api
+        - put-object-acl
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-object-legal-hold
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-object-lock-configuration
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-object-retention
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-object-tagging
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - put-public-access-block
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - restore-object
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - select-object-content
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - s3api
+        - upload-part
+      help: Uploads a part in a multipart upload.
+    - path:
+        - s3api
+        - upload-part-copy
+      help: Uploads a part by copying data from an existing object as data source.
+    - path:
+        - s3api
+        - wait
+      help: Wait until a particular condition is satisfied.
+      children:
+        - bucket-exists
+        - bucket-not-exists
+        - object-exists
+        - object-not-exists
+    - path:
+        - s3api
+        - wait
+        - bucket-exists
+      help: Wait until 200 response is received when polling with head-bucket.
+    - path:
+        - s3api
+        - wait
+        - bucket-not-exists
+      help: Wait until 404 response is received when polling with head-bucket.
+    - path:
+        - s3api
+        - wait
+        - object-exists
+      help: Wait until 200 response is received when polling with head-object.
+    - path:
+        - s3api
+        - wait
+        - object-not-exists
+      help: Wait until 404 response is received when polling with head-object.
+    - path:
+        - s3api
+        - write-get-object-response
+      help: 'NOTE: This operation is not supported for directory buckets.'
+    - path:
+        - ssm
+      help: Amazon Web Services Systems Manager is the operations hub for your Amazon Web Services applications and resources and a secure end-to-end management solution for hybrid cloud environments that enables safe and secure operations at scale.
+      children:
+        - add-tags-to-resource
+        - associate-ops-item-related-item
+        - cancel-command
+        - cancel-maintenance-window-execution
+        - create-activation
+        - create-association
+        - create-association-batch
+        - create-document
+        - create-maintenance-window
+        - create-ops-item
+        - create-ops-metadata
+        - create-patch-baseline
+        - create-resource-data-sync
+        - delete-activation
+        - delete-association
+        - delete-document
+        - delete-inventory
+        - delete-maintenance-window
+        - delete-ops-item
+        - delete-ops-metadata
+        - delete-parameter
+        - delete-parameters
+        - delete-patch-baseline
+        - delete-resource-data-sync
+        - delete-resource-policy
+        - deregister-managed-instance
+        - deregister-patch-baseline-for-patch-group
+        - deregister-target-from-maintenance-window
+        - deregister-task-from-maintenance-window
+        - describe-activations
+        - describe-association
+        - describe-association-execution-targets
+        - describe-association-executions
+        - describe-automation-executions
+        - describe-automation-step-executions
+        - describe-available-patches
+        - describe-document
+        - describe-document-permission
+        - describe-effective-instance-associations
+        - describe-instance-associations-status
+        - describe-instance-information
+        - describe-instance-patch-states
+        - describe-instance-patches
+        - describe-instance-properties
+        - describe-inventory-deletions
+        - describe-maintenance-window-executions
+        - describe-maintenance-window-schedule
+        - describe-maintenance-window-targets
+        - describe-maintenance-window-tasks
+        - describe-maintenance-windows
+        - describe-maintenance-windows-for-target
+        - describe-ops-items
+        - describe-parameters
+        - describe-patch-baselines
+        - describe-patch-group-state
+        - describe-patch-groups
+        - describe-patch-properties
+        - describe-sessions
+        - disassociate-ops-item-related-item
+        - get-automation-execution
+        - get-calendar-state
+        - get-command-invocation
+        - get-connection-status
+        - get-default-patch-baseline
+        - get-document
+        - get-execution-preview
+        - get-inventory
+        - get-inventory-schema
+        - get-maintenance-window
+        - get-maintenance-window-execution
+        - get-maintenance-window-execution-task
+        - get-maintenance-window-task
+        - get-ops-item
+        - get-ops-metadata
+        - get-ops-summary
+        - get-parameter
+        - get-parameter-history
+        - get-parameters
+        - get-parameters-by-path
+        - get-patch-baseline
+        - get-patch-baseline-for-patch-group
+        - get-resource-policies
+        - get-service-setting
+        - label-parameter-version
+        - list-association-versions
+        - list-associations
+        - list-command-invocations
+        - list-compliance-items
+        - list-compliance-summaries
+        - list-document-metadata-history
+        - list-document-versions
+        - list-documents
+        - list-inventory-entries
+        - list-nodes
+        - list-nodes-summary
+        - list-ops-item-events
+        - list-ops-item-related-items
+        - list-ops-metadata
+        - list-resource-compliance-summaries
+        - list-resource-data-sync
+        - list-tags-for-resource
+        - modify-document-permission
+        - put-compliance-items
+        - put-inventory
+        - put-parameter
+        - put-resource-policy
+        - register-default-patch-baseline
+        - register-patch-baseline-for-patch-group
+        - register-target-with-maintenance-window
+        - register-task-with-maintenance-window
+        - remove-tags-from-resource
+        - reset-service-setting
+        - resume-session
+        - send-automation-signal
+        - send-command
+        - start-associations-once
+        - start-automation-execution
+        - start-change-request-execution
+        - start-execution-preview
+        - start-session
+        - stop-automation-execution
+        - terminate-session
+        - unlabel-parameter-version
+        - update-association
+        - update-association-status
+        - update-document
+        - update-document-default-version
+        - update-document-metadata
+        - update-maintenance-window
+        - update-maintenance-window-target
+        - update-maintenance-window-task
+        - update-managed-instance-role
+        - update-ops-item
+        - update-ops-metadata
+        - update-patch-baseline
+        - update-resource-data-sync
+        - update-service-setting
+        - wait
+    - path:
+        - ssm
+        - add-tags-to-resource
+      help: Adds or overwrites one or more tags for the specified resource.
+    - path:
+        - ssm
+        - associate-ops-item-related-item
+      help: Associates a related item to a Systems Manager OpsCenter OpsItem.
+    - path:
+        - ssm
+        - cancel-command
+      help: Attempts to cancel the command specified by the Command ID.
+    - path:
+        - ssm
+        - cancel-maintenance-window-execution
+      help: Stops a maintenance window execution that is already in progress and cancels any tasks in the window that haven't already starting running.
+    - path:
+        - ssm
+        - create-activation
+      help: Generates an activation code and activation ID you can use to register your on-premises servers, edge devices, or virtual machine (VM) with Amazon Web Services Systems Manager.
+    - path:
+        - ssm
+        - create-association
+      help: A State Manager association defines the state that you want to maintain on your managed nodes.
+    - path:
+        - ssm
+        - create-association-batch
+      help: Associates the specified Amazon Web Services Systems Manager document (SSM document) with the specified managed nodes or targets.
+    - path:
+        - ssm
+        - create-document
+      help: Creates a Amazon Web Services Systems Manager (SSM document).
+    - path:
+        - ssm
+        - create-maintenance-window
+      help: Creates a new maintenance window.
+    - path:
+        - ssm
+        - create-ops-item
+      help: Creates a new OpsItem.
+    - path:
+        - ssm
+        - create-ops-metadata
+      help: If you create a new application in Application Manager, Amazon Web Services Systems Manager calls this API operation to specify information about the new application, including the application type.
+    - path:
+        - ssm
+        - create-patch-baseline
+      help: Creates a patch baseline.
+    - path:
+        - ssm
+        - create-resource-data-sync
+      help: A resource data sync helps you view data from multiple sources in a single location.
+    - path:
+        - ssm
+        - delete-activation
+      help: Deletes an activation.
+    - path:
+        - ssm
+        - delete-association
+      help: Disassociates the specified Amazon Web Services Systems Manager document (SSM document) from the specified managed node.
+    - path:
+        - ssm
+        - delete-document
+      help: Deletes the Amazon Web Services Systems Manager document (SSM document) and all managed node associations to the document.
+    - path:
+        - ssm
+        - delete-inventory
+      help: Delete a custom inventory type or the data associated with a custom Inventory type.
+    - path:
+        - ssm
+        - delete-maintenance-window
+      help: Deletes a maintenance window.
+    - path:
+        - ssm
+        - delete-ops-item
+      help: Delete an OpsItem.
+    - path:
+        - ssm
+        - delete-ops-metadata
+      help: Delete OpsMetadata related to an application.
+    - path:
+        - ssm
+        - delete-parameter
+      help: Delete a parameter from the system.
+    - path:
+        - ssm
+        - delete-parameters
+      help: Delete a list of parameters.
+    - path:
+        - ssm
+        - delete-patch-baseline
+      help: Deletes a patch baseline.
+    - path:
+        - ssm
+        - delete-resource-data-sync
+      help: Deletes a resource data sync configuration.
+    - path:
+        - ssm
+        - delete-resource-policy
+      help: Deletes a Systems Manager resource policy.
+    - path:
+        - ssm
+        - deregister-managed-instance
+      help: Removes the server or virtual machine from the list of registered servers.
+    - path:
+        - ssm
+        - deregister-patch-baseline-for-patch-group
+      help: Removes a patch group from a patch baseline.
+    - path:
+        - ssm
+        - deregister-target-from-maintenance-window
+      help: Removes a target from a maintenance window.
+    - path:
+        - ssm
+        - deregister-task-from-maintenance-window
+      help: Removes a task from a maintenance window.
+    - path:
+        - ssm
+        - describe-activations
+      help: Describes details about the activation, such as the date and time the activation was created, its expiration date, the Identity and Access Management (IAM) role assigned to the managed nodes in the activation, and the number of nodes registered by using this activation.
+    - path:
+        - ssm
+        - describe-association
+      help: Describes the association for the specified target or managed node.
+    - path:
+        - ssm
+        - describe-association-execution-targets
+      help: Views information about a specific execution of a specific association.
+    - path:
+        - ssm
+        - describe-association-executions
+      help: Views all executions for a specific association ID.
+    - path:
+        - ssm
+        - describe-automation-executions
+      help: Provides details about all active and terminated Automation executions.
+    - path:
+        - ssm
+        - describe-automation-step-executions
+      help: Information about all active and terminated step executions in an Automation workflow.
+    - path:
+        - ssm
+        - describe-available-patches
+      help: Lists all patches eligible to be included in a patch baseline.
+    - path:
+        - ssm
+        - describe-document
+      help: Describes the specified Amazon Web Services Systems Manager document (SSM document).
+    - path:
+        - ssm
+        - describe-document-permission
+      help: Describes the permissions for a Amazon Web Services Systems Manager document (SSM document).
+    - path:
+        - ssm
+        - describe-effective-instance-associations
+      help: All associations for the managed nodes.
+    - path:
+        - ssm
+        - describe-instance-associations-status
+      help: The status of the associations for the managed nodes.
+    - path:
+        - ssm
+        - describe-instance-information
+      help: Provides information about one or more of your managed nodes, including the operating system platform, SSM Agent version, association status, and IP address.
+    - path:
+        - ssm
+        - describe-instance-patch-states
+      help: Retrieves the high-level patch state of one or more managed nodes.
+    - path:
+        - ssm
+        - describe-instance-patches
+      help: Retrieves information about the patches on the specified managed node and their state relative to the patch baseline being used for the node.
+    - path:
+        - ssm
+        - describe-instance-properties
+      help: An API operation used by the Systems Manager console to display information about Systems Manager managed nodes.
+    - path:
+        - ssm
+        - describe-inventory-deletions
+      help: Describes a specific delete inventory operation.
+    - path:
+        - ssm
+        - describe-maintenance-window-executions
+      help: Lists the executions of a maintenance window.
+    - path:
+        - ssm
+        - describe-maintenance-window-schedule
+      help: Retrieves information about upcoming executions of a maintenance window.
+    - path:
+        - ssm
+        - describe-maintenance-window-targets
+      help: Lists the targets registered with the maintenance window.
+    - path:
+        - ssm
+        - describe-maintenance-window-tasks
+      help: Lists the tasks in a maintenance window.
+    - path:
+        - ssm
+        - describe-maintenance-windows
+      help: Retrieves the maintenance windows in an Amazon Web Services account.
+    - path:
+        - ssm
+        - describe-maintenance-windows-for-target
+      help: Retrieves information about the maintenance window targets or tasks that a managed node is associated with.
+    - path:
+        - ssm
+        - describe-ops-items
+      help: Query a set of OpsItems.
+    - path:
+        - ssm
+        - describe-parameters
+      help: Lists the parameters in your Amazon Web Services account or the parameters shared with you when you enable the Shared option.
+    - path:
+        - ssm
+        - describe-patch-baselines
+      help: Lists the patch baselines in your Amazon Web Services account.
+    - path:
+        - ssm
+        - describe-patch-group-state
+      help: Returns high-level aggregated patch compliance state information for a patch group.
+    - path:
+        - ssm
+        - describe-patch-groups
+      help: Lists all patch groups that have been registered with patch baselines.
+    - path:
+        - ssm
+        - describe-patch-properties
+      help: Lists the properties of available patches organized by product, product family, classification, severity, and other properties of available patches.
+    - path:
+        - ssm
+        - describe-sessions
+      help: Retrieves a list of all active sessions (both connected and disconnected) or terminated sessions from the past 30 days.
+    - path:
+        - ssm
+        - disassociate-ops-item-related-item
+      help: Deletes the association between an OpsItem and a related item.
+    - path:
+        - ssm
+        - get-automation-execution
+      help: Get detailed information about a particular Automation execution.
+    - path:
+        - ssm
+        - get-calendar-state
+      help: Gets the state of a Amazon Web Services Systems Manager change calendar at the current time or a specified time.
+    - path:
+        - ssm
+        - get-command-invocation
+      help: Returns detailed information about command execution for an invocation or plugin.
+    - path:
+        - ssm
+        - get-connection-status
+      help: Retrieves the Session Manager connection status for a managed node to determine whether it is running and ready to receive Session Manager connections.
+    - path:
+        - ssm
+        - get-default-patch-baseline
+      help: Retrieves the default patch baseline.
+    - path:
+        - ssm
+        - get-document
+      help: Gets the contents of the specified Amazon Web Services Systems Manager document (SSM document).
+    - path:
+        - ssm
+        - get-execution-preview
+      help: Initiates the process of retrieving an existing preview that shows the effects that running a specified Automation runbook would have on the targeted resources.
+    - path:
+        - ssm
+        - get-inventory
+      help: Query inventory information.
+    - path:
+        - ssm
+        - get-inventory-schema
+      help: Return a list of inventory type names for the account, or return a list of attribute names for a specific Inventory item type.
+    - path:
+        - ssm
+        - get-maintenance-window
+      help: Retrieves a maintenance window.
+    - path:
+        - ssm
+        - get-maintenance-window-execution
+      help: Retrieves details about a specific a maintenance window execution.
+    - path:
+        - ssm
+        - get-maintenance-window-execution-task
+      help: Retrieves the details about a specific task run as part of a maintenance window execution.
+    - path:
+        - ssm
+        - get-maintenance-window-task
+      help: Retrieves the details of a maintenance window task.
+    - path:
+        - ssm
+        - get-ops-item
+      help: Get information about an OpsItem by using the ID.
+    - path:
+        - ssm
+        - get-ops-metadata
+      help: View operational metadata related to an application in Application Manager.
+    - path:
+        - ssm
+        - get-ops-summary
+      help: View a summary of operations metadata (OpsData) based on specified filters and aggregators.
+    - path:
+        - ssm
+        - get-parameter
+      help: Get information about a single parameter by specifying the parameter name.
+    - path:
+        - ssm
+        - get-parameter-history
+      help: Retrieves the history of all changes to a parameter.
+    - path:
+        - ssm
+        - get-parameters
+      help: Get information about one or more parameters by specifying multiple parameter names.
+    - path:
+        - ssm
+        - get-parameters-by-path
+      help: Retrieve information about one or more parameters under a specified level in a hierarchy.
+    - path:
+        - ssm
+        - get-patch-baseline
+      help: Retrieves information about a patch baseline.
+    - path:
+        - ssm
+        - get-patch-baseline-for-patch-group
+      help: Retrieves the patch baseline that should be used for the specified patch group.
+    - path:
+        - ssm
+        - get-resource-policies
+      help: Returns an array of the Policy object.
+    - path:
+        - ssm
+        - get-service-setting
+      help: ServiceSetting is an account-level setting for an Amazon Web Services service.
+    - path:
+        - ssm
+        - label-parameter-version
+      help: A parameter label is a user-defined alias to help you manage different versions of a parameter.
+    - path:
+        - ssm
+        - list-association-versions
+      help: Retrieves all versions of an association for a specific association ID.
+    - path:
+        - ssm
+        - list-associations
+      help: Returns all State Manager associations in the current Amazon Web Services account and Amazon Web Services Region.
+    - path:
+        - ssm
+        - list-command-invocations
+      help: An invocation is copy of a command sent to a specific managed node.
+    - path:
+        - ssm
+        - list-compliance-items
+      help: For a specified resource ID, this API operation returns a list of compliance statuses for different resource types.
+    - path:
+        - ssm
+        - list-compliance-summaries
+      help: Returns a summary count of compliant and non-compliant resources for a compliance type.
+    - path:
+        - ssm
+        - list-document-metadata-history
+      help: Information about approval reviews for a version of a change template in Change Manager.
+    - path:
+        - ssm
+        - list-document-versions
+      help: List all versions for a document.
+    - path:
+        - ssm
+        - list-documents
+      help: Returns all Systems Manager (SSM) documents in the current Amazon Web Services account and Amazon Web Services Region.
+    - path:
+        - ssm
+        - list-inventory-entries
+      help: A list of inventory items returned by the request.
+    - path:
+        - ssm
+        - list-nodes
+      help: Takes in filters and returns a list of managed nodes matching the filter criteria.
+    - path:
+        - ssm
+        - list-nodes-summary
+      help: Generates a summary of managed instance/node metadata based on the filters and aggregators you specify.
+    - path:
+        - ssm
+        - list-ops-item-events
+      help: Returns a list of all OpsItem events in the current Amazon Web Services Region and Amazon Web Services account.
+    - path:
+        - ssm
+        - list-ops-item-related-items
+      help: Lists all related-item resources associated with a Systems Manager OpsCenter OpsItem.
+    - path:
+        - ssm
+        - list-ops-metadata
+      help: Amazon Web Services Systems Manager calls this API operation when displaying all Application Manager OpsMetadata objects or blobs.
+    - path:
+        - ssm
+        - list-resource-compliance-summaries
+      help: Returns a resource-level summary count.
+    - path:
+        - ssm
+        - list-resource-data-sync
+      help: Lists your resource data sync configurations.
+    - path:
+        - ssm
+        - list-tags-for-resource
+      help: Returns a list of the tags assigned to the specified resource.
+    - path:
+        - ssm
+        - modify-document-permission
+      help: Shares a Amazon Web Services Systems Manager document (SSM document)publicly or privately.
+    - path:
+        - ssm
+        - put-compliance-items
+      help: Registers a compliance type and other compliance details on a designated resource.
+    - path:
+        - ssm
+        - put-inventory
+      help: Bulk update custom inventory items on one or more managed nodes.
+    - path:
+        - ssm
+        - put-parameter
+      help: Create or update a parameter in Parameter Store.
+    - path:
+        - ssm
+        - put-resource-policy
+      help: Creates or updates a Systems Manager resource policy.
+    - path:
+        - ssm
+        - register-default-patch-baseline
+      help: Defines the default patch baseline for the relevant operating system.
+    - path:
+        - ssm
+        - register-patch-baseline-for-patch-group
+      help: Registers a patch baseline for a patch group.
+    - path:
+        - ssm
+        - register-target-with-maintenance-window
+      help: Registers a target with a maintenance window.
+    - path:
+        - ssm
+        - register-task-with-maintenance-window
+      help: Adds a new task to a maintenance window.
+    - path:
+        - ssm
+        - remove-tags-from-resource
+      help: Removes tag keys from the specified resource.
+    - path:
+        - ssm
+        - reset-service-setting
+      help: ServiceSetting is an account-level setting for an Amazon Web Services service.
+    - path:
+        - ssm
+        - resume-session
+      help: Reconnects a session to a managed node after it has been disconnected.
+    - path:
+        - ssm
+        - send-automation-signal
+      help: Sends a signal to an Automation execution to change the current behavior or status of the execution.
+    - path:
+        - ssm
+        - send-command
+      help: Runs commands on one or more managed nodes.
+    - path:
+        - ssm
+        - start-associations-once
+      help: Runs an association immediately and only one time.
+    - path:
+        - ssm
+        - start-automation-execution
+      help: Initiates execution of an Automation runbook.
+    - path:
+        - ssm
+        - start-change-request-execution
+      help: Creates a change request for Change Manager.
+    - path:
+        - ssm
+        - start-execution-preview
+      help: Initiates the process of creating a preview showing the effects that running a specified Automation runbook would have on the targeted resources.
+    - path:
+        - ssm
+        - start-session
+      help: Initiates a connection to a target (for example, a managed node) for a Session Manager session.
+    - path:
+        - ssm
+        - stop-automation-execution
+      help: Stop an Automation that is currently running.
+    - path:
+        - ssm
+        - terminate-session
+      help: Permanently ends a session and closes the data connection between the Session Manager client and SSM Agent on the managed node.
+    - path:
+        - ssm
+        - unlabel-parameter-version
+      help: Remove a label or labels from a parameter.
+    - path:
+        - ssm
+        - update-association
+      help: Updates an association.
+    - path:
+        - ssm
+        - update-association-status
+      help: Updates the status of the Amazon Web Services Systems Manager document (SSM document) associated with the specified managed node.
+    - path:
+        - ssm
+        - update-document
+      help: Updates one or more values for an SSM document.
+    - path:
+        - ssm
+        - update-document-default-version
+      help: Set the default version of a document.
+    - path:
+        - ssm
+        - update-document-metadata
+      help: Updates information related to approval reviews for a specific version of a change template in Change Manager.
+    - path:
+        - ssm
+        - update-maintenance-window
+      help: Updates an existing maintenance window.
+    - path:
+        - ssm
+        - update-maintenance-window-target
+      help: Modifies the target of an existing maintenance window.
+    - path:
+        - ssm
+        - update-maintenance-window-task
+      help: Modifies a task assigned to a maintenance window.
+    - path:
+        - ssm
+        - update-managed-instance-role
+      help: Changes the Identity and Access Management (IAM) role that is assigned to the on-premises server, edge device, or virtual machines (VM).
+    - path:
+        - ssm
+        - update-ops-item
+      help: Edit or change an OpsItem.
+    - path:
+        - ssm
+        - update-ops-metadata
+      help: Amazon Web Services Systems Manager calls this API operation when you edit OpsMetadata in Application Manager.
+    - path:
+        - ssm
+        - update-patch-baseline
+      help: Modifies an existing patch baseline.
+    - path:
+        - ssm
+        - update-resource-data-sync
+      help: Update a resource data sync.
+    - path:
+        - ssm
+        - update-service-setting
+      help: ServiceSetting is an account-level setting for an Amazon Web Services service.
+    - path:
+        - ssm
+        - wait
+      help: Wait until a particular condition is satisfied.
+      children:
+        - command-executed
+    - path:
+        - ssm
+        - wait
+        - command-executed
+      help: Wait until JMESPath query Status returns Success when polling with get-command-invocation.
+    - path:
+        - sts
+      help: Security Token Service (STS) enables you to request temporary, limited-privilege credentials for users.
+      children:
+        - assume-role
+        - assume-role-with-saml
+        - assume-role-with-web-identity
+        - assume-root
+        - decode-authorization-message
+        - get-access-key-info
+        - get-caller-identity
+        - get-federation-token
+        - get-session-token
+    - path:
+        - sts
+        - assume-role
+      help: Returns a set of temporary security credentials that you can use to access Amazon Web Services resources.
+    - path:
+        - sts
+        - assume-role-with-saml
+      help: Returns a set of temporary security credentials for users who have been authenticated via a SAML authentication response.
+    - path:
+        - sts
+        - assume-role-with-web-identity
+      help: Returns a set of temporary security credentials for users who have been authenticated in a mobile or web application with a web identity provider.
+    - path:
+        - sts
+        - assume-root
+      help: Returns a set of short term credentials you can use to perform privileged tasks on a member account in your organization.
+    - path:
+        - sts
+        - decode-authorization-message
+      help: Decodes additional information about the authorization status of a request from an encoded message returned in response to an Amazon Web Services request.
+    - path:
+        - sts
+        - get-access-key-info
+      help: Returns the account identifier for the specified access key ID.
+    - path:
+        - sts
+        - get-caller-identity
+      help: Returns details about the IAM user or role whose credentials are used to call the operation.
+    - path:
+        - sts
+        - get-federation-token
+      help: Returns a set of temporary security credentials (consisting of an access key ID, a secret access key, and a security token) for a user.
+    - path:
+        - sts
+        - get-session-token
+      help: Returns a set of temporary credentials for an Amazon Web Services account or IAM user.
