@@ -3796,17 +3796,84 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Commands: []*cli.Command{
 					&cli.Command{
 						Name:  "code",
-						Usage: "freebsd/freebsd-src:contrib/less/NEWS: * Fix bug where # substitution failed after viewing help (github #420).",
+						Usage: "Search within code in GitHub repositories.",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "extension"},
+							&cli.StringFlag{Name: "filename"},
+							&cli.StringFlag{Name: "jq"},
+							&cli.StringFlag{Name: "json"},
+							&cli.StringFlag{Name: "language"},
+							&cli.StringFlag{Name: "limit"},
+							&cli.StringFlag{Name: "match"},
+							&cli.StringFlag{Name: "owner"},
+							&cli.StringFlag{Name: "repo"},
+							&cli.StringFlag{Name: "size"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+						},
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.search.code",
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
+									args["--extension"] = c.String("extension")
+									args["--filename"] = c.String("filename")
+									args["--jq"] = c.String("jq")
+									args["--json"] = c.String("json")
+									args["--language"] = c.String("language")
+									args["--limit"] = c.String("limit")
+									args["--match"] = c.String("match")
+									args["--owner"] = c.String("owner")
+									args["--repo"] = c.String("repo")
+									args["--size"] = c.String("size")
+									args["--template"] = c.String("template")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
 									return args, nil, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "code"}
+									if c.IsSet("extension") {
+										argv = append(argv, "--"+"extension", c.String("extension"))
+									}
+									if c.IsSet("filename") {
+										argv = append(argv, "--"+"filename", c.String("filename"))
+									}
+									if c.IsSet("jq") {
+										argv = append(argv, "--"+"jq", c.String("jq"))
+									}
+									if c.IsSet("json") {
+										argv = append(argv, "--"+"json", c.String("json"))
+									}
+									if c.IsSet("language") {
+										argv = append(argv, "--"+"language", c.String("language"))
+									}
+									if c.IsSet("limit") {
+										argv = append(argv, "--"+"limit", c.String("limit"))
+									}
+									if c.IsSet("match") {
+										argv = append(argv, "--"+"match", c.String("match"))
+									}
+									if c.IsSet("owner") {
+										argv = append(argv, "--"+"owner", c.String("owner"))
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									if c.IsSet("size") {
+										argv = append(argv, "--"+"size", c.String("size"))
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--"+"template", c.String("template"))
+									}
+									if c.IsSet("web") {
+										argv = append(argv, "--"+"web", c.String("web"))
+									}
+									if c.IsSet("help") {
+										argv = append(argv, "--"+"help", c.String("help"))
+									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3816,17 +3883,134 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					},
 					&cli.Command{
 						Name:  "commits",
-						Usage: "Alchemists-Of-Yore/No-Mans-Land\tcdcc4e31471f1994766949d8bc23b1ab31347ebe\tTHE PARTICLES CRASH THE GAME! HELP! HELP ME! HELP!!!\tFarcr\t2026-04-08T19:19:15+02:00",
+						Usage: "Search for commits on GitHub.",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "author"},
+							&cli.StringFlag{Name: "author-date"},
+							&cli.StringFlag{Name: "author-email"},
+							&cli.StringFlag{Name: "author-name"},
+							&cli.StringFlag{Name: "committer"},
+							&cli.StringFlag{Name: "committer-date"},
+							&cli.StringFlag{Name: "committer-email"},
+							&cli.StringFlag{Name: "committer-name"},
+							&cli.StringFlag{Name: "hash"},
+							&cli.StringFlag{Name: "jq"},
+							&cli.StringFlag{Name: "json"},
+							&cli.StringFlag{Name: "limit"},
+							&cli.StringFlag{Name: "merge"},
+							&cli.StringFlag{Name: "order"},
+							&cli.StringFlag{Name: "owner"},
+							&cli.StringFlag{Name: "parent"},
+							&cli.StringFlag{Name: "repo"},
+							&cli.StringFlag{Name: "sort"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "tree"},
+							&cli.StringFlag{Name: "visibility"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+						},
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.search.commits",
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
+									args["--author"] = c.String("author")
+									args["--author-date"] = c.String("author-date")
+									args["--author-email"] = c.String("author-email")
+									args["--author-name"] = c.String("author-name")
+									args["--committer"] = c.String("committer")
+									args["--committer-date"] = c.String("committer-date")
+									args["--committer-email"] = c.String("committer-email")
+									args["--committer-name"] = c.String("committer-name")
+									args["--hash"] = c.String("hash")
+									args["--jq"] = c.String("jq")
+									args["--json"] = c.String("json")
+									args["--limit"] = c.String("limit")
+									args["--merge"] = c.String("merge")
+									args["--order"] = c.String("order")
+									args["--owner"] = c.String("owner")
+									args["--parent"] = c.String("parent")
+									args["--repo"] = c.String("repo")
+									args["--sort"] = c.String("sort")
+									args["--template"] = c.String("template")
+									args["--tree"] = c.String("tree")
+									args["--visibility"] = c.String("visibility")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
 									return args, nil, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "commits"}
+									if c.IsSet("author") {
+										argv = append(argv, "--"+"author", c.String("author"))
+									}
+									if c.IsSet("author-date") {
+										argv = append(argv, "--"+"author-date", c.String("author-date"))
+									}
+									if c.IsSet("author-email") {
+										argv = append(argv, "--"+"author-email", c.String("author-email"))
+									}
+									if c.IsSet("author-name") {
+										argv = append(argv, "--"+"author-name", c.String("author-name"))
+									}
+									if c.IsSet("committer") {
+										argv = append(argv, "--"+"committer", c.String("committer"))
+									}
+									if c.IsSet("committer-date") {
+										argv = append(argv, "--"+"committer-date", c.String("committer-date"))
+									}
+									if c.IsSet("committer-email") {
+										argv = append(argv, "--"+"committer-email", c.String("committer-email"))
+									}
+									if c.IsSet("committer-name") {
+										argv = append(argv, "--"+"committer-name", c.String("committer-name"))
+									}
+									if c.IsSet("hash") {
+										argv = append(argv, "--"+"hash", c.String("hash"))
+									}
+									if c.IsSet("jq") {
+										argv = append(argv, "--"+"jq", c.String("jq"))
+									}
+									if c.IsSet("json") {
+										argv = append(argv, "--"+"json", c.String("json"))
+									}
+									if c.IsSet("limit") {
+										argv = append(argv, "--"+"limit", c.String("limit"))
+									}
+									if c.IsSet("merge") {
+										argv = append(argv, "--"+"merge", c.String("merge"))
+									}
+									if c.IsSet("order") {
+										argv = append(argv, "--"+"order", c.String("order"))
+									}
+									if c.IsSet("owner") {
+										argv = append(argv, "--"+"owner", c.String("owner"))
+									}
+									if c.IsSet("parent") {
+										argv = append(argv, "--"+"parent", c.String("parent"))
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									if c.IsSet("sort") {
+										argv = append(argv, "--"+"sort", c.String("sort"))
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--"+"template", c.String("template"))
+									}
+									if c.IsSet("tree") {
+										argv = append(argv, "--"+"tree", c.String("tree"))
+									}
+									if c.IsSet("visibility") {
+										argv = append(argv, "--"+"visibility", c.String("visibility"))
+									}
+									if c.IsSet("web") {
+										argv = append(argv, "--"+"web", c.String("web"))
+									}
+									if c.IsSet("help") {
+										argv = append(argv, "--"+"help", c.String("help"))
+									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3836,17 +4020,204 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					},
 					&cli.Command{
 						Name:  "issues",
-						Usage: "",
+						Usage: "Search for issues on GitHub.",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "app"},
+							&cli.StringFlag{Name: "archived"},
+							&cli.StringFlag{Name: "assignee"},
+							&cli.StringFlag{Name: "author"},
+							&cli.StringFlag{Name: "closed"},
+							&cli.StringFlag{Name: "commenter"},
+							&cli.StringFlag{Name: "comments"},
+							&cli.StringFlag{Name: "created"},
+							&cli.StringFlag{Name: "include-prs"},
+							&cli.StringFlag{Name: "interactions"},
+							&cli.StringFlag{Name: "involves"},
+							&cli.StringFlag{Name: "jq"},
+							&cli.StringFlag{Name: "json"},
+							&cli.StringFlag{Name: "label"},
+							&cli.StringFlag{Name: "language"},
+							&cli.StringFlag{Name: "limit"},
+							&cli.StringFlag{Name: "locked"},
+							&cli.StringFlag{Name: "match"},
+							&cli.StringFlag{Name: "mentions"},
+							&cli.StringFlag{Name: "milestone"},
+							&cli.StringFlag{Name: "no-assignee"},
+							&cli.StringFlag{Name: "no-label"},
+							&cli.StringFlag{Name: "no-milestone"},
+							&cli.StringFlag{Name: "no-project"},
+							&cli.StringFlag{Name: "order"},
+							&cli.StringFlag{Name: "owner"},
+							&cli.StringFlag{Name: "project"},
+							&cli.StringFlag{Name: "reactions"},
+							&cli.StringFlag{Name: "repo"},
+							&cli.StringFlag{Name: "sort"},
+							&cli.StringFlag{Name: "state"},
+							&cli.StringFlag{Name: "team-mentions"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "updated"},
+							&cli.StringFlag{Name: "visibility"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+						},
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.search.issues",
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
+									args["--app"] = c.String("app")
+									args["--archived"] = c.String("archived")
+									args["--assignee"] = c.String("assignee")
+									args["--author"] = c.String("author")
+									args["--closed"] = c.String("closed")
+									args["--commenter"] = c.String("commenter")
+									args["--comments"] = c.String("comments")
+									args["--created"] = c.String("created")
+									args["--include-prs"] = c.String("include-prs")
+									args["--interactions"] = c.String("interactions")
+									args["--involves"] = c.String("involves")
+									args["--jq"] = c.String("jq")
+									args["--json"] = c.String("json")
+									args["--label"] = c.String("label")
+									args["--language"] = c.String("language")
+									args["--limit"] = c.String("limit")
+									args["--locked"] = c.String("locked")
+									args["--match"] = c.String("match")
+									args["--mentions"] = c.String("mentions")
+									args["--milestone"] = c.String("milestone")
+									args["--no-assignee"] = c.String("no-assignee")
+									args["--no-label"] = c.String("no-label")
+									args["--no-milestone"] = c.String("no-milestone")
+									args["--no-project"] = c.String("no-project")
+									args["--order"] = c.String("order")
+									args["--owner"] = c.String("owner")
+									args["--project"] = c.String("project")
+									args["--reactions"] = c.String("reactions")
+									args["--repo"] = c.String("repo")
+									args["--sort"] = c.String("sort")
+									args["--state"] = c.String("state")
+									args["--team-mentions"] = c.String("team-mentions")
+									args["--template"] = c.String("template")
+									args["--updated"] = c.String("updated")
+									args["--visibility"] = c.String("visibility")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
 									return args, nil, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "issues"}
+									if c.IsSet("app") {
+										argv = append(argv, "--"+"app", c.String("app"))
+									}
+									if c.IsSet("archived") {
+										argv = append(argv, "--"+"archived", c.String("archived"))
+									}
+									if c.IsSet("assignee") {
+										argv = append(argv, "--"+"assignee", c.String("assignee"))
+									}
+									if c.IsSet("author") {
+										argv = append(argv, "--"+"author", c.String("author"))
+									}
+									if c.IsSet("closed") {
+										argv = append(argv, "--"+"closed", c.String("closed"))
+									}
+									if c.IsSet("commenter") {
+										argv = append(argv, "--"+"commenter", c.String("commenter"))
+									}
+									if c.IsSet("comments") {
+										argv = append(argv, "--"+"comments", c.String("comments"))
+									}
+									if c.IsSet("created") {
+										argv = append(argv, "--"+"created", c.String("created"))
+									}
+									if c.IsSet("include-prs") {
+										argv = append(argv, "--"+"include-prs", c.String("include-prs"))
+									}
+									if c.IsSet("interactions") {
+										argv = append(argv, "--"+"interactions", c.String("interactions"))
+									}
+									if c.IsSet("involves") {
+										argv = append(argv, "--"+"involves", c.String("involves"))
+									}
+									if c.IsSet("jq") {
+										argv = append(argv, "--"+"jq", c.String("jq"))
+									}
+									if c.IsSet("json") {
+										argv = append(argv, "--"+"json", c.String("json"))
+									}
+									if c.IsSet("label") {
+										argv = append(argv, "--"+"label", c.String("label"))
+									}
+									if c.IsSet("language") {
+										argv = append(argv, "--"+"language", c.String("language"))
+									}
+									if c.IsSet("limit") {
+										argv = append(argv, "--"+"limit", c.String("limit"))
+									}
+									if c.IsSet("locked") {
+										argv = append(argv, "--"+"locked", c.String("locked"))
+									}
+									if c.IsSet("match") {
+										argv = append(argv, "--"+"match", c.String("match"))
+									}
+									if c.IsSet("mentions") {
+										argv = append(argv, "--"+"mentions", c.String("mentions"))
+									}
+									if c.IsSet("milestone") {
+										argv = append(argv, "--"+"milestone", c.String("milestone"))
+									}
+									if c.IsSet("no-assignee") {
+										argv = append(argv, "--"+"no-assignee", c.String("no-assignee"))
+									}
+									if c.IsSet("no-label") {
+										argv = append(argv, "--"+"no-label", c.String("no-label"))
+									}
+									if c.IsSet("no-milestone") {
+										argv = append(argv, "--"+"no-milestone", c.String("no-milestone"))
+									}
+									if c.IsSet("no-project") {
+										argv = append(argv, "--"+"no-project", c.String("no-project"))
+									}
+									if c.IsSet("order") {
+										argv = append(argv, "--"+"order", c.String("order"))
+									}
+									if c.IsSet("owner") {
+										argv = append(argv, "--"+"owner", c.String("owner"))
+									}
+									if c.IsSet("project") {
+										argv = append(argv, "--"+"project", c.String("project"))
+									}
+									if c.IsSet("reactions") {
+										argv = append(argv, "--"+"reactions", c.String("reactions"))
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									if c.IsSet("sort") {
+										argv = append(argv, "--"+"sort", c.String("sort"))
+									}
+									if c.IsSet("state") {
+										argv = append(argv, "--"+"state", c.String("state"))
+									}
+									if c.IsSet("team-mentions") {
+										argv = append(argv, "--"+"team-mentions", c.String("team-mentions"))
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--"+"template", c.String("template"))
+									}
+									if c.IsSet("updated") {
+										argv = append(argv, "--"+"updated", c.String("updated"))
+									}
+									if c.IsSet("visibility") {
+										argv = append(argv, "--"+"visibility", c.String("visibility"))
+									}
+									if c.IsSet("web") {
+										argv = append(argv, "--"+"web", c.String("web"))
+									}
+									if c.IsSet("help") {
+										argv = append(argv, "--"+"help", c.String("help"))
+									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3856,17 +4227,244 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					},
 					&cli.Command{
 						Name:  "prs",
-						Usage: "GCA-Classroom/08-prj-loreal-chatbot\t19\topen\tHELP\t\t2026-04-21T03:51:04Z",
+						Usage: "Search for pull requests on GitHub.",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "app"},
+							&cli.StringFlag{Name: "archived"},
+							&cli.StringFlag{Name: "assignee"},
+							&cli.StringFlag{Name: "author"},
+							&cli.StringFlag{Name: "base"},
+							&cli.StringFlag{Name: "checks"},
+							&cli.StringFlag{Name: "closed"},
+							&cli.StringFlag{Name: "commenter"},
+							&cli.StringFlag{Name: "comments"},
+							&cli.StringFlag{Name: "created"},
+							&cli.StringFlag{Name: "draft"},
+							&cli.StringFlag{Name: "head"},
+							&cli.StringFlag{Name: "interactions"},
+							&cli.StringFlag{Name: "involves"},
+							&cli.StringFlag{Name: "jq"},
+							&cli.StringFlag{Name: "json"},
+							&cli.StringFlag{Name: "label"},
+							&cli.StringFlag{Name: "language"},
+							&cli.StringFlag{Name: "limit"},
+							&cli.StringFlag{Name: "locked"},
+							&cli.StringFlag{Name: "match"},
+							&cli.StringFlag{Name: "mentions"},
+							&cli.StringFlag{Name: "merged"},
+							&cli.StringFlag{Name: "merged-at"},
+							&cli.StringFlag{Name: "milestone"},
+							&cli.StringFlag{Name: "no-assignee"},
+							&cli.StringFlag{Name: "no-label"},
+							&cli.StringFlag{Name: "no-milestone"},
+							&cli.StringFlag{Name: "no-project"},
+							&cli.StringFlag{Name: "order"},
+							&cli.StringFlag{Name: "owner"},
+							&cli.StringFlag{Name: "project"},
+							&cli.StringFlag{Name: "reactions"},
+							&cli.StringFlag{Name: "repo"},
+							&cli.StringFlag{Name: "review"},
+							&cli.StringFlag{Name: "review-requested"},
+							&cli.StringFlag{Name: "reviewed-by"},
+							&cli.StringFlag{Name: "sort"},
+							&cli.StringFlag{Name: "state"},
+							&cli.StringFlag{Name: "team-mentions"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "updated"},
+							&cli.StringFlag{Name: "visibility"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+						},
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.search.prs",
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
+									args["--app"] = c.String("app")
+									args["--archived"] = c.String("archived")
+									args["--assignee"] = c.String("assignee")
+									args["--author"] = c.String("author")
+									args["--base"] = c.String("base")
+									args["--checks"] = c.String("checks")
+									args["--closed"] = c.String("closed")
+									args["--commenter"] = c.String("commenter")
+									args["--comments"] = c.String("comments")
+									args["--created"] = c.String("created")
+									args["--draft"] = c.String("draft")
+									args["--head"] = c.String("head")
+									args["--interactions"] = c.String("interactions")
+									args["--involves"] = c.String("involves")
+									args["--jq"] = c.String("jq")
+									args["--json"] = c.String("json")
+									args["--label"] = c.String("label")
+									args["--language"] = c.String("language")
+									args["--limit"] = c.String("limit")
+									args["--locked"] = c.String("locked")
+									args["--match"] = c.String("match")
+									args["--mentions"] = c.String("mentions")
+									args["--merged"] = c.String("merged")
+									args["--merged-at"] = c.String("merged-at")
+									args["--milestone"] = c.String("milestone")
+									args["--no-assignee"] = c.String("no-assignee")
+									args["--no-label"] = c.String("no-label")
+									args["--no-milestone"] = c.String("no-milestone")
+									args["--no-project"] = c.String("no-project")
+									args["--order"] = c.String("order")
+									args["--owner"] = c.String("owner")
+									args["--project"] = c.String("project")
+									args["--reactions"] = c.String("reactions")
+									args["--repo"] = c.String("repo")
+									args["--review"] = c.String("review")
+									args["--review-requested"] = c.String("review-requested")
+									args["--reviewed-by"] = c.String("reviewed-by")
+									args["--sort"] = c.String("sort")
+									args["--state"] = c.String("state")
+									args["--team-mentions"] = c.String("team-mentions")
+									args["--template"] = c.String("template")
+									args["--updated"] = c.String("updated")
+									args["--visibility"] = c.String("visibility")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
 									return args, nil, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "prs"}
+									if c.IsSet("app") {
+										argv = append(argv, "--"+"app", c.String("app"))
+									}
+									if c.IsSet("archived") {
+										argv = append(argv, "--"+"archived", c.String("archived"))
+									}
+									if c.IsSet("assignee") {
+										argv = append(argv, "--"+"assignee", c.String("assignee"))
+									}
+									if c.IsSet("author") {
+										argv = append(argv, "--"+"author", c.String("author"))
+									}
+									if c.IsSet("base") {
+										argv = append(argv, "--"+"base", c.String("base"))
+									}
+									if c.IsSet("checks") {
+										argv = append(argv, "--"+"checks", c.String("checks"))
+									}
+									if c.IsSet("closed") {
+										argv = append(argv, "--"+"closed", c.String("closed"))
+									}
+									if c.IsSet("commenter") {
+										argv = append(argv, "--"+"commenter", c.String("commenter"))
+									}
+									if c.IsSet("comments") {
+										argv = append(argv, "--"+"comments", c.String("comments"))
+									}
+									if c.IsSet("created") {
+										argv = append(argv, "--"+"created", c.String("created"))
+									}
+									if c.IsSet("draft") {
+										argv = append(argv, "--"+"draft", c.String("draft"))
+									}
+									if c.IsSet("head") {
+										argv = append(argv, "--"+"head", c.String("head"))
+									}
+									if c.IsSet("interactions") {
+										argv = append(argv, "--"+"interactions", c.String("interactions"))
+									}
+									if c.IsSet("involves") {
+										argv = append(argv, "--"+"involves", c.String("involves"))
+									}
+									if c.IsSet("jq") {
+										argv = append(argv, "--"+"jq", c.String("jq"))
+									}
+									if c.IsSet("json") {
+										argv = append(argv, "--"+"json", c.String("json"))
+									}
+									if c.IsSet("label") {
+										argv = append(argv, "--"+"label", c.String("label"))
+									}
+									if c.IsSet("language") {
+										argv = append(argv, "--"+"language", c.String("language"))
+									}
+									if c.IsSet("limit") {
+										argv = append(argv, "--"+"limit", c.String("limit"))
+									}
+									if c.IsSet("locked") {
+										argv = append(argv, "--"+"locked", c.String("locked"))
+									}
+									if c.IsSet("match") {
+										argv = append(argv, "--"+"match", c.String("match"))
+									}
+									if c.IsSet("mentions") {
+										argv = append(argv, "--"+"mentions", c.String("mentions"))
+									}
+									if c.IsSet("merged") {
+										argv = append(argv, "--"+"merged", c.String("merged"))
+									}
+									if c.IsSet("merged-at") {
+										argv = append(argv, "--"+"merged-at", c.String("merged-at"))
+									}
+									if c.IsSet("milestone") {
+										argv = append(argv, "--"+"milestone", c.String("milestone"))
+									}
+									if c.IsSet("no-assignee") {
+										argv = append(argv, "--"+"no-assignee", c.String("no-assignee"))
+									}
+									if c.IsSet("no-label") {
+										argv = append(argv, "--"+"no-label", c.String("no-label"))
+									}
+									if c.IsSet("no-milestone") {
+										argv = append(argv, "--"+"no-milestone", c.String("no-milestone"))
+									}
+									if c.IsSet("no-project") {
+										argv = append(argv, "--"+"no-project", c.String("no-project"))
+									}
+									if c.IsSet("order") {
+										argv = append(argv, "--"+"order", c.String("order"))
+									}
+									if c.IsSet("owner") {
+										argv = append(argv, "--"+"owner", c.String("owner"))
+									}
+									if c.IsSet("project") {
+										argv = append(argv, "--"+"project", c.String("project"))
+									}
+									if c.IsSet("reactions") {
+										argv = append(argv, "--"+"reactions", c.String("reactions"))
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									if c.IsSet("review") {
+										argv = append(argv, "--"+"review", c.String("review"))
+									}
+									if c.IsSet("review-requested") {
+										argv = append(argv, "--"+"review-requested", c.String("review-requested"))
+									}
+									if c.IsSet("reviewed-by") {
+										argv = append(argv, "--"+"reviewed-by", c.String("reviewed-by"))
+									}
+									if c.IsSet("sort") {
+										argv = append(argv, "--"+"sort", c.String("sort"))
+									}
+									if c.IsSet("state") {
+										argv = append(argv, "--"+"state", c.String("state"))
+									}
+									if c.IsSet("team-mentions") {
+										argv = append(argv, "--"+"team-mentions", c.String("team-mentions"))
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--"+"template", c.String("template"))
+									}
+									if c.IsSet("updated") {
+										argv = append(argv, "--"+"updated", c.String("updated"))
+									}
+									if c.IsSet("visibility") {
+										argv = append(argv, "--"+"visibility", c.String("visibility"))
+									}
+									if c.IsSet("web") {
+										argv = append(argv, "--"+"web", c.String("web"))
+									}
+									if c.IsSet("help") {
+										argv = append(argv, "--"+"help", c.String("help"))
+									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3876,17 +4474,144 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					},
 					&cli.Command{
 						Name:  "repos",
-						Usage: "nodejs/help\t:sparkles: Need help with Node.js? File an Issue here.",
+						Usage: "Search for repositories on GitHub.",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "archived"},
+							&cli.StringFlag{Name: "created"},
+							&cli.StringFlag{Name: "followers"},
+							&cli.StringFlag{Name: "forks"},
+							&cli.StringFlag{Name: "good-first-issues"},
+							&cli.StringFlag{Name: "help-wanted-issues"},
+							&cli.StringFlag{Name: "include-forks"},
+							&cli.StringFlag{Name: "jq"},
+							&cli.StringFlag{Name: "json"},
+							&cli.StringFlag{Name: "language"},
+							&cli.StringFlag{Name: "license"},
+							&cli.StringFlag{Name: "limit"},
+							&cli.StringFlag{Name: "match"},
+							&cli.StringFlag{Name: "number-topics"},
+							&cli.StringFlag{Name: "order"},
+							&cli.StringFlag{Name: "owner"},
+							&cli.StringFlag{Name: "size"},
+							&cli.StringFlag{Name: "sort"},
+							&cli.StringFlag{Name: "stars"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "topic"},
+							&cli.StringFlag{Name: "updated"},
+							&cli.StringFlag{Name: "visibility"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+						},
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.search.repos",
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
+									args["--archived"] = c.String("archived")
+									args["--created"] = c.String("created")
+									args["--followers"] = c.String("followers")
+									args["--forks"] = c.String("forks")
+									args["--good-first-issues"] = c.String("good-first-issues")
+									args["--help-wanted-issues"] = c.String("help-wanted-issues")
+									args["--include-forks"] = c.String("include-forks")
+									args["--jq"] = c.String("jq")
+									args["--json"] = c.String("json")
+									args["--language"] = c.String("language")
+									args["--license"] = c.String("license")
+									args["--limit"] = c.String("limit")
+									args["--match"] = c.String("match")
+									args["--number-topics"] = c.String("number-topics")
+									args["--order"] = c.String("order")
+									args["--owner"] = c.String("owner")
+									args["--size"] = c.String("size")
+									args["--sort"] = c.String("sort")
+									args["--stars"] = c.String("stars")
+									args["--template"] = c.String("template")
+									args["--topic"] = c.String("topic")
+									args["--updated"] = c.String("updated")
+									args["--visibility"] = c.String("visibility")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
 									return args, nil, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "repos"}
+									if c.IsSet("archived") {
+										argv = append(argv, "--"+"archived", c.String("archived"))
+									}
+									if c.IsSet("created") {
+										argv = append(argv, "--"+"created", c.String("created"))
+									}
+									if c.IsSet("followers") {
+										argv = append(argv, "--"+"followers", c.String("followers"))
+									}
+									if c.IsSet("forks") {
+										argv = append(argv, "--"+"forks", c.String("forks"))
+									}
+									if c.IsSet("good-first-issues") {
+										argv = append(argv, "--"+"good-first-issues", c.String("good-first-issues"))
+									}
+									if c.IsSet("help-wanted-issues") {
+										argv = append(argv, "--"+"help-wanted-issues", c.String("help-wanted-issues"))
+									}
+									if c.IsSet("include-forks") {
+										argv = append(argv, "--"+"include-forks", c.String("include-forks"))
+									}
+									if c.IsSet("jq") {
+										argv = append(argv, "--"+"jq", c.String("jq"))
+									}
+									if c.IsSet("json") {
+										argv = append(argv, "--"+"json", c.String("json"))
+									}
+									if c.IsSet("language") {
+										argv = append(argv, "--"+"language", c.String("language"))
+									}
+									if c.IsSet("license") {
+										argv = append(argv, "--"+"license", c.String("license"))
+									}
+									if c.IsSet("limit") {
+										argv = append(argv, "--"+"limit", c.String("limit"))
+									}
+									if c.IsSet("match") {
+										argv = append(argv, "--"+"match", c.String("match"))
+									}
+									if c.IsSet("number-topics") {
+										argv = append(argv, "--"+"number-topics", c.String("number-topics"))
+									}
+									if c.IsSet("order") {
+										argv = append(argv, "--"+"order", c.String("order"))
+									}
+									if c.IsSet("owner") {
+										argv = append(argv, "--"+"owner", c.String("owner"))
+									}
+									if c.IsSet("size") {
+										argv = append(argv, "--"+"size", c.String("size"))
+									}
+									if c.IsSet("sort") {
+										argv = append(argv, "--"+"sort", c.String("sort"))
+									}
+									if c.IsSet("stars") {
+										argv = append(argv, "--"+"stars", c.String("stars"))
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--"+"template", c.String("template"))
+									}
+									if c.IsSet("topic") {
+										argv = append(argv, "--"+"topic", c.String("topic"))
+									}
+									if c.IsSet("updated") {
+										argv = append(argv, "--"+"updated", c.String("updated"))
+									}
+									if c.IsSet("visibility") {
+										argv = append(argv, "--"+"visibility", c.String("visibility"))
+									}
+									if c.IsSet("web") {
+										argv = append(argv, "--"+"web", c.String("web"))
+									}
+									if c.IsSet("help") {
+										argv = append(argv, "--"+"help", c.String("help"))
+									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},

@@ -1,30 +1,67 @@
-Alchemists-Of-Yore/No-Mans-Land	cdcc4e31471f1994766949d8bc23b1ab31347ebe	THE PARTICLES CRASH THE GAME! HELP! HELP ME! HELP!!!	Farcr	2026-04-08T19:19:15+02:00
-lue-bird/gren-extra-checks	7546ef1c4f514908b073c25b8d8736c165cfc441	correct region helpers, improve introduced variable helpers	lue-bird	2026-04-17T15:03:07+02:00
-darhnoel/markql	afbeaf7d05311154fcaab2a7f32b2fe8acb8e0b6	feat(helper): add initial MarkQL Helper	darhnoel	2026-04-09T22:52:37+09:00
-The3eard/BeardGit_tests	f3746bc39fe1a7a0fc3bd23a143bc77b69b32306	feat(utils): add mean, median and roundTo helpers (#15) * feat(utils): add mean, median, roundTo helpers * docs(changelog): note new number helpers --------- Co-authored-by: Adolfo Fuentes <adolfofuentes@metricool.com>	The3eard	2026-04-17T21:08:52+02:00
-Mahmoud-Emad/gruth	1f8c1aa27d20e72884108cd56be78859a3a7f1f3	feat: Implement help and error info overlays - Add InputMode variants for Help and ErrorInfo - Add key handlers for Help and ErrorInfo - Implement drawing functions for Help and ErrorInfo overlays - Add functionality to display detailed error messages - Enhance directory picker with auto-refresh and selection persistenc	Mahmoud-Emad	2026-04-16T13:56:36+02:00
-Gitlawb/openclaude	3d1979ff066db32415e0c8321af916d81f5f2621	fix(help): prevent /help tab crash from undefined descriptions (#732) - Guard formatDescriptionWithSource() so missing command descriptions become '' - Harden truncate helpers to accept undefined text/path safely - Add regression tests covering undefined input cases	dhenuh	2026-04-18T15:38:44-07:00
-lue-bird/gren-extra-checks	5632f391a012cf9736708cdf010157077e2aec5b	change ExtraCheck test helper to be more stylistically aligned with Expect helpers	lue-bird	2026-04-14T01:38:02+02:00
-Ramyachandran98/devops-demo	7cc9d850afc8da4aa777691b3405bae834fda428	help		2026-04-20T22:37:24+05:30
-ghostspice/gitlab-cli	c953630d2d4abe6bf676527569413e68fcbd659c	Merge pull request #8 from ghostspice/align/2.7-confirm-helper Add confirm() helper and AppError::Cancelled	ghostspice	2026-04-17T10:51:48+03:00
-Jamie-Lawlor/HelpOuts	d663d9b28d652717209190fe051477324b3a6ef1	Fixes to helper profile Changes to helper profile on mobile.	caitlinmag	2026-04-08T16:21:45+01:00
-bellhorn12rs/concert-tracker	cb8bd36e3c45194414c8fecec0173ab708fe2c39	helper	bellhorn12rs	2026-04-18T20:05:47-07:00
-Olbrasoft/VirtualAssistant	0bcea825351924dd88c90f373e623aab55bd6f9f	Merge pull request #995 from Olbrasoft/feature/issue-974-transcription-pipeline-helpers refactor(transcription): extract ApplyLlmCorrectionAsync helper from TranscribeAsync	Olbrasoft	2026-04-18T23:07:19+02:00
-Noc2/CURYO	0f36956109265ca03040db7225e15d4267eb4d81	Merge pull request #129 from Noc2/codex/voteable-content-helper-tests [codex] Cover voteable content e2e helper	Noc2	2026-04-16T09:46:20+02:00
-daintreehq/daintree	07ddd1694b13dcb3f9c61ba9952d51f20b639b43	feat(help): add help.launchAgent action with keybinding and menu integration - Add help.launchAgent to BuiltInKeyAction union and KEY_ACTION_VALUES - Register action in preferencesActions.ts with IPC folder resolution - Add Cmd+Shift+H default keybinding - Add Launch Help Agent menu item to Help submenu - Add launch-help-agent to menuToActionMap in useMenuActions - Add unit tests for help.launchAgent action	gregpriday	2026-03-30T04:59:02+02:00
-sushi30/sushiclaw	6ba3bfe1fbcad72e267c2d55784b401976629583	Merge pull request #46 from sushi30/feat/debug-slash-in-help-menu feat(gateway): inject /debug into /help menu	sushi30	2026-04-17T08:05:20+02:00
-Jamie-Lawlor/HelpOuts	82b5a64dd326cd03d5b17fea94b9d733c4020821	Helper request modal Displaying accept and reject modal for helper requests.	caitlinmag	2026-04-07T20:26:02+01:00
-VoxDroid/CycleOne	cf4dd49f54334f62e1571c39852e41c9867639d9	Add accessibility IDs and UI test back helper Give HelpView items explicit accessibility identifiers for UI tests (Help_GitHubLink, Help_PrivacyPolicyLink). Add a tapBackButton(in:timeout:) helper to CoverageIntegrationUITests and update the test to use the new identifiers and helper for more robust navigation and waits. Adjusted timeouts and element lookups to reduce flakiness.	VoxDroid	2026-04-08T14:08:14+08:00
-chinmay28/VMSmith	4a5fc5531673b7a12e11d0341a44c1abad0da2ae	scripts: add release install helper (#100) * scripts: add release install helper * fix(scripts): restore installer dependency checks and sudo fallback	march26bot	2026-04-16T13:04:13-07:00
-espensen-mik/Lykkecup_app	8d02188f93e31004cc3cc82df2e07e500330860b	help		2026-04-14T22:18:36+02:00
-thesyncim/libgowebrtc	052e901096800cf433dd57df5669824c49b5afcf	Merge pull request #50 from thesyncim/codex/media-pion-helper-boundary Trim media Pion convenience helpers	thesyncim	2026-04-11T16:49:45+01:00
-neisserdev/gestion-tareas	d64a7f34aef7f6eb9e9d2b43265216e5a50dfd27	Delete HELP.md	neisserdev	2026-04-18T08:10:18-04:00
-D1ie3z/d1ie3z.github.io	40ef27428ef274de23fb809a8583895d687e0ac5	Remove 'Help' option from context menu Removed the 'Help' option from the context menu and its associated event listener.	D1ie3z	2026-04-14T16:52:05-06:00
-chelseabaek/BIF7101-projet	c56227ebc20a16d73cd79a3a778546ef3d7e3c86	help	mariyanas	2026-04-14T12:53:57-04:00
-dsisnero/doms_dotfiles	ab777392aeca74adcb96130c18e77d233866b926	fix: rasppi? helper excludes macOS to prevent Linux commands on Apple Silicon - Update rasppi? helper to check platform and exclude macOS (darwin/osx) - Update helix cookbook to use rasppi? helper instead of direct ARM check - Update debian role to use rasppi? helper for Raspberry Pi package detection - Prevents apt/dpkg commands from being executed on Apple Silicon Macs	dsisnero	2026-04-13T22:53:10-06:00
-FreedomBen/sanitize_filenames	228f05bac5ca8d0d1cc95977bf0c3dfe01065512	Add self-documenting make help target Annotates each Makefile target with a ## description and adds a help target that prints them.	FreedomBen	2026-04-15T04:12:40-06:00
-byezy/frencli	1604fd30c5d552704d4e2f3ab3d39cdc3afac71f	docs(cli): expand help with pattern examples and quick reference Add rename pattern examples covering placeholders, ranges, case modifiers, trim, and literal/regex replacements. Include a compact pattern quick reference on main help and point users to rename --help. Made-with: Cursor	byezy	2026-04-16T11:52:31+08:00
-asheshgoplani/agent-deck	fb4daaaaedc8941f5e5654236b78b02d68f636fa	Merge pull request #643 from mike-bot-12/followup-pr-613-test-and-helper-rename test(ui): add regression coverage + helper rename for #613	asheshgoplani	2026-04-18T02:26:32+08:00
-wansin-cws/coach-schedule-bot	857b95f6aaf1176199e6b2bf68ba8809f26e3d79	add help today week commands		2026-04-20T23:30:26+08:00
-andy-and-terry/datasharing	f0ae921372f2bf3cd98fe48cec53d4e16cdd4ac7	Delete help directory	andy-and-terry	2026-04-15T19:25:26+08:00
-christianmjelsdal-cloud/ChessEngine	f18ec3ca9644749df9be24d68db80ddbd53e2399	feat: Lazy SMP multi-threaded search - Engine::setThreadCount(N) spawns N-1 helper threads sharing the main TT - Each helper is a full Engine instance with own killers/history/pvTable - Helpers use setSharedTT() to point at main thread's TT vector - Helpers search at depth±1 to avoid duplication with main thread - Main thread stops helpers and joins on completion, aggregates node counts - TTEntry moved to public struct (uint8_t flag instead of TTFlag enum) - activeTT() helper returns shared TT if set, own TT otherwise - UCI setoption name Threads value N already wired to setThreadCount - 10/10 SmokeTests passing		2026-04-14T03:50:15+02:00
+Search for commits on GitHub.
+
+The command supports constructing queries using the GitHub search syntax,
+using the parameter and qualifier flags, or a combination of the two.
+
+GitHub search syntax is documented at:
+<https://docs.github.com/search-github/searching-on-github/searching-commits>
+
+For more information about output formatting flags, see `gh help formatting`.
+
+USAGE
+  gh search commits [<query>] [flags]
+
+FLAGS
+      --author string            Filter by author
+      --author-date date         Filter based on authored date
+      --author-email string      Filter on author email
+      --author-name string       Filter on author name
+      --committer string         Filter by committer
+      --committer-date date      Filter based on committed date
+      --committer-email string   Filter on committer email
+      --committer-name string    Filter on committer name
+      --hash string              Filter by commit hash
+  -q, --jq expression            Filter JSON output using a jq expression
+      --json fields              Output JSON with the specified fields
+  -L, --limit int                Maximum number of commits to fetch (default 30)
+      --merge                    Filter on merge commits
+      --order string             Order of commits returned, ignored unless '--sort' flag is specified: {asc|desc} (default "desc")
+      --owner strings            Filter on repository owner
+      --parent string            Filter by parent hash
+  -R, --repo strings             Filter on repository
+      --sort string              Sort fetched commits: {author-date|committer-date} (default "best-match")
+  -t, --template string          Format JSON output using a Go template; see "gh help formatting"
+      --tree string              Filter by tree hash
+      --visibility strings       Filter based on repository visibility: {public|private|internal}
+  -w, --web                      Open the search query in the web browser
+
+INHERITED FLAGS
+  --help   Show help for command
+
+JSON FIELDS
+  author, commit, committer, id, parents, repository, sha, url
+
+EXAMPLES
+  # search commits matching set of keywords "readme" and "typo"
+  $ gh search commits readme typo
+  
+  # search commits matching phrase "bug fix"
+  $ gh search commits "bug fix"
+  
+  # search commits committed by user "monalisa"
+  $ gh search commits --committer=monalisa
+  
+  # search commits authored by users with name "Jane Doe"
+  $ gh search commits --author-name="Jane Doe"
+  
+  # search commits matching hash "8dd03144ffdc6c0d486d6b705f9c7fba871ee7c3"
+  $ gh search commits --hash=8dd03144ffdc6c0d486d6b705f9c7fba871ee7c3
+  
+  # search commits authored before February 1st, 2022
+  $ gh search commits --author-date="<2022-02-01"
+
+LEARN MORE
+  Use `gh <command> <subcommand> --help` for more information about a command.
+  Read the manual at https://cli.github.com/manual
+  Learn about exit codes using `gh help exit-codes`
+

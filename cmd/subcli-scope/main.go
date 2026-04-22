@@ -194,8 +194,11 @@ func walk(bin string, path []string, leaves *[]Command, depth int, fetch HelpFet
 func liveFetcher(bin string, path []string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
-	// Try `help` subcommand first (aws style), fall back to --help (gh/kubectl).
-	for _, tail := range [][]string{{"help"}, {"--help"}} {
+	// aws needs the `help` subcommand to render its man-style page. Other CLIs
+	// must use `--help`: gh in particular treats `help` as a positional arg at
+	// leaf commands (e.g. `gh search code help` runs a real search for the word
+	// "help" and exits 0 with garbage output the parser would then ingest).
+	for _, tail := range helpVariants(bin) {
 		args := append(append([]string{}, path...), tail...)
 		cmd := exec.CommandContext(ctx, bin, args...)
 		// Defeat pagers. aws CLI pipes help through less by default.
@@ -212,6 +215,13 @@ func liveFetcher(bin string, path []string) string {
 		}
 	}
 	return ""
+}
+
+func helpVariants(bin string) [][]string {
+	if filepath.Base(bin) == "aws" {
+		return [][]string{{"help"}, {"--help"}}
+	}
+	return [][]string{{"--help"}, {"help"}}
 }
 
 // capturingFetcher wraps an inner fetcher and also writes each help text to

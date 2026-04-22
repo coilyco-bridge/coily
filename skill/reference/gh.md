@@ -996,21 +996,181 @@ Subcommands: `code`, `commits`, `issues`, `prs`, `repos`
 
 ### `coily gh search code`
 
-freebsd/freebsd-src:contrib/less/NEWS: * Fix bug where # substitution failed after viewing help (github #420).
+Search within code in GitHub repositories.
+
+Flags:
+
+- `--extension`
+- `--filename`
+- `--jq`
+- `--json`
+- `--language`
+- `--limit`
+- `--match`
+- `--owner`
+- `--repo`
+- `--size`
+- `--template`
+- `--web`
+- `--help`
 
 ### `coily gh search commits`
 
-Alchemists-Of-Yore/No-Mans-Land	cdcc4e31471f1994766949d8bc23b1ab31347ebe	THE PARTICLES CRASH THE GAME! HELP! HELP ME! HELP!!!	Farcr	2026-04-08T19:19:15+02:00
+Search for commits on GitHub.
+
+Flags:
+
+- `--author`
+- `--author-date`
+- `--author-email`
+- `--author-name`
+- `--committer`
+- `--committer-date`
+- `--committer-email`
+- `--committer-name`
+- `--hash`
+- `--jq`
+- `--json`
+- `--limit`
+- `--merge`
+- `--order`
+- `--owner`
+- `--parent`
+- `--repo`
+- `--sort`
+- `--template`
+- `--tree`
+- `--visibility`
+- `--web`
+- `--help`
 
 ### `coily gh search issues`
 
+Search for issues on GitHub.
+
+Flags:
+
+- `--app`
+- `--archived`
+- `--assignee`
+- `--author`
+- `--closed`
+- `--commenter`
+- `--comments`
+- `--created`
+- `--include-prs`
+- `--interactions`
+- `--involves`
+- `--jq`
+- `--json`
+- `--label`
+- `--language`
+- `--limit`
+- `--locked`
+- `--match`
+- `--mentions`
+- `--milestone`
+- `--no-assignee`
+- `--no-label`
+- `--no-milestone`
+- `--no-project`
+- `--order`
+- `--owner`
+- `--project`
+- `--reactions`
+- `--repo`
+- `--sort`
+- `--state`
+- `--team-mentions`
+- `--template`
+- `--updated`
+- `--visibility`
+- `--web`
+- `--help`
+
 ### `coily gh search prs`
 
-GCA-Classroom/08-prj-loreal-chatbot	19	open	HELP		2026-04-21T03:51:04Z
+Search for pull requests on GitHub.
+
+Flags:
+
+- `--app`
+- `--archived`
+- `--assignee`
+- `--author`
+- `--base`
+- `--checks`
+- `--closed`
+- `--commenter`
+- `--comments`
+- `--created`
+- `--draft`
+- `--head`
+- `--interactions`
+- `--involves`
+- `--jq`
+- `--json`
+- `--label`
+- `--language`
+- `--limit`
+- `--locked`
+- `--match`
+- `--mentions`
+- `--merged`
+- `--merged-at`
+- `--milestone`
+- `--no-assignee`
+- `--no-label`
+- `--no-milestone`
+- `--no-project`
+- `--order`
+- `--owner`
+- `--project`
+- `--reactions`
+- `--repo`
+- `--review`
+- `--review-requested`
+- `--reviewed-by`
+- `--sort`
+- `--state`
+- `--team-mentions`
+- `--template`
+- `--updated`
+- `--visibility`
+- `--web`
+- `--help`
 
 ### `coily gh search repos`
 
-nodejs/help	:sparkles: Need help with Node.js? File an Issue here.
+Search for repositories on GitHub.
+
+Flags:
+
+- `--archived`
+- `--created`
+- `--followers`
+- `--forks`
+- `--good-first-issues`
+- `--help-wanted-issues`
+- `--include-forks`
+- `--jq`
+- `--json`
+- `--language`
+- `--license`
+- `--limit`
+- `--match`
+- `--number-topics`
+- `--order`
+- `--owner`
+- `--size`
+- `--sort`
+- `--stars`
+- `--template`
+- `--topic`
+- `--updated`
+- `--visibility`
+- `--web`
+- `--help`
 
 ## `coily gh secret`
 

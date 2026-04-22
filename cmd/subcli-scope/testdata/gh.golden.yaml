@@ -968,23 +968,171 @@ commands:
     - path:
         - search
         - code
-      help: 'freebsd/freebsd-src:contrib/less/NEWS: * Fix bug where # substitution failed after viewing help (github #420).'
+      help: Search within code in GitHub repositories.
+      flags:
+        - name: --extension
+        - name: --filename
+        - name: --jq
+        - name: --json
+        - name: --language
+        - name: --limit
+        - name: --match
+        - name: --owner
+        - name: --repo
+        - name: --size
+        - name: --template
+        - name: --web
+        - name: --help
     - path:
         - search
         - commits
-      help: "Alchemists-Of-Yore/No-Mans-Land\tcdcc4e31471f1994766949d8bc23b1ab31347ebe\tTHE PARTICLES CRASH THE GAME! HELP! HELP ME! HELP!!!\tFarcr\t2026-04-08T19:19:15+02:00"
+      help: Search for commits on GitHub.
+      flags:
+        - name: --author
+        - name: --author-date
+        - name: --author-email
+        - name: --author-name
+        - name: --committer
+        - name: --committer-date
+        - name: --committer-email
+        - name: --committer-name
+        - name: --hash
+        - name: --jq
+        - name: --json
+        - name: --limit
+        - name: --merge
+        - name: --order
+        - name: --owner
+        - name: --parent
+        - name: --repo
+        - name: --sort
+        - name: --template
+        - name: --tree
+        - name: --visibility
+        - name: --web
+        - name: --help
     - path:
         - search
         - issues
-      help: "aimadetools/race-claude\t14\topen\t[HELP] HELP REQUEST\thuman-help, pending\t2026-04-22T00:38:00Z"
+      help: Search for issues on GitHub.
+      flags:
+        - name: --app
+        - name: --archived
+        - name: --assignee
+        - name: --author
+        - name: --closed
+        - name: --commenter
+        - name: --comments
+        - name: --created
+        - name: --include-prs
+        - name: --interactions
+        - name: --involves
+        - name: --jq
+        - name: --json
+        - name: --label
+        - name: --language
+        - name: --limit
+        - name: --locked
+        - name: --match
+        - name: --mentions
+        - name: --milestone
+        - name: --no-assignee
+        - name: --no-label
+        - name: --no-milestone
+        - name: --no-project
+        - name: --order
+        - name: --owner
+        - name: --project
+        - name: --reactions
+        - name: --repo
+        - name: --sort
+        - name: --state
+        - name: --team-mentions
+        - name: --template
+        - name: --updated
+        - name: --visibility
+        - name: --web
+        - name: --help
     - path:
         - search
         - prs
-      help: "GCA-Classroom/08-prj-loreal-chatbot\t19\topen\tHELP\t\t2026-04-21T03:51:04Z"
+      help: Search for pull requests on GitHub.
+      flags:
+        - name: --app
+        - name: --archived
+        - name: --assignee
+        - name: --author
+        - name: --base
+        - name: --checks
+        - name: --closed
+        - name: --commenter
+        - name: --comments
+        - name: --created
+        - name: --draft
+        - name: --head
+        - name: --interactions
+        - name: --involves
+        - name: --jq
+        - name: --json
+        - name: --label
+        - name: --language
+        - name: --limit
+        - name: --locked
+        - name: --match
+        - name: --mentions
+        - name: --merged
+        - name: --merged-at
+        - name: --milestone
+        - name: --no-assignee
+        - name: --no-label
+        - name: --no-milestone
+        - name: --no-project
+        - name: --order
+        - name: --owner
+        - name: --project
+        - name: --reactions
+        - name: --repo
+        - name: --review
+        - name: --review-requested
+        - name: --reviewed-by
+        - name: --sort
+        - name: --state
+        - name: --team-mentions
+        - name: --template
+        - name: --updated
+        - name: --visibility
+        - name: --web
+        - name: --help
     - path:
         - search
         - repos
-      help: "nodejs/help\t:sparkles: Need help with Node.js? File an Issue here."
+      help: Search for repositories on GitHub.
+      flags:
+        - name: --archived
+        - name: --created
+        - name: --followers
+        - name: --forks
+        - name: --good-first-issues
+        - name: --help-wanted-issues
+        - name: --include-forks
+        - name: --jq
+        - name: --json
+        - name: --language
+        - name: --license
+        - name: --limit
+        - name: --match
+        - name: --number-topics
+        - name: --order
+        - name: --owner
+        - name: --size
+        - name: --sort
+        - name: --stars
+        - name: --template
+        - name: --topic
+        - name: --updated
+        - name: --visibility
+        - name: --web
+        - name: --help
     - path:
         - secret
       help: Secrets can be set at the repository, or organization level for use in
