@@ -25,16 +25,16 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-// Record is one line in the audit log.
+// Record is one line in the audit log. Timestamp is unix seconds (int64),
+// JSON-encoded as a number. Easier to sort and diff than RFC3339 strings.
 type Record struct {
-	Timestamp  time.Time `json:"ts"`
-	Version    string    `json:"version,omitempty"`
-	Verb       string    `json:"verb"`
-	Argv       []string  `json:"argv"`
-	ExitCode   int       `json:"exit_code"`
-	Error      string    `json:"error,omitempty"`
-	SessionID  string    `json:"session_id,omitempty"`
-	DurationMS int64     `json:"duration_ms,omitempty"`
+	Timestamp  int64    `json:"ts"`
+	Version    string   `json:"version,omitempty"`
+	Verb       string   `json:"verb"`
+	Argv       []string `json:"argv"`
+	ExitCode   int      `json:"exit_code"`
+	Error      string   `json:"error,omitempty"`
+	DurationMS int64    `json:"duration_ms,omitempty"`
 }
 
 // Writer appends records to a JSONL file. The zero value is unusable. Use
@@ -44,9 +44,6 @@ type Writer struct {
 	Path string
 	// Now is used for timestamps. Tests override. Defaults to time.Now.
 	Now func() time.Time
-	// Session is the value used for SessionID on records that do not set it.
-	// Typically populated from CLAUDE_SESSION_ID or similar.
-	Session string
 	// MaxSizeMB is the rotation trigger. Zero uses lumberjack's default (100).
 	MaxSizeMB int
 	// MaxBackups caps the number of rotated files retained. Zero keeps all.
@@ -61,31 +58,26 @@ type Writer struct {
 	warnedErr bool // true after the first write/mkdir failure has been reported to stderr
 }
 
-// NewWriter returns a Writer with Now set to time.Now and Session populated
-// from the CLAUDE_SESSION_ID env var if present. Rotation fields default to
-// zero (lumberjack defaults apply) and can be set by the caller.
+// NewWriter returns a Writer with Now set to time.Now. Rotation fields
+// default to zero (lumberjack defaults apply) and can be set by the caller.
 func NewWriter(path string) *Writer {
 	return &Writer{
-		Path:    path,
-		Now:     time.Now,
-		Session: os.Getenv("CLAUDE_SESSION_ID"),
+		Path: path,
+		Now:  time.Now,
 	}
 }
 
 // ErrPathUnset is returned when Append is called on a Writer with empty Path.
 var ErrPathUnset = errors.New("audit: log path not configured")
 
-// Append writes one record as a JSON line. Timestamp and SessionID are
-// populated from the Writer if unset on the Record.
+// Append writes one record as a JSON line. Timestamp is populated from the
+// Writer if unset on the Record (zero).
 func (w *Writer) Append(r Record) error {
 	if w.Path == "" {
 		return ErrPathUnset
 	}
-	if r.Timestamp.IsZero() {
-		r.Timestamp = w.now()
-	}
-	if r.SessionID == "" {
-		r.SessionID = w.Session
+	if r.Timestamp == 0 {
+		r.Timestamp = w.now().Unix()
 	}
 
 	if err := os.MkdirAll(filepath.Dir(w.Path), 0o700); err != nil {

@@ -17,9 +17,8 @@ func tempWriter(t *testing.T) *audit.Writer {
 	t.Helper()
 	dir := t.TempDir()
 	return &audit.Writer{
-		Path:    filepath.Join(dir, "subdir", "audit.jsonl"),
-		Now:     func() time.Time { return time.Date(2026, 4, 22, 12, 0, 0, 0, time.UTC) },
-		Session: "test-session",
+		Path: filepath.Join(dir, "subdir", "audit.jsonl"),
+		Now:  func() time.Time { return time.Date(2026, 4, 22, 12, 0, 0, 0, time.UTC) },
 	}
 }
 
@@ -38,7 +37,7 @@ func TestAppend_CreatesDirectoryAndFile(t *testing.T) {
 	}
 }
 
-func TestAppend_PopulatesTimestampAndSession(t *testing.T) {
+func TestAppend_PopulatesTimestamp(t *testing.T) {
 	w := tempWriter(t)
 	if err := w.Append(audit.Record{Verb: "test.verb"}); err != nil {
 		t.Fatalf("Append: %v", err)
@@ -48,31 +47,25 @@ func TestAppend_PopulatesTimestampAndSession(t *testing.T) {
 		t.Fatalf("got %d records, want 1", len(records))
 	}
 	r := records[0]
-	if r.Timestamp.IsZero() {
-		t.Error("timestamp was not populated")
-	}
-	if r.SessionID != "test-session" {
-		t.Errorf("SessionID = %q, want test-session", r.SessionID)
+	want := time.Date(2026, 4, 22, 12, 0, 0, 0, time.UTC).Unix()
+	if r.Timestamp != want {
+		t.Errorf("timestamp = %d, want %d", r.Timestamp, want)
 	}
 }
 
-func TestAppend_PreservesCallerSuppliedFields(t *testing.T) {
+func TestAppend_PreservesCallerSuppliedTimestamp(t *testing.T) {
 	w := tempWriter(t)
-	custom := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
+	custom := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC).Unix()
 	rec := audit.Record{
 		Verb:      "test.verb",
 		Timestamp: custom,
-		SessionID: "caller-session",
 	}
 	if err := w.Append(rec); err != nil {
 		t.Fatalf("Append: %v", err)
 	}
 	records := read(t, w.Path)
-	if !records[0].Timestamp.Equal(custom) {
-		t.Errorf("timestamp = %v, want %v (caller value should win)", records[0].Timestamp, custom)
-	}
-	if records[0].SessionID != "caller-session" {
-		t.Errorf("SessionID = %q, want caller-session", records[0].SessionID)
+	if records[0].Timestamp != custom {
+		t.Errorf("timestamp = %d, want %d (caller value should win)", records[0].Timestamp, custom)
 	}
 }
 
@@ -149,14 +142,13 @@ func TestWrap_LogsFailure(t *testing.T) {
 	}
 }
 
-func TestNewWriter_ReadsEnv(t *testing.T) {
-	t.Setenv("CLAUDE_SESSION_ID", "env-session")
+func TestNewWriter_PopulatesNow(t *testing.T) {
 	w := audit.NewWriter("/tmp/x.jsonl")
-	if w.Session != "env-session" {
-		t.Errorf("Session = %q, want env-session", w.Session)
-	}
 	if w.Now == nil {
 		t.Error("Now should be populated by NewWriter")
+	}
+	if w.Path != "/tmp/x.jsonl" {
+		t.Errorf("Path = %q, want /tmp/x.jsonl", w.Path)
 	}
 }
 
@@ -201,9 +193,8 @@ func TestAppend_CreatesNestedParentDirectories(t *testing.T) {
 	dir := t.TempDir()
 	nested := filepath.Join(dir, "a", "b", "c")
 	w := &audit.Writer{
-		Path:    filepath.Join(nested, "audit.jsonl"),
-		Now:     func() time.Time { return time.Date(2026, 4, 22, 12, 0, 0, 0, time.UTC) },
-		Session: "test-session",
+		Path: filepath.Join(nested, "audit.jsonl"),
+		Now:  func() time.Time { return time.Date(2026, 4, 22, 12, 0, 0, 0, time.UTC) },
 	}
 	if err := w.Append(audit.Record{Verb: "test.verb"}); err != nil {
 		t.Fatalf("Append: %v", err)
@@ -303,8 +294,8 @@ func TestWrap_StderrWarningLatchesAfterFirstFailure(t *testing.T) {
 }
 
 func TestReadAll_DecodesMultipleRecords(t *testing.T) {
-	input := `{"ts":"2026-04-22T12:00:00Z","verb":"a"}
-{"ts":"2026-04-22T12:00:01Z","verb":"b"}
+	input := `{"ts":1745323200,"verb":"a"}
+{"ts":1745323201,"verb":"b"}
 `
 	records, err := audit.ReadAll(bytes.NewBufferString(input))
 	if err != nil {
@@ -315,6 +306,9 @@ func TestReadAll_DecodesMultipleRecords(t *testing.T) {
 	}
 	if records[0].Verb != "a" || records[1].Verb != "b" {
 		t.Errorf("verbs: %v", records)
+	}
+	if records[0].Timestamp != 1745323200 {
+		t.Errorf("records[0].Timestamp = %d, want 1745323200", records[0].Timestamp)
 	}
 }
 
