@@ -993,6 +993,7 @@ commands:
         - list-association-versions
         - list-associations
         - list-command-invocations
+        - list-commands
         - list-compliance-items
         - list-compliance-summaries
         - list-document-metadata-history
@@ -1392,6 +1393,10 @@ commands:
         - ssm
         - list-command-invocations
       help: An invocation is copy of a command sent to a specific managed node.
+    - path:
+        - ssm
+        - list-commands
+      help: Lists the commands requested by users of the Amazon Web Services account.
     - path:
         - ssm
         - list-compliance-items

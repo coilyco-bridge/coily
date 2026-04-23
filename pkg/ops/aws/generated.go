@@ -40,10 +40,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "activate-key-signing-key"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -60,10 +64,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "associate-vpc-with-hosted-zone"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -80,10 +88,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "change-cidr-collection"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -100,10 +112,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "change-resource-record-sets"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -120,10 +136,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "change-tags-for-resource"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -140,10 +160,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-cidr-collection"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -160,10 +184,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-health-check"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -180,10 +208,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-hosted-zone"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -200,10 +232,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-key-signing-key"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -220,10 +256,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-query-logging-config"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -240,10 +280,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-reusable-delegation-set"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -260,10 +304,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-traffic-policy"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -280,10 +328,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-traffic-policy-instance"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -300,10 +352,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-traffic-policy-version"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -320,10 +376,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-vpc-association-authorization"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -340,10 +400,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "deactivate-key-signing-key"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -360,10 +424,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-cidr-collection"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -380,10 +448,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-health-check"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -400,10 +472,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-hosted-zone"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -420,10 +496,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-key-signing-key"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -440,10 +520,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-query-logging-config"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -460,10 +544,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-reusable-delegation-set"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -480,10 +568,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-traffic-policy"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -500,10 +592,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-traffic-policy-instance"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -520,10 +616,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-vpc-association-authorization"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -540,10 +640,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "disable-hosted-zone-dnssec"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -560,10 +664,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "disassociate-vpc-from-hosted-zone"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -580,10 +688,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "enable-hosted-zone-dnssec"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -600,10 +712,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-account-limit"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -620,10 +736,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-change"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -640,10 +760,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-checker-ip-ranges"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -660,10 +784,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-dnssec"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -680,10 +808,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-geo-location"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -700,10 +832,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-health-check"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -720,10 +856,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-health-check-count"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -740,10 +880,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-health-check-last-failure-reason"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -760,10 +904,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-health-check-status"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -780,10 +928,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-hosted-zone"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -800,10 +952,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-hosted-zone-count"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -820,10 +976,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-hosted-zone-limit"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -840,10 +1000,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-query-logging-config"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -860,10 +1024,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-reusable-delegation-set"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -880,10 +1048,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-reusable-delegation-set-limit"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -900,10 +1072,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-traffic-policy"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -920,10 +1096,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-traffic-policy-instance"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -940,10 +1120,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-traffic-policy-instance-count"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -960,10 +1144,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-cidr-blocks"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -980,10 +1168,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-cidr-collections"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1000,10 +1192,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-cidr-locations"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1020,10 +1216,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-geo-locations"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1040,10 +1240,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-health-checks"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1060,10 +1264,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-hosted-zones"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1080,10 +1288,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-hosted-zones-by-name"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1100,10 +1312,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-hosted-zones-by-vpc"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1120,10 +1336,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-query-logging-configs"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1140,10 +1360,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-resource-record-sets"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1160,10 +1384,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-reusable-delegation-sets"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1180,10 +1408,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-tags-for-resource"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1200,10 +1432,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-tags-for-resources"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1220,10 +1456,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-traffic-policies"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1240,10 +1480,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-traffic-policy-instances"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1260,10 +1504,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-traffic-policy-instances-by-policy"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1280,10 +1528,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-traffic-policy-versions"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1300,10 +1552,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-vpc-association-authorizations"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1320,10 +1576,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "test-dns-answer"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1340,10 +1600,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "update-health-check"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1360,10 +1624,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "update-hosted-zone-comment"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1380,10 +1648,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "update-traffic-policy-comment"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1400,10 +1672,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "update-traffic-policy-instance"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1424,10 +1700,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"route53", "wait", "resource-record-sets-changed"}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -1449,13 +1729,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.s3.cp",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "cp"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1472,10 +1756,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "ls"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1489,13 +1777,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.s3.mb",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "mb"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1509,13 +1801,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.s3.mv",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "mv"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1532,10 +1828,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "presign"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1549,13 +1849,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.s3.rb",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "rb"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1569,13 +1873,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.s3.rm",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "rm"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1589,13 +1897,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.s3.sync",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "sync"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1612,10 +1924,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "website"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1627,7 +1943,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 			},
 			&cli.Command{
 				Name:  "s3api",
-				Usage: "S3API()                                                                S3API()",
+				Usage: "",
 				Commands: []*cli.Command{
 					&cli.Command{
 						Name:  "abort-multipart-upload",
@@ -1635,13 +1951,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.s3api.abort-multipart-upload",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "abort-multipart-upload"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1655,13 +1975,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.s3api.complete-multipart-upload",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "complete-multipart-upload"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1678,10 +2002,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "copy-object"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1698,10 +2026,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "create-bucket"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1718,10 +2050,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "create-multipart-upload"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1738,10 +2074,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "create-session"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1758,10 +2098,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1778,10 +2122,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-analytics-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1798,10 +2146,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-cors"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1818,10 +2170,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-encryption"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1838,10 +2194,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-inventory-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1858,10 +2218,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-lifecycle"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1878,10 +2242,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-metrics-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1898,10 +2266,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-ownership-controls"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1918,10 +2290,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-policy"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1938,10 +2314,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-replication"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1958,10 +2338,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-tagging"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1978,10 +2362,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-website"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1998,10 +2386,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-object"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2018,10 +2410,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-object-tagging"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2038,10 +2434,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-objects"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2058,10 +2458,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-public-access-block"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2078,10 +2482,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-accelerate-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2098,10 +2506,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-acl"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2118,10 +2530,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-analytics-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2138,10 +2554,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-cors"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2158,10 +2578,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-encryption"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2178,10 +2602,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-inventory-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2198,10 +2626,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-lifecycle-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2218,10 +2650,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-location"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2238,10 +2674,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-logging"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2258,10 +2698,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-metadata-table-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2278,10 +2722,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-metrics-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2298,10 +2746,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-notification-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2318,10 +2770,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-ownership-controls"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2338,10 +2794,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-policy"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2358,10 +2818,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-policy-status"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2378,10 +2842,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-replication"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2398,10 +2866,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-request-payment"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2418,10 +2890,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-tagging"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2438,10 +2914,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-versioning"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2458,10 +2938,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-website"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2478,10 +2962,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2498,10 +2986,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-acl"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2518,10 +3010,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-attributes"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2538,10 +3034,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-legal-hold"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2558,10 +3058,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-lock-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2578,10 +3082,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-retention"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2598,10 +3106,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-tagging"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2618,10 +3130,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-torrent"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2638,10 +3154,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-public-access-block"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2658,10 +3178,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "head-bucket"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2678,10 +3202,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "head-object"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2698,10 +3226,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-bucket-analytics-configurations"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2718,10 +3250,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-bucket-inventory-configurations"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2738,10 +3274,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-bucket-metrics-configurations"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2758,10 +3298,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-buckets"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2778,10 +3322,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-directory-buckets"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2798,10 +3346,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-multipart-uploads"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2818,10 +3370,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-object-versions"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2838,10 +3394,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-objects"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2858,10 +3418,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-objects-v2"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2878,10 +3442,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-parts"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2898,10 +3466,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-accelerate-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2918,10 +3490,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-acl"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2938,10 +3514,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-analytics-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2958,10 +3538,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-cors"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2978,10 +3562,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-encryption"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2998,10 +3586,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-inventory-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3018,10 +3610,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-lifecycle-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3038,10 +3634,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-logging"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3058,10 +3658,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-metrics-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3078,10 +3682,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-notification-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3098,10 +3706,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-ownership-controls"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3118,10 +3730,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-policy"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3138,10 +3754,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-replication"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3158,10 +3778,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-request-payment"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3178,10 +3802,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-tagging"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3198,10 +3826,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-versioning"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3218,10 +3850,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-website"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3238,10 +3874,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-object"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3258,10 +3898,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-object-acl"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3278,10 +3922,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-object-legal-hold"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3298,10 +3946,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-object-lock-configuration"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3318,10 +3970,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-object-retention"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3338,10 +3994,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-object-tagging"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3358,10 +4018,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-public-access-block"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3378,10 +4042,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "restore-object"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3398,10 +4066,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "select-object-content"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3415,13 +4087,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.s3api.upload-part",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "upload-part"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3435,13 +4111,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.s3api.upload-part-copy",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "upload-part-copy"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3462,10 +4142,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"s3api", "wait", "bucket-exists"}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3482,10 +4166,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"s3api", "wait", "bucket-not-exists"}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3502,10 +4190,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"s3api", "wait", "object-exists"}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3522,10 +4214,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"s3api", "wait", "object-not-exists"}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3544,10 +4240,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "write-get-object-response"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3570,10 +4270,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "add-tags-to-resource"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3590,10 +4294,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "associate-ops-item-related-item"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3610,10 +4318,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "cancel-command"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3630,10 +4342,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "cancel-maintenance-window-execution"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3650,10 +4366,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-activation"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3670,10 +4390,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-association"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3690,10 +4414,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-association-batch"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3710,10 +4438,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-document"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3730,10 +4462,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-maintenance-window"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3750,10 +4486,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-ops-item"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3770,10 +4510,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-ops-metadata"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3790,10 +4534,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-patch-baseline"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3810,10 +4558,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-resource-data-sync"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3830,10 +4582,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-activation"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3850,10 +4606,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-association"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3870,10 +4630,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-document"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3890,10 +4654,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-inventory"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3910,10 +4678,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-maintenance-window"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3930,10 +4702,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-ops-item"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3950,10 +4726,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-ops-metadata"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3970,10 +4750,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-parameter"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3990,10 +4774,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-parameters"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4010,10 +4798,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-patch-baseline"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4030,10 +4822,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-resource-data-sync"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4050,10 +4846,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-resource-policy"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4070,10 +4870,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "deregister-managed-instance"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4090,10 +4894,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "deregister-patch-baseline-for-patch-group"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4110,10 +4918,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "deregister-target-from-maintenance-window"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4130,10 +4942,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "deregister-task-from-maintenance-window"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4150,10 +4966,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-activations"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4170,10 +4990,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-association"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4190,10 +5014,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-association-execution-targets"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4210,10 +5038,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-association-executions"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4230,10 +5062,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-automation-executions"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4250,10 +5086,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-automation-step-executions"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4270,10 +5110,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-available-patches"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4290,10 +5134,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-document"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4310,10 +5158,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-document-permission"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4330,10 +5182,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-effective-instance-associations"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4350,10 +5206,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-instance-associations-status"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4370,10 +5230,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-instance-information"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4390,10 +5254,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-instance-patch-states"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4410,10 +5278,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-instance-patches"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4430,10 +5302,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-instance-properties"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4450,10 +5326,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-inventory-deletions"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4470,10 +5350,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-maintenance-window-executions"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4490,10 +5374,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-maintenance-window-schedule"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4510,10 +5398,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-maintenance-window-targets"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4530,10 +5422,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-maintenance-window-tasks"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4550,10 +5446,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-maintenance-windows"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4570,10 +5470,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-maintenance-windows-for-target"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4590,10 +5494,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-ops-items"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4610,10 +5518,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-parameters"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4630,10 +5542,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-patch-baselines"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4650,10 +5566,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-patch-group-state"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4670,10 +5590,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-patch-groups"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4690,10 +5614,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-patch-properties"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4710,10 +5638,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-sessions"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4730,10 +5662,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "disassociate-ops-item-related-item"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4750,10 +5686,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-automation-execution"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4770,10 +5710,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-calendar-state"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4790,10 +5734,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-command-invocation"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4810,10 +5758,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-connection-status"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4830,10 +5782,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-default-patch-baseline"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4850,10 +5806,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-document"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4870,10 +5830,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-execution-preview"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4890,10 +5854,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-inventory"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4910,10 +5878,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-inventory-schema"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4930,10 +5902,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-maintenance-window"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4950,10 +5926,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-maintenance-window-execution"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4970,10 +5950,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-maintenance-window-execution-task"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4990,10 +5974,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-maintenance-window-task"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5010,10 +5998,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-ops-item"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5030,10 +6022,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-ops-metadata"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5050,10 +6046,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-ops-summary"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5070,10 +6070,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-parameter"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5090,10 +6094,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-parameter-history"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5110,10 +6118,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-parameters"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5130,10 +6142,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-parameters-by-path"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5150,10 +6166,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-patch-baseline"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5170,10 +6190,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-patch-baseline-for-patch-group"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5190,10 +6214,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-resource-policies"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5210,10 +6238,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-service-setting"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5230,10 +6262,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "label-parameter-version"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5250,10 +6286,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-association-versions"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5270,10 +6310,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-associations"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5290,10 +6334,38 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-command-invocations"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "list-commands",
+						Usage: "Lists the commands requested by users of the Amazon Web Services account.",
+						Action: verb.Wrap(
+							verb.Spec{
+								Name: "aws.ssm.list-commands",
+								Kind: policy.ReadOnly,
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									return args, c.Args().Slice(), c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"ssm", "list-commands"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5310,10 +6382,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-compliance-items"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5330,10 +6406,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-compliance-summaries"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5350,10 +6430,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-document-metadata-history"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5370,10 +6454,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-document-versions"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5390,10 +6478,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-documents"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5410,10 +6502,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-inventory-entries"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5430,10 +6526,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-nodes"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5450,10 +6550,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-nodes-summary"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5470,10 +6574,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-ops-item-events"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5490,10 +6598,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-ops-item-related-items"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5510,10 +6622,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-ops-metadata"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5530,10 +6646,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-resource-compliance-summaries"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5550,10 +6670,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-resource-data-sync"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5570,10 +6694,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-tags-for-resource"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5590,10 +6718,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "modify-document-permission"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5610,10 +6742,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "put-compliance-items"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5630,10 +6766,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "put-inventory"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5650,10 +6790,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "put-parameter"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5670,10 +6814,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "put-resource-policy"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5690,10 +6838,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "register-default-patch-baseline"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5710,10 +6862,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "register-patch-baseline-for-patch-group"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5730,10 +6886,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "register-target-with-maintenance-window"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5750,10 +6910,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "register-task-with-maintenance-window"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5770,10 +6934,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "remove-tags-from-resource"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5790,10 +6958,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "reset-service-setting"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5807,13 +6979,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.ssm.resume-session",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "resume-session"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5827,13 +7003,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.ssm.send-automation-signal",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "send-automation-signal"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5847,13 +7027,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.ssm.send-command",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "send-command"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5870,10 +7054,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "start-associations-once"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5890,10 +7078,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "start-automation-execution"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5910,10 +7102,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "start-change-request-execution"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5930,10 +7126,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "start-execution-preview"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5950,10 +7150,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "start-session"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5970,10 +7174,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "stop-automation-execution"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5990,10 +7198,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "terminate-session"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6007,13 +7219,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "aws.ssm.unlabel-parameter-version",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "unlabel-parameter-version"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6030,10 +7246,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-association"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6050,10 +7270,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-association-status"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6070,10 +7294,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-document"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6090,10 +7318,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-document-default-version"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6110,10 +7342,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-document-metadata"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6130,10 +7366,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-maintenance-window"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6150,10 +7390,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-maintenance-window-target"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6170,10 +7414,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-maintenance-window-task"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6190,10 +7438,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-managed-instance-role"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6210,10 +7462,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-ops-item"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6230,10 +7486,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-ops-metadata"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6250,10 +7510,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-patch-baseline"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6270,10 +7534,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-resource-data-sync"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6290,10 +7558,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-service-setting"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6314,10 +7586,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"ssm", "wait", "command-executed"}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -6342,10 +7618,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "assume-role"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6362,10 +7642,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "assume-role-with-saml"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6382,10 +7666,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "assume-role-with-web-identity"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6402,10 +7690,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "assume-root"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6422,10 +7714,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "decode-authorization-message"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6442,10 +7738,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "get-access-key-info"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6462,10 +7762,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "get-caller-identity"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6482,10 +7786,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "get-federation-token"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -6502,10 +7810,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "get-session-token"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},

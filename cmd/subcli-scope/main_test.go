@@ -145,6 +145,34 @@ Use "kubectl <command> --help" for more information about a given command.
 `,
 			want: []string{"deploy"},
 		},
+		{
+			// kubectl groups its top-level verbs under headers like
+			// "Basic Commands (Beginner):" and "Basic Commands (Intermediate):".
+			// The previous suffix-based detector dropped these sections, so
+			// get/create/delete/edit silently disappeared from the manifest.
+			name: "kubectl basic commands with parenthetical qualifier",
+			in: `kubectl controls the Kubernetes cluster manager.
+
+Basic Commands (Beginner):
+  create          Create a resource from a file or from stdin
+  expose          Expose a resource
+  run             Run a particular image on the cluster
+  set             Set specific features on objects
+
+Basic Commands (Intermediate):
+  explain         Get documentation for a resource
+  get             Display one or many resources
+  edit            Edit a resource on the server
+  delete          Delete resources
+
+Deploy Commands:
+  rollout         Manage the rollout of a resource
+
+Usage:
+  kubectl [flags] [options]
+`,
+			want: []string{"create", "expose", "run", "set", "explain", "get", "edit", "delete", "rollout"},
+		},
 	}
 
 	for _, tc := range cases {

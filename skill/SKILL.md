@@ -51,9 +51,9 @@ coily version
 
 For each of these, `coily <tool> ...` takes the same arguments as `<tool> ...` directly. Full verb trees are in this skill's reference directory.
 
-- **`coily aws`** - 322 verbs. Full reference: `reference/aws.md`.
+- **`coily aws`** - 323 verbs. Full reference: `reference/aws.md`.
 - **`coily gh`** - 80 verbs. Full reference: `reference/gh.md`.
-- **`coily kubectl`** - 48 verbs. Full reference: `reference/kubectl.md`.
+- **`coily kubectl`** - 80 verbs. Full reference: `reference/kubectl.md`.
 
 ## Examples
 

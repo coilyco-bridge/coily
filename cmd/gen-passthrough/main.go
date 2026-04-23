@@ -351,7 +351,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				{{- range $node.Flags}}
 				args[{{printf "--%s" . | goString}}] = c.String({{. | goString}})
 				{{- end}}
-				return args, nil, c.String("token")
+				return args, c.Args().Slice(), c.String("token")
 			},
 			Action: func(ctx context.Context, c *cli.Command) error {
 				argv := []string{ {{range $node.Path}}{{. | goString}}, {{end}} }
@@ -360,6 +360,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					argv = append(argv, "--" + {{. | goString}}, c.String({{. | goString}}))
 				}
 				{{- end}}
+				// Forward any trailing positional args after flags so verbs
+				// like "gh api <endpoint>", "kubectl get <resource>", and
+				// "aws s3 cp <src> <dst>" reach the underlying tool.
+				argv = append(argv, c.Args().Slice()...)
 				_ = strconv.Itoa // keep strconv imported even when no flags
 				return r.Exec(ctx, BinaryName, argv...)
 			},

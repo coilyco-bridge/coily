@@ -70,7 +70,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							args["--template"] = c.String("template")
 							args["--verbose"] = c.String("verbose")
 							args["--help"] = c.String("help")
-							return args, nil, c.String("token")
+							return args, c.Args().Slice(), c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"api"}
@@ -122,6 +122,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							if c.IsSet("help") {
 								argv = append(argv, "--"+"help", c.String("help"))
 							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
 						},
@@ -152,7 +156,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--reason"] = c.String("reason")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "close"}
@@ -168,6 +172,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -190,7 +198,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.issue.comment",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
 									args["--body"] = c.String("body")
@@ -200,7 +208,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "comment"}
@@ -225,6 +233,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -269,7 +281,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "create"}
@@ -312,6 +324,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -336,7 +352,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--yes"] = c.String("yes")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "delete"}
@@ -349,6 +365,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -381,7 +401,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--name"] = c.String("name")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "develop"}
@@ -406,6 +426,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -450,7 +474,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--title"] = c.String("title")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "edit"}
@@ -493,6 +517,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -541,7 +569,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "list"}
@@ -590,6 +618,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -614,7 +646,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--reason"] = c.String("reason")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "lock"}
@@ -627,6 +659,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -649,7 +685,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args := map[string]string{}
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "pin"}
@@ -659,6 +695,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -683,7 +723,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--comment"] = c.String("comment")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "reopen"}
@@ -696,6 +736,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -724,7 +768,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "status"}
@@ -743,6 +787,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -765,7 +813,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args := map[string]string{}
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "transfer"}
@@ -775,6 +823,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -797,7 +849,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args := map[string]string{}
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "unlock"}
@@ -807,6 +859,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -829,7 +885,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args := map[string]string{}
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "unpin"}
@@ -839,6 +895,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -871,7 +931,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "view"}
@@ -896,6 +956,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -923,7 +987,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.pr.checkout",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
 									args["--branch"] = c.String("branch")
@@ -932,7 +996,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--recurse-submodules"] = c.String("recurse-submodules")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "checkout"}
@@ -954,6 +1018,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -992,7 +1060,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "checks"}
@@ -1026,6 +1094,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1052,7 +1124,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--delete-branch"] = c.String("delete-branch")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "close"}
@@ -1068,6 +1140,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1090,7 +1166,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.pr.comment",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
 									args["--body"] = c.String("body")
@@ -1100,7 +1176,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "comment"}
@@ -1125,6 +1201,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1187,7 +1267,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "create"}
@@ -1257,6 +1337,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1287,7 +1371,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "diff"}
@@ -1309,6 +1393,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1359,7 +1447,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--title"] = c.String("title")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "edit"}
@@ -1411,6 +1499,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1461,7 +1553,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "list"}
@@ -1513,6 +1605,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1537,7 +1633,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--reason"] = c.String("reason")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "lock"}
@@ -1550,6 +1646,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1596,7 +1696,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--subject"] = c.String("subject")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "merge"}
@@ -1642,6 +1742,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1660,13 +1764,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.pr.ready",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
 									args["--undo"] = c.String("undo")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "ready"}
@@ -1679,6 +1783,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1703,7 +1811,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--comment"] = c.String("comment")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "reopen"}
@@ -1716,6 +1824,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1738,7 +1850,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.pr.review",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
 									args["--approve"] = c.String("approve")
@@ -1748,7 +1860,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--request-changes"] = c.String("request-changes")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "review"}
@@ -1773,6 +1885,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1803,7 +1919,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "status"}
@@ -1825,6 +1941,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1847,7 +1967,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args := map[string]string{}
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "unlock"}
@@ -1857,6 +1977,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1889,7 +2013,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "view"}
@@ -1914,6 +2038,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1966,7 +2094,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--verify-tag"] = c.String("verify-tag")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "create"}
@@ -2012,6 +2140,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2038,7 +2170,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--yes"] = c.String("yes")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "delete"}
@@ -2054,6 +2186,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2088,7 +2224,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--skip-existing"] = c.String("skip-existing")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "download"}
@@ -2116,6 +2252,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2158,7 +2298,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--verify-tag"] = c.String("verify-tag")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "edit"}
@@ -2198,6 +2338,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2234,7 +2378,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "list"}
@@ -2265,6 +2409,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2283,13 +2431,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.release.upload",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
 									args["--clobber"] = c.String("clobber")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "upload"}
@@ -2302,6 +2450,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2332,7 +2484,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "view"}
@@ -2354,6 +2506,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2377,12 +2533,12 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.repo.archive",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
 									args["--yes"] = c.String("yes")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "archive"}
@@ -2392,6 +2548,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2420,7 +2580,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											args["--numeric"] = c.String("numeric")
 											args["--help"] = c.String("help")
 											args["--repo"] = c.String("repo")
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "autolink", "create"}
@@ -2433,6 +2593,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											if c.IsSet("repo") {
 												argv = append(argv, "--"+"repo", c.String("repo"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -2463,7 +2627,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											args["--web"] = c.String("web")
 											args["--help"] = c.String("help")
 											args["--repo"] = c.String("repo")
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "autolink", "list"}
@@ -2485,6 +2649,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											if c.IsSet("repo") {
 												argv = append(argv, "--"+"repo", c.String("repo"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -2513,7 +2681,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											args["--template"] = c.String("template")
 											args["--help"] = c.String("help")
 											args["--repo"] = c.String("repo")
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "autolink", "view"}
@@ -2532,6 +2700,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											if c.IsSet("repo") {
 												argv = append(argv, "--"+"repo", c.String("repo"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -2551,12 +2723,12 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.repo.clone",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
 									args["--upstream-remote-name"] = c.String("upstream-remote-name")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "clone"}
@@ -2566,6 +2738,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2620,7 +2796,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--team"] = c.String("team")
 									args["--template"] = c.String("template")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "create"}
@@ -2678,6 +2854,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2700,7 +2880,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args := map[string]string{}
 									args["--yes"] = c.String("yes")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "delete"}
@@ -2710,6 +2890,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2733,14 +2917,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Action: verb.Wrap(
 									verb.Spec{
 										Name: "gh.repo.deploy-key.add",
-										Kind: policy.Mutating,
+										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
 											args["--allow-write"] = c.String("allow-write")
 											args["--title"] = c.String("title")
 											args["--help"] = c.String("help")
 											args["--repo"] = c.String("repo")
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "deploy-key", "add"}
@@ -2756,6 +2940,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											if c.IsSet("repo") {
 												argv = append(argv, "--"+"repo", c.String("repo"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -2778,7 +2966,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											args := map[string]string{}
 											args["--help"] = c.String("help")
 											args["--repo"] = c.String("repo")
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "deploy-key", "delete"}
@@ -2788,6 +2976,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											if c.IsSet("repo") {
 												argv = append(argv, "--"+"repo", c.String("repo"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -2816,7 +3008,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											args["--template"] = c.String("template")
 											args["--help"] = c.String("help")
 											args["--repo"] = c.String("repo")
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "deploy-key", "list"}
@@ -2835,6 +3027,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											if c.IsSet("repo") {
 												argv = append(argv, "--"+"repo", c.String("repo"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -2901,7 +3097,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--visibility"] = c.String("visibility")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "edit"}
@@ -2974,6 +3170,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2996,7 +3196,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.repo.fork",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
 									args["--clone"] = c.String("clone")
@@ -3006,7 +3206,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--remote"] = c.String("remote")
 									args["--remote-name"] = c.String("remote-name")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "fork"}
@@ -3031,6 +3231,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3055,13 +3259,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
 											args["--help"] = c.String("help")
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "gitignore", "list"}
 											if c.IsSet("help") {
 												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3082,13 +3290,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
 											args["--help"] = c.String("help")
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "gitignore", "view"}
 											if c.IsSet("help") {
 												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3115,13 +3327,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
 											args["--help"] = c.String("help")
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "license", "list"}
 											if c.IsSet("help") {
 												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3144,7 +3360,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											args := map[string]string{}
 											args["--web"] = c.String("web")
 											args["--help"] = c.String("help")
-											return args, nil, c.String("token")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "license", "view"}
@@ -3154,6 +3370,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											if c.IsSet("help") {
 												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3198,7 +3418,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--topic"] = c.String("topic")
 									args["--visibility"] = c.String("visibility")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "list"}
@@ -3238,6 +3458,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3262,7 +3486,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--repo"] = c.String("repo")
 									args["--yes"] = c.String("yes")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "rename"}
@@ -3275,6 +3499,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3294,14 +3522,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.repo.sync",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
 									args["--branch"] = c.String("branch")
 									args["--force"] = c.String("force")
 									args["--source"] = c.String("source")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "sync"}
@@ -3317,6 +3545,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3334,12 +3566,12 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.repo.unarchive",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
 									args["--yes"] = c.String("yes")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "unarchive"}
@@ -3349,6 +3581,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3379,7 +3615,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "view"}
@@ -3401,6 +3637,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3429,7 +3669,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args := map[string]string{}
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "cancel"}
@@ -3439,6 +3679,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3461,7 +3705,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args := map[string]string{}
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "delete"}
@@ -3471,6 +3715,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3499,7 +3747,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--pattern"] = c.String("pattern")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "download"}
@@ -3518,6 +3766,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3564,7 +3816,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--workflow"] = c.String("workflow")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "list"}
@@ -3610,6 +3862,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3630,7 +3886,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "gh.run.rerun",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
 									args["--debug"] = c.String("debug")
@@ -3638,7 +3894,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--job"] = c.String("job")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "rerun"}
@@ -3657,6 +3913,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3699,7 +3959,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "view"}
@@ -3739,6 +3999,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3765,7 +4029,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--interval"] = c.String("interval")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "watch"}
@@ -3781,6 +4045,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3831,7 +4099,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "code"}
@@ -3874,6 +4142,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3938,7 +4210,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--visibility"] = c.String("visibility")
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "commits"}
@@ -4011,6 +4283,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4103,7 +4379,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--visibility"] = c.String("visibility")
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "issues"}
@@ -4218,6 +4494,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4326,7 +4606,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--visibility"] = c.String("visibility")
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "prs"}
@@ -4465,6 +4745,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4533,7 +4817,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--visibility"] = c.String("visibility")
 									args["--web"] = c.String("web")
 									args["--help"] = c.String("help")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "repos"}
@@ -4612,6 +4896,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("help") {
 										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4648,7 +4936,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--user"] = c.String("user")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"secret", "delete"}
@@ -4670,6 +4958,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4706,7 +4998,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--user"] = c.String("user")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"secret", "list"}
@@ -4737,6 +5029,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4777,7 +5073,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--visibility"] = c.String("visibility")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"secret", "set"}
@@ -4814,6 +5110,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4842,7 +5142,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args := map[string]string{}
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "disable"}
@@ -4852,6 +5152,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4874,7 +5178,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args := map[string]string{}
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "enable"}
@@ -4884,6 +5188,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4916,7 +5224,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "list"}
@@ -4941,6 +5249,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4971,7 +5283,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--ref"] = c.String("ref")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "run"}
@@ -4993,6 +5305,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5021,7 +5337,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--yaml"] = c.String("yaml")
 									args["--help"] = c.String("help")
 									args["--repo"] = c.String("repo")
-									return args, nil, c.String("token")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "view"}
@@ -5040,6 +5356,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									if c.IsSet("repo") {
 										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},

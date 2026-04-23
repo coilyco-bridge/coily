@@ -1,6 +1,37 @@
 package main
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
+
+// TestRenderForwardsPositionalArgs locks in the fix for "gh api <endpoint>"
+// and friends. The generated Action must append c.Args().Slice() after the
+// flag block so trailing positionals reach the underlying tool. Likewise the
+// ArgsFunc must hand positionals to policy.Enforce instead of nil.
+func TestRenderForwardsPositionalArgs(t *testing.T) {
+	m := Manifest{
+		Binary: "gh",
+		Commands: []ManifestCommand{
+			{Path: []string{"api"}, Help: "Make a GitHub API request.", Flags: []ManifestFlag{{Name: "--method"}}},
+		},
+	}
+	code, err := render(m)
+	if err != nil {
+		t.Fatalf("render: %v", err)
+	}
+	wants := []string{
+		// Action appends positionals after the flag loop.
+		`argv = append(argv, c.Args().Slice()...)`,
+		// ArgsFunc passes positionals into policy enforcement.
+		`return args, c.Args().Slice(), c.String("token")`,
+	}
+	for _, w := range wants {
+		if !strings.Contains(code, w) {
+			t.Errorf("rendered code missing %q\n--- code ---\n%s", w, code)
+		}
+	}
+}
 
 // TestClassifyVerb is a golden-style enumeration. Each entry is a CLI path
 // (leaf last) and the expected Mutating classification. When this test

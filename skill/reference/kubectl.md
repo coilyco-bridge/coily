@@ -247,23 +247,23 @@ Subcommands: `current-context`, `delete-cluster`, `delete-context`, `delete-user
 
 ### `coily kubectl config current-context`
 
-help
+Display the current-context.
 
 ### `coily kubectl config delete-cluster`
 
-deleted cluster help from /Users/kai/.kube/config
+Delete the specified cluster from the kubeconfig.
 
 ### `coily kubectl config delete-context`
 
-warning: this removed your active context, use "kubectl config use-context" to select a different one
+Delete the specified context from the kubeconfig.
 
 ### `coily kubectl config delete-user`
 
-deleted user help from /Users/kai/.kube/config
+Delete the specified user from the kubeconfig.
 
 ### `coily kubectl config get-clusters`
 
-NAME
+Display clusters defined in the kubeconfig.
 
 ### `coily kubectl config get-contexts`
 
@@ -276,7 +276,7 @@ Flags:
 
 ### `coily kubectl config get-users`
 
-NAME
+Display users defined in the kubeconfig.
 
 ### `coily kubectl config rename-context`
 
@@ -292,15 +292,46 @@ Flags:
 
 ### `coily kubectl config set-cluster`
 
-Cluster "help" set.
+Set a cluster entry in kubeconfig.
+
+Flags:
+
+- `--certificate-authority`
+- `--embed-certs`
+- `--insecure-skip-tls-verify`
+- `--proxy-url`
+- `--server`
+- `--tls-server-name`
 
 ### `coily kubectl config set-context`
 
-Context "help" created.
+Set a context entry in kubeconfig.
+
+Flags:
+
+- `--cluster`
+- `--current`
+- `--namespace`
+- `--user`
 
 ### `coily kubectl config set-credentials`
 
-User "help" set.
+Set a user entry in kubeconfig.
+
+Flags:
+
+- `--client-certificate`
+- `--token`
+- `--username`
+- `--auth-provider`
+- `--auth-provider-arg`
+- `--client-key`
+- `--embed-certs`
+- `--exec-api-version`
+- `--exec-arg`
+- `--exec-command`
+- `--exec-env`
+- `--password`
 
 ### `coily kubectl config unset`
 
@@ -308,7 +339,7 @@ Unset an individual value in a kubeconfig file.
 
 ### `coily kubectl config use-context`
 
-Switched to context "help".
+Set the current-context in a kubeconfig file.
 
 ### `coily kubectl config view`
 
@@ -335,6 +366,446 @@ Flags:
 
 - `--dry-run`
 - `--selector`
+
+## `coily kubectl create`
+
+### `coily kubectl create` (group)
+
+Create a resource from a file or from stdin.
+
+Subcommands: `clusterrole`, `clusterrolebinding`, `configmap`, `cronjob`, `deployment`, `ingress`, `job`, `namespace`, `poddisruptionbudget`, `priorityclass`, `quota`, `role`, `rolebinding`, `secret`, `service`, `serviceaccount`, `token`
+
+### `coily kubectl create clusterrole`
+
+Create a cluster role.
+
+Flags:
+
+- `--aggregation-rule`
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--non-resource-url`
+- `--output`
+- `--resource`
+- `--resource-name`
+- `--save-config`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+- `--verb`
+
+### `coily kubectl create clusterrolebinding`
+
+Create a cluster role binding for a particular cluster role.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--clusterrole`
+- `--dry-run`
+- `--field-manager`
+- `--group`
+- `--output`
+- `--save-config`
+- `--serviceaccount`
+- `--show-managed-fields`
+- `--template`
+- `--user`
+- `--validate`
+
+### `coily kubectl create configmap`
+
+Create a config map based on a file, directory, or specified literal value.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--append-hash`
+- `--dry-run`
+- `--field-manager`
+- `--from-env-file`
+- `--from-file`
+- `--from-literal`
+- `--output`
+- `--save-config`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+
+### `coily kubectl create cronjob`
+
+Create a cron job with the specified name.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--image`
+- `--output`
+- `--restart`
+- `--save-config`
+- `--schedule`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+
+### `coily kubectl create deployment`
+
+Create a deployment with the specified name.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--image`
+- `--output`
+- `--port`
+- `--replicas`
+- `--save-config`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+
+### `coily kubectl create ingress`
+
+Create an ingress with the specified name.
+
+Flags:
+
+- `--annotation`
+- `--rule`
+- `--default-backend`
+- `--allow-missing-template-keys`
+- `--class`
+- `--dry-run`
+- `--field-manager`
+- `--output`
+- `--save-config`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+
+### `coily kubectl create job`
+
+Create a job with the specified name.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--from`
+- `--image`
+- `--output`
+- `--save-config`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+
+### `coily kubectl create namespace`
+
+Create a namespace with the specified name.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--output`
+- `--save-config`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+
+### `coily kubectl create poddisruptionbudget`
+
+Create a pod disruption budget with the specified name, selector, and desired minimum available pods.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--max-unavailable`
+- `--min-available`
+- `--output`
+- `--save-config`
+- `--selector`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+
+### `coily kubectl create priorityclass`
+
+Create a priority class with the specified name, value, globalDefault and description.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--description`
+- `--dry-run`
+- `--field-manager`
+- `--global-default`
+- `--output`
+- `--preemption-policy`
+- `--save-config`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+- `--value`
+
+### `coily kubectl create quota`
+
+Create a resource quota with the specified name, hard limits, and optional scopes.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--hard`
+- `--output`
+- `--save-config`
+- `--scopes`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+
+### `coily kubectl create role`
+
+Create a role with single rule.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--output`
+- `--resource`
+- `--resource-name`
+- `--save-config`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+- `--verb`
+
+### `coily kubectl create rolebinding`
+
+Create a role binding for a particular role or cluster role.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--clusterrole`
+- `--dry-run`
+- `--field-manager`
+- `--group`
+- `--output`
+- `--role`
+- `--save-config`
+- `--serviceaccount`
+- `--show-managed-fields`
+- `--template`
+- `--user`
+- `--validate`
+
+### `coily kubectl create secret` (group)
+
+Create a secret using specified subcommand.
+
+Subcommands: `docker-registry`, `generic`, `tls`
+
+### `coily kubectl create secret docker-registry`
+
+Create a new secret for use with Docker registries.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--append-hash`
+- `--docker-email`
+- `--docker-password`
+- `--docker-server`
+- `--docker-username`
+- `--dry-run`
+- `--field-manager`
+- `--from-file`
+- `--output`
+- `--save-config`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+
+### `coily kubectl create secret generic`
+
+Create a secret based on a file, directory, or specified literal value.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--append-hash`
+- `--dry-run`
+- `--field-manager`
+- `--from-env-file`
+- `--from-file`
+- `--from-literal`
+- `--output`
+- `--save-config`
+- `--show-managed-fields`
+- `--template`
+- `--type`
+- `--validate`
+
+### `coily kubectl create secret tls`
+
+Create a TLS secret from the given public/private key pair.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--append-hash`
+- `--cert`
+- `--dry-run`
+- `--field-manager`
+- `--key`
+- `--output`
+- `--save-config`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+
+### `coily kubectl create service` (group)
+
+Create a service using a specified subcommand.
+
+Subcommands: `clusterip`, `externalname`, `loadbalancer`, `nodeport`
+
+### `coily kubectl create service clusterip`
+
+Create a ClusterIP service with the specified name.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--clusterip`
+- `--dry-run`
+- `--field-manager`
+- `--output`
+- `--save-config`
+- `--show-managed-fields`
+- `--tcp`
+- `--template`
+- `--validate`
+
+### `coily kubectl create service externalname`
+
+Create an ExternalName service with the specified name.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--external-name`
+- `--field-manager`
+- `--output`
+- `--save-config`
+- `--show-managed-fields`
+- `--tcp`
+- `--template`
+- `--validate`
+
+### `coily kubectl create service loadbalancer`
+
+Create a LoadBalancer service with the specified name.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--output`
+- `--save-config`
+- `--show-managed-fields`
+- `--tcp`
+- `--template`
+- `--validate`
+
+### `coily kubectl create service nodeport`
+
+Create a NodePort service with the specified name.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--node-port`
+- `--output`
+- `--save-config`
+- `--show-managed-fields`
+- `--tcp`
+- `--template`
+- `--validate`
+
+### `coily kubectl create serviceaccount`
+
+Create a service account with the specified name.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--output`
+- `--save-config`
+- `--show-managed-fields`
+- `--template`
+- `--validate`
+
+### `coily kubectl create token`
+
+Request a service account token.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--audience`
+- `--bound-object-kind`
+- `--bound-object-name`
+- `--bound-object-uid`
+- `--duration`
+- `--output`
+- `--show-managed-fields`
+- `--template`
+
+## `coily kubectl delete`
+
+### `coily kubectl delete`
+
+Delete resources by file names, stdin, resources and names, or by resources and label selector.
+
+Flags:
+
+- `--all`
+- `--all-namespaces`
+- `--cascade`
+- `--dry-run`
+- `--field-selector`
+- `--filename`
+- `--force`
+- `--grace-period`
+- `--ignore-not-found`
+- `--kustomize`
+- `--now`
+- `--output`
+- `--raw`
+- `--recursive`
+- `--selector`
+- `--timeout`
+- `--wait`
 
 ## `coily kubectl describe`
 
@@ -409,6 +880,82 @@ Flags:
 - `--template`
 - `--types`
 - `--watch`
+
+## `coily kubectl explain`
+
+### `coily kubectl explain`
+
+List the fields for supported resources.
+
+Flags:
+
+- `--api-version`
+- `--output`
+- `--recursive`
+
+## `coily kubectl expose`
+
+### `coily kubectl expose`
+
+Expose a resource as a new Kubernetes service.
+
+Flags:
+
+- `--allow-missing-template-keys`
+- `--cluster-ip`
+- `--dry-run`
+- `--external-ip`
+- `--field-manager`
+- `--filename`
+- `--kustomize`
+- `--labels`
+- `--load-balancer-ip`
+- `--name`
+- `--output`
+- `--override-type`
+- `--overrides`
+- `--port`
+- `--protocol`
+- `--recursive`
+- `--save-config`
+- `--selector`
+- `--session-affinity`
+- `--show-managed-fields`
+- `--target-port`
+- `--template`
+- `--type`
+
+## `coily kubectl get`
+
+### `coily kubectl get`
+
+Display one or many resources.
+
+Flags:
+
+- `--all-namespaces`
+- `--allow-missing-template-keys`
+- `--chunk-size`
+- `--field-selector`
+- `--filename`
+- `--ignore-not-found`
+- `--kustomize`
+- `--label-columns`
+- `--no-headers`
+- `--output`
+- `--output-watch-events`
+- `--raw`
+- `--recursive`
+- `--selector`
+- `--server-print`
+- `--show-kind`
+- `--show-labels`
+- `--show-managed-fields`
+- `--sort-by`
+- `--subresource`
+- `--template`
+- `--watch`
+- `--watch-only`
 
 ## `coily kubectl label`
 
@@ -608,6 +1155,140 @@ Flags:
 - `--show-managed-fields`
 - `--template`
 - `--timeout`
+
+## `coily kubectl set`
+
+### `coily kubectl set` (group)
+
+Configure application resources.
+
+Subcommands: `env`, `image`, `resources`, `selector`, `serviceaccount`, `subject`
+
+### `coily kubectl set env`
+
+Update environment variables on a pod template.
+
+Flags:
+
+- `--all`
+- `--allow-missing-template-keys`
+- `--containers`
+- `--dry-run`
+- `--env`
+- `--field-manager`
+- `--filename`
+- `--from`
+- `--keys`
+- `--kustomize`
+- `--list`
+- `--local`
+- `--output`
+- `--overwrite`
+- `--prefix`
+- `--recursive`
+- `--resolve`
+- `--selector`
+- `--show-managed-fields`
+- `--template`
+
+### `coily kubectl set image`
+
+Update existing container image(s) of resources.
+
+Flags:
+
+- `--all`
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--filename`
+- `--kustomize`
+- `--local`
+- `--output`
+- `--recursive`
+- `--selector`
+- `--show-managed-fields`
+- `--template`
+
+### `coily kubectl set resources`
+
+Specify compute resource requirements (CPU, memory) for any resource that defines a pod template.
+
+Flags:
+
+- `--all`
+- `--allow-missing-template-keys`
+- `--containers`
+- `--dry-run`
+- `--field-manager`
+- `--filename`
+- `--kustomize`
+- `--limits`
+- `--local`
+- `--output`
+- `--recursive`
+- `--requests`
+- `--selector`
+- `--show-managed-fields`
+- `--template`
+
+### `coily kubectl set selector`
+
+Set the selector on a resource.
+
+Flags:
+
+- `--all`
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--filename`
+- `--local`
+- `--output`
+- `--recursive`
+- `--resource-version`
+- `--show-managed-fields`
+- `--template`
+
+### `coily kubectl set serviceaccount`
+
+Update the service account of pod template resources.
+
+Flags:
+
+- `--all`
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--filename`
+- `--kustomize`
+- `--local`
+- `--output`
+- `--recursive`
+- `--show-managed-fields`
+- `--template`
+
+### `coily kubectl set subject`
+
+Update the user, group, or service account in a role binding or cluster role binding.
+
+Flags:
+
+- `--all`
+- `--allow-missing-template-keys`
+- `--dry-run`
+- `--field-manager`
+- `--filename`
+- `--group`
+- `--kustomize`
+- `--local`
+- `--output`
+- `--recursive`
+- `--selector`
+- `--serviceaccount`
+- `--show-managed-fields`
+- `--template`
+- `--user`
 
 ## `coily kubectl taint`
 
