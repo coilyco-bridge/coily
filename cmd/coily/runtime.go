@@ -81,14 +81,26 @@ func getRuntime() *runtime {
 		aw.MaxAgeDays = cfg.Audit.MaxAgeDays
 		aw.Compress = cfg.Audit.Compress
 
+		// FetchingResolver replaces PathResolver: tools come from the
+		// in-tree manifest + cached downloads, never from $PATH. An
+		// agent who swapped /usr/local/bin/aws is now ignored. If the
+		// embedded manifest fails to parse the build is broken, fail
+		// fast.
+		fr, err := shell.NewFetchingResolver()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "coily: fatal: cannot load embedded tools manifest: %v\n", err)
+			os.Exit(2)
+		}
+
 		rtInst = &runtime{
 			cfg:    cfg,
 			audit:  aw,
 			issuer: auth.NewIssuer(issuerKey),
 			runner: &shell.Runner{
-				Stdout: os.Stdout,
-				Stderr: os.Stderr,
-				Stdin:  os.Stdin,
+				Stdout:  os.Stdout,
+				Stderr:  os.Stderr,
+				Stdin:   os.Stdin,
+				Resolve: fr.AsResolverFunc(),
 			},
 		}
 	})

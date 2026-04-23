@@ -17,7 +17,6 @@ out one agent per item, each touching a single file.
 
 ## Incomplete features
 
-8. [Embedded sub-binaries](unresolved/08-embedded-binaries.md)
 9. [SDK-native ssh/scp/tailscale](unresolved/09-sdk-ssh.md)
 10. [`coily eco world`](unresolved/10-eco-world.md)
 11. [Self-update v2 + adversarial review](unresolved/11-self-update.md)
@@ -38,7 +37,6 @@ out one agent per item, each touching a single file.
 3. Add a docs/audit.md explaining the log format and a `coily audit tail`
    verb so Kai can review it easily.
 4. Pass runtime into verbs explicitly so cmd/coily/ becomes testable (#7).
-5. Then: embedded binaries (#8). Big lift but closes the threat model.
 
 ## Things that are done but deserve skepticism
 
