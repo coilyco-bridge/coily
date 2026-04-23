@@ -30,7 +30,7 @@ out one agent per item, each touching a single file.
    mise). Repo commands currently resolve binaries via `$PATH` with no
    authenticity check. Add an optional `tools:` block pinning name +
    version + sha256, with a `coily tools sync` verb that fetches into a
-   per-user cache (same pattern as the embedded aws/kubectl/gh extraction)
+   per-user cache (same pattern as the pinned aws/kubectl/gh fetch)
    and prepends the cache to PATH only for the duration of that command.
 4. **Task dependencies and pre/post hooks in `.coily/coily.yaml`** (make /
    mise task-runner slice). Today commands are flat. Extend the schema so

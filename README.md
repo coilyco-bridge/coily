@@ -10,6 +10,8 @@ This repo exists for three reasons.
 
 ## Install
 
+coily itself is never published as a prebuilt binary. Every install is a local build gated by `sudo`, so the install step is always a human (you) compiling from this checkout and placing the result in a root-owned directory. There is no "curl | sh" path and there won't be one.
+
 ### Laptop (darwin-arm64)
 
 ```
@@ -31,6 +33,12 @@ make dev               # builds ./bin/coily-dev (different binary name, not on P
 
 The agent's allowlist only trusts `coily`, never `coily-dev`. Dev builds have `-tags dev` with extra diagnostics. Production builds use `-tags prod` which strips dev code paths.
 
+### What about `aws`, `kubectl`, `gh`?
+
+Those are the one thing coily *does* publish - not coily itself. The `tools-latest` GitHub Release holds pinned `aws` / `kubectl` / `gh` binaries for `darwin/{arm64,amd64}` and `linux/{arm64,amd64}`, refreshed by [`.github/workflows/release-tools.yml`](.github/workflows/release-tools.yml) on a weekly schedule and on workflow_dispatch.
+
+On first use coily reads the embedded [`pkg/shell/tools.json`](pkg/shell/tools.json) manifest (baked into the binary at build time), fetches the matching binary from `tools-latest`, verifies sha256 against the pin, and caches under `~/.cache/coily/bin/<sha256>/<tool>`. Subsequent runs hit the cache and re-verify the hash before exec. `$PATH` is never consulted for these tools, so an agent who swaps `/usr/local/bin/aws` is ignored. See [docs/threat-model.md](docs/threat-model.md) for the full reasoning.
+
 ## Per-repo commands (`.coily/coily.yaml`)
 
 Each repo can drop a `coily.yaml` inside a `.coily/` overlay directory at its root to declare the dev commands an operator (human or agent) should run from that tree. `coily test`, `coily lint`, `coily build`. This replaces per-repo Makefiles and `pyinvoke` tasks without widening the security boundary.
@@ -48,12 +56,12 @@ commands:
 - Every declared token plus any user-supplied extras pass through `policy.ValidateArg`. Shell metacharacters are rejected at load time and at invocation. No carve-outs.
 - Audit records use verb `repo.<cmd>`. Same log file as privileged ops.
 - Repo commands that collide with a built-in (`aws`, `kubectl`, etc.) are skipped with a stderr warning. Built-ins always win.
-- Binaries are resolved via `$PATH` (unlike the embedded `aws`/`kubectl`/`gh`). Repo-level dev tools vary per repo. Their authenticity is the repo's problem, not coily's.
+- Binaries are resolved via `$PATH` (unlike the pinned `aws`/`kubectl`/`gh`). Repo-level dev tools vary per repo. Their authenticity is the repo's problem, not coily's.
 
 ## Architectural decisions
 
 - **Single binary**, single trust boundary. One entry in the Claude allowlist, `Bash(coily:*)`.
-- **Embed `aws`/`kubectl`/`gh`** in the binary via `//go:embed`, extracted per-user to a cache dir with checksum verification. Prevents an agent from substituting `/usr/local/bin/aws` to intercept shell-outs.
+- **Pin `aws`/`kubectl`/`gh` by sha256** in an embedded manifest ([`pkg/shell/tools.json`](pkg/shell/tools.json)). coily fetches the binaries on demand from the `tools-latest` GitHub Release, verifies the hash, and caches under `~/.cache/coily/bin/<sha256>/<tool>`. `$PATH` is never consulted, so an agent substituting `/usr/local/bin/aws` to intercept shell-outs is ignored. The binaries themselves aren't `//go:embed`'d because ~30MB x 3 tools x 4 platforms is too much to ship in-tree.
 - **SDK-native for simple APIs.** ssh/scp (`golang.org/x/crypto/ssh`) and tailscale (`tailscale.com/client/tailscale`). No subprocess means no argv to a shell.
 - **Mirror the sub-CLIs exactly.** `coily aws ssm get-parameter` takes the same args as `aws ssm get-parameter`, not a reinvented interface.
 - **Config is embedded, not loaded from disk.** Changes require rebuild + sudo install.
