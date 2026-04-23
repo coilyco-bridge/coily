@@ -9,10 +9,11 @@
 //	go run ./cmd/gen-passthrough <binary>   # e.g. aws, gh, kubectl
 //	go run ./cmd/gen-passthrough all        # regenerate every manifest
 //
-// Classification of mutating vs. read-only verbs is done by prefix heuristic
-// at generation time. See classifyVerb below. Wrong classification is a bug
-// worth flagging: an agent-facing tool that mis-classifies a mutator as
-// read-only silently drops token-gating for that verb.
+// Classification of mutating vs. read-only verbs lives in pkg/verbclass and
+// is shared with cmd/subcli-scope so the snapshot diff and the codegen agree
+// on what counts as a mutator. Wrong classification is a bug worth flagging:
+// an agent-facing tool that mis-classifies a mutator as read-only silently
+// drops token-gating for that verb.
 package main
 
 import (
@@ -23,12 +24,13 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/coilysiren/coily/pkg/verbclass"
 	"gopkg.in/yaml.v3"
 )
 
 // Manifest + ManifestCommand + ManifestFlag mirror pkg/skillgen (and thus
 // subcli-scope's output). Kept local so this tool has no coily-internal
-// dependencies beyond the yaml package.
+// dependencies beyond the yaml + verbclass packages.
 type Manifest struct {
 	Binary   string            `yaml:"binary"`
 	Commands []ManifestCommand `yaml:"commands"`
@@ -43,6 +45,7 @@ type ManifestCommand struct {
 
 type ManifestFlag struct {
 	Name string `yaml:"name"`
+	Type string `yaml:"type,omitempty"`
 }
 
 func main() {
@@ -89,13 +92,24 @@ func runOne(binary string) {
 	fmt.Fprintf(os.Stderr, "wrote %s\n", outPath)
 }
 
+// flagSpec is the per-flag intermediate the template renders. Bare is the
+// flag name without the leading "--", which is what cli.Flag.Name expects;
+// FlagKind is the cli.*Flag constructor (StringFlag, BoolFlag, IntFlag,
+// StringSliceFlag).
+type flagSpec struct {
+	Bare     string // "method"
+	Long     string // "--method"
+	Type     string // "string", "bool", "int", "stringSlice"
+	FlagKind string // "StringFlag" | "BoolFlag" | "IntFlag" | "StringSliceFlag"
+}
+
 // tree is the intermediate structure the template walks to render nested
 // cli.Command literals. Built from the manifest's flat command list.
 type tree struct {
 	Name     string
 	Path     []string
 	Help     string
-	Flags    []string
+	Flags    []flagSpec
 	Children []*tree
 	Mutating bool
 }
@@ -118,10 +132,10 @@ func buildTree(m Manifest) *tree {
 			Name:     c.Path[len(c.Path)-1],
 			Path:     append([]string{}, c.Path...),
 			Help:     sanitize(c.Help),
-			Mutating: classifyVerb(c.Path),
+			Mutating: verbclass.Classify(c.Path),
 		}
 		for _, f := range c.Flags {
-			node.Flags = append(node.Flags, strings.TrimPrefix(f.Name, "--"))
+			node.Flags = append(node.Flags, makeFlagSpec(f))
 		}
 		key := strings.Join(c.Path, "/")
 		byPath[key] = node
@@ -135,110 +149,37 @@ func buildTree(m Manifest) *tree {
 	return root
 }
 
-// classifyVerb returns true for Mutating. Heuristic: the leaf verb name
-// starts with one of a known set of mutation prefixes, or matches an exact
-// bare verb, or is a leaf under a mutating group (e.g. kubectl rollout
-// restart). Parent/group nodes return false. Only leaves matter.
-//
-// When adding new cases here, bias toward Mutating. A false positive just
-// makes an agent ask for a token. A false negative silently drops the
-// policy gate.
-func classifyVerb(path []string) bool {
-	if len(path) == 0 {
-		return false
-	}
-	leaf := path[len(path)-1]
+// Flag type vocabulary. Mirrors cmd/subcli-scope's flagType* constants. Kept
+// duplicated rather than imported to keep this codegen tool free of
+// coily-internal deps beyond yaml + verbclass.
+const (
+	flagTypeString      = "string"
+	flagTypeBool        = "bool"
+	flagTypeInt         = "int"
+	flagTypeStringSlice = "stringSlice"
+)
 
-	// Mutating leaves, considered only in the context of a specific parent
-	// group. Used for kubectl's grouped verbs where the bare leaf name
-	// ("restart", "resume", "approve") would otherwise be ambiguous.
-	type parented struct{ parent, leaf string }
-	parentedMutating := []parented{
-		{"rollout", "restart"},
-		{"rollout", "undo"},
-		{"rollout", "pause"},
-		{"rollout", "resume"},
-		{"certificate", "approve"},
-		{"certificate", "deny"},
-		{"auth", "reconcile"},
-		{"config", "unset"},
-		{"config", "use-context"},
-		{"workflow", "run"},
-		{"workflow", "enable"},
-		{"workflow", "disable"},
-		{"run", "rerun"},
-		{"run", "cancel"},
-		{"pr", "checkout"},
-		{"pr", "ready"},
-		{"pr", "comment"},
-		{"pr", "review"},
-		{"issue", "comment"},
+func makeFlagSpec(f ManifestFlag) flagSpec {
+	bare := strings.TrimPrefix(f.Name, "--")
+	t := f.Type
+	if t == "" {
+		t = flagTypeString
 	}
-	if len(path) >= 2 {
-		parent := path[len(path)-2]
-		for _, pm := range parentedMutating {
-			if parent == pm.parent && leaf == pm.leaf {
-				return true
-			}
-		}
+	kind := "StringFlag"
+	switch t {
+	case flagTypeBool:
+		kind = "BoolFlag"
+	case flagTypeInt:
+		kind = "IntFlag"
+	case flagTypeStringSlice:
+		kind = "StringSliceFlag"
 	}
-
-	// Mutating prefixes. Matched against the leaf verb. The trailing dash
-	// keeps "get-" from swallowing "getter" (hypothetical) but also lets
-	// the bare form match via the exactBareVerbs list below.
-	prefixes := []string{
-		// CRUD-ish
-		"create-", "delete-", "update-", "put-", "post-",
-		"modify-", "change-", "apply-", "set-", "remove-",
-		"add-", "patch-", "replace-",
-		// Lifecycle / state transitions
-		"register-", "deregister-",
-		"associate-", "disassociate-", "attach-", "detach-",
-		"enable-", "disable-", "activate-", "deactivate-",
-		"start-", "stop-", "restart-", "reboot-", "terminate-",
-		"resume-", "pause-", "suspend-",
-		"rotate-", "refresh-", "reset-", "revoke-", "recycle-",
-		"cancel-", "abort-", "complete-",
-		"promote-", "demote-", "publish-", "unpublish-",
-		"accept-", "reject-", "approve-", "deny-",
-		// Data movement
-		"move-", "copy-", "rename-", "restore-", "backup-",
-		"upload-", "download-", "import-", "export-",
-		"send-", "sync-",
-		// Versioning / upgrade
-		"upgrade-", "downgrade-", "rollback-", "rollforward-",
-		// Tagging / labeling
-		"tag-", "untag-", "label-", "unlabel-", "annotate-",
-		// Auth-ish writes
-		"grant-", "deny-",
+	return flagSpec{
+		Bare:     bare,
+		Long:     "--" + bare,
+		Type:     t,
+		FlagKind: kind,
 	}
-	for _, p := range prefixes {
-		if strings.HasPrefix(leaf, p) {
-			return true
-		}
-	}
-
-	// Bare-verb leaves. kubectl- and gh-style commands where the whole
-	// leaf is the verb.
-	exactBareVerbs := []string{
-		// kubectl
-		"apply", "create", "delete", "patch", "replace", "edit",
-		"label", "annotate", "scale", "autoscale", "set",
-		"taint", "cordon", "uncordon", "drain", "expose", "run",
-		// aws s3 short forms
-		"cp", "mv", "rm", "rb", "mb", "sync",
-		// gh
-		"merge", "close", "reopen", "lock", "unlock", "pin", "unpin",
-		"transfer", "archive", "unarchive", "fork", "clone", "upload",
-		"rename",
-	}
-	for _, v := range exactBareVerbs {
-		if leaf == v {
-			return true
-		}
-	}
-
-	return false
 }
 
 func sanitize(s string) string {
@@ -331,7 +272,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 {{- if $node.Flags}}
 	Flags: []cli.Flag{
 	{{- range $node.Flags}}
-		&cli.StringFlag{Name: {{. | goString}}},
+		&cli.{{.FlagKind}}{Name: {{.Bare | goString}}},
 	{{- end}}
 	},
 {{- end}}
@@ -348,16 +289,42 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 			Kind: policy.{{if $node.Mutating}}Mutating{{else}}ReadOnly{{end}},
 			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 				args := map[string]string{}
+				var positional []string
+				_ = positional
 				{{- range $node.Flags}}
-				args[{{printf "--%s" . | goString}}] = c.String({{. | goString}})
+				{{- if eq .Type "bool"}}
+				if c.Bool({{.Bare | goString}}) {
+					args[{{.Long | goString}}] = "true"
+				}
+				{{- else if eq .Type "int"}}
+				args[{{.Long | goString}}] = strconv.Itoa(int(c.Int({{.Bare | goString}})))
+				{{- else if eq .Type "stringSlice"}}
+				for _, v := range c.StringSlice({{.Bare | goString}}) {
+					positional = append(positional, v)
+				}
+				{{- else}}
+				args[{{.Long | goString}}] = c.String({{.Bare | goString}})
 				{{- end}}
-				return args, nil, c.String("token")
+				{{- end}}
+				return args, positional, c.String("token")
 			},
 			Action: func(ctx context.Context, c *cli.Command) error {
 				argv := []string{ {{range $node.Path}}{{. | goString}}, {{end}} }
 				{{- range $node.Flags}}
-				if c.IsSet({{. | goString}}) {
-					argv = append(argv, "--" + {{. | goString}}, c.String({{. | goString}}))
+				if c.IsSet({{.Bare | goString}}) {
+				{{- if eq .Type "bool"}}
+					if c.Bool({{.Bare | goString}}) {
+						argv = append(argv, {{.Long | goString}})
+					}
+				{{- else if eq .Type "int"}}
+					argv = append(argv, {{.Long | goString}}, strconv.Itoa(int(c.Int({{.Bare | goString}}))))
+				{{- else if eq .Type "stringSlice"}}
+					for _, v := range c.StringSlice({{.Bare | goString}}) {
+						argv = append(argv, {{.Long | goString}}, v)
+					}
+				{{- else}}
+					argv = append(argv, {{.Long | goString}}, c.String({{.Bare | goString}}))
+				{{- end}}
 				}
 				{{- end}}
 				_ = strconv.Itoa // keep strconv imported even when no flags
@@ -370,12 +337,6 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 }
 {{- end}}
 `
-
-// The template `args` function lets us pass multiple values into nested
-// template invocations. Register it via FuncMap.
-func init() {
-	// no-op init; args registered below
-}
 
 func die(format string, a ...any) {
 	fmt.Fprintf(os.Stderr, "gen-passthrough: "+format+"\n", a...)

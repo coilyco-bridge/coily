@@ -17,119 +17,200 @@ commands:
       help: View previous rollout revisions and configurations.
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --output
+          type: string
         - name: --recursive
+          type: bool
         - name: --revision
+          type: int
         - name: --selector
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
     - path:
         - rollout
         - pause
       help: Mark the provided resource as paused.
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --field-manager
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --output
+          type: string
         - name: --recursive
+          type: bool
         - name: --selector
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
     - path:
         - rollout
         - restart
       help: Restart a resource.
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --field-manager
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --output
+          type: string
         - name: --recursive
+          type: bool
         - name: --selector
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
     - path:
         - rollout
         - resume
       help: Resume a paused resource.
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --field-manager
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --output
+          type: string
         - name: --recursive
+          type: bool
         - name: --selector
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
     - path:
         - rollout
         - status
       help: Show the status of the rollout.
       flags:
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --recursive
+          type: bool
         - name: --revision
+          type: int
         - name: --selector
+          type: string
         - name: --timeout
+          type: string
         - name: --watch
+          type: bool
     - path:
         - rollout
         - undo
       help: Roll back to a previous rollout.
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --dry-run
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --output
+          type: string
         - name: --recursive
+          type: bool
         - name: --selector
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
         - name: --to-revision
+          type: int
     - path:
         - scale
       help: Set a new size for a deployment, replica set, replication controller, or stateful set.
       flags:
         - name: --all
+          type: bool
         - name: --allow-missing-template-keys
+          type: bool
         - name: --current-replicas
+          type: int
         - name: --dry-run
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --output
+          type: string
         - name: --recursive
+          type: bool
         - name: --replicas
+          type: int
         - name: --resource-version
+          type: string
         - name: --selector
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
         - name: --timeout
+          type: string
     - path:
         - autoscale
       help: Creates an autoscaler that automatically chooses and sets the number of pods that run in a Kubernetes cluster.
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --cpu-percent
+          type: int
         - name: --dry-run
+          type: string
         - name: --field-manager
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --max
+          type: int
         - name: --min
+          type: int
         - name: --name
+          type: string
         - name: --output
+          type: string
         - name: --recursive
+          type: bool
         - name: --save-config
+          type: bool
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
     - path:
         - certificate
       help: Modify certificate resources.
@@ -142,26 +223,42 @@ commands:
       help: Approve a certificate signing request.
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --filename
+          type: stringSlice
         - name: --force
+          type: bool
         - name: --kustomize
+          type: string
         - name: --output
+          type: string
         - name: --recursive
+          type: bool
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
     - path:
         - certificate
         - deny
       help: Deny a certificate signing request.
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --filename
+          type: stringSlice
         - name: --force
+          type: bool
         - name: --kustomize
+          type: string
         - name: --output
+          type: string
         - name: --recursive
+          type: bool
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
     - path:
         - cluster-info
       help: Display addresses of the control plane and services with label kubernetes.io/cluster-service=true.
@@ -173,13 +270,21 @@ commands:
       help: Dump cluster information out suitable for debugging and diagnosing cluster problems.
       flags:
         - name: --all-namespaces
+          type: bool
         - name: --allow-missing-template-keys
+          type: bool
         - name: --namespaces
+          type: stringSlice
         - name: --output
+          type: string
         - name: --output-directory
+          type: string
         - name: --pod-running-timeout
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
     - path:
         - top
       help: Display Resource (CPU/Memory) usage.
@@ -192,94 +297,154 @@ commands:
       help: Display resource (CPU/memory) usage of nodes.
       flags:
         - name: --no-headers
+          type: bool
         - name: --selector
+          type: string
         - name: --show-capacity
+          type: bool
         - name: --sort-by
+          type: string
         - name: --use-protocol-buffers
+          type: bool
     - path:
         - top
         - pod
       help: Display resource (CPU/memory) usage of pods.
       flags:
         - name: --all-namespaces
+          type: bool
         - name: --containers
+          type: bool
         - name: --field-selector
+          type: string
         - name: --no-headers
+          type: bool
         - name: --selector
+          type: string
         - name: --sort-by
+          type: string
         - name: --sum
+          type: bool
         - name: --use-protocol-buffers
+          type: bool
     - path:
         - cordon
       help: Mark node as unschedulable.
       flags:
         - name: --dry-run
+          type: string
         - name: --selector
+          type: string
     - path:
         - uncordon
       help: Mark node as schedulable.
       flags:
         - name: --dry-run
+          type: string
         - name: --selector
+          type: string
     - path:
         - drain
       help: Drain node in preparation for maintenance.
       flags:
         - name: --chunk-size
+          type: int
         - name: --delete-emptydir-data
+          type: bool
         - name: --disable-eviction
+          type: bool
         - name: --dry-run
+          type: string
         - name: --force
+          type: bool
         - name: --grace-period
+          type: int
         - name: --ignore-daemonsets
+          type: bool
         - name: --pod-selector
+          type: string
         - name: --selector
+          type: string
         - name: --skip-wait-for-delete-timeout
+          type: int
         - name: --timeout
+          type: string
     - path:
         - taint
       help: Update the taints on one or more nodes.
       flags:
         - name: --all
+          type: bool
         - name: --allow-missing-template-keys
+          type: bool
         - name: --dry-run
+          type: string
         - name: --field-manager
+          type: string
         - name: --output
+          type: string
         - name: --overwrite
+          type: bool
         - name: --selector
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
         - name: --validate
+          type: string
     - path:
         - describe
       help: Show details of a specific resource or group of resources.
       flags:
         - name: --all-namespaces
+          type: bool
         - name: --chunk-size
+          type: int
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --recursive
+          type: bool
         - name: --selector
+          type: string
         - name: --show-events
+          type: bool
     - path:
         - logs
       help: Print the logs for a container in a pod or specified resource.
       flags:
         - name: --all-containers
+          type: bool
         - name: --container
+          type: string
         - name: --follow
+          type: bool
         - name: --ignore-errors
+          type: bool
         - name: --insecure-skip-tls-verify-backend
+          type: bool
         - name: --limit-bytes
+          type: int
         - name: --max-log-requests
+          type: int
         - name: --pod-running-timeout
+          type: string
         - name: --prefix
+          type: bool
         - name: --previous
+          type: bool
         - name: --selector
+          type: string
         - name: --since
+          type: string
         - name: --since-time
+          type: string
         - name: --tail
+          type: int
         - name: --timestamps
+          type: bool
     - path:
         - auth
       help: Inspect authorization
@@ -293,62 +458,101 @@ commands:
       help: Check whether an action is allowed.
       flags:
         - name: --all-namespaces
+          type: bool
         - name: --list
+          type: bool
         - name: --no-headers
+          type: bool
         - name: --quiet
+          type: bool
         - name: --subresource
+          type: string
     - path:
         - auth
         - reconcile
       help: Reconciles rules for RBAC role, role binding, cluster role, and cluster role binding objects.
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --dry-run
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --output
+          type: string
         - name: --recursive
+          type: bool
         - name: --remove-extra-permissions
+          type: bool
         - name: --remove-extra-subjects
+          type: bool
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
     - path:
         - auth
         - whoami
       help: 'Experimental: Check who you are and your attributes (groups, extra).'
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --output
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
     - path:
         - events
       help: Display events
       flags:
         - name: --all-namespaces
+          type: bool
         - name: --allow-missing-template-keys
+          type: bool
         - name: --chunk-size
+          type: int
         - name: --for
+          type: string
         - name: --no-headers
+          type: bool
         - name: --output
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
         - name: --types
+          type: stringSlice
         - name: --watch
+          type: bool
     - path:
         - diff
       help: Diff configurations specified by file name or stdin between the current online configuration, and the configuration as it would be if applied.
       flags:
         - name: --field-manager
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --force-conflicts
+          type: bool
         - name: --kustomize
+          type: string
         - name: --prune
+          type: bool
         - name: --prune-allowlist
+          type: stringSlice
         - name: --recursive
+          type: bool
         - name: --selector
+          type: string
         - name: --server-side
+          type: bool
         - name: --show-managed-fields
+          type: bool
     - path:
         - apply
       help: Apply a configuration to a resource by file name or stdin.
@@ -362,127 +566,219 @@ commands:
       help: Edit the latest last-applied-configuration annotations of resources from the default editor.
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --field-manager
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --output
+          type: string
         - name: --recursive
+          type: bool
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
         - name: --validate
+          type: string
         - name: --windows-line-endings
+          type: bool
     - path:
         - apply
         - set-last-applied
       help: Set the latest last-applied-configuration annotations by setting it to match the contents of a file.
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --create-annotation
+          type: bool
         - name: --dry-run
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --output
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
     - path:
         - apply
         - view-last-applied
       help: View the latest last-applied-configuration annotations by type/name or file.
       flags:
         - name: --all
+          type: bool
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --output
+          type: string
         - name: --recursive
+          type: bool
         - name: --selector
+          type: string
     - path:
         - patch
       help: Update fields of a resource using strategic merge patch, a JSON merge patch, or a JSON patch.
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --dry-run
+          type: string
         - name: --field-manager
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --local
+          type: bool
         - name: --output
+          type: string
         - name: --patch
+          type: string
         - name: --patch-file
+          type: string
         - name: --recursive
+          type: bool
         - name: --show-managed-fields
+          type: bool
         - name: --subresource
+          type: string
         - name: --template
+          type: string
         - name: --type
+          type: string
     - path:
         - wait
       help: 'Experimental: Wait for a specific condition on one or many resources.'
       flags:
         - name: --all
+          type: bool
         - name: --all-namespaces
+          type: bool
         - name: --allow-missing-template-keys
+          type: bool
         - name: --field-selector
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --for
+          type: string
         - name: --local
+          type: bool
         - name: --output
+          type: string
         - name: --recursive
+          type: bool
         - name: --selector
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
         - name: --timeout
+          type: string
     - path:
         - label
       help: Update the labels on a resource.
       flags:
         - name: --all
+          type: bool
         - name: --all-namespaces
+          type: bool
         - name: --allow-missing-template-keys
+          type: bool
         - name: --dry-run
+          type: string
         - name: --field-manager
+          type: string
         - name: --field-selector
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --list
+          type: bool
         - name: --local
+          type: bool
         - name: --output
+          type: string
         - name: --overwrite
+          type: bool
         - name: --recursive
+          type: bool
         - name: --resource-version
+          type: string
         - name: --selector
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
     - path:
         - annotate
       help: Update the annotations on one or more resources.
       flags:
         - name: --all
+          type: bool
         - name: --all-namespaces
+          type: bool
         - name: --allow-missing-template-keys
+          type: bool
         - name: --dry-run
+          type: string
         - name: --field-manager
+          type: string
         - name: --field-selector
+          type: string
         - name: --filename
+          type: stringSlice
         - name: --kustomize
+          type: string
         - name: --list
+          type: bool
         - name: --local
+          type: bool
         - name: --output
+          type: string
         - name: --overwrite
+          type: bool
         - name: --recursive
+          type: bool
         - name: --resource-version
+          type: string
         - name: --selector
+          type: string
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string
     - path:
         - api-resources
       help: Print the supported API resources on the server.
       flags:
         - name: --api-group
+          type: string
         - name: --cached
+          type: bool
         - name: --categories
+          type: stringSlice
         - name: --namespaced
+          type: bool
         - name: --no-headers
+          type: bool
         - name: --output
+          type: string
         - name: --sort-by
+          type: string
         - name: --verbs
+          type: stringSlice
     - path:
         - api-versions
       help: Print the supported API versions on the server, in the form of "group/version".
@@ -531,7 +827,9 @@ commands:
       help: Display one or many contexts from the kubeconfig file.
       flags:
         - name: --no-headers
+          type: bool
         - name: --output
+          type: string
     - path:
         - config
         - get-users
@@ -546,6 +844,7 @@ commands:
       help: Set an individual value in a kubeconfig file.
       flags:
         - name: --set-raw-bytes
+          type: bool
     - path:
         - config
         - set-cluster
@@ -572,10 +871,18 @@ commands:
       help: Display merged kubeconfig settings or a specified kubeconfig file.
       flags:
         - name: --allow-missing-template-keys
+          type: bool
         - name: --flatten
+          type: bool
         - name: --merge
+          type: bool
         - name: --minify
+          type: bool
         - name: --output
+          type: string
         - name: --raw
+          type: bool
         - name: --show-managed-fields
+          type: bool
         - name: --template
+          type: string

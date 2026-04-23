@@ -82,15 +82,19 @@ gen-passthrough:
 
 .PHONY: update-fixtures
 update-fixtures:
-	@# Recapture help-text fixtures from live aws/gh/kubectl into cmd/subcli-scope/testdata/fixtures/
-	@# Refresh the goldens, then regenerate the skill. Review the resulting diff before committing.
+	@# Recapture help-text fixtures from live aws/gh/kubectl into cmd/subcli-scope/testdata/fixtures/.
+	@# Refresh the goldens AND the per-tool classification snapshots
+	@# (cmd/subcli-scope/testdata/<tool>.classified.txt), then regenerate
+	@# the pass-through and the skill. Review the resulting diff before
+	@# committing - in particular the .classified.txt diff is the place a
+	@# new MUTATING verb mis-labeled READONLY will show up.
 	$(GO) run ./cmd/subcli-scope -capture cmd/subcli-scope/testdata/fixtures gh
 	$(GO) run ./cmd/subcli-scope -capture cmd/subcli-scope/testdata/fixtures kubectl
 	$(GO) run ./cmd/subcli-scope -capture cmd/subcli-scope/testdata/fixtures aws
 	$(GO) test ./cmd/subcli-scope -update
 	$(MAKE) gen-passthrough
 	$(MAKE) skill
-	@echo "fixtures + goldens + pass-through + skill refreshed. diff and commit if you approve the changes."
+	@echo "fixtures + goldens + classified snapshots + pass-through + skill refreshed. diff and commit if you approve the changes."
 
 .PHONY: skill
 skill: dev

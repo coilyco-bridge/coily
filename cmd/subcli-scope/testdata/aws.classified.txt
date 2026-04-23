@@ -1,0 +1,725 @@
+aws accessanalyzer READONLY
+aws account READONLY
+aws acm READONLY
+aws acm-pca READONLY
+aws amp READONLY
+aws amplify READONLY
+aws amplifybackend READONLY
+aws amplifyuibuilder READONLY
+aws apigateway READONLY
+aws apigatewaymanagementapi READONLY
+aws apigatewayv2 READONLY
+aws appconfig READONLY
+aws appconfigdata READONLY
+aws appfabric READONLY
+aws appflow READONLY
+aws appintegrations READONLY
+aws application-autoscaling READONLY
+aws application-insights READONLY
+aws application-signals READONLY
+aws applicationcostprofiler READONLY
+aws appmesh READONLY
+aws apprunner READONLY
+aws appstream READONLY
+aws appsync READONLY
+aws apptest READONLY
+aws arc-zonal-shift READONLY
+aws artifact READONLY
+aws athena READONLY
+aws auditmanager READONLY
+aws autoscaling READONLY
+aws autoscaling-plans READONLY
+aws b2bi READONLY
+aws backup READONLY
+aws backup-gateway MUTATING
+aws backupsearch READONLY
+aws batch READONLY
+aws bcm-data-exports READONLY
+aws bcm-pricing-calculator READONLY
+aws bedrock READONLY
+aws bedrock-agent READONLY
+aws bedrock-agent-runtime READONLY
+aws bedrock-data-automation READONLY
+aws bedrock-data-automation-runtime READONLY
+aws bedrock-runtime READONLY
+aws billing READONLY
+aws billingconductor READONLY
+aws braket READONLY
+aws budgets READONLY
+aws ce READONLY
+aws chatbot READONLY
+aws chime READONLY
+aws chime-sdk-identity READONLY
+aws chime-sdk-media-pipelines READONLY
+aws chime-sdk-meetings READONLY
+aws chime-sdk-messaging READONLY
+aws chime-sdk-voice READONLY
+aws cleanrooms READONLY
+aws cleanroomsml READONLY
+aws cli-dev READONLY
+aws cloud9 READONLY
+aws cloudcontrol READONLY
+aws clouddirectory READONLY
+aws cloudformation READONLY
+aws cloudfront READONLY
+aws cloudfront-keyvaluestore READONLY
+aws cloudhsm READONLY
+aws cloudhsmv2 READONLY
+aws cloudsearch READONLY
+aws cloudsearchdomain READONLY
+aws cloudtrail READONLY
+aws cloudtrail-data READONLY
+aws cloudwatch READONLY
+aws codeartifact READONLY
+aws codebuild READONLY
+aws codecatalyst READONLY
+aws codecommit READONLY
+aws codeconnections READONLY
+aws codeguru-reviewer READONLY
+aws codeguru-security READONLY
+aws codeguruprofiler READONLY
+aws codepipeline READONLY
+aws codestar-connections READONLY
+aws codestar-notifications READONLY
+aws cognito-identity READONLY
+aws cognito-idp READONLY
+aws cognito-sync READONLY
+aws comprehend READONLY
+aws comprehendmedical READONLY
+aws compute-optimizer READONLY
+aws configservice READONLY
+aws configure READONLY
+aws connect READONLY
+aws connect-contact-lens READONLY
+aws connectcampaigns READONLY
+aws connectcampaignsv2 READONLY
+aws connectcases READONLY
+aws connectparticipant READONLY
+aws controlcatalog READONLY
+aws controltower READONLY
+aws cost-optimization-hub READONLY
+aws cur READONLY
+aws customer-profiles READONLY
+aws databrew READONLY
+aws dataexchange READONLY
+aws datapipeline READONLY
+aws datasync READONLY
+aws datazone READONLY
+aws dax READONLY
+aws ddb READONLY
+aws deadline READONLY
+aws deploy READONLY
+aws detective READONLY
+aws devicefarm READONLY
+aws devops-guru READONLY
+aws directconnect READONLY
+aws discovery READONLY
+aws dlm READONLY
+aws dms READONLY
+aws docdb READONLY
+aws docdb-elastic READONLY
+aws drs READONLY
+aws ds READONLY
+aws ds-data READONLY
+aws dsql READONLY
+aws dynamodb READONLY
+aws dynamodbstreams READONLY
+aws ebs READONLY
+aws ec2 READONLY
+aws ec2-instance-connect READONLY
+aws ecr READONLY
+aws ecr-public READONLY
+aws ecs READONLY
+aws efs READONLY
+aws eks READONLY
+aws eks-auth READONLY
+aws elasticache READONLY
+aws elasticbeanstalk READONLY
+aws elastictranscoder READONLY
+aws elb READONLY
+aws elbv2 READONLY
+aws emr READONLY
+aws emr-containers READONLY
+aws emr-serverless READONLY
+aws entityresolution READONLY
+aws es READONLY
+aws events READONLY
+aws evidently READONLY
+aws finspace READONLY
+aws finspace-data READONLY
+aws firehose READONLY
+aws fis READONLY
+aws fms READONLY
+aws forecast READONLY
+aws forecastquery READONLY
+aws frauddetector READONLY
+aws freetier READONLY
+aws fsx READONLY
+aws gamelift READONLY
+aws gameliftstreams READONLY
+aws geo-maps READONLY
+aws geo-places READONLY
+aws geo-routes READONLY
+aws glacier READONLY
+aws globalaccelerator READONLY
+aws glue READONLY
+aws grafana READONLY
+aws greengrass READONLY
+aws greengrassv2 READONLY
+aws groundstation READONLY
+aws guardduty READONLY
+aws health READONLY
+aws healthlake READONLY
+aws history READONLY
+aws iam READONLY
+aws identitystore READONLY
+aws imagebuilder READONLY
+aws importexport READONLY
+aws inspector READONLY
+aws inspector-scan READONLY
+aws inspector2 READONLY
+aws internetmonitor READONLY
+aws invoicing READONLY
+aws iot READONLY
+aws iot-data READONLY
+aws iot-jobs-data READONLY
+aws iot-managed-integrations READONLY
+aws iotanalytics READONLY
+aws iotdeviceadvisor READONLY
+aws iotevents READONLY
+aws iotevents-data READONLY
+aws iotfleethub READONLY
+aws iotfleetwise READONLY
+aws iotsecuretunneling READONLY
+aws iotsitewise READONLY
+aws iotthingsgraph READONLY
+aws iottwinmaker READONLY
+aws iotwireless READONLY
+aws ivs READONLY
+aws ivs-realtime READONLY
+aws ivschat READONLY
+aws kafka READONLY
+aws kafkaconnect READONLY
+aws kendra READONLY
+aws kendra-ranking READONLY
+aws keyspaces READONLY
+aws kinesis READONLY
+aws kinesis-video-archived-media READONLY
+aws kinesis-video-media READONLY
+aws kinesis-video-signaling READONLY
+aws kinesis-video-webrtc-storage READONLY
+aws kinesisanalytics READONLY
+aws kinesisanalyticsv2 READONLY
+aws kinesisvideo READONLY
+aws kms READONLY
+aws lakeformation READONLY
+aws lambda READONLY
+aws launch-wizard READONLY
+aws lex-models READONLY
+aws lex-runtime READONLY
+aws lexv2-models READONLY
+aws lexv2-runtime READONLY
+aws license-manager READONLY
+aws license-manager-linux-subscriptions READONLY
+aws license-manager-user-subscriptions READONLY
+aws lightsail READONLY
+aws location READONLY
+aws logs READONLY
+aws lookoutequipment READONLY
+aws lookoutmetrics READONLY
+aws lookoutvision READONLY
+aws m2 READONLY
+aws machinelearning READONLY
+aws macie2 READONLY
+aws mailmanager READONLY
+aws managedblockchain READONLY
+aws managedblockchain-query READONLY
+aws marketplace-agreement READONLY
+aws marketplace-catalog READONLY
+aws marketplace-deployment READONLY
+aws marketplace-entitlement READONLY
+aws marketplace-reporting READONLY
+aws marketplacecommerceanalytics READONLY
+aws mediaconnect READONLY
+aws mediaconvert READONLY
+aws medialive READONLY
+aws mediapackage READONLY
+aws mediapackage-vod READONLY
+aws mediapackagev2 READONLY
+aws mediastore READONLY
+aws mediastore-data READONLY
+aws mediatailor READONLY
+aws medical-imaging READONLY
+aws memorydb READONLY
+aws meteringmarketplace READONLY
+aws mgh READONLY
+aws mgn READONLY
+aws migration-hub-refactor-spaces READONLY
+aws migrationhub-config READONLY
+aws migrationhuborchestrator READONLY
+aws migrationhubstrategy READONLY
+aws mq READONLY
+aws mturk READONLY
+aws mwaa READONLY
+aws neptune READONLY
+aws neptune-graph READONLY
+aws neptunedata READONLY
+aws network-firewall READONLY
+aws networkflowmonitor READONLY
+aws networkmanager READONLY
+aws networkmonitor READONLY
+aws notifications READONLY
+aws notificationscontacts READONLY
+aws oam READONLY
+aws observabilityadmin READONLY
+aws omics READONLY
+aws opensearch READONLY
+aws opensearchserverless READONLY
+aws opsworks READONLY
+aws opsworks-cm READONLY
+aws organizations READONLY
+aws osis READONLY
+aws outposts READONLY
+aws panorama READONLY
+aws partnercentral-selling READONLY
+aws payment-cryptography READONLY
+aws payment-cryptography-data READONLY
+aws pca-connector-ad READONLY
+aws pca-connector-scep READONLY
+aws pcs READONLY
+aws personalize READONLY
+aws personalize-events READONLY
+aws personalize-runtime READONLY
+aws pi READONLY
+aws pinpoint READONLY
+aws pinpoint-email READONLY
+aws pinpoint-sms-voice READONLY
+aws pinpoint-sms-voice-v2 READONLY
+aws pipes READONLY
+aws polly READONLY
+aws pricing READONLY
+aws privatenetworks READONLY
+aws proton READONLY
+aws qapps READONLY
+aws qbusiness READONLY
+aws qconnect READONLY
+aws qldb READONLY
+aws qldb-session READONLY
+aws quicksight READONLY
+aws ram READONLY
+aws rbin READONLY
+aws rds READONLY
+aws rds-data READONLY
+aws redshift READONLY
+aws redshift-data READONLY
+aws redshift-serverless READONLY
+aws rekognition READONLY
+aws repostspace READONLY
+aws resiliencehub READONLY
+aws resource-explorer-2 READONLY
+aws resource-groups READONLY
+aws resourcegroupstaggingapi READONLY
+aws robomaker READONLY
+aws rolesanywhere READONLY
+aws route53 activate-key-signing-key MUTATING
+aws route53 associate-vpc-with-hosted-zone MUTATING
+aws route53 change-cidr-collection MUTATING
+aws route53 change-resource-record-sets MUTATING
+aws route53 change-tags-for-resource MUTATING
+aws route53 create-cidr-collection MUTATING
+aws route53 create-health-check MUTATING
+aws route53 create-hosted-zone MUTATING
+aws route53 create-key-signing-key MUTATING
+aws route53 create-query-logging-config MUTATING
+aws route53 create-reusable-delegation-set MUTATING
+aws route53 create-traffic-policy MUTATING
+aws route53 create-traffic-policy-instance MUTATING
+aws route53 create-traffic-policy-version MUTATING
+aws route53 create-vpc-association-authorization MUTATING
+aws route53 deactivate-key-signing-key MUTATING
+aws route53 delete-cidr-collection MUTATING
+aws route53 delete-health-check MUTATING
+aws route53 delete-hosted-zone MUTATING
+aws route53 delete-key-signing-key MUTATING
+aws route53 delete-query-logging-config MUTATING
+aws route53 delete-reusable-delegation-set MUTATING
+aws route53 delete-traffic-policy MUTATING
+aws route53 delete-traffic-policy-instance MUTATING
+aws route53 delete-vpc-association-authorization MUTATING
+aws route53 disable-hosted-zone-dnssec MUTATING
+aws route53 disassociate-vpc-from-hosted-zone MUTATING
+aws route53 enable-hosted-zone-dnssec MUTATING
+aws route53 get-account-limit READONLY
+aws route53 get-change READONLY
+aws route53 get-checker-ip-ranges READONLY
+aws route53 get-dnssec READONLY
+aws route53 get-geo-location READONLY
+aws route53 get-health-check READONLY
+aws route53 get-health-check-count READONLY
+aws route53 get-health-check-last-failure-reason READONLY
+aws route53 get-health-check-status READONLY
+aws route53 get-hosted-zone READONLY
+aws route53 get-hosted-zone-count READONLY
+aws route53 get-hosted-zone-limit READONLY
+aws route53 get-query-logging-config READONLY
+aws route53 get-reusable-delegation-set READONLY
+aws route53 get-reusable-delegation-set-limit READONLY
+aws route53 get-traffic-policy READONLY
+aws route53 get-traffic-policy-instance READONLY
+aws route53 get-traffic-policy-instance-count READONLY
+aws route53 list-cidr-blocks READONLY
+aws route53 list-cidr-collections READONLY
+aws route53 list-cidr-locations READONLY
+aws route53 list-geo-locations READONLY
+aws route53 list-health-checks READONLY
+aws route53 list-hosted-zones READONLY
+aws route53 list-hosted-zones-by-name READONLY
+aws route53 list-hosted-zones-by-vpc READONLY
+aws route53 list-query-logging-configs READONLY
+aws route53 list-resource-record-sets READONLY
+aws route53 list-reusable-delegation-sets READONLY
+aws route53 list-tags-for-resource READONLY
+aws route53 list-tags-for-resources READONLY
+aws route53 list-traffic-policies READONLY
+aws route53 list-traffic-policy-instances READONLY
+aws route53 list-traffic-policy-instances-by-policy READONLY
+aws route53 list-traffic-policy-versions READONLY
+aws route53 list-vpc-association-authorizations READONLY
+aws route53 test-dns-answer READONLY
+aws route53 update-health-check MUTATING
+aws route53 update-hosted-zone-comment MUTATING
+aws route53 update-traffic-policy-comment MUTATING
+aws route53 update-traffic-policy-instance MUTATING
+aws route53 wait resource-record-sets-changed READONLY
+aws route53-recovery-cluster READONLY
+aws route53-recovery-control-config READONLY
+aws route53-recovery-readiness READONLY
+aws route53domains READONLY
+aws route53profiles READONLY
+aws route53resolver READONLY
+aws rum READONLY
+aws s3 cp MUTATING
+aws s3 ls READONLY
+aws s3 mb MUTATING
+aws s3 mv MUTATING
+aws s3 presign READONLY
+aws s3 rb MUTATING
+aws s3 rm MUTATING
+aws s3 sync MUTATING
+aws s3 website READONLY
+aws s3api abort-multipart-upload MUTATING
+aws s3api complete-multipart-upload MUTATING
+aws s3api copy-object MUTATING
+aws s3api create-bucket MUTATING
+aws s3api create-multipart-upload MUTATING
+aws s3api create-session MUTATING
+aws s3api delete-bucket MUTATING
+aws s3api delete-bucket-analytics-configuration MUTATING
+aws s3api delete-bucket-cors MUTATING
+aws s3api delete-bucket-encryption MUTATING
+aws s3api delete-bucket-inventory-configuration MUTATING
+aws s3api delete-bucket-lifecycle MUTATING
+aws s3api delete-bucket-metrics-configuration MUTATING
+aws s3api delete-bucket-ownership-controls MUTATING
+aws s3api delete-bucket-policy MUTATING
+aws s3api delete-bucket-replication MUTATING
+aws s3api delete-bucket-tagging MUTATING
+aws s3api delete-bucket-website MUTATING
+aws s3api delete-object MUTATING
+aws s3api delete-object-tagging MUTATING
+aws s3api delete-objects MUTATING
+aws s3api delete-public-access-block MUTATING
+aws s3api get-bucket-accelerate-configuration READONLY
+aws s3api get-bucket-acl READONLY
+aws s3api get-bucket-analytics-configuration READONLY
+aws s3api get-bucket-cors READONLY
+aws s3api get-bucket-encryption READONLY
+aws s3api get-bucket-inventory-configuration READONLY
+aws s3api get-bucket-lifecycle-configuration READONLY
+aws s3api get-bucket-location READONLY
+aws s3api get-bucket-logging READONLY
+aws s3api get-bucket-metadata-table-configuration READONLY
+aws s3api get-bucket-metrics-configuration READONLY
+aws s3api get-bucket-notification-configuration READONLY
+aws s3api get-bucket-ownership-controls READONLY
+aws s3api get-bucket-policy READONLY
+aws s3api get-bucket-policy-status READONLY
+aws s3api get-bucket-replication READONLY
+aws s3api get-bucket-request-payment READONLY
+aws s3api get-bucket-tagging READONLY
+aws s3api get-bucket-versioning READONLY
+aws s3api get-bucket-website READONLY
+aws s3api get-object READONLY
+aws s3api get-object-acl READONLY
+aws s3api get-object-attributes READONLY
+aws s3api get-object-legal-hold READONLY
+aws s3api get-object-lock-configuration READONLY
+aws s3api get-object-retention READONLY
+aws s3api get-object-tagging READONLY
+aws s3api get-object-torrent READONLY
+aws s3api get-public-access-block READONLY
+aws s3api head-bucket READONLY
+aws s3api head-object READONLY
+aws s3api list-bucket-analytics-configurations READONLY
+aws s3api list-bucket-inventory-configurations READONLY
+aws s3api list-bucket-metrics-configurations READONLY
+aws s3api list-buckets READONLY
+aws s3api list-directory-buckets READONLY
+aws s3api list-multipart-uploads READONLY
+aws s3api list-object-versions READONLY
+aws s3api list-objects READONLY
+aws s3api list-objects-v2 READONLY
+aws s3api list-parts READONLY
+aws s3api put-bucket-accelerate-configuration MUTATING
+aws s3api put-bucket-acl MUTATING
+aws s3api put-bucket-analytics-configuration MUTATING
+aws s3api put-bucket-cors MUTATING
+aws s3api put-bucket-encryption MUTATING
+aws s3api put-bucket-inventory-configuration MUTATING
+aws s3api put-bucket-lifecycle-configuration MUTATING
+aws s3api put-bucket-logging MUTATING
+aws s3api put-bucket-metrics-configuration MUTATING
+aws s3api put-bucket-notification-configuration MUTATING
+aws s3api put-bucket-ownership-controls MUTATING
+aws s3api put-bucket-policy MUTATING
+aws s3api put-bucket-replication MUTATING
+aws s3api put-bucket-request-payment MUTATING
+aws s3api put-bucket-tagging MUTATING
+aws s3api put-bucket-versioning MUTATING
+aws s3api put-bucket-website MUTATING
+aws s3api put-object MUTATING
+aws s3api put-object-acl MUTATING
+aws s3api put-object-legal-hold MUTATING
+aws s3api put-object-lock-configuration MUTATING
+aws s3api put-object-retention MUTATING
+aws s3api put-object-tagging MUTATING
+aws s3api put-public-access-block MUTATING
+aws s3api restore-object MUTATING
+aws s3api select-object-content READONLY
+aws s3api upload-part MUTATING
+aws s3api upload-part-copy MUTATING
+aws s3api wait bucket-exists READONLY
+aws s3api wait bucket-not-exists READONLY
+aws s3api wait object-exists READONLY
+aws s3api wait object-not-exists READONLY
+aws s3api write-get-object-response READONLY
+aws s3control READONLY
+aws s3outposts READONLY
+aws s3tables READONLY
+aws sagemaker READONLY
+aws sagemaker-a2i-runtime READONLY
+aws sagemaker-edge READONLY
+aws sagemaker-featurestore-runtime READONLY
+aws sagemaker-geospatial READONLY
+aws sagemaker-metrics READONLY
+aws sagemaker-runtime READONLY
+aws savingsplans READONLY
+aws scheduler READONLY
+aws schemas READONLY
+aws sdb READONLY
+aws secretsmanager READONLY
+aws security-ir READONLY
+aws securityhub READONLY
+aws securitylake READONLY
+aws serverlessrepo READONLY
+aws service-quotas READONLY
+aws servicecatalog READONLY
+aws servicecatalog-appregistry READONLY
+aws servicediscovery READONLY
+aws ses READONLY
+aws sesv2 READONLY
+aws shield READONLY
+aws signer READONLY
+aws simspaceweaver READONLY
+aws sms READONLY
+aws snow-device-management READONLY
+aws snowball READONLY
+aws sns READONLY
+aws socialmessaging READONLY
+aws sqs READONLY
+aws ssm add-tags-to-resource MUTATING
+aws ssm associate-ops-item-related-item MUTATING
+aws ssm cancel-command MUTATING
+aws ssm cancel-maintenance-window-execution MUTATING
+aws ssm create-activation MUTATING
+aws ssm create-association MUTATING
+aws ssm create-association-batch MUTATING
+aws ssm create-document MUTATING
+aws ssm create-maintenance-window MUTATING
+aws ssm create-ops-item MUTATING
+aws ssm create-ops-metadata MUTATING
+aws ssm create-patch-baseline MUTATING
+aws ssm create-resource-data-sync MUTATING
+aws ssm delete-activation MUTATING
+aws ssm delete-association MUTATING
+aws ssm delete-document MUTATING
+aws ssm delete-inventory MUTATING
+aws ssm delete-maintenance-window MUTATING
+aws ssm delete-ops-item MUTATING
+aws ssm delete-ops-metadata MUTATING
+aws ssm delete-parameter MUTATING
+aws ssm delete-parameters MUTATING
+aws ssm delete-patch-baseline MUTATING
+aws ssm delete-resource-data-sync MUTATING
+aws ssm delete-resource-policy MUTATING
+aws ssm deregister-managed-instance MUTATING
+aws ssm deregister-patch-baseline-for-patch-group MUTATING
+aws ssm deregister-target-from-maintenance-window MUTATING
+aws ssm deregister-task-from-maintenance-window MUTATING
+aws ssm describe-activations READONLY
+aws ssm describe-association READONLY
+aws ssm describe-association-execution-targets READONLY
+aws ssm describe-association-executions READONLY
+aws ssm describe-automation-executions READONLY
+aws ssm describe-automation-step-executions READONLY
+aws ssm describe-available-patches READONLY
+aws ssm describe-document READONLY
+aws ssm describe-document-permission READONLY
+aws ssm describe-effective-instance-associations READONLY
+aws ssm describe-instance-associations-status READONLY
+aws ssm describe-instance-information READONLY
+aws ssm describe-instance-patch-states READONLY
+aws ssm describe-instance-patches READONLY
+aws ssm describe-instance-properties READONLY
+aws ssm describe-inventory-deletions READONLY
+aws ssm describe-maintenance-window-executions READONLY
+aws ssm describe-maintenance-window-schedule READONLY
+aws ssm describe-maintenance-window-targets READONLY
+aws ssm describe-maintenance-window-tasks READONLY
+aws ssm describe-maintenance-windows READONLY
+aws ssm describe-maintenance-windows-for-target READONLY
+aws ssm describe-ops-items READONLY
+aws ssm describe-parameters READONLY
+aws ssm describe-patch-baselines READONLY
+aws ssm describe-patch-group-state READONLY
+aws ssm describe-patch-groups READONLY
+aws ssm describe-patch-properties READONLY
+aws ssm describe-sessions READONLY
+aws ssm disassociate-ops-item-related-item MUTATING
+aws ssm get-automation-execution READONLY
+aws ssm get-calendar-state READONLY
+aws ssm get-command-invocation READONLY
+aws ssm get-connection-status READONLY
+aws ssm get-default-patch-baseline READONLY
+aws ssm get-document READONLY
+aws ssm get-execution-preview READONLY
+aws ssm get-inventory READONLY
+aws ssm get-inventory-schema READONLY
+aws ssm get-maintenance-window READONLY
+aws ssm get-maintenance-window-execution READONLY
+aws ssm get-maintenance-window-execution-task READONLY
+aws ssm get-maintenance-window-task READONLY
+aws ssm get-ops-item READONLY
+aws ssm get-ops-metadata READONLY
+aws ssm get-ops-summary READONLY
+aws ssm get-parameter READONLY
+aws ssm get-parameter-history READONLY
+aws ssm get-parameters READONLY
+aws ssm get-parameters-by-path READONLY
+aws ssm get-patch-baseline READONLY
+aws ssm get-patch-baseline-for-patch-group READONLY
+aws ssm get-resource-policies READONLY
+aws ssm get-service-setting READONLY
+aws ssm label-parameter-version MUTATING
+aws ssm list-association-versions READONLY
+aws ssm list-associations READONLY
+aws ssm list-command-invocations READONLY
+aws ssm list-compliance-items READONLY
+aws ssm list-compliance-summaries READONLY
+aws ssm list-document-metadata-history READONLY
+aws ssm list-document-versions READONLY
+aws ssm list-documents READONLY
+aws ssm list-inventory-entries READONLY
+aws ssm list-nodes READONLY
+aws ssm list-nodes-summary READONLY
+aws ssm list-ops-item-events READONLY
+aws ssm list-ops-item-related-items READONLY
+aws ssm list-ops-metadata READONLY
+aws ssm list-resource-compliance-summaries READONLY
+aws ssm list-resource-data-sync READONLY
+aws ssm list-tags-for-resource READONLY
+aws ssm modify-document-permission MUTATING
+aws ssm put-compliance-items MUTATING
+aws ssm put-inventory MUTATING
+aws ssm put-parameter MUTATING
+aws ssm put-resource-policy MUTATING
+aws ssm register-default-patch-baseline MUTATING
+aws ssm register-patch-baseline-for-patch-group MUTATING
+aws ssm register-target-with-maintenance-window MUTATING
+aws ssm register-task-with-maintenance-window MUTATING
+aws ssm remove-tags-from-resource MUTATING
+aws ssm reset-service-setting MUTATING
+aws ssm resume-session MUTATING
+aws ssm send-automation-signal MUTATING
+aws ssm send-command MUTATING
+aws ssm start-associations-once MUTATING
+aws ssm start-automation-execution MUTATING
+aws ssm start-change-request-execution MUTATING
+aws ssm start-execution-preview MUTATING
+aws ssm start-session MUTATING
+aws ssm stop-automation-execution MUTATING
+aws ssm terminate-session MUTATING
+aws ssm unlabel-parameter-version MUTATING
+aws ssm update-association MUTATING
+aws ssm update-association-status MUTATING
+aws ssm update-document MUTATING
+aws ssm update-document-default-version MUTATING
+aws ssm update-document-metadata MUTATING
+aws ssm update-maintenance-window MUTATING
+aws ssm update-maintenance-window-target MUTATING
+aws ssm update-maintenance-window-task MUTATING
+aws ssm update-managed-instance-role MUTATING
+aws ssm update-ops-item MUTATING
+aws ssm update-ops-metadata MUTATING
+aws ssm update-patch-baseline MUTATING
+aws ssm update-resource-data-sync MUTATING
+aws ssm update-service-setting MUTATING
+aws ssm wait command-executed READONLY
+aws ssm-contacts READONLY
+aws ssm-incidents READONLY
+aws ssm-quicksetup READONLY
+aws ssm-sap READONLY
+aws sso READONLY
+aws sso-admin READONLY
+aws sso-oidc READONLY
+aws stepfunctions READONLY
+aws storagegateway READONLY
+aws sts assume-role READONLY
+aws sts assume-role-with-saml READONLY
+aws sts assume-role-with-web-identity READONLY
+aws sts assume-root READONLY
+aws sts decode-authorization-message READONLY
+aws sts get-access-key-info READONLY
+aws sts get-caller-identity READONLY
+aws sts get-federation-token READONLY
+aws sts get-session-token READONLY
+aws supplychain READONLY
+aws support READONLY
+aws support-app READONLY
+aws swf READONLY
+aws synthetics READONLY
+aws taxsettings READONLY
+aws textract READONLY
+aws timestream-influxdb READONLY
+aws timestream-query READONLY
+aws timestream-write READONLY
+aws tnb READONLY
+aws transcribe READONLY
+aws transfer MUTATING
+aws translate READONLY
+aws trustedadvisor READONLY
+aws verifiedpermissions READONLY
+aws voice-id READONLY
+aws vpc-lattice READONLY
+aws waf READONLY
+aws waf-regional READONLY
+aws wafv2 READONLY
+aws wellarchitected READONLY
+aws wisdom READONLY
+aws workdocs READONLY
+aws workmail READONLY
+aws workmailmessageflow READONLY
+aws workspaces READONLY
+aws workspaces-thin-client READONLY
+aws workspaces-web READONLY
+aws xray READONLY

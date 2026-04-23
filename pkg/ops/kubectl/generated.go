@@ -31,22 +31,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Name:  "annotate",
 				Usage: "Update the annotations on one or more resources.",
 				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "all"},
-					&cli.StringFlag{Name: "all-namespaces"},
-					&cli.StringFlag{Name: "allow-missing-template-keys"},
+					&cli.BoolFlag{Name: "all"},
+					&cli.BoolFlag{Name: "all-namespaces"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
 					&cli.StringFlag{Name: "dry-run"},
 					&cli.StringFlag{Name: "field-manager"},
 					&cli.StringFlag{Name: "field-selector"},
-					&cli.StringFlag{Name: "filename"},
+					&cli.StringSliceFlag{Name: "filename"},
 					&cli.StringFlag{Name: "kustomize"},
-					&cli.StringFlag{Name: "list"},
-					&cli.StringFlag{Name: "local"},
+					&cli.BoolFlag{Name: "list"},
+					&cli.BoolFlag{Name: "local"},
 					&cli.StringFlag{Name: "output"},
-					&cli.StringFlag{Name: "overwrite"},
-					&cli.StringFlag{Name: "recursive"},
+					&cli.BoolFlag{Name: "overwrite"},
+					&cli.BoolFlag{Name: "recursive"},
 					&cli.StringFlag{Name: "resource-version"},
 					&cli.StringFlag{Name: "selector"},
-					&cli.StringFlag{Name: "show-managed-fields"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "template"},
 				},
 				Action: verb.Wrap(
@@ -55,77 +55,115 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.Mutating,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
-							args["--all"] = c.String("all")
-							args["--all-namespaces"] = c.String("all-namespaces")
-							args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
+							var positional []string
+							_ = positional
+							if c.Bool("all") {
+								args["--all"] = "true"
+							}
+							if c.Bool("all-namespaces") {
+								args["--all-namespaces"] = "true"
+							}
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
 							args["--dry-run"] = c.String("dry-run")
 							args["--field-manager"] = c.String("field-manager")
 							args["--field-selector"] = c.String("field-selector")
-							args["--filename"] = c.String("filename")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
 							args["--kustomize"] = c.String("kustomize")
-							args["--list"] = c.String("list")
-							args["--local"] = c.String("local")
+							if c.Bool("list") {
+								args["--list"] = "true"
+							}
+							if c.Bool("local") {
+								args["--local"] = "true"
+							}
 							args["--output"] = c.String("output")
-							args["--overwrite"] = c.String("overwrite")
-							args["--recursive"] = c.String("recursive")
+							if c.Bool("overwrite") {
+								args["--overwrite"] = "true"
+							}
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
 							args["--resource-version"] = c.String("resource-version")
 							args["--selector"] = c.String("selector")
-							args["--show-managed-fields"] = c.String("show-managed-fields")
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
 							args["--template"] = c.String("template")
-							return args, nil, c.String("token")
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"annotate"}
 							if c.IsSet("all") {
-								argv = append(argv, "--"+"all", c.String("all"))
+								if c.Bool("all") {
+									argv = append(argv, "--all")
+								}
 							}
 							if c.IsSet("all-namespaces") {
-								argv = append(argv, "--"+"all-namespaces", c.String("all-namespaces"))
+								if c.Bool("all-namespaces") {
+									argv = append(argv, "--all-namespaces")
+								}
 							}
 							if c.IsSet("allow-missing-template-keys") {
-								argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
 							}
 							if c.IsSet("dry-run") {
-								argv = append(argv, "--"+"dry-run", c.String("dry-run"))
+								argv = append(argv, "--dry-run", c.String("dry-run"))
 							}
 							if c.IsSet("field-manager") {
-								argv = append(argv, "--"+"field-manager", c.String("field-manager"))
+								argv = append(argv, "--field-manager", c.String("field-manager"))
 							}
 							if c.IsSet("field-selector") {
-								argv = append(argv, "--"+"field-selector", c.String("field-selector"))
+								argv = append(argv, "--field-selector", c.String("field-selector"))
 							}
 							if c.IsSet("filename") {
-								argv = append(argv, "--"+"filename", c.String("filename"))
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
 							}
 							if c.IsSet("kustomize") {
-								argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+								argv = append(argv, "--kustomize", c.String("kustomize"))
 							}
 							if c.IsSet("list") {
-								argv = append(argv, "--"+"list", c.String("list"))
+								if c.Bool("list") {
+									argv = append(argv, "--list")
+								}
 							}
 							if c.IsSet("local") {
-								argv = append(argv, "--"+"local", c.String("local"))
+								if c.Bool("local") {
+									argv = append(argv, "--local")
+								}
 							}
 							if c.IsSet("output") {
-								argv = append(argv, "--"+"output", c.String("output"))
+								argv = append(argv, "--output", c.String("output"))
 							}
 							if c.IsSet("overwrite") {
-								argv = append(argv, "--"+"overwrite", c.String("overwrite"))
+								if c.Bool("overwrite") {
+									argv = append(argv, "--overwrite")
+								}
 							}
 							if c.IsSet("recursive") {
-								argv = append(argv, "--"+"recursive", c.String("recursive"))
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
 							}
 							if c.IsSet("resource-version") {
-								argv = append(argv, "--"+"resource-version", c.String("resource-version"))
+								argv = append(argv, "--resource-version", c.String("resource-version"))
 							}
 							if c.IsSet("selector") {
-								argv = append(argv, "--"+"selector", c.String("selector"))
+								argv = append(argv, "--selector", c.String("selector"))
 							}
 							if c.IsSet("show-managed-fields") {
-								argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
 							}
 							if c.IsSet("template") {
-								argv = append(argv, "--"+"template", c.String("template"))
+								argv = append(argv, "--template", c.String("template"))
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -139,13 +177,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Usage: "Print the supported API resources on the server.",
 				Flags: []cli.Flag{
 					&cli.StringFlag{Name: "api-group"},
-					&cli.StringFlag{Name: "cached"},
-					&cli.StringFlag{Name: "categories"},
-					&cli.StringFlag{Name: "namespaced"},
-					&cli.StringFlag{Name: "no-headers"},
+					&cli.BoolFlag{Name: "cached"},
+					&cli.StringSliceFlag{Name: "categories"},
+					&cli.BoolFlag{Name: "namespaced"},
+					&cli.BoolFlag{Name: "no-headers"},
 					&cli.StringFlag{Name: "output"},
 					&cli.StringFlag{Name: "sort-by"},
-					&cli.StringFlag{Name: "verbs"},
+					&cli.StringSliceFlag{Name: "verbs"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
@@ -153,41 +191,63 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.ReadOnly,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
+							var positional []string
+							_ = positional
 							args["--api-group"] = c.String("api-group")
-							args["--cached"] = c.String("cached")
-							args["--categories"] = c.String("categories")
-							args["--namespaced"] = c.String("namespaced")
-							args["--no-headers"] = c.String("no-headers")
+							if c.Bool("cached") {
+								args["--cached"] = "true"
+							}
+							for _, v := range c.StringSlice("categories") {
+								positional = append(positional, v)
+							}
+							if c.Bool("namespaced") {
+								args["--namespaced"] = "true"
+							}
+							if c.Bool("no-headers") {
+								args["--no-headers"] = "true"
+							}
 							args["--output"] = c.String("output")
 							args["--sort-by"] = c.String("sort-by")
-							args["--verbs"] = c.String("verbs")
-							return args, nil, c.String("token")
+							for _, v := range c.StringSlice("verbs") {
+								positional = append(positional, v)
+							}
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"api-resources"}
 							if c.IsSet("api-group") {
-								argv = append(argv, "--"+"api-group", c.String("api-group"))
+								argv = append(argv, "--api-group", c.String("api-group"))
 							}
 							if c.IsSet("cached") {
-								argv = append(argv, "--"+"cached", c.String("cached"))
+								if c.Bool("cached") {
+									argv = append(argv, "--cached")
+								}
 							}
 							if c.IsSet("categories") {
-								argv = append(argv, "--"+"categories", c.String("categories"))
+								for _, v := range c.StringSlice("categories") {
+									argv = append(argv, "--categories", v)
+								}
 							}
 							if c.IsSet("namespaced") {
-								argv = append(argv, "--"+"namespaced", c.String("namespaced"))
+								if c.Bool("namespaced") {
+									argv = append(argv, "--namespaced")
+								}
 							}
 							if c.IsSet("no-headers") {
-								argv = append(argv, "--"+"no-headers", c.String("no-headers"))
+								if c.Bool("no-headers") {
+									argv = append(argv, "--no-headers")
+								}
 							}
 							if c.IsSet("output") {
-								argv = append(argv, "--"+"output", c.String("output"))
+								argv = append(argv, "--output", c.String("output"))
 							}
 							if c.IsSet("sort-by") {
-								argv = append(argv, "--"+"sort-by", c.String("sort-by"))
+								argv = append(argv, "--sort-by", c.String("sort-by"))
 							}
 							if c.IsSet("verbs") {
-								argv = append(argv, "--"+"verbs", c.String("verbs"))
+								for _, v := range c.StringSlice("verbs") {
+									argv = append(argv, "--verbs", v)
+								}
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -205,7 +265,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.ReadOnly,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
-							return args, nil, c.String("token")
+							var positional []string
+							_ = positional
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"api-versions"}
@@ -224,66 +286,88 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "edit-last-applied",
 						Usage: "Edit the latest last-applied-configuration annotations of resources from the default editor.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "allow-missing-template-keys"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
 							&cli.StringFlag{Name: "field-manager"},
-							&cli.StringFlag{Name: "filename"},
+							&cli.StringSliceFlag{Name: "filename"},
 							&cli.StringFlag{Name: "kustomize"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "recursive"},
-							&cli.StringFlag{Name: "show-managed-fields"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
-							&cli.StringFlag{Name: "windows-line-endings"},
+							&cli.BoolFlag{Name: "windows-line-endings"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "kubectl.apply.edit-last-applied",
-								Kind: policy.Mutating,
+								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
 									args["--field-manager"] = c.String("field-manager")
-									args["--filename"] = c.String("filename")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
 									args["--kustomize"] = c.String("kustomize")
 									args["--output"] = c.String("output")
-									args["--recursive"] = c.String("recursive")
-									args["--show-managed-fields"] = c.String("show-managed-fields")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
-									args["--windows-line-endings"] = c.String("windows-line-endings")
-									return args, nil, c.String("token")
+									if c.Bool("windows-line-endings") {
+										args["--windows-line-endings"] = "true"
+									}
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"apply", "edit-last-applied"}
 									if c.IsSet("allow-missing-template-keys") {
-										argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
 									}
 									if c.IsSet("field-manager") {
-										argv = append(argv, "--"+"field-manager", c.String("field-manager"))
+										argv = append(argv, "--field-manager", c.String("field-manager"))
 									}
 									if c.IsSet("filename") {
-										argv = append(argv, "--"+"filename", c.String("filename"))
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
 									}
 									if c.IsSet("kustomize") {
-										argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+										argv = append(argv, "--kustomize", c.String("kustomize"))
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("recursive") {
-										argv = append(argv, "--"+"recursive", c.String("recursive"))
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
 									}
 									if c.IsSet("show-managed-fields") {
-										argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--"+"template", c.String("template"))
+										argv = append(argv, "--template", c.String("template"))
 									}
 									if c.IsSet("validate") {
-										argv = append(argv, "--"+"validate", c.String("validate"))
+										argv = append(argv, "--validate", c.String("validate"))
 									}
 									if c.IsSet("windows-line-endings") {
-										argv = append(argv, "--"+"windows-line-endings", c.String("windows-line-endings"))
+										if c.Bool("windows-line-endings") {
+											argv = append(argv, "--windows-line-endings")
+										}
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -296,12 +380,12 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "set-last-applied",
 						Usage: "Set the latest last-applied-configuration annotations by setting it to match the contents of a file.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "allow-missing-template-keys"},
-							&cli.StringFlag{Name: "create-annotation"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.BoolFlag{Name: "create-annotation"},
 							&cli.StringFlag{Name: "dry-run"},
-							&cli.StringFlag{Name: "filename"},
+							&cli.StringSliceFlag{Name: "filename"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "show-managed-fields"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 						},
 						Action: verb.Wrap(
@@ -310,37 +394,55 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-									args["--create-annotation"] = c.String("create-annotation")
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									if c.Bool("create-annotation") {
+										args["--create-annotation"] = "true"
+									}
 									args["--dry-run"] = c.String("dry-run")
-									args["--filename"] = c.String("filename")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
 									args["--output"] = c.String("output")
-									args["--show-managed-fields"] = c.String("show-managed-fields")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
 									args["--template"] = c.String("template")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"apply", "set-last-applied"}
 									if c.IsSet("allow-missing-template-keys") {
-										argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
 									}
 									if c.IsSet("create-annotation") {
-										argv = append(argv, "--"+"create-annotation", c.String("create-annotation"))
+										if c.Bool("create-annotation") {
+											argv = append(argv, "--create-annotation")
+										}
 									}
 									if c.IsSet("dry-run") {
-										argv = append(argv, "--"+"dry-run", c.String("dry-run"))
+										argv = append(argv, "--dry-run", c.String("dry-run"))
 									}
 									if c.IsSet("filename") {
-										argv = append(argv, "--"+"filename", c.String("filename"))
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("show-managed-fields") {
-										argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--"+"template", c.String("template"))
+										argv = append(argv, "--template", c.String("template"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -353,11 +455,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "view-last-applied",
 						Usage: "View the latest last-applied-configuration annotations by type/name or file.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "all"},
-							&cli.StringFlag{Name: "filename"},
+							&cli.BoolFlag{Name: "all"},
+							&cli.StringSliceFlag{Name: "filename"},
 							&cli.StringFlag{Name: "kustomize"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "recursive"},
 							&cli.StringFlag{Name: "selector"},
 						},
 						Action: verb.Wrap(
@@ -366,33 +468,47 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--all"] = c.String("all")
-									args["--filename"] = c.String("filename")
+									var positional []string
+									_ = positional
+									if c.Bool("all") {
+										args["--all"] = "true"
+									}
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
 									args["--kustomize"] = c.String("kustomize")
 									args["--output"] = c.String("output")
-									args["--recursive"] = c.String("recursive")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
 									args["--selector"] = c.String("selector")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"apply", "view-last-applied"}
 									if c.IsSet("all") {
-										argv = append(argv, "--"+"all", c.String("all"))
+										if c.Bool("all") {
+											argv = append(argv, "--all")
+										}
 									}
 									if c.IsSet("filename") {
-										argv = append(argv, "--"+"filename", c.String("filename"))
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
 									}
 									if c.IsSet("kustomize") {
-										argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+										argv = append(argv, "--kustomize", c.String("kustomize"))
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("recursive") {
-										argv = append(argv, "--"+"recursive", c.String("recursive"))
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
 									}
 									if c.IsSet("selector") {
-										argv = append(argv, "--"+"selector", c.String("selector"))
+										argv = append(argv, "--selector", c.String("selector"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -411,10 +527,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "can-i",
 						Usage: "Check whether an action is allowed.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "all-namespaces"},
-							&cli.StringFlag{Name: "list"},
-							&cli.StringFlag{Name: "no-headers"},
-							&cli.StringFlag{Name: "quiet"},
+							&cli.BoolFlag{Name: "all-namespaces"},
+							&cli.BoolFlag{Name: "list"},
+							&cli.BoolFlag{Name: "no-headers"},
+							&cli.BoolFlag{Name: "quiet"},
 							&cli.StringFlag{Name: "subresource"},
 						},
 						Action: verb.Wrap(
@@ -423,29 +539,47 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--all-namespaces"] = c.String("all-namespaces")
-									args["--list"] = c.String("list")
-									args["--no-headers"] = c.String("no-headers")
-									args["--quiet"] = c.String("quiet")
+									var positional []string
+									_ = positional
+									if c.Bool("all-namespaces") {
+										args["--all-namespaces"] = "true"
+									}
+									if c.Bool("list") {
+										args["--list"] = "true"
+									}
+									if c.Bool("no-headers") {
+										args["--no-headers"] = "true"
+									}
+									if c.Bool("quiet") {
+										args["--quiet"] = "true"
+									}
 									args["--subresource"] = c.String("subresource")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"auth", "can-i"}
 									if c.IsSet("all-namespaces") {
-										argv = append(argv, "--"+"all-namespaces", c.String("all-namespaces"))
+										if c.Bool("all-namespaces") {
+											argv = append(argv, "--all-namespaces")
+										}
 									}
 									if c.IsSet("list") {
-										argv = append(argv, "--"+"list", c.String("list"))
+										if c.Bool("list") {
+											argv = append(argv, "--list")
+										}
 									}
 									if c.IsSet("no-headers") {
-										argv = append(argv, "--"+"no-headers", c.String("no-headers"))
+										if c.Bool("no-headers") {
+											argv = append(argv, "--no-headers")
+										}
 									}
 									if c.IsSet("quiet") {
-										argv = append(argv, "--"+"quiet", c.String("quiet"))
+										if c.Bool("quiet") {
+											argv = append(argv, "--quiet")
+										}
 									}
 									if c.IsSet("subresource") {
-										argv = append(argv, "--"+"subresource", c.String("subresource"))
+										argv = append(argv, "--subresource", c.String("subresource"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -458,66 +592,92 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "reconcile",
 						Usage: "Reconciles rules for RBAC role, role binding, cluster role, and cluster role binding objects.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "allow-missing-template-keys"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
 							&cli.StringFlag{Name: "dry-run"},
-							&cli.StringFlag{Name: "filename"},
+							&cli.StringSliceFlag{Name: "filename"},
 							&cli.StringFlag{Name: "kustomize"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "recursive"},
-							&cli.StringFlag{Name: "remove-extra-permissions"},
-							&cli.StringFlag{Name: "remove-extra-subjects"},
-							&cli.StringFlag{Name: "show-managed-fields"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "remove-extra-permissions"},
+							&cli.BoolFlag{Name: "remove-extra-subjects"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "kubectl.auth.reconcile",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
 									args["--dry-run"] = c.String("dry-run")
-									args["--filename"] = c.String("filename")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
 									args["--kustomize"] = c.String("kustomize")
 									args["--output"] = c.String("output")
-									args["--recursive"] = c.String("recursive")
-									args["--remove-extra-permissions"] = c.String("remove-extra-permissions")
-									args["--remove-extra-subjects"] = c.String("remove-extra-subjects")
-									args["--show-managed-fields"] = c.String("show-managed-fields")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									if c.Bool("remove-extra-permissions") {
+										args["--remove-extra-permissions"] = "true"
+									}
+									if c.Bool("remove-extra-subjects") {
+										args["--remove-extra-subjects"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
 									args["--template"] = c.String("template")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"auth", "reconcile"}
 									if c.IsSet("allow-missing-template-keys") {
-										argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
 									}
 									if c.IsSet("dry-run") {
-										argv = append(argv, "--"+"dry-run", c.String("dry-run"))
+										argv = append(argv, "--dry-run", c.String("dry-run"))
 									}
 									if c.IsSet("filename") {
-										argv = append(argv, "--"+"filename", c.String("filename"))
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
 									}
 									if c.IsSet("kustomize") {
-										argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+										argv = append(argv, "--kustomize", c.String("kustomize"))
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("recursive") {
-										argv = append(argv, "--"+"recursive", c.String("recursive"))
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
 									}
 									if c.IsSet("remove-extra-permissions") {
-										argv = append(argv, "--"+"remove-extra-permissions", c.String("remove-extra-permissions"))
+										if c.Bool("remove-extra-permissions") {
+											argv = append(argv, "--remove-extra-permissions")
+										}
 									}
 									if c.IsSet("remove-extra-subjects") {
-										argv = append(argv, "--"+"remove-extra-subjects", c.String("remove-extra-subjects"))
+										if c.Bool("remove-extra-subjects") {
+											argv = append(argv, "--remove-extra-subjects")
+										}
 									}
 									if c.IsSet("show-managed-fields") {
-										argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--"+"template", c.String("template"))
+										argv = append(argv, "--template", c.String("template"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -530,9 +690,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "whoami",
 						Usage: "Experimental: Check who you are and your attributes (groups, extra).",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "allow-missing-template-keys"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "show-managed-fields"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 						},
 						Action: verb.Wrap(
@@ -541,25 +701,35 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
 									args["--output"] = c.String("output")
-									args["--show-managed-fields"] = c.String("show-managed-fields")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
 									args["--template"] = c.String("template")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"auth", "whoami"}
 									if c.IsSet("allow-missing-template-keys") {
-										argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("show-managed-fields") {
-										argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--"+"template", c.String("template"))
+										argv = append(argv, "--template", c.String("template"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -574,19 +744,19 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Name:  "autoscale",
 				Usage: "Creates an autoscaler that automatically chooses and sets the number of pods that run in a Kubernetes cluster.",
 				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "allow-missing-template-keys"},
-					&cli.StringFlag{Name: "cpu-percent"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
+					&cli.IntFlag{Name: "cpu-percent"},
 					&cli.StringFlag{Name: "dry-run"},
 					&cli.StringFlag{Name: "field-manager"},
-					&cli.StringFlag{Name: "filename"},
+					&cli.StringSliceFlag{Name: "filename"},
 					&cli.StringFlag{Name: "kustomize"},
-					&cli.StringFlag{Name: "max"},
-					&cli.StringFlag{Name: "min"},
+					&cli.IntFlag{Name: "max"},
+					&cli.IntFlag{Name: "min"},
 					&cli.StringFlag{Name: "name"},
 					&cli.StringFlag{Name: "output"},
-					&cli.StringFlag{Name: "recursive"},
-					&cli.StringFlag{Name: "save-config"},
-					&cli.StringFlag{Name: "show-managed-fields"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.BoolFlag{Name: "save-config"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "template"},
 				},
 				Action: verb.Wrap(
@@ -595,65 +765,87 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.Mutating,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
-							args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-							args["--cpu-percent"] = c.String("cpu-percent")
+							var positional []string
+							_ = positional
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
+							args["--cpu-percent"] = strconv.Itoa(int(c.Int("cpu-percent")))
 							args["--dry-run"] = c.String("dry-run")
 							args["--field-manager"] = c.String("field-manager")
-							args["--filename"] = c.String("filename")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
 							args["--kustomize"] = c.String("kustomize")
-							args["--max"] = c.String("max")
-							args["--min"] = c.String("min")
+							args["--max"] = strconv.Itoa(int(c.Int("max")))
+							args["--min"] = strconv.Itoa(int(c.Int("min")))
 							args["--name"] = c.String("name")
 							args["--output"] = c.String("output")
-							args["--recursive"] = c.String("recursive")
-							args["--save-config"] = c.String("save-config")
-							args["--show-managed-fields"] = c.String("show-managed-fields")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							if c.Bool("save-config") {
+								args["--save-config"] = "true"
+							}
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
 							args["--template"] = c.String("template")
-							return args, nil, c.String("token")
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"autoscale"}
 							if c.IsSet("allow-missing-template-keys") {
-								argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
 							}
 							if c.IsSet("cpu-percent") {
-								argv = append(argv, "--"+"cpu-percent", c.String("cpu-percent"))
+								argv = append(argv, "--cpu-percent", strconv.Itoa(int(c.Int("cpu-percent"))))
 							}
 							if c.IsSet("dry-run") {
-								argv = append(argv, "--"+"dry-run", c.String("dry-run"))
+								argv = append(argv, "--dry-run", c.String("dry-run"))
 							}
 							if c.IsSet("field-manager") {
-								argv = append(argv, "--"+"field-manager", c.String("field-manager"))
+								argv = append(argv, "--field-manager", c.String("field-manager"))
 							}
 							if c.IsSet("filename") {
-								argv = append(argv, "--"+"filename", c.String("filename"))
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
 							}
 							if c.IsSet("kustomize") {
-								argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+								argv = append(argv, "--kustomize", c.String("kustomize"))
 							}
 							if c.IsSet("max") {
-								argv = append(argv, "--"+"max", c.String("max"))
+								argv = append(argv, "--max", strconv.Itoa(int(c.Int("max"))))
 							}
 							if c.IsSet("min") {
-								argv = append(argv, "--"+"min", c.String("min"))
+								argv = append(argv, "--min", strconv.Itoa(int(c.Int("min"))))
 							}
 							if c.IsSet("name") {
-								argv = append(argv, "--"+"name", c.String("name"))
+								argv = append(argv, "--name", c.String("name"))
 							}
 							if c.IsSet("output") {
-								argv = append(argv, "--"+"output", c.String("output"))
+								argv = append(argv, "--output", c.String("output"))
 							}
 							if c.IsSet("recursive") {
-								argv = append(argv, "--"+"recursive", c.String("recursive"))
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
 							}
 							if c.IsSet("save-config") {
-								argv = append(argv, "--"+"save-config", c.String("save-config"))
+								if c.Bool("save-config") {
+									argv = append(argv, "--save-config")
+								}
 							}
 							if c.IsSet("show-managed-fields") {
-								argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
 							}
 							if c.IsSet("template") {
-								argv = append(argv, "--"+"template", c.String("template"))
+								argv = append(argv, "--template", c.String("template"))
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -670,56 +862,78 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "approve",
 						Usage: "Approve a certificate signing request.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "allow-missing-template-keys"},
-							&cli.StringFlag{Name: "filename"},
-							&cli.StringFlag{Name: "force"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.BoolFlag{Name: "force"},
 							&cli.StringFlag{Name: "kustomize"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "recursive"},
-							&cli.StringFlag{Name: "show-managed-fields"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "kubectl.certificate.approve",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-									args["--filename"] = c.String("filename")
-									args["--force"] = c.String("force")
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									if c.Bool("force") {
+										args["--force"] = "true"
+									}
 									args["--kustomize"] = c.String("kustomize")
 									args["--output"] = c.String("output")
-									args["--recursive"] = c.String("recursive")
-									args["--show-managed-fields"] = c.String("show-managed-fields")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
 									args["--template"] = c.String("template")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"certificate", "approve"}
 									if c.IsSet("allow-missing-template-keys") {
-										argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
 									}
 									if c.IsSet("filename") {
-										argv = append(argv, "--"+"filename", c.String("filename"))
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
 									}
 									if c.IsSet("force") {
-										argv = append(argv, "--"+"force", c.String("force"))
+										if c.Bool("force") {
+											argv = append(argv, "--force")
+										}
 									}
 									if c.IsSet("kustomize") {
-										argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+										argv = append(argv, "--kustomize", c.String("kustomize"))
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("recursive") {
-										argv = append(argv, "--"+"recursive", c.String("recursive"))
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
 									}
 									if c.IsSet("show-managed-fields") {
-										argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--"+"template", c.String("template"))
+										argv = append(argv, "--template", c.String("template"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -732,56 +946,78 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "deny",
 						Usage: "Deny a certificate signing request.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "allow-missing-template-keys"},
-							&cli.StringFlag{Name: "filename"},
-							&cli.StringFlag{Name: "force"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.BoolFlag{Name: "force"},
 							&cli.StringFlag{Name: "kustomize"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "recursive"},
-							&cli.StringFlag{Name: "show-managed-fields"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "kubectl.certificate.deny",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-									args["--filename"] = c.String("filename")
-									args["--force"] = c.String("force")
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									if c.Bool("force") {
+										args["--force"] = "true"
+									}
 									args["--kustomize"] = c.String("kustomize")
 									args["--output"] = c.String("output")
-									args["--recursive"] = c.String("recursive")
-									args["--show-managed-fields"] = c.String("show-managed-fields")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
 									args["--template"] = c.String("template")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"certificate", "deny"}
 									if c.IsSet("allow-missing-template-keys") {
-										argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
 									}
 									if c.IsSet("filename") {
-										argv = append(argv, "--"+"filename", c.String("filename"))
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
 									}
 									if c.IsSet("force") {
-										argv = append(argv, "--"+"force", c.String("force"))
+										if c.Bool("force") {
+											argv = append(argv, "--force")
+										}
 									}
 									if c.IsSet("kustomize") {
-										argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+										argv = append(argv, "--kustomize", c.String("kustomize"))
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("recursive") {
-										argv = append(argv, "--"+"recursive", c.String("recursive"))
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
 									}
 									if c.IsSet("show-managed-fields") {
-										argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--"+"template", c.String("template"))
+										argv = append(argv, "--template", c.String("template"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -800,13 +1036,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "dump",
 						Usage: "Dump cluster information out suitable for debugging and diagnosing cluster problems.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "all-namespaces"},
-							&cli.StringFlag{Name: "allow-missing-template-keys"},
-							&cli.StringFlag{Name: "namespaces"},
+							&cli.BoolFlag{Name: "all-namespaces"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringSliceFlag{Name: "namespaces"},
 							&cli.StringFlag{Name: "output"},
 							&cli.StringFlag{Name: "output-directory"},
 							&cli.StringFlag{Name: "pod-running-timeout"},
-							&cli.StringFlag{Name: "show-managed-fields"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 						},
 						Action: verb.Wrap(
@@ -815,41 +1051,59 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--all-namespaces"] = c.String("all-namespaces")
-									args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-									args["--namespaces"] = c.String("namespaces")
+									var positional []string
+									_ = positional
+									if c.Bool("all-namespaces") {
+										args["--all-namespaces"] = "true"
+									}
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									for _, v := range c.StringSlice("namespaces") {
+										positional = append(positional, v)
+									}
 									args["--output"] = c.String("output")
 									args["--output-directory"] = c.String("output-directory")
 									args["--pod-running-timeout"] = c.String("pod-running-timeout")
-									args["--show-managed-fields"] = c.String("show-managed-fields")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
 									args["--template"] = c.String("template")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"cluster-info", "dump"}
 									if c.IsSet("all-namespaces") {
-										argv = append(argv, "--"+"all-namespaces", c.String("all-namespaces"))
+										if c.Bool("all-namespaces") {
+											argv = append(argv, "--all-namespaces")
+										}
 									}
 									if c.IsSet("allow-missing-template-keys") {
-										argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
 									}
 									if c.IsSet("namespaces") {
-										argv = append(argv, "--"+"namespaces", c.String("namespaces"))
+										for _, v := range c.StringSlice("namespaces") {
+											argv = append(argv, "--namespaces", v)
+										}
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("output-directory") {
-										argv = append(argv, "--"+"output-directory", c.String("output-directory"))
+										argv = append(argv, "--output-directory", c.String("output-directory"))
 									}
 									if c.IsSet("pod-running-timeout") {
-										argv = append(argv, "--"+"pod-running-timeout", c.String("pod-running-timeout"))
+										argv = append(argv, "--pod-running-timeout", c.String("pod-running-timeout"))
 									}
 									if c.IsSet("show-managed-fields") {
-										argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--"+"template", c.String("template"))
+										argv = append(argv, "--template", c.String("template"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -873,7 +1127,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									var positional []string
+									_ = positional
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "current-context"}
@@ -893,7 +1149,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									var positional []string
+									_ = positional
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "delete-cluster"}
@@ -913,7 +1171,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									var positional []string
+									_ = positional
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "delete-context"}
@@ -933,7 +1193,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									var positional []string
+									_ = positional
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "delete-user"}
@@ -953,7 +1215,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									var positional []string
+									_ = positional
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "get-clusters"}
@@ -968,7 +1232,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "get-contexts",
 						Usage: "Display one or many contexts from the kubeconfig file.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "no-headers"},
+							&cli.BoolFlag{Name: "no-headers"},
 							&cli.StringFlag{Name: "output"},
 						},
 						Action: verb.Wrap(
@@ -977,17 +1241,23 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--no-headers"] = c.String("no-headers")
+									var positional []string
+									_ = positional
+									if c.Bool("no-headers") {
+										args["--no-headers"] = "true"
+									}
 									args["--output"] = c.String("output")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "get-contexts"}
 									if c.IsSet("no-headers") {
-										argv = append(argv, "--"+"no-headers", c.String("no-headers"))
+										if c.Bool("no-headers") {
+											argv = append(argv, "--no-headers")
+										}
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -1005,7 +1275,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									var positional []string
+									_ = positional
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "get-users"}
@@ -1025,7 +1297,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									var positional []string
+									_ = positional
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "rename-context"}
@@ -1040,7 +1314,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "set",
 						Usage: "Set an individual value in a kubeconfig file.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "set-raw-bytes"},
+							&cli.BoolFlag{Name: "set-raw-bytes"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1048,13 +1322,19 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--set-raw-bytes"] = c.String("set-raw-bytes")
-									return args, nil, c.String("token")
+									var positional []string
+									_ = positional
+									if c.Bool("set-raw-bytes") {
+										args["--set-raw-bytes"] = "true"
+									}
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "set"}
 									if c.IsSet("set-raw-bytes") {
-										argv = append(argv, "--"+"set-raw-bytes", c.String("set-raw-bytes"))
+										if c.Bool("set-raw-bytes") {
+											argv = append(argv, "--set-raw-bytes")
+										}
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -1072,7 +1352,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									var positional []string
+									_ = positional
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "set-cluster"}
@@ -1092,7 +1374,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									var positional []string
+									_ = positional
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "set-context"}
@@ -1112,7 +1396,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									var positional []string
+									_ = positional
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "set-credentials"}
@@ -1129,10 +1415,12 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "kubectl.config.unset",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									var positional []string
+									_ = positional
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "unset"}
@@ -1149,10 +1437,12 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "kubectl.config.use-context",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									return args, nil, c.String("token")
+									var positional []string
+									_ = positional
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "use-context"}
@@ -1167,13 +1457,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "view",
 						Usage: "Display merged kubeconfig settings or a specified kubeconfig file.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "allow-missing-template-keys"},
-							&cli.StringFlag{Name: "flatten"},
-							&cli.StringFlag{Name: "merge"},
-							&cli.StringFlag{Name: "minify"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.BoolFlag{Name: "flatten"},
+							&cli.BoolFlag{Name: "merge"},
+							&cli.BoolFlag{Name: "minify"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "raw"},
-							&cli.StringFlag{Name: "show-managed-fields"},
+							&cli.BoolFlag{Name: "raw"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 						},
 						Action: verb.Wrap(
@@ -1182,41 +1472,67 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-									args["--flatten"] = c.String("flatten")
-									args["--merge"] = c.String("merge")
-									args["--minify"] = c.String("minify")
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									if c.Bool("flatten") {
+										args["--flatten"] = "true"
+									}
+									if c.Bool("merge") {
+										args["--merge"] = "true"
+									}
+									if c.Bool("minify") {
+										args["--minify"] = "true"
+									}
 									args["--output"] = c.String("output")
-									args["--raw"] = c.String("raw")
-									args["--show-managed-fields"] = c.String("show-managed-fields")
+									if c.Bool("raw") {
+										args["--raw"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
 									args["--template"] = c.String("template")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "view"}
 									if c.IsSet("allow-missing-template-keys") {
-										argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
 									}
 									if c.IsSet("flatten") {
-										argv = append(argv, "--"+"flatten", c.String("flatten"))
+										if c.Bool("flatten") {
+											argv = append(argv, "--flatten")
+										}
 									}
 									if c.IsSet("merge") {
-										argv = append(argv, "--"+"merge", c.String("merge"))
+										if c.Bool("merge") {
+											argv = append(argv, "--merge")
+										}
 									}
 									if c.IsSet("minify") {
-										argv = append(argv, "--"+"minify", c.String("minify"))
+										if c.Bool("minify") {
+											argv = append(argv, "--minify")
+										}
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("raw") {
-										argv = append(argv, "--"+"raw", c.String("raw"))
+										if c.Bool("raw") {
+											argv = append(argv, "--raw")
+										}
 									}
 									if c.IsSet("show-managed-fields") {
-										argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--"+"template", c.String("template"))
+										argv = append(argv, "--template", c.String("template"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -1240,17 +1556,19 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.Mutating,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
+							var positional []string
+							_ = positional
 							args["--dry-run"] = c.String("dry-run")
 							args["--selector"] = c.String("selector")
-							return args, nil, c.String("token")
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"cordon"}
 							if c.IsSet("dry-run") {
-								argv = append(argv, "--"+"dry-run", c.String("dry-run"))
+								argv = append(argv, "--dry-run", c.String("dry-run"))
 							}
 							if c.IsSet("selector") {
-								argv = append(argv, "--"+"selector", c.String("selector"))
+								argv = append(argv, "--selector", c.String("selector"))
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -1263,13 +1581,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Name:  "describe",
 				Usage: "Show details of a specific resource or group of resources.",
 				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "all-namespaces"},
-					&cli.StringFlag{Name: "chunk-size"},
-					&cli.StringFlag{Name: "filename"},
+					&cli.BoolFlag{Name: "all-namespaces"},
+					&cli.IntFlag{Name: "chunk-size"},
+					&cli.StringSliceFlag{Name: "filename"},
 					&cli.StringFlag{Name: "kustomize"},
-					&cli.StringFlag{Name: "recursive"},
+					&cli.BoolFlag{Name: "recursive"},
 					&cli.StringFlag{Name: "selector"},
-					&cli.StringFlag{Name: "show-events"},
+					&cli.BoolFlag{Name: "show-events"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
@@ -1277,37 +1595,55 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.ReadOnly,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
-							args["--all-namespaces"] = c.String("all-namespaces")
-							args["--chunk-size"] = c.String("chunk-size")
-							args["--filename"] = c.String("filename")
+							var positional []string
+							_ = positional
+							if c.Bool("all-namespaces") {
+								args["--all-namespaces"] = "true"
+							}
+							args["--chunk-size"] = strconv.Itoa(int(c.Int("chunk-size")))
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
 							args["--kustomize"] = c.String("kustomize")
-							args["--recursive"] = c.String("recursive")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
 							args["--selector"] = c.String("selector")
-							args["--show-events"] = c.String("show-events")
-							return args, nil, c.String("token")
+							if c.Bool("show-events") {
+								args["--show-events"] = "true"
+							}
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"describe"}
 							if c.IsSet("all-namespaces") {
-								argv = append(argv, "--"+"all-namespaces", c.String("all-namespaces"))
+								if c.Bool("all-namespaces") {
+									argv = append(argv, "--all-namespaces")
+								}
 							}
 							if c.IsSet("chunk-size") {
-								argv = append(argv, "--"+"chunk-size", c.String("chunk-size"))
+								argv = append(argv, "--chunk-size", strconv.Itoa(int(c.Int("chunk-size"))))
 							}
 							if c.IsSet("filename") {
-								argv = append(argv, "--"+"filename", c.String("filename"))
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
 							}
 							if c.IsSet("kustomize") {
-								argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+								argv = append(argv, "--kustomize", c.String("kustomize"))
 							}
 							if c.IsSet("recursive") {
-								argv = append(argv, "--"+"recursive", c.String("recursive"))
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
 							}
 							if c.IsSet("selector") {
-								argv = append(argv, "--"+"selector", c.String("selector"))
+								argv = append(argv, "--selector", c.String("selector"))
 							}
 							if c.IsSet("show-events") {
-								argv = append(argv, "--"+"show-events", c.String("show-events"))
+								if c.Bool("show-events") {
+									argv = append(argv, "--show-events")
+								}
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -1321,15 +1657,15 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Usage: "Diff configurations specified by file name or stdin between the current online configuration, and the configuration as it would be if applied.",
 				Flags: []cli.Flag{
 					&cli.StringFlag{Name: "field-manager"},
-					&cli.StringFlag{Name: "filename"},
-					&cli.StringFlag{Name: "force-conflicts"},
+					&cli.StringSliceFlag{Name: "filename"},
+					&cli.BoolFlag{Name: "force-conflicts"},
 					&cli.StringFlag{Name: "kustomize"},
-					&cli.StringFlag{Name: "prune"},
-					&cli.StringFlag{Name: "prune-allowlist"},
-					&cli.StringFlag{Name: "recursive"},
+					&cli.BoolFlag{Name: "prune"},
+					&cli.StringSliceFlag{Name: "prune-allowlist"},
+					&cli.BoolFlag{Name: "recursive"},
 					&cli.StringFlag{Name: "selector"},
-					&cli.StringFlag{Name: "server-side"},
-					&cli.StringFlag{Name: "show-managed-fields"},
+					&cli.BoolFlag{Name: "server-side"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
@@ -1337,49 +1673,79 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.ReadOnly,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
+							var positional []string
+							_ = positional
 							args["--field-manager"] = c.String("field-manager")
-							args["--filename"] = c.String("filename")
-							args["--force-conflicts"] = c.String("force-conflicts")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
+							if c.Bool("force-conflicts") {
+								args["--force-conflicts"] = "true"
+							}
 							args["--kustomize"] = c.String("kustomize")
-							args["--prune"] = c.String("prune")
-							args["--prune-allowlist"] = c.String("prune-allowlist")
-							args["--recursive"] = c.String("recursive")
+							if c.Bool("prune") {
+								args["--prune"] = "true"
+							}
+							for _, v := range c.StringSlice("prune-allowlist") {
+								positional = append(positional, v)
+							}
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
 							args["--selector"] = c.String("selector")
-							args["--server-side"] = c.String("server-side")
-							args["--show-managed-fields"] = c.String("show-managed-fields")
-							return args, nil, c.String("token")
+							if c.Bool("server-side") {
+								args["--server-side"] = "true"
+							}
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"diff"}
 							if c.IsSet("field-manager") {
-								argv = append(argv, "--"+"field-manager", c.String("field-manager"))
+								argv = append(argv, "--field-manager", c.String("field-manager"))
 							}
 							if c.IsSet("filename") {
-								argv = append(argv, "--"+"filename", c.String("filename"))
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
 							}
 							if c.IsSet("force-conflicts") {
-								argv = append(argv, "--"+"force-conflicts", c.String("force-conflicts"))
+								if c.Bool("force-conflicts") {
+									argv = append(argv, "--force-conflicts")
+								}
 							}
 							if c.IsSet("kustomize") {
-								argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+								argv = append(argv, "--kustomize", c.String("kustomize"))
 							}
 							if c.IsSet("prune") {
-								argv = append(argv, "--"+"prune", c.String("prune"))
+								if c.Bool("prune") {
+									argv = append(argv, "--prune")
+								}
 							}
 							if c.IsSet("prune-allowlist") {
-								argv = append(argv, "--"+"prune-allowlist", c.String("prune-allowlist"))
+								for _, v := range c.StringSlice("prune-allowlist") {
+									argv = append(argv, "--prune-allowlist", v)
+								}
 							}
 							if c.IsSet("recursive") {
-								argv = append(argv, "--"+"recursive", c.String("recursive"))
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
 							}
 							if c.IsSet("selector") {
-								argv = append(argv, "--"+"selector", c.String("selector"))
+								argv = append(argv, "--selector", c.String("selector"))
 							}
 							if c.IsSet("server-side") {
-								argv = append(argv, "--"+"server-side", c.String("server-side"))
+								if c.Bool("server-side") {
+									argv = append(argv, "--server-side")
+								}
 							}
 							if c.IsSet("show-managed-fields") {
-								argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -1392,16 +1758,16 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Name:  "drain",
 				Usage: "Drain node in preparation for maintenance.",
 				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "chunk-size"},
-					&cli.StringFlag{Name: "delete-emptydir-data"},
-					&cli.StringFlag{Name: "disable-eviction"},
+					&cli.IntFlag{Name: "chunk-size"},
+					&cli.BoolFlag{Name: "delete-emptydir-data"},
+					&cli.BoolFlag{Name: "disable-eviction"},
 					&cli.StringFlag{Name: "dry-run"},
-					&cli.StringFlag{Name: "force"},
-					&cli.StringFlag{Name: "grace-period"},
-					&cli.StringFlag{Name: "ignore-daemonsets"},
+					&cli.BoolFlag{Name: "force"},
+					&cli.IntFlag{Name: "grace-period"},
+					&cli.BoolFlag{Name: "ignore-daemonsets"},
 					&cli.StringFlag{Name: "pod-selector"},
 					&cli.StringFlag{Name: "selector"},
-					&cli.StringFlag{Name: "skip-wait-for-delete-timeout"},
+					&cli.IntFlag{Name: "skip-wait-for-delete-timeout"},
 					&cli.StringFlag{Name: "timeout"},
 				},
 				Action: verb.Wrap(
@@ -1410,53 +1776,71 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.Mutating,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
-							args["--chunk-size"] = c.String("chunk-size")
-							args["--delete-emptydir-data"] = c.String("delete-emptydir-data")
-							args["--disable-eviction"] = c.String("disable-eviction")
+							var positional []string
+							_ = positional
+							args["--chunk-size"] = strconv.Itoa(int(c.Int("chunk-size")))
+							if c.Bool("delete-emptydir-data") {
+								args["--delete-emptydir-data"] = "true"
+							}
+							if c.Bool("disable-eviction") {
+								args["--disable-eviction"] = "true"
+							}
 							args["--dry-run"] = c.String("dry-run")
-							args["--force"] = c.String("force")
-							args["--grace-period"] = c.String("grace-period")
-							args["--ignore-daemonsets"] = c.String("ignore-daemonsets")
+							if c.Bool("force") {
+								args["--force"] = "true"
+							}
+							args["--grace-period"] = strconv.Itoa(int(c.Int("grace-period")))
+							if c.Bool("ignore-daemonsets") {
+								args["--ignore-daemonsets"] = "true"
+							}
 							args["--pod-selector"] = c.String("pod-selector")
 							args["--selector"] = c.String("selector")
-							args["--skip-wait-for-delete-timeout"] = c.String("skip-wait-for-delete-timeout")
+							args["--skip-wait-for-delete-timeout"] = strconv.Itoa(int(c.Int("skip-wait-for-delete-timeout")))
 							args["--timeout"] = c.String("timeout")
-							return args, nil, c.String("token")
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"drain"}
 							if c.IsSet("chunk-size") {
-								argv = append(argv, "--"+"chunk-size", c.String("chunk-size"))
+								argv = append(argv, "--chunk-size", strconv.Itoa(int(c.Int("chunk-size"))))
 							}
 							if c.IsSet("delete-emptydir-data") {
-								argv = append(argv, "--"+"delete-emptydir-data", c.String("delete-emptydir-data"))
+								if c.Bool("delete-emptydir-data") {
+									argv = append(argv, "--delete-emptydir-data")
+								}
 							}
 							if c.IsSet("disable-eviction") {
-								argv = append(argv, "--"+"disable-eviction", c.String("disable-eviction"))
+								if c.Bool("disable-eviction") {
+									argv = append(argv, "--disable-eviction")
+								}
 							}
 							if c.IsSet("dry-run") {
-								argv = append(argv, "--"+"dry-run", c.String("dry-run"))
+								argv = append(argv, "--dry-run", c.String("dry-run"))
 							}
 							if c.IsSet("force") {
-								argv = append(argv, "--"+"force", c.String("force"))
+								if c.Bool("force") {
+									argv = append(argv, "--force")
+								}
 							}
 							if c.IsSet("grace-period") {
-								argv = append(argv, "--"+"grace-period", c.String("grace-period"))
+								argv = append(argv, "--grace-period", strconv.Itoa(int(c.Int("grace-period"))))
 							}
 							if c.IsSet("ignore-daemonsets") {
-								argv = append(argv, "--"+"ignore-daemonsets", c.String("ignore-daemonsets"))
+								if c.Bool("ignore-daemonsets") {
+									argv = append(argv, "--ignore-daemonsets")
+								}
 							}
 							if c.IsSet("pod-selector") {
-								argv = append(argv, "--"+"pod-selector", c.String("pod-selector"))
+								argv = append(argv, "--pod-selector", c.String("pod-selector"))
 							}
 							if c.IsSet("selector") {
-								argv = append(argv, "--"+"selector", c.String("selector"))
+								argv = append(argv, "--selector", c.String("selector"))
 							}
 							if c.IsSet("skip-wait-for-delete-timeout") {
-								argv = append(argv, "--"+"skip-wait-for-delete-timeout", c.String("skip-wait-for-delete-timeout"))
+								argv = append(argv, "--skip-wait-for-delete-timeout", strconv.Itoa(int(c.Int("skip-wait-for-delete-timeout"))))
 							}
 							if c.IsSet("timeout") {
-								argv = append(argv, "--"+"timeout", c.String("timeout"))
+								argv = append(argv, "--timeout", c.String("timeout"))
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -1469,16 +1853,16 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Name:  "events",
 				Usage: "Display events",
 				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "all-namespaces"},
-					&cli.StringFlag{Name: "allow-missing-template-keys"},
-					&cli.StringFlag{Name: "chunk-size"},
+					&cli.BoolFlag{Name: "all-namespaces"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
+					&cli.IntFlag{Name: "chunk-size"},
 					&cli.StringFlag{Name: "for"},
-					&cli.StringFlag{Name: "no-headers"},
+					&cli.BoolFlag{Name: "no-headers"},
 					&cli.StringFlag{Name: "output"},
-					&cli.StringFlag{Name: "show-managed-fields"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "template"},
-					&cli.StringFlag{Name: "types"},
-					&cli.StringFlag{Name: "watch"},
+					&cli.StringSliceFlag{Name: "types"},
+					&cli.BoolFlag{Name: "watch"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
@@ -1486,49 +1870,75 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.ReadOnly,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
-							args["--all-namespaces"] = c.String("all-namespaces")
-							args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-							args["--chunk-size"] = c.String("chunk-size")
+							var positional []string
+							_ = positional
+							if c.Bool("all-namespaces") {
+								args["--all-namespaces"] = "true"
+							}
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
+							args["--chunk-size"] = strconv.Itoa(int(c.Int("chunk-size")))
 							args["--for"] = c.String("for")
-							args["--no-headers"] = c.String("no-headers")
+							if c.Bool("no-headers") {
+								args["--no-headers"] = "true"
+							}
 							args["--output"] = c.String("output")
-							args["--show-managed-fields"] = c.String("show-managed-fields")
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
 							args["--template"] = c.String("template")
-							args["--types"] = c.String("types")
-							args["--watch"] = c.String("watch")
-							return args, nil, c.String("token")
+							for _, v := range c.StringSlice("types") {
+								positional = append(positional, v)
+							}
+							if c.Bool("watch") {
+								args["--watch"] = "true"
+							}
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"events"}
 							if c.IsSet("all-namespaces") {
-								argv = append(argv, "--"+"all-namespaces", c.String("all-namespaces"))
+								if c.Bool("all-namespaces") {
+									argv = append(argv, "--all-namespaces")
+								}
 							}
 							if c.IsSet("allow-missing-template-keys") {
-								argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
 							}
 							if c.IsSet("chunk-size") {
-								argv = append(argv, "--"+"chunk-size", c.String("chunk-size"))
+								argv = append(argv, "--chunk-size", strconv.Itoa(int(c.Int("chunk-size"))))
 							}
 							if c.IsSet("for") {
-								argv = append(argv, "--"+"for", c.String("for"))
+								argv = append(argv, "--for", c.String("for"))
 							}
 							if c.IsSet("no-headers") {
-								argv = append(argv, "--"+"no-headers", c.String("no-headers"))
+								if c.Bool("no-headers") {
+									argv = append(argv, "--no-headers")
+								}
 							}
 							if c.IsSet("output") {
-								argv = append(argv, "--"+"output", c.String("output"))
+								argv = append(argv, "--output", c.String("output"))
 							}
 							if c.IsSet("show-managed-fields") {
-								argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
 							}
 							if c.IsSet("template") {
-								argv = append(argv, "--"+"template", c.String("template"))
+								argv = append(argv, "--template", c.String("template"))
 							}
 							if c.IsSet("types") {
-								argv = append(argv, "--"+"types", c.String("types"))
+								for _, v := range c.StringSlice("types") {
+									argv = append(argv, "--types", v)
+								}
 							}
 							if c.IsSet("watch") {
-								argv = append(argv, "--"+"watch", c.String("watch"))
+								if c.Bool("watch") {
+									argv = append(argv, "--watch")
+								}
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -1541,22 +1951,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Name:  "label",
 				Usage: "Update the labels on a resource.",
 				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "all"},
-					&cli.StringFlag{Name: "all-namespaces"},
-					&cli.StringFlag{Name: "allow-missing-template-keys"},
+					&cli.BoolFlag{Name: "all"},
+					&cli.BoolFlag{Name: "all-namespaces"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
 					&cli.StringFlag{Name: "dry-run"},
 					&cli.StringFlag{Name: "field-manager"},
 					&cli.StringFlag{Name: "field-selector"},
-					&cli.StringFlag{Name: "filename"},
+					&cli.StringSliceFlag{Name: "filename"},
 					&cli.StringFlag{Name: "kustomize"},
-					&cli.StringFlag{Name: "list"},
-					&cli.StringFlag{Name: "local"},
+					&cli.BoolFlag{Name: "list"},
+					&cli.BoolFlag{Name: "local"},
 					&cli.StringFlag{Name: "output"},
-					&cli.StringFlag{Name: "overwrite"},
-					&cli.StringFlag{Name: "recursive"},
+					&cli.BoolFlag{Name: "overwrite"},
+					&cli.BoolFlag{Name: "recursive"},
 					&cli.StringFlag{Name: "resource-version"},
 					&cli.StringFlag{Name: "selector"},
-					&cli.StringFlag{Name: "show-managed-fields"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "template"},
 				},
 				Action: verb.Wrap(
@@ -1565,77 +1975,115 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.Mutating,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
-							args["--all"] = c.String("all")
-							args["--all-namespaces"] = c.String("all-namespaces")
-							args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
+							var positional []string
+							_ = positional
+							if c.Bool("all") {
+								args["--all"] = "true"
+							}
+							if c.Bool("all-namespaces") {
+								args["--all-namespaces"] = "true"
+							}
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
 							args["--dry-run"] = c.String("dry-run")
 							args["--field-manager"] = c.String("field-manager")
 							args["--field-selector"] = c.String("field-selector")
-							args["--filename"] = c.String("filename")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
 							args["--kustomize"] = c.String("kustomize")
-							args["--list"] = c.String("list")
-							args["--local"] = c.String("local")
+							if c.Bool("list") {
+								args["--list"] = "true"
+							}
+							if c.Bool("local") {
+								args["--local"] = "true"
+							}
 							args["--output"] = c.String("output")
-							args["--overwrite"] = c.String("overwrite")
-							args["--recursive"] = c.String("recursive")
+							if c.Bool("overwrite") {
+								args["--overwrite"] = "true"
+							}
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
 							args["--resource-version"] = c.String("resource-version")
 							args["--selector"] = c.String("selector")
-							args["--show-managed-fields"] = c.String("show-managed-fields")
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
 							args["--template"] = c.String("template")
-							return args, nil, c.String("token")
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"label"}
 							if c.IsSet("all") {
-								argv = append(argv, "--"+"all", c.String("all"))
+								if c.Bool("all") {
+									argv = append(argv, "--all")
+								}
 							}
 							if c.IsSet("all-namespaces") {
-								argv = append(argv, "--"+"all-namespaces", c.String("all-namespaces"))
+								if c.Bool("all-namespaces") {
+									argv = append(argv, "--all-namespaces")
+								}
 							}
 							if c.IsSet("allow-missing-template-keys") {
-								argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
 							}
 							if c.IsSet("dry-run") {
-								argv = append(argv, "--"+"dry-run", c.String("dry-run"))
+								argv = append(argv, "--dry-run", c.String("dry-run"))
 							}
 							if c.IsSet("field-manager") {
-								argv = append(argv, "--"+"field-manager", c.String("field-manager"))
+								argv = append(argv, "--field-manager", c.String("field-manager"))
 							}
 							if c.IsSet("field-selector") {
-								argv = append(argv, "--"+"field-selector", c.String("field-selector"))
+								argv = append(argv, "--field-selector", c.String("field-selector"))
 							}
 							if c.IsSet("filename") {
-								argv = append(argv, "--"+"filename", c.String("filename"))
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
 							}
 							if c.IsSet("kustomize") {
-								argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+								argv = append(argv, "--kustomize", c.String("kustomize"))
 							}
 							if c.IsSet("list") {
-								argv = append(argv, "--"+"list", c.String("list"))
+								if c.Bool("list") {
+									argv = append(argv, "--list")
+								}
 							}
 							if c.IsSet("local") {
-								argv = append(argv, "--"+"local", c.String("local"))
+								if c.Bool("local") {
+									argv = append(argv, "--local")
+								}
 							}
 							if c.IsSet("output") {
-								argv = append(argv, "--"+"output", c.String("output"))
+								argv = append(argv, "--output", c.String("output"))
 							}
 							if c.IsSet("overwrite") {
-								argv = append(argv, "--"+"overwrite", c.String("overwrite"))
+								if c.Bool("overwrite") {
+									argv = append(argv, "--overwrite")
+								}
 							}
 							if c.IsSet("recursive") {
-								argv = append(argv, "--"+"recursive", c.String("recursive"))
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
 							}
 							if c.IsSet("resource-version") {
-								argv = append(argv, "--"+"resource-version", c.String("resource-version"))
+								argv = append(argv, "--resource-version", c.String("resource-version"))
 							}
 							if c.IsSet("selector") {
-								argv = append(argv, "--"+"selector", c.String("selector"))
+								argv = append(argv, "--selector", c.String("selector"))
 							}
 							if c.IsSet("show-managed-fields") {
-								argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
 							}
 							if c.IsSet("template") {
-								argv = append(argv, "--"+"template", c.String("template"))
+								argv = append(argv, "--template", c.String("template"))
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -1648,21 +2096,21 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Name:  "logs",
 				Usage: "Print the logs for a container in a pod or specified resource.",
 				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "all-containers"},
+					&cli.BoolFlag{Name: "all-containers"},
 					&cli.StringFlag{Name: "container"},
-					&cli.StringFlag{Name: "follow"},
-					&cli.StringFlag{Name: "ignore-errors"},
-					&cli.StringFlag{Name: "insecure-skip-tls-verify-backend"},
-					&cli.StringFlag{Name: "limit-bytes"},
-					&cli.StringFlag{Name: "max-log-requests"},
+					&cli.BoolFlag{Name: "follow"},
+					&cli.BoolFlag{Name: "ignore-errors"},
+					&cli.BoolFlag{Name: "insecure-skip-tls-verify-backend"},
+					&cli.IntFlag{Name: "limit-bytes"},
+					&cli.IntFlag{Name: "max-log-requests"},
 					&cli.StringFlag{Name: "pod-running-timeout"},
-					&cli.StringFlag{Name: "prefix"},
-					&cli.StringFlag{Name: "previous"},
+					&cli.BoolFlag{Name: "prefix"},
+					&cli.BoolFlag{Name: "previous"},
 					&cli.StringFlag{Name: "selector"},
 					&cli.StringFlag{Name: "since"},
 					&cli.StringFlag{Name: "since-time"},
-					&cli.StringFlag{Name: "tail"},
-					&cli.StringFlag{Name: "timestamps"},
+					&cli.IntFlag{Name: "tail"},
+					&cli.BoolFlag{Name: "timestamps"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
@@ -1670,69 +2118,99 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.ReadOnly,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
-							args["--all-containers"] = c.String("all-containers")
+							var positional []string
+							_ = positional
+							if c.Bool("all-containers") {
+								args["--all-containers"] = "true"
+							}
 							args["--container"] = c.String("container")
-							args["--follow"] = c.String("follow")
-							args["--ignore-errors"] = c.String("ignore-errors")
-							args["--insecure-skip-tls-verify-backend"] = c.String("insecure-skip-tls-verify-backend")
-							args["--limit-bytes"] = c.String("limit-bytes")
-							args["--max-log-requests"] = c.String("max-log-requests")
+							if c.Bool("follow") {
+								args["--follow"] = "true"
+							}
+							if c.Bool("ignore-errors") {
+								args["--ignore-errors"] = "true"
+							}
+							if c.Bool("insecure-skip-tls-verify-backend") {
+								args["--insecure-skip-tls-verify-backend"] = "true"
+							}
+							args["--limit-bytes"] = strconv.Itoa(int(c.Int("limit-bytes")))
+							args["--max-log-requests"] = strconv.Itoa(int(c.Int("max-log-requests")))
 							args["--pod-running-timeout"] = c.String("pod-running-timeout")
-							args["--prefix"] = c.String("prefix")
-							args["--previous"] = c.String("previous")
+							if c.Bool("prefix") {
+								args["--prefix"] = "true"
+							}
+							if c.Bool("previous") {
+								args["--previous"] = "true"
+							}
 							args["--selector"] = c.String("selector")
 							args["--since"] = c.String("since")
 							args["--since-time"] = c.String("since-time")
-							args["--tail"] = c.String("tail")
-							args["--timestamps"] = c.String("timestamps")
-							return args, nil, c.String("token")
+							args["--tail"] = strconv.Itoa(int(c.Int("tail")))
+							if c.Bool("timestamps") {
+								args["--timestamps"] = "true"
+							}
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"logs"}
 							if c.IsSet("all-containers") {
-								argv = append(argv, "--"+"all-containers", c.String("all-containers"))
+								if c.Bool("all-containers") {
+									argv = append(argv, "--all-containers")
+								}
 							}
 							if c.IsSet("container") {
-								argv = append(argv, "--"+"container", c.String("container"))
+								argv = append(argv, "--container", c.String("container"))
 							}
 							if c.IsSet("follow") {
-								argv = append(argv, "--"+"follow", c.String("follow"))
+								if c.Bool("follow") {
+									argv = append(argv, "--follow")
+								}
 							}
 							if c.IsSet("ignore-errors") {
-								argv = append(argv, "--"+"ignore-errors", c.String("ignore-errors"))
+								if c.Bool("ignore-errors") {
+									argv = append(argv, "--ignore-errors")
+								}
 							}
 							if c.IsSet("insecure-skip-tls-verify-backend") {
-								argv = append(argv, "--"+"insecure-skip-tls-verify-backend", c.String("insecure-skip-tls-verify-backend"))
+								if c.Bool("insecure-skip-tls-verify-backend") {
+									argv = append(argv, "--insecure-skip-tls-verify-backend")
+								}
 							}
 							if c.IsSet("limit-bytes") {
-								argv = append(argv, "--"+"limit-bytes", c.String("limit-bytes"))
+								argv = append(argv, "--limit-bytes", strconv.Itoa(int(c.Int("limit-bytes"))))
 							}
 							if c.IsSet("max-log-requests") {
-								argv = append(argv, "--"+"max-log-requests", c.String("max-log-requests"))
+								argv = append(argv, "--max-log-requests", strconv.Itoa(int(c.Int("max-log-requests"))))
 							}
 							if c.IsSet("pod-running-timeout") {
-								argv = append(argv, "--"+"pod-running-timeout", c.String("pod-running-timeout"))
+								argv = append(argv, "--pod-running-timeout", c.String("pod-running-timeout"))
 							}
 							if c.IsSet("prefix") {
-								argv = append(argv, "--"+"prefix", c.String("prefix"))
+								if c.Bool("prefix") {
+									argv = append(argv, "--prefix")
+								}
 							}
 							if c.IsSet("previous") {
-								argv = append(argv, "--"+"previous", c.String("previous"))
+								if c.Bool("previous") {
+									argv = append(argv, "--previous")
+								}
 							}
 							if c.IsSet("selector") {
-								argv = append(argv, "--"+"selector", c.String("selector"))
+								argv = append(argv, "--selector", c.String("selector"))
 							}
 							if c.IsSet("since") {
-								argv = append(argv, "--"+"since", c.String("since"))
+								argv = append(argv, "--since", c.String("since"))
 							}
 							if c.IsSet("since-time") {
-								argv = append(argv, "--"+"since-time", c.String("since-time"))
+								argv = append(argv, "--since-time", c.String("since-time"))
 							}
 							if c.IsSet("tail") {
-								argv = append(argv, "--"+"tail", c.String("tail"))
+								argv = append(argv, "--tail", strconv.Itoa(int(c.Int("tail"))))
 							}
 							if c.IsSet("timestamps") {
-								argv = append(argv, "--"+"timestamps", c.String("timestamps"))
+								if c.Bool("timestamps") {
+									argv = append(argv, "--timestamps")
+								}
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -1745,17 +2223,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Name:  "patch",
 				Usage: "Update fields of a resource using strategic merge patch, a JSON merge patch, or a JSON patch.",
 				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "allow-missing-template-keys"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
 					&cli.StringFlag{Name: "dry-run"},
 					&cli.StringFlag{Name: "field-manager"},
-					&cli.StringFlag{Name: "filename"},
+					&cli.StringSliceFlag{Name: "filename"},
 					&cli.StringFlag{Name: "kustomize"},
-					&cli.StringFlag{Name: "local"},
+					&cli.BoolFlag{Name: "local"},
 					&cli.StringFlag{Name: "output"},
 					&cli.StringFlag{Name: "patch"},
 					&cli.StringFlag{Name: "patch-file"},
-					&cli.StringFlag{Name: "recursive"},
-					&cli.StringFlag{Name: "show-managed-fields"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "subresource"},
 					&cli.StringFlag{Name: "template"},
 					&cli.StringFlag{Name: "type"},
@@ -1766,65 +2244,87 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.Mutating,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
-							args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
+							var positional []string
+							_ = positional
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
 							args["--dry-run"] = c.String("dry-run")
 							args["--field-manager"] = c.String("field-manager")
-							args["--filename"] = c.String("filename")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
 							args["--kustomize"] = c.String("kustomize")
-							args["--local"] = c.String("local")
+							if c.Bool("local") {
+								args["--local"] = "true"
+							}
 							args["--output"] = c.String("output")
 							args["--patch"] = c.String("patch")
 							args["--patch-file"] = c.String("patch-file")
-							args["--recursive"] = c.String("recursive")
-							args["--show-managed-fields"] = c.String("show-managed-fields")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
 							args["--subresource"] = c.String("subresource")
 							args["--template"] = c.String("template")
 							args["--type"] = c.String("type")
-							return args, nil, c.String("token")
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"patch"}
 							if c.IsSet("allow-missing-template-keys") {
-								argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
 							}
 							if c.IsSet("dry-run") {
-								argv = append(argv, "--"+"dry-run", c.String("dry-run"))
+								argv = append(argv, "--dry-run", c.String("dry-run"))
 							}
 							if c.IsSet("field-manager") {
-								argv = append(argv, "--"+"field-manager", c.String("field-manager"))
+								argv = append(argv, "--field-manager", c.String("field-manager"))
 							}
 							if c.IsSet("filename") {
-								argv = append(argv, "--"+"filename", c.String("filename"))
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
 							}
 							if c.IsSet("kustomize") {
-								argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+								argv = append(argv, "--kustomize", c.String("kustomize"))
 							}
 							if c.IsSet("local") {
-								argv = append(argv, "--"+"local", c.String("local"))
+								if c.Bool("local") {
+									argv = append(argv, "--local")
+								}
 							}
 							if c.IsSet("output") {
-								argv = append(argv, "--"+"output", c.String("output"))
+								argv = append(argv, "--output", c.String("output"))
 							}
 							if c.IsSet("patch") {
-								argv = append(argv, "--"+"patch", c.String("patch"))
+								argv = append(argv, "--patch", c.String("patch"))
 							}
 							if c.IsSet("patch-file") {
-								argv = append(argv, "--"+"patch-file", c.String("patch-file"))
+								argv = append(argv, "--patch-file", c.String("patch-file"))
 							}
 							if c.IsSet("recursive") {
-								argv = append(argv, "--"+"recursive", c.String("recursive"))
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
 							}
 							if c.IsSet("show-managed-fields") {
-								argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
 							}
 							if c.IsSet("subresource") {
-								argv = append(argv, "--"+"subresource", c.String("subresource"))
+								argv = append(argv, "--subresource", c.String("subresource"))
 							}
 							if c.IsSet("template") {
-								argv = append(argv, "--"+"template", c.String("template"))
+								argv = append(argv, "--template", c.String("template"))
 							}
 							if c.IsSet("type") {
-								argv = append(argv, "--"+"type", c.String("type"))
+								argv = append(argv, "--type", c.String("type"))
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -1841,14 +2341,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "history",
 						Usage: "View previous rollout revisions and configurations.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "allow-missing-template-keys"},
-							&cli.StringFlag{Name: "filename"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringSliceFlag{Name: "filename"},
 							&cli.StringFlag{Name: "kustomize"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "recursive"},
-							&cli.StringFlag{Name: "revision"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.IntFlag{Name: "revision"},
 							&cli.StringFlag{Name: "selector"},
-							&cli.StringFlag{Name: "show-managed-fields"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 						},
 						Action: verb.Wrap(
@@ -1857,45 +2357,63 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-									args["--filename"] = c.String("filename")
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
 									args["--kustomize"] = c.String("kustomize")
 									args["--output"] = c.String("output")
-									args["--recursive"] = c.String("recursive")
-									args["--revision"] = c.String("revision")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									args["--revision"] = strconv.Itoa(int(c.Int("revision")))
 									args["--selector"] = c.String("selector")
-									args["--show-managed-fields"] = c.String("show-managed-fields")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
 									args["--template"] = c.String("template")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"rollout", "history"}
 									if c.IsSet("allow-missing-template-keys") {
-										argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
 									}
 									if c.IsSet("filename") {
-										argv = append(argv, "--"+"filename", c.String("filename"))
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
 									}
 									if c.IsSet("kustomize") {
-										argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+										argv = append(argv, "--kustomize", c.String("kustomize"))
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("recursive") {
-										argv = append(argv, "--"+"recursive", c.String("recursive"))
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
 									}
 									if c.IsSet("revision") {
-										argv = append(argv, "--"+"revision", c.String("revision"))
+										argv = append(argv, "--revision", strconv.Itoa(int(c.Int("revision"))))
 									}
 									if c.IsSet("selector") {
-										argv = append(argv, "--"+"selector", c.String("selector"))
+										argv = append(argv, "--selector", c.String("selector"))
 									}
 									if c.IsSet("show-managed-fields") {
-										argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--"+"template", c.String("template"))
+										argv = append(argv, "--template", c.String("template"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -1908,61 +2426,79 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "pause",
 						Usage: "Mark the provided resource as paused.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "allow-missing-template-keys"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
 							&cli.StringFlag{Name: "field-manager"},
-							&cli.StringFlag{Name: "filename"},
+							&cli.StringSliceFlag{Name: "filename"},
 							&cli.StringFlag{Name: "kustomize"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "recursive"},
 							&cli.StringFlag{Name: "selector"},
-							&cli.StringFlag{Name: "show-managed-fields"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "kubectl.rollout.pause",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
 									args["--field-manager"] = c.String("field-manager")
-									args["--filename"] = c.String("filename")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
 									args["--kustomize"] = c.String("kustomize")
 									args["--output"] = c.String("output")
-									args["--recursive"] = c.String("recursive")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
 									args["--selector"] = c.String("selector")
-									args["--show-managed-fields"] = c.String("show-managed-fields")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
 									args["--template"] = c.String("template")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"rollout", "pause"}
 									if c.IsSet("allow-missing-template-keys") {
-										argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
 									}
 									if c.IsSet("field-manager") {
-										argv = append(argv, "--"+"field-manager", c.String("field-manager"))
+										argv = append(argv, "--field-manager", c.String("field-manager"))
 									}
 									if c.IsSet("filename") {
-										argv = append(argv, "--"+"filename", c.String("filename"))
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
 									}
 									if c.IsSet("kustomize") {
-										argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+										argv = append(argv, "--kustomize", c.String("kustomize"))
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("recursive") {
-										argv = append(argv, "--"+"recursive", c.String("recursive"))
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
 									}
 									if c.IsSet("selector") {
-										argv = append(argv, "--"+"selector", c.String("selector"))
+										argv = append(argv, "--selector", c.String("selector"))
 									}
 									if c.IsSet("show-managed-fields") {
-										argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--"+"template", c.String("template"))
+										argv = append(argv, "--template", c.String("template"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -1975,14 +2511,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "restart",
 						Usage: "Restart a resource.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "allow-missing-template-keys"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
 							&cli.StringFlag{Name: "field-manager"},
-							&cli.StringFlag{Name: "filename"},
+							&cli.StringSliceFlag{Name: "filename"},
 							&cli.StringFlag{Name: "kustomize"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "recursive"},
 							&cli.StringFlag{Name: "selector"},
-							&cli.StringFlag{Name: "show-managed-fields"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 						},
 						Action: verb.Wrap(
@@ -1991,45 +2527,63 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
 									args["--field-manager"] = c.String("field-manager")
-									args["--filename"] = c.String("filename")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
 									args["--kustomize"] = c.String("kustomize")
 									args["--output"] = c.String("output")
-									args["--recursive"] = c.String("recursive")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
 									args["--selector"] = c.String("selector")
-									args["--show-managed-fields"] = c.String("show-managed-fields")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
 									args["--template"] = c.String("template")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"rollout", "restart"}
 									if c.IsSet("allow-missing-template-keys") {
-										argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
 									}
 									if c.IsSet("field-manager") {
-										argv = append(argv, "--"+"field-manager", c.String("field-manager"))
+										argv = append(argv, "--field-manager", c.String("field-manager"))
 									}
 									if c.IsSet("filename") {
-										argv = append(argv, "--"+"filename", c.String("filename"))
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
 									}
 									if c.IsSet("kustomize") {
-										argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+										argv = append(argv, "--kustomize", c.String("kustomize"))
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("recursive") {
-										argv = append(argv, "--"+"recursive", c.String("recursive"))
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
 									}
 									if c.IsSet("selector") {
-										argv = append(argv, "--"+"selector", c.String("selector"))
+										argv = append(argv, "--selector", c.String("selector"))
 									}
 									if c.IsSet("show-managed-fields") {
-										argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--"+"template", c.String("template"))
+										argv = append(argv, "--template", c.String("template"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -2042,61 +2596,79 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "resume",
 						Usage: "Resume a paused resource.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "allow-missing-template-keys"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
 							&cli.StringFlag{Name: "field-manager"},
-							&cli.StringFlag{Name: "filename"},
+							&cli.StringSliceFlag{Name: "filename"},
 							&cli.StringFlag{Name: "kustomize"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "recursive"},
 							&cli.StringFlag{Name: "selector"},
-							&cli.StringFlag{Name: "show-managed-fields"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "kubectl.rollout.resume",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
 									args["--field-manager"] = c.String("field-manager")
-									args["--filename"] = c.String("filename")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
 									args["--kustomize"] = c.String("kustomize")
 									args["--output"] = c.String("output")
-									args["--recursive"] = c.String("recursive")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
 									args["--selector"] = c.String("selector")
-									args["--show-managed-fields"] = c.String("show-managed-fields")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
 									args["--template"] = c.String("template")
-									return args, nil, c.String("token")
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"rollout", "resume"}
 									if c.IsSet("allow-missing-template-keys") {
-										argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
 									}
 									if c.IsSet("field-manager") {
-										argv = append(argv, "--"+"field-manager", c.String("field-manager"))
+										argv = append(argv, "--field-manager", c.String("field-manager"))
 									}
 									if c.IsSet("filename") {
-										argv = append(argv, "--"+"filename", c.String("filename"))
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
 									}
 									if c.IsSet("kustomize") {
-										argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+										argv = append(argv, "--kustomize", c.String("kustomize"))
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("recursive") {
-										argv = append(argv, "--"+"recursive", c.String("recursive"))
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
 									}
 									if c.IsSet("selector") {
-										argv = append(argv, "--"+"selector", c.String("selector"))
+										argv = append(argv, "--selector", c.String("selector"))
 									}
 									if c.IsSet("show-managed-fields") {
-										argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--"+"template", c.String("template"))
+										argv = append(argv, "--template", c.String("template"))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -2109,13 +2681,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "status",
 						Usage: "Show the status of the rollout.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "filename"},
+							&cli.StringSliceFlag{Name: "filename"},
 							&cli.StringFlag{Name: "kustomize"},
-							&cli.StringFlag{Name: "recursive"},
-							&cli.StringFlag{Name: "revision"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.IntFlag{Name: "revision"},
 							&cli.StringFlag{Name: "selector"},
 							&cli.StringFlag{Name: "timeout"},
-							&cli.StringFlag{Name: "watch"},
+							&cli.BoolFlag{Name: "watch"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2123,37 +2695,51 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--filename"] = c.String("filename")
+									var positional []string
+									_ = positional
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
 									args["--kustomize"] = c.String("kustomize")
-									args["--recursive"] = c.String("recursive")
-									args["--revision"] = c.String("revision")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									args["--revision"] = strconv.Itoa(int(c.Int("revision")))
 									args["--selector"] = c.String("selector")
 									args["--timeout"] = c.String("timeout")
-									args["--watch"] = c.String("watch")
-									return args, nil, c.String("token")
+									if c.Bool("watch") {
+										args["--watch"] = "true"
+									}
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"rollout", "status"}
 									if c.IsSet("filename") {
-										argv = append(argv, "--"+"filename", c.String("filename"))
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
 									}
 									if c.IsSet("kustomize") {
-										argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+										argv = append(argv, "--kustomize", c.String("kustomize"))
 									}
 									if c.IsSet("recursive") {
-										argv = append(argv, "--"+"recursive", c.String("recursive"))
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
 									}
 									if c.IsSet("revision") {
-										argv = append(argv, "--"+"revision", c.String("revision"))
+										argv = append(argv, "--revision", strconv.Itoa(int(c.Int("revision"))))
 									}
 									if c.IsSet("selector") {
-										argv = append(argv, "--"+"selector", c.String("selector"))
+										argv = append(argv, "--selector", c.String("selector"))
 									}
 									if c.IsSet("timeout") {
-										argv = append(argv, "--"+"timeout", c.String("timeout"))
+										argv = append(argv, "--timeout", c.String("timeout"))
 									}
 									if c.IsSet("watch") {
-										argv = append(argv, "--"+"watch", c.String("watch"))
+										if c.Bool("watch") {
+											argv = append(argv, "--watch")
+										}
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -2166,66 +2752,84 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "undo",
 						Usage: "Roll back to a previous rollout.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "allow-missing-template-keys"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
 							&cli.StringFlag{Name: "dry-run"},
-							&cli.StringFlag{Name: "filename"},
+							&cli.StringSliceFlag{Name: "filename"},
 							&cli.StringFlag{Name: "kustomize"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "recursive"},
 							&cli.StringFlag{Name: "selector"},
-							&cli.StringFlag{Name: "show-managed-fields"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "to-revision"},
+							&cli.IntFlag{Name: "to-revision"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
 								Name: "kubectl.rollout.undo",
-								Kind: policy.ReadOnly,
+								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
 									args["--dry-run"] = c.String("dry-run")
-									args["--filename"] = c.String("filename")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
 									args["--kustomize"] = c.String("kustomize")
 									args["--output"] = c.String("output")
-									args["--recursive"] = c.String("recursive")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
 									args["--selector"] = c.String("selector")
-									args["--show-managed-fields"] = c.String("show-managed-fields")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
 									args["--template"] = c.String("template")
-									args["--to-revision"] = c.String("to-revision")
-									return args, nil, c.String("token")
+									args["--to-revision"] = strconv.Itoa(int(c.Int("to-revision")))
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"rollout", "undo"}
 									if c.IsSet("allow-missing-template-keys") {
-										argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
 									}
 									if c.IsSet("dry-run") {
-										argv = append(argv, "--"+"dry-run", c.String("dry-run"))
+										argv = append(argv, "--dry-run", c.String("dry-run"))
 									}
 									if c.IsSet("filename") {
-										argv = append(argv, "--"+"filename", c.String("filename"))
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
 									}
 									if c.IsSet("kustomize") {
-										argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+										argv = append(argv, "--kustomize", c.String("kustomize"))
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--"+"output", c.String("output"))
+										argv = append(argv, "--output", c.String("output"))
 									}
 									if c.IsSet("recursive") {
-										argv = append(argv, "--"+"recursive", c.String("recursive"))
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
 									}
 									if c.IsSet("selector") {
-										argv = append(argv, "--"+"selector", c.String("selector"))
+										argv = append(argv, "--selector", c.String("selector"))
 									}
 									if c.IsSet("show-managed-fields") {
-										argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--"+"template", c.String("template"))
+										argv = append(argv, "--template", c.String("template"))
 									}
 									if c.IsSet("to-revision") {
-										argv = append(argv, "--"+"to-revision", c.String("to-revision"))
+										argv = append(argv, "--to-revision", strconv.Itoa(int(c.Int("to-revision"))))
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -2240,18 +2844,18 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Name:  "scale",
 				Usage: "Set a new size for a deployment, replica set, replication controller, or stateful set.",
 				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "all"},
-					&cli.StringFlag{Name: "allow-missing-template-keys"},
-					&cli.StringFlag{Name: "current-replicas"},
+					&cli.BoolFlag{Name: "all"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
+					&cli.IntFlag{Name: "current-replicas"},
 					&cli.StringFlag{Name: "dry-run"},
-					&cli.StringFlag{Name: "filename"},
+					&cli.StringSliceFlag{Name: "filename"},
 					&cli.StringFlag{Name: "kustomize"},
 					&cli.StringFlag{Name: "output"},
-					&cli.StringFlag{Name: "recursive"},
-					&cli.StringFlag{Name: "replicas"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.IntFlag{Name: "replicas"},
 					&cli.StringFlag{Name: "resource-version"},
 					&cli.StringFlag{Name: "selector"},
-					&cli.StringFlag{Name: "show-managed-fields"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "template"},
 					&cli.StringFlag{Name: "timeout"},
 				},
@@ -2261,65 +2865,87 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.Mutating,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
-							args["--all"] = c.String("all")
-							args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-							args["--current-replicas"] = c.String("current-replicas")
+							var positional []string
+							_ = positional
+							if c.Bool("all") {
+								args["--all"] = "true"
+							}
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
+							args["--current-replicas"] = strconv.Itoa(int(c.Int("current-replicas")))
 							args["--dry-run"] = c.String("dry-run")
-							args["--filename"] = c.String("filename")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
 							args["--kustomize"] = c.String("kustomize")
 							args["--output"] = c.String("output")
-							args["--recursive"] = c.String("recursive")
-							args["--replicas"] = c.String("replicas")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							args["--replicas"] = strconv.Itoa(int(c.Int("replicas")))
 							args["--resource-version"] = c.String("resource-version")
 							args["--selector"] = c.String("selector")
-							args["--show-managed-fields"] = c.String("show-managed-fields")
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
 							args["--template"] = c.String("template")
 							args["--timeout"] = c.String("timeout")
-							return args, nil, c.String("token")
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"scale"}
 							if c.IsSet("all") {
-								argv = append(argv, "--"+"all", c.String("all"))
+								if c.Bool("all") {
+									argv = append(argv, "--all")
+								}
 							}
 							if c.IsSet("allow-missing-template-keys") {
-								argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
 							}
 							if c.IsSet("current-replicas") {
-								argv = append(argv, "--"+"current-replicas", c.String("current-replicas"))
+								argv = append(argv, "--current-replicas", strconv.Itoa(int(c.Int("current-replicas"))))
 							}
 							if c.IsSet("dry-run") {
-								argv = append(argv, "--"+"dry-run", c.String("dry-run"))
+								argv = append(argv, "--dry-run", c.String("dry-run"))
 							}
 							if c.IsSet("filename") {
-								argv = append(argv, "--"+"filename", c.String("filename"))
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
 							}
 							if c.IsSet("kustomize") {
-								argv = append(argv, "--"+"kustomize", c.String("kustomize"))
+								argv = append(argv, "--kustomize", c.String("kustomize"))
 							}
 							if c.IsSet("output") {
-								argv = append(argv, "--"+"output", c.String("output"))
+								argv = append(argv, "--output", c.String("output"))
 							}
 							if c.IsSet("recursive") {
-								argv = append(argv, "--"+"recursive", c.String("recursive"))
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
 							}
 							if c.IsSet("replicas") {
-								argv = append(argv, "--"+"replicas", c.String("replicas"))
+								argv = append(argv, "--replicas", strconv.Itoa(int(c.Int("replicas"))))
 							}
 							if c.IsSet("resource-version") {
-								argv = append(argv, "--"+"resource-version", c.String("resource-version"))
+								argv = append(argv, "--resource-version", c.String("resource-version"))
 							}
 							if c.IsSet("selector") {
-								argv = append(argv, "--"+"selector", c.String("selector"))
+								argv = append(argv, "--selector", c.String("selector"))
 							}
 							if c.IsSet("show-managed-fields") {
-								argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
 							}
 							if c.IsSet("template") {
-								argv = append(argv, "--"+"template", c.String("template"))
+								argv = append(argv, "--template", c.String("template"))
 							}
 							if c.IsSet("timeout") {
-								argv = append(argv, "--"+"timeout", c.String("timeout"))
+								argv = append(argv, "--timeout", c.String("timeout"))
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -2332,14 +2958,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Name:  "taint",
 				Usage: "Update the taints on one or more nodes.",
 				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "all"},
-					&cli.StringFlag{Name: "allow-missing-template-keys"},
+					&cli.BoolFlag{Name: "all"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
 					&cli.StringFlag{Name: "dry-run"},
 					&cli.StringFlag{Name: "field-manager"},
 					&cli.StringFlag{Name: "output"},
-					&cli.StringFlag{Name: "overwrite"},
+					&cli.BoolFlag{Name: "overwrite"},
 					&cli.StringFlag{Name: "selector"},
-					&cli.StringFlag{Name: "show-managed-fields"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "template"},
 					&cli.StringFlag{Name: "validate"},
 				},
@@ -2349,49 +2975,67 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.Mutating,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
-							args["--all"] = c.String("all")
-							args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
+							var positional []string
+							_ = positional
+							if c.Bool("all") {
+								args["--all"] = "true"
+							}
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
 							args["--dry-run"] = c.String("dry-run")
 							args["--field-manager"] = c.String("field-manager")
 							args["--output"] = c.String("output")
-							args["--overwrite"] = c.String("overwrite")
+							if c.Bool("overwrite") {
+								args["--overwrite"] = "true"
+							}
 							args["--selector"] = c.String("selector")
-							args["--show-managed-fields"] = c.String("show-managed-fields")
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
 							args["--template"] = c.String("template")
 							args["--validate"] = c.String("validate")
-							return args, nil, c.String("token")
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"taint"}
 							if c.IsSet("all") {
-								argv = append(argv, "--"+"all", c.String("all"))
+								if c.Bool("all") {
+									argv = append(argv, "--all")
+								}
 							}
 							if c.IsSet("allow-missing-template-keys") {
-								argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
 							}
 							if c.IsSet("dry-run") {
-								argv = append(argv, "--"+"dry-run", c.String("dry-run"))
+								argv = append(argv, "--dry-run", c.String("dry-run"))
 							}
 							if c.IsSet("field-manager") {
-								argv = append(argv, "--"+"field-manager", c.String("field-manager"))
+								argv = append(argv, "--field-manager", c.String("field-manager"))
 							}
 							if c.IsSet("output") {
-								argv = append(argv, "--"+"output", c.String("output"))
+								argv = append(argv, "--output", c.String("output"))
 							}
 							if c.IsSet("overwrite") {
-								argv = append(argv, "--"+"overwrite", c.String("overwrite"))
+								if c.Bool("overwrite") {
+									argv = append(argv, "--overwrite")
+								}
 							}
 							if c.IsSet("selector") {
-								argv = append(argv, "--"+"selector", c.String("selector"))
+								argv = append(argv, "--selector", c.String("selector"))
 							}
 							if c.IsSet("show-managed-fields") {
-								argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
 							}
 							if c.IsSet("template") {
-								argv = append(argv, "--"+"template", c.String("template"))
+								argv = append(argv, "--template", c.String("template"))
 							}
 							if c.IsSet("validate") {
-								argv = append(argv, "--"+"validate", c.String("validate"))
+								argv = append(argv, "--validate", c.String("validate"))
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -2408,11 +3052,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "node",
 						Usage: "Display resource (CPU/memory) usage of nodes.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "no-headers"},
+							&cli.BoolFlag{Name: "no-headers"},
 							&cli.StringFlag{Name: "selector"},
-							&cli.StringFlag{Name: "show-capacity"},
+							&cli.BoolFlag{Name: "show-capacity"},
 							&cli.StringFlag{Name: "sort-by"},
-							&cli.StringFlag{Name: "use-protocol-buffers"},
+							&cli.BoolFlag{Name: "use-protocol-buffers"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2420,29 +3064,43 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--no-headers"] = c.String("no-headers")
+									var positional []string
+									_ = positional
+									if c.Bool("no-headers") {
+										args["--no-headers"] = "true"
+									}
 									args["--selector"] = c.String("selector")
-									args["--show-capacity"] = c.String("show-capacity")
+									if c.Bool("show-capacity") {
+										args["--show-capacity"] = "true"
+									}
 									args["--sort-by"] = c.String("sort-by")
-									args["--use-protocol-buffers"] = c.String("use-protocol-buffers")
-									return args, nil, c.String("token")
+									if c.Bool("use-protocol-buffers") {
+										args["--use-protocol-buffers"] = "true"
+									}
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"top", "node"}
 									if c.IsSet("no-headers") {
-										argv = append(argv, "--"+"no-headers", c.String("no-headers"))
+										if c.Bool("no-headers") {
+											argv = append(argv, "--no-headers")
+										}
 									}
 									if c.IsSet("selector") {
-										argv = append(argv, "--"+"selector", c.String("selector"))
+										argv = append(argv, "--selector", c.String("selector"))
 									}
 									if c.IsSet("show-capacity") {
-										argv = append(argv, "--"+"show-capacity", c.String("show-capacity"))
+										if c.Bool("show-capacity") {
+											argv = append(argv, "--show-capacity")
+										}
 									}
 									if c.IsSet("sort-by") {
-										argv = append(argv, "--"+"sort-by", c.String("sort-by"))
+										argv = append(argv, "--sort-by", c.String("sort-by"))
 									}
 									if c.IsSet("use-protocol-buffers") {
-										argv = append(argv, "--"+"use-protocol-buffers", c.String("use-protocol-buffers"))
+										if c.Bool("use-protocol-buffers") {
+											argv = append(argv, "--use-protocol-buffers")
+										}
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -2455,14 +3113,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "pod",
 						Usage: "Display resource (CPU/memory) usage of pods.",
 						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "all-namespaces"},
-							&cli.StringFlag{Name: "containers"},
+							&cli.BoolFlag{Name: "all-namespaces"},
+							&cli.BoolFlag{Name: "containers"},
 							&cli.StringFlag{Name: "field-selector"},
-							&cli.StringFlag{Name: "no-headers"},
+							&cli.BoolFlag{Name: "no-headers"},
 							&cli.StringFlag{Name: "selector"},
 							&cli.StringFlag{Name: "sort-by"},
-							&cli.StringFlag{Name: "sum"},
-							&cli.StringFlag{Name: "use-protocol-buffers"},
+							&cli.BoolFlag{Name: "sum"},
+							&cli.BoolFlag{Name: "use-protocol-buffers"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2470,41 +3128,63 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									args["--all-namespaces"] = c.String("all-namespaces")
-									args["--containers"] = c.String("containers")
+									var positional []string
+									_ = positional
+									if c.Bool("all-namespaces") {
+										args["--all-namespaces"] = "true"
+									}
+									if c.Bool("containers") {
+										args["--containers"] = "true"
+									}
 									args["--field-selector"] = c.String("field-selector")
-									args["--no-headers"] = c.String("no-headers")
+									if c.Bool("no-headers") {
+										args["--no-headers"] = "true"
+									}
 									args["--selector"] = c.String("selector")
 									args["--sort-by"] = c.String("sort-by")
-									args["--sum"] = c.String("sum")
-									args["--use-protocol-buffers"] = c.String("use-protocol-buffers")
-									return args, nil, c.String("token")
+									if c.Bool("sum") {
+										args["--sum"] = "true"
+									}
+									if c.Bool("use-protocol-buffers") {
+										args["--use-protocol-buffers"] = "true"
+									}
+									return args, positional, c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"top", "pod"}
 									if c.IsSet("all-namespaces") {
-										argv = append(argv, "--"+"all-namespaces", c.String("all-namespaces"))
+										if c.Bool("all-namespaces") {
+											argv = append(argv, "--all-namespaces")
+										}
 									}
 									if c.IsSet("containers") {
-										argv = append(argv, "--"+"containers", c.String("containers"))
+										if c.Bool("containers") {
+											argv = append(argv, "--containers")
+										}
 									}
 									if c.IsSet("field-selector") {
-										argv = append(argv, "--"+"field-selector", c.String("field-selector"))
+										argv = append(argv, "--field-selector", c.String("field-selector"))
 									}
 									if c.IsSet("no-headers") {
-										argv = append(argv, "--"+"no-headers", c.String("no-headers"))
+										if c.Bool("no-headers") {
+											argv = append(argv, "--no-headers")
+										}
 									}
 									if c.IsSet("selector") {
-										argv = append(argv, "--"+"selector", c.String("selector"))
+										argv = append(argv, "--selector", c.String("selector"))
 									}
 									if c.IsSet("sort-by") {
-										argv = append(argv, "--"+"sort-by", c.String("sort-by"))
+										argv = append(argv, "--sort-by", c.String("sort-by"))
 									}
 									if c.IsSet("sum") {
-										argv = append(argv, "--"+"sum", c.String("sum"))
+										if c.Bool("sum") {
+											argv = append(argv, "--sum")
+										}
 									}
 									if c.IsSet("use-protocol-buffers") {
-										argv = append(argv, "--"+"use-protocol-buffers", c.String("use-protocol-buffers"))
+										if c.Bool("use-protocol-buffers") {
+											argv = append(argv, "--use-protocol-buffers")
+										}
 									}
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
@@ -2528,17 +3208,19 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.Mutating,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
+							var positional []string
+							_ = positional
 							args["--dry-run"] = c.String("dry-run")
 							args["--selector"] = c.String("selector")
-							return args, nil, c.String("token")
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"uncordon"}
 							if c.IsSet("dry-run") {
-								argv = append(argv, "--"+"dry-run", c.String("dry-run"))
+								argv = append(argv, "--dry-run", c.String("dry-run"))
 							}
 							if c.IsSet("selector") {
-								argv = append(argv, "--"+"selector", c.String("selector"))
+								argv = append(argv, "--selector", c.String("selector"))
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
@@ -2551,17 +3233,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Name:  "wait",
 				Usage: "Experimental: Wait for a specific condition on one or many resources.",
 				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "all"},
-					&cli.StringFlag{Name: "all-namespaces"},
-					&cli.StringFlag{Name: "allow-missing-template-keys"},
+					&cli.BoolFlag{Name: "all"},
+					&cli.BoolFlag{Name: "all-namespaces"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
 					&cli.StringFlag{Name: "field-selector"},
-					&cli.StringFlag{Name: "filename"},
+					&cli.StringSliceFlag{Name: "filename"},
 					&cli.StringFlag{Name: "for"},
-					&cli.StringFlag{Name: "local"},
+					&cli.BoolFlag{Name: "local"},
 					&cli.StringFlag{Name: "output"},
-					&cli.StringFlag{Name: "recursive"},
+					&cli.BoolFlag{Name: "recursive"},
 					&cli.StringFlag{Name: "selector"},
-					&cli.StringFlag{Name: "show-managed-fields"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "template"},
 					&cli.StringFlag{Name: "timeout"},
 				},
@@ -2571,61 +3253,91 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.ReadOnly,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
-							args["--all"] = c.String("all")
-							args["--all-namespaces"] = c.String("all-namespaces")
-							args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
+							var positional []string
+							_ = positional
+							if c.Bool("all") {
+								args["--all"] = "true"
+							}
+							if c.Bool("all-namespaces") {
+								args["--all-namespaces"] = "true"
+							}
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
 							args["--field-selector"] = c.String("field-selector")
-							args["--filename"] = c.String("filename")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
 							args["--for"] = c.String("for")
-							args["--local"] = c.String("local")
+							if c.Bool("local") {
+								args["--local"] = "true"
+							}
 							args["--output"] = c.String("output")
-							args["--recursive"] = c.String("recursive")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
 							args["--selector"] = c.String("selector")
-							args["--show-managed-fields"] = c.String("show-managed-fields")
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
 							args["--template"] = c.String("template")
 							args["--timeout"] = c.String("timeout")
-							return args, nil, c.String("token")
+							return args, positional, c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"wait"}
 							if c.IsSet("all") {
-								argv = append(argv, "--"+"all", c.String("all"))
+								if c.Bool("all") {
+									argv = append(argv, "--all")
+								}
 							}
 							if c.IsSet("all-namespaces") {
-								argv = append(argv, "--"+"all-namespaces", c.String("all-namespaces"))
+								if c.Bool("all-namespaces") {
+									argv = append(argv, "--all-namespaces")
+								}
 							}
 							if c.IsSet("allow-missing-template-keys") {
-								argv = append(argv, "--"+"allow-missing-template-keys", c.String("allow-missing-template-keys"))
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
 							}
 							if c.IsSet("field-selector") {
-								argv = append(argv, "--"+"field-selector", c.String("field-selector"))
+								argv = append(argv, "--field-selector", c.String("field-selector"))
 							}
 							if c.IsSet("filename") {
-								argv = append(argv, "--"+"filename", c.String("filename"))
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
 							}
 							if c.IsSet("for") {
-								argv = append(argv, "--"+"for", c.String("for"))
+								argv = append(argv, "--for", c.String("for"))
 							}
 							if c.IsSet("local") {
-								argv = append(argv, "--"+"local", c.String("local"))
+								if c.Bool("local") {
+									argv = append(argv, "--local")
+								}
 							}
 							if c.IsSet("output") {
-								argv = append(argv, "--"+"output", c.String("output"))
+								argv = append(argv, "--output", c.String("output"))
 							}
 							if c.IsSet("recursive") {
-								argv = append(argv, "--"+"recursive", c.String("recursive"))
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
 							}
 							if c.IsSet("selector") {
-								argv = append(argv, "--"+"selector", c.String("selector"))
+								argv = append(argv, "--selector", c.String("selector"))
 							}
 							if c.IsSet("show-managed-fields") {
-								argv = append(argv, "--"+"show-managed-fields", c.String("show-managed-fields"))
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
 							}
 							if c.IsSet("template") {
-								argv = append(argv, "--"+"template", c.String("template"))
+								argv = append(argv, "--template", c.String("template"))
 							}
 							if c.IsSet("timeout") {
-								argv = append(argv, "--"+"timeout", c.String("timeout"))
+								argv = append(argv, "--timeout", c.String("timeout"))
 							}
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)

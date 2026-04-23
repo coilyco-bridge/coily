@@ -1,0 +1,101 @@
+gh actions READONLY
+gh alias READONLY
+gh api READONLY
+gh auth READONLY
+gh browse READONLY
+gh cache READONLY
+gh co READONLY
+gh codespace READONLY
+gh config READONLY
+gh exit-codes READONLY
+gh extension READONLY
+gh formatting READONLY
+gh gist READONLY
+gh gpg-key READONLY
+gh issue close MUTATING
+gh issue comment MUTATING
+gh issue create MUTATING
+gh issue delete MUTATING
+gh issue develop READONLY
+gh issue edit MUTATING
+gh issue list READONLY
+gh issue lock MUTATING
+gh issue pin MUTATING
+gh issue reopen MUTATING
+gh issue status READONLY
+gh issue transfer MUTATING
+gh issue unlock MUTATING
+gh issue unpin MUTATING
+gh issue view READONLY
+gh label MUTATING
+gh mintty READONLY
+gh org READONLY
+gh pr checkout MUTATING
+gh pr checks READONLY
+gh pr close MUTATING
+gh pr comment MUTATING
+gh pr create MUTATING
+gh pr diff READONLY
+gh pr edit MUTATING
+gh pr list READONLY
+gh pr lock MUTATING
+gh pr merge MUTATING
+gh pr ready MUTATING
+gh pr reopen MUTATING
+gh pr review MUTATING
+gh pr status READONLY
+gh pr unlock MUTATING
+gh pr view READONLY
+gh project READONLY
+gh release create MUTATING
+gh release delete MUTATING
+gh release download READONLY
+gh release edit MUTATING
+gh release list READONLY
+gh release upload MUTATING
+gh release view READONLY
+gh repo archive MUTATING
+gh repo autolink create MUTATING
+gh repo autolink list READONLY
+gh repo autolink view READONLY
+gh repo clone MUTATING
+gh repo create MUTATING
+gh repo delete MUTATING
+gh repo deploy-key add READONLY
+gh repo deploy-key delete MUTATING
+gh repo deploy-key list READONLY
+gh repo edit MUTATING
+gh repo fork MUTATING
+gh repo gitignore list READONLY
+gh repo gitignore view READONLY
+gh repo license list READONLY
+gh repo license view READONLY
+gh repo list READONLY
+gh repo rename MUTATING
+gh repo sync MUTATING
+gh repo unarchive MUTATING
+gh repo view READONLY
+gh ruleset READONLY
+gh run cancel MUTATING
+gh run delete MUTATING
+gh run download READONLY
+gh run list READONLY
+gh run rerun MUTATING
+gh run view READONLY
+gh run watch READONLY
+gh search code READONLY
+gh search commits READONLY
+gh search issues READONLY
+gh search prs READONLY
+gh search repos READONLY
+gh secret delete MUTATING
+gh secret list READONLY
+gh secret set MUTATING
+gh ssh-key READONLY
+gh status READONLY
+gh variable READONLY
+gh workflow disable MUTATING
+gh workflow enable MUTATING
+gh workflow list READONLY
+gh workflow run MUTATING
+gh workflow view READONLY
