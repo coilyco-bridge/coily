@@ -8,9 +8,19 @@
 //	  "deniedMcpServers": [...]
 //	}
 //
-// When writing to an existing file, allow/deny/deniedMcpServers entries are
-// unioned with what's already there (duplicates removed). Other top-level
-// keys in the existing file are preserved.
+// Behavior model (per docs/unresolved/13-lockdown-token.md, resolved):
+//
+//   - Bare `coily lockdown` prints the plan and exits. No write, no token.
+//   - `coily lockdown --apply` writes a fresh file only if .claude/settings.json
+//     does not already exist. It refuses an existing file. No token.
+//   - `coily lockdown --apply --replace` overwrites an existing file. Mutating,
+//     token required.
+//
+// The previous silent-merge behavior (union with existing allow/deny entries)
+// is gone. The CLI either bootstraps a fresh file or replaces an existing one
+// wholesale. BuildPlan always returns the canonical defaults, regardless of
+// what is on disk. Any custom allow/deny entries the user added by hand are
+// dropped on --replace.
 package lockdown
 
 import (
@@ -66,50 +76,41 @@ type Plan struct {
 
 // BuildPlan computes what the target settings file should look like after
 // applying the defaults. Does not touch disk.
-func BuildPlan(targetPath string, d *Defaults, replace bool) (*Plan, error) {
+//
+// The plan's After is always the canonical defaults rendered as JSON,
+// independent of whatever is already on disk. The merge behavior that used
+// to live here is gone: the CLI either bootstraps a fresh file (refusing if
+// one exists) or overwrites with --replace. Existed and Before are still
+// populated so callers can show a diff.
+func BuildPlan(targetPath string, d *Defaults) (*Plan, error) {
 	plan := &Plan{TargetPath: targetPath}
 
-	// Load existing settings (if any).
-	var existing map[string]any
 	raw, err := os.ReadFile(targetPath)
 	switch {
 	case err == nil:
 		plan.Existed = true
 		plan.Before = append(json.RawMessage(nil), raw...)
-		if err := json.Unmarshal(raw, &existing); err != nil {
-			return nil, fmt.Errorf("lockdown: parse existing %s: %w", targetPath, err)
-		}
 	case os.IsNotExist(err):
-		existing = map[string]any{}
+		// Nothing to load. Fresh bootstrap.
 	default:
 		return nil, fmt.Errorf("lockdown: read %s: %w", targetPath, err)
 	}
 
-	if replace {
-		existing = map[string]any{}
+	out := map[string]any{
+		"permissions": map[string]any{
+			"allow": uniqueSorted(append([]string(nil), d.Allow...)),
+			"deny":  uniqueSorted(append([]string(nil), d.Deny...)),
+		},
+	}
+	if mcp := uniqueSorted(append([]string(nil), d.DeniedMcpServers...)); len(mcp) > 0 {
+		out["deniedMcpServers"] = mcp
 	}
 
-	// Extract + merge permissions.
-	allow, deny := extractPermissions(existing)
-	allow = uniqueSorted(append(allow, d.Allow...))
-	deny = uniqueSorted(append(deny, d.Deny...))
-	existing["permissions"] = map[string]any{
-		"allow": allow,
-		"deny":  deny,
-	}
-
-	// Merge deniedMcpServers.
-	mcp := extractStringSlice(existing, "deniedMcpServers")
-	mcp = uniqueSorted(append(mcp, d.DeniedMcpServers...))
-	if len(mcp) > 0 {
-		existing["deniedMcpServers"] = mcp
-	}
-
-	out, err := json.MarshalIndent(existing, "", "  ")
+	encoded, err := json.MarshalIndent(out, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("lockdown: marshal: %w", err)
 	}
-	plan.After = out
+	plan.After = encoded
 	return plan, nil
 }
 
@@ -130,28 +131,6 @@ func TargetPath(dir string, local bool) string {
 		name = "settings.local.json"
 	}
 	return filepath.Join(dir, ".claude", name)
-}
-
-func extractPermissions(m map[string]any) (allow, deny []string) {
-	p, ok := m["permissions"].(map[string]any)
-	if !ok {
-		return nil, nil
-	}
-	return extractStringSlice(p, "allow"), extractStringSlice(p, "deny")
-}
-
-func extractStringSlice(m map[string]any, key string) []string {
-	v, ok := m[key].([]any)
-	if !ok {
-		return nil
-	}
-	out := make([]string, 0, len(v))
-	for _, x := range v {
-		if s, ok := x.(string); ok {
-			out = append(out, s)
-		}
-	}
-	return out
 }
 
 func uniqueSorted(in []string) []string {

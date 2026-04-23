@@ -56,7 +56,7 @@ func TestLoadDefaults_DeniesAwsEksMcp(t *testing.T) {
 func TestBuildPlan_NewFileGetsFullDefaults(t *testing.T) {
 	d, _ := lockdown.LoadDefaults()
 	target := filepath.Join(t.TempDir(), ".claude", "settings.json")
-	plan, err := lockdown.BuildPlan(target, d, false)
+	plan, err := lockdown.BuildPlan(target, d)
 	if err != nil {
 		t.Fatalf("BuildPlan: %v", err)
 	}
@@ -74,7 +74,7 @@ func TestBuildPlan_NewFileGetsFullDefaults(t *testing.T) {
 	}
 }
 
-func TestBuildPlan_MergesExistingAllowDeny(t *testing.T) {
+func TestBuildPlan_ExistingFileReportsExistedWithoutMerging(t *testing.T) {
 	d, _ := lockdown.LoadDefaults()
 	dir := t.TempDir()
 	target := filepath.Join(dir, "settings.json")
@@ -89,7 +89,7 @@ func TestBuildPlan_MergesExistingAllowDeny(t *testing.T) {
 	if err := os.WriteFile(target, raw, 0o600); err != nil {
 		t.Fatal(err)
 	}
-	plan, err := lockdown.BuildPlan(target, d, false)
+	plan, err := lockdown.BuildPlan(target, d)
 	if err != nil {
 		t.Fatalf("BuildPlan: %v", err)
 	}
@@ -99,50 +99,37 @@ func TestBuildPlan_MergesExistingAllowDeny(t *testing.T) {
 	var after map[string]any
 	_ = json.Unmarshal(plan.After, &after)
 	allow := toStringSlice(after["permissions"].(map[string]any)["allow"])
-	if !contains(allow, "Bash(custom-tool:*)") {
-		t.Error("custom allow entry was dropped")
+	if contains(allow, "Bash(custom-tool:*)") {
+		t.Error("merge happened: custom allow entry leaked into After (silent merge is gone)")
+	}
+	if _, ok := after["someOtherKey"]; ok {
+		t.Error("merge happened: unrelated top-level key leaked into After")
 	}
 	if !contains(allow, "Bash(coily:*)") {
-		t.Error("default allow entry is missing after merge")
-	}
-	if after["someOtherKey"] != "preserved" {
-		t.Errorf("unrelated top-level key was lost: %v", after["someOtherKey"])
+		t.Error("default allow entry is missing")
 	}
 }
 
-func TestBuildPlan_ReplaceClobbersExisting(t *testing.T) {
-	d, _ := lockdown.LoadDefaults()
-	target := filepath.Join(t.TempDir(), "settings.json")
-	existing := map[string]any{
-		"permissions": map[string]any{
-			"allow": []any{"Bash(custom-tool:*)"},
-		},
-	}
-	raw, _ := json.Marshal(existing)
-	_ = os.WriteFile(target, raw, 0o600)
-	plan, _ := lockdown.BuildPlan(target, d, true)
-	var after map[string]any
-	_ = json.Unmarshal(plan.After, &after)
-	allow := toStringSlice(after["permissions"].(map[string]any)["allow"])
-	if contains(allow, "Bash(custom-tool:*)") {
-		t.Error("replace did not remove the existing custom allow entry")
-	}
-}
-
-func TestBuildPlan_BadExistingJSONErrors(t *testing.T) {
+func TestBuildPlan_ExistingFileWithBadJSONIsAccepted(t *testing.T) {
+	// BuildPlan no longer parses the existing file, only reads it for the
+	// Before diff. Bad JSON is no longer fatal here. The CLI's --apply path
+	// is what refuses to clobber.
 	d, _ := lockdown.LoadDefaults()
 	target := filepath.Join(t.TempDir(), "settings.json")
 	_ = os.WriteFile(target, []byte("this is not json"), 0o600)
-	_, err := lockdown.BuildPlan(target, d, false)
-	if err == nil {
-		t.Error("expected error on unparseable existing file")
+	plan, err := lockdown.BuildPlan(target, d)
+	if err != nil {
+		t.Errorf("BuildPlan errored on opaque existing file: %v", err)
+	}
+	if !plan.Existed {
+		t.Error("plan.Existed should be true")
 	}
 }
 
 func TestWrite_WritesWithTightPerms(t *testing.T) {
 	d, _ := lockdown.LoadDefaults()
 	target := filepath.Join(t.TempDir(), ".claude", "settings.json")
-	plan, _ := lockdown.BuildPlan(target, d, false)
+	plan, _ := lockdown.BuildPlan(target, d)
 	if err := lockdown.Write(plan); err != nil {
 		t.Fatalf("Write: %v", err)
 	}
