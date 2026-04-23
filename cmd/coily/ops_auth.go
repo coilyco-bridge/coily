@@ -18,9 +18,15 @@ var authCmd = &cli.Command{
 	Usage: "Issue and verify confirmation tokens for destructive verbs.",
 	Description: `Mutating verbs (coily aws route53 change-resource-record-sets, coily k8s
 rollout restart, coily eco restart, etc.) require a short-lived confirmation
-token. Tokens are scoped to one verb and expire after --ttl.
+token. Tokens are scoped to one bucket per service and expire after --ttl.
 
-Flow: Kai runs 'coily auth issue --scope <verb> --ttl 5m', gets a token,
+Scope strings have the form <binary>.<service>:<bucket> where bucket is
+read|write|delete. Examples: aws.route53:write, aws.route53:delete,
+gh.pr:write, kubectl.rollout:write, coily.eco:write. write subsumes read
+on the same service. delete is its own bucket and is not subsumed by
+write. To grant all three, pass --scope aws.route53:write,aws.route53:delete.
+
+Flow: Kai runs 'coily auth issue --scope <scope> --ttl 5m', gets a token,
 pastes it into the mutating invocation as --token or $COILY_TOKEN.
 
 The token issuer's key is stored at the path configured in
@@ -41,7 +47,7 @@ var authIssueCmd = &cli.Command{
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:     "scope",
-			Usage:    "verb scope this token authorizes, e.g. aws.route53.change-resource-record-sets",
+			Usage:    "scope this token authorizes, e.g. aws.route53:write. Comma-separate to bind multiple.",
 			Required: true,
 		},
 		&cli.DurationFlag{
@@ -60,6 +66,9 @@ var authIssueCmd = &cli.Command{
 			Action: func(_ context.Context, c *cli.Command) error {
 				scope := c.String("scope")
 				ttl := c.Duration("ttl")
+				if err := policy.ValidateScopeList(scope); err != nil {
+					return err
+				}
 				tok, err := getRuntime().issuer.Issue(scope, ttl)
 				if err != nil {
 					return err

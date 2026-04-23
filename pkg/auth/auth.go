@@ -8,10 +8,12 @@
 //
 //	scope | issued-at | ttl-seconds | hmac-sha256(scope|issued|ttl)
 //
-// The signing key is loaded from a root-owned path configured in
-// config.tokens.issuer_key_path. If the key file is missing, Issue creates
-// one on the first call with 0600 perms and a cryptographically random
-// 32-byte payload. Verify reads the same path.
+// scope is a comma-separated list of one or more scope strings shaped as
+// `<binary>.<service>:<bucket>` (validated by pkg/policy.ValidateScopeList
+// at issuance time). The signing key is loaded from a root-owned path
+// configured in config.tokens.issuer_key_path. If the key file is missing,
+// Issue creates one on the first call with 0600 perms and a
+// cryptographically random 32-byte payload. Verify reads the same path.
 //
 // An agent running as the coily process user can read the key, which is
 // fine: the point of the token is not to prevent a local attacker from
@@ -32,6 +34,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/coilysiren/coily/pkg/policy"
 )
 
 // ErrInvalidToken is returned by Verify when the token is malformed, its
@@ -61,7 +65,11 @@ func (i *Issuer) now() time.Time {
 	return i.Now()
 }
 
-// Issue returns an opaque token for scope that remains valid for ttl.
+// Issue returns an opaque token for scope that remains valid for ttl. scope
+// is a comma-separated list of one or more scope strings. Validation of the
+// scope shape is left to the caller (see policy.ValidateScopeList). Issue
+// itself only rejects empty scopes and scopes containing the internal
+// delimiter `|`.
 func (i *Issuer) Issue(scope string, ttl time.Duration) (string, error) {
 	if i.KeyPath == "" {
 		return "", ErrKeyPathUnset
@@ -87,46 +95,59 @@ func (i *Issuer) Issue(scope string, ttl time.Duration) (string, error) {
 	return base64.RawURLEncoding.EncodeToString([]byte(payload + "|" + sig)), nil
 }
 
-// Verify checks that token was issued by this Issuer for scope and has not
-// expired. Satisfies policy.TokenVerifier.
-func (i *Issuer) Verify(scope, token string) error {
+// VerifyScopes checks the token's signature and expiration. On success it
+// returns the comma-separated scope list bound to the token. The caller
+// (typically pkg/policy.Enforce) decides whether those scopes satisfy the
+// verb's required scope. Implements pkg/policy.TokenVerifier.
+func (i *Issuer) VerifyScopes(token string) (string, error) {
 	if i.KeyPath == "" {
-		return ErrKeyPathUnset
+		return "", ErrKeyPathUnset
 	}
 	raw, err := base64.RawURLEncoding.DecodeString(token)
 	if err != nil {
-		return fmt.Errorf("%w: not base64", ErrInvalidToken)
+		return "", fmt.Errorf("%w: not base64", ErrInvalidToken)
 	}
 	parts := strings.Split(string(raw), "|")
 	if len(parts) != 4 {
-		return fmt.Errorf("%w: expected 4 parts, got %d", ErrInvalidToken, len(parts))
+		return "", fmt.Errorf("%w: expected 4 parts, got %d", ErrInvalidToken, len(parts))
 	}
 	gotScope, issuedStr, ttlStr, gotSig := parts[0], parts[1], parts[2], parts[3]
 
 	key, err := i.loadOrCreateKey()
 	if err != nil {
-		return err
+		return "", err
 	}
 	payload := fmt.Sprintf("%s|%s|%s", gotScope, issuedStr, ttlStr)
 	wantSig := sign(key, payload)
 	if !hmac.Equal([]byte(gotSig), []byte(wantSig)) {
-		return fmt.Errorf("%w: signature mismatch", ErrInvalidToken)
-	}
-	if gotScope != scope {
-		return fmt.Errorf("%w: token scope %q does not match required %q",
-			ErrInvalidToken, gotScope, scope)
+		return "", fmt.Errorf("%w: signature mismatch", ErrInvalidToken)
 	}
 	issued, err := strconv.ParseInt(issuedStr, 10, 64)
 	if err != nil {
-		return fmt.Errorf("%w: bad issued-at", ErrInvalidToken)
+		return "", fmt.Errorf("%w: bad issued-at", ErrInvalidToken)
 	}
 	ttlSeconds, err := strconv.ParseInt(ttlStr, 10, 64)
 	if err != nil {
-		return fmt.Errorf("%w: bad ttl", ErrInvalidToken)
+		return "", fmt.Errorf("%w: bad ttl", ErrInvalidToken)
 	}
 	expires := time.Unix(issued, 0).Add(time.Duration(ttlSeconds) * time.Second)
 	if i.now().After(expires) {
-		return fmt.Errorf("%w: expired at %s", ErrInvalidToken, expires.Format(time.RFC3339))
+		return "", fmt.Errorf("%w: expired at %s", ErrInvalidToken, expires.Format(time.RFC3339))
+	}
+	return gotScope, nil
+}
+
+// Verify is a convenience for `coily auth verify --scope X --token T`. It
+// runs VerifyScopes and then checks subsumption against scope using
+// pkg/policy.Satisfies.
+func (i *Issuer) Verify(scope, token string) error {
+	held, err := i.VerifyScopes(token)
+	if err != nil {
+		return err
+	}
+	if !policy.Satisfies(held, scope) {
+		return fmt.Errorf("%w: token scopes %q do not satisfy required %q",
+			ErrInvalidToken, held, scope)
 	}
 	return nil
 }

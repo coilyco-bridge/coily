@@ -77,16 +77,23 @@ var ecoTailCmd = &cli.Command{
 	),
 }
 
+// ecoMutatingScope is the required scope for any eco systemd state change.
+// restart/stop/start are all writes, not deletes - no eco state is being
+// destroyed, just re-cycled. coily-native verbs follow the same scope shape
+// as pass-throughs (`<binary>.<service>:<bucket>`) with binary "coily".
+const ecoMutatingScope = "coily.eco:write"
+
 var ecoRestartCmd = &cli.Command{
 	Name:  "restart",
 	Usage: "Restart the eco-server systemd unit. Requires a confirmation token.",
 	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to eco.restart"},
+		&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to coily.eco:write"},
 	},
 	Action: verb.Wrap(
 		verb.Spec{
-			Name: "eco.restart",
-			Kind: policy.Mutating,
+			Name:  "eco.restart",
+			Kind:  policy.Mutating,
+			Scope: ecoMutatingScope,
 			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 				return nil, nil, c.String("token")
 			},
@@ -101,12 +108,13 @@ var ecoStopCmd = &cli.Command{
 	Name:  "stop",
 	Usage: "Stop the eco-server systemd unit. Requires a confirmation token.",
 	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to eco.stop"},
+		&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to coily.eco:write"},
 	},
 	Action: verb.Wrap(
 		verb.Spec{
-			Name: "eco.stop",
-			Kind: policy.Mutating,
+			Name:  "eco.stop",
+			Kind:  policy.Mutating,
+			Scope: ecoMutatingScope,
 			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 				return nil, nil, c.String("token")
 			},
@@ -121,12 +129,13 @@ var ecoStartCmd = &cli.Command{
 	Name:  "start",
 	Usage: "Start the eco-server systemd unit. Requires a confirmation token.",
 	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to eco.start"},
+		&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to coily.eco:write"},
 	},
 	Action: verb.Wrap(
 		verb.Spec{
-			Name: "eco.start",
-			Kind: policy.Mutating,
+			Name:  "eco.start",
+			Kind:  policy.Mutating,
+			Scope: ecoMutatingScope,
 			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 				return nil, nil, c.String("token")
 			},

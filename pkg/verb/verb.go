@@ -22,12 +22,19 @@ import (
 
 // Spec describes a verb before it is wrapped into a cli.ActionFunc.
 type Spec struct {
-	// Name is the dotted verb path for audit logging and token scope, e.g.
+	// Name is the dotted verb path used for audit logging, e.g.
 	// "aws.route53.change-resource-record-sets" or "lockdown".
 	Name string
 
 	// Kind is ReadOnly or Mutating. Mutating verbs require a confirmation token.
 	Kind policy.Kind
+
+	// Scope is the required token scope for mutating verbs, shaped as
+	// `<binary>.<service>:<bucket>` (e.g. `aws.route53:write`). Ignored
+	// for ReadOnly verbs. May be left empty for ReadOnly. For Mutating
+	// verbs, leaving Scope empty is a wiring bug and policy.Enforce will
+	// reject the invocation.
+	Scope string
 
 	// ArgsFunc extracts the user-supplied string arguments from the
 	// *cli.Command. Returns three parts:
@@ -56,6 +63,7 @@ func Wrap(spec Spec, verifier policy.TokenVerifier, writer *audit.Writer) cli.Ac
 		inv := policy.Invocation{
 			Verb:       spec.Name,
 			Kind:       spec.Kind,
+			Scope:      spec.Scope,
 			Args:       args,
 			Positional: positional,
 			Token:      token,

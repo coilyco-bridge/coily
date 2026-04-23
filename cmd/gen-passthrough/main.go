@@ -9,10 +9,10 @@
 //	go run ./cmd/gen-passthrough <binary>   # e.g. aws, gh, kubectl
 //	go run ./cmd/gen-passthrough all        # regenerate every manifest
 //
-// Classification of mutating vs. read-only verbs is done by prefix heuristic
-// at generation time. See classifyVerb below. Wrong classification is a bug
-// worth flagging: an agent-facing tool that mis-classifies a mutator as
-// read-only silently drops token-gating for that verb.
+// Classification of leaves into one of three buckets (Read / Write /
+// Delete) is delegated to pkg/verbclass at generation time. The bucket
+// determines the verb's Kind (ReadOnly vs Mutating) and the required token
+// scope (`<binary>.<service>:<bucket>`).
 package main
 
 import (
@@ -23,6 +23,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/coilysiren/coily/pkg/verbclass"
 	"gopkg.in/yaml.v3"
 )
 
@@ -97,7 +98,12 @@ type tree struct {
 	Help     string
 	Flags    []string
 	Children []*tree
+	// Mutating is true when Bucket is Write or Delete. Set on leaves only.
 	Mutating bool
+	// Scope is the full required scope string for mutating leaves
+	// (`<binary>.<service>:<bucket>`). Empty for read-only leaves and
+	// for group nodes.
+	Scope string
 }
 
 func buildTree(m Manifest) *tree {
@@ -115,10 +121,9 @@ func buildTree(m Manifest) *tree {
 
 	for _, c := range cmds {
 		node := &tree{
-			Name:     c.Path[len(c.Path)-1],
-			Path:     append([]string{}, c.Path...),
-			Help:     sanitize(c.Help),
-			Mutating: classifyVerb(c.Path),
+			Name: c.Path[len(c.Path)-1],
+			Path: append([]string{}, c.Path...),
+			Help: sanitize(c.Help),
 		}
 		for _, f := range c.Flags {
 			node.Flags = append(node.Flags, strings.TrimPrefix(f.Name, "--"))
@@ -132,113 +137,22 @@ func buildTree(m Manifest) *tree {
 		}
 		parent.Children = append(parent.Children, node)
 	}
+
+	// Pass two: classify leaves only. Group nodes inherit Mutating=false
+	// and Scope="" because their Action is never invoked.
+	classifyLeaves(m.Binary, root)
 	return root
 }
 
-// classifyVerb returns true for Mutating. Heuristic: the leaf verb name
-// starts with one of a known set of mutation prefixes, or matches an exact
-// bare verb, or is a leaf under a mutating group (e.g. kubectl rollout
-// restart). Parent/group nodes return false. Only leaves matter.
-//
-// When adding new cases here, bias toward Mutating. A false positive just
-// makes an agent ask for a token. A false negative silently drops the
-// policy gate.
-func classifyVerb(path []string) bool {
-	if len(path) == 0 {
-		return false
+func classifyLeaves(binary string, node *tree) {
+	if len(node.Children) == 0 && len(node.Path) > 0 {
+		bucket := verbclass.Classify(node.Path)
+		node.Mutating = bucket != verbclass.Read
+		node.Scope = fmt.Sprintf("%s.%s:%s", binary, verbclass.Service(node.Path), bucket)
 	}
-	leaf := path[len(path)-1]
-
-	// Mutating leaves, considered only in the context of a specific parent
-	// group. Used for kubectl's grouped verbs where the bare leaf name
-	// ("restart", "resume", "approve") would otherwise be ambiguous.
-	type parented struct{ parent, leaf string }
-	parentedMutating := []parented{
-		{"rollout", "restart"},
-		{"rollout", "undo"},
-		{"rollout", "pause"},
-		{"rollout", "resume"},
-		{"certificate", "approve"},
-		{"certificate", "deny"},
-		{"auth", "reconcile"},
-		{"config", "unset"},
-		{"config", "use-context"},
-		{"workflow", "run"},
-		{"workflow", "enable"},
-		{"workflow", "disable"},
-		{"run", "rerun"},
-		{"run", "cancel"},
-		{"pr", "checkout"},
-		{"pr", "ready"},
-		{"pr", "comment"},
-		{"pr", "review"},
-		{"issue", "comment"},
+	for _, c := range node.Children {
+		classifyLeaves(binary, c)
 	}
-	if len(path) >= 2 {
-		parent := path[len(path)-2]
-		for _, pm := range parentedMutating {
-			if parent == pm.parent && leaf == pm.leaf {
-				return true
-			}
-		}
-	}
-
-	// Mutating prefixes. Matched against the leaf verb. The trailing dash
-	// keeps "get-" from swallowing "getter" (hypothetical) but also lets
-	// the bare form match via the exactBareVerbs list below.
-	prefixes := []string{
-		// CRUD-ish
-		"create-", "delete-", "update-", "put-", "post-",
-		"modify-", "change-", "apply-", "set-", "remove-",
-		"add-", "patch-", "replace-",
-		// Lifecycle / state transitions
-		"register-", "deregister-",
-		"associate-", "disassociate-", "attach-", "detach-",
-		"enable-", "disable-", "activate-", "deactivate-",
-		"start-", "stop-", "restart-", "reboot-", "terminate-",
-		"resume-", "pause-", "suspend-",
-		"rotate-", "refresh-", "reset-", "revoke-", "recycle-",
-		"cancel-", "abort-", "complete-",
-		"promote-", "demote-", "publish-", "unpublish-",
-		"accept-", "reject-", "approve-", "deny-",
-		// Data movement
-		"move-", "copy-", "rename-", "restore-", "backup-",
-		"upload-", "download-", "import-", "export-",
-		"send-", "sync-",
-		// Versioning / upgrade
-		"upgrade-", "downgrade-", "rollback-", "rollforward-",
-		// Tagging / labeling
-		"tag-", "untag-", "label-", "unlabel-", "annotate-",
-		// Auth-ish writes
-		"grant-", "deny-",
-	}
-	for _, p := range prefixes {
-		if strings.HasPrefix(leaf, p) {
-			return true
-		}
-	}
-
-	// Bare-verb leaves. kubectl- and gh-style commands where the whole
-	// leaf is the verb.
-	exactBareVerbs := []string{
-		// kubectl
-		"apply", "create", "delete", "patch", "replace", "edit",
-		"label", "annotate", "scale", "autoscale", "set",
-		"taint", "cordon", "uncordon", "drain", "expose", "run",
-		// aws s3 short forms
-		"cp", "mv", "rm", "rb", "mb", "sync",
-		// gh
-		"merge", "close", "reopen", "lock", "unlock", "pin", "unpin",
-		"transfer", "archive", "unarchive", "fork", "clone", "upload",
-		"rename",
-	}
-	for _, v := range exactBareVerbs {
-		if leaf == v {
-			return true
-		}
-	}
-
-	return false
 }
 
 func sanitize(s string) string {
@@ -346,6 +260,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 		verb.Spec{
 			Name: {{dottedPath $binary $node.Path | goString}},
 			Kind: policy.{{if $node.Mutating}}Mutating{{else}}ReadOnly{{end}},
+			Scope: {{$node.Scope | goString}},
 			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 				args := map[string]string{}
 				{{- range $node.Flags}}
@@ -370,12 +285,6 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 }
 {{- end}}
 `
-
-// The template `args` function lets us pass multiple values into nested
-// template invocations. Register it via FuncMap.
-func init() {
-	// no-op init; args registered below
-}
 
 func die(format string, a ...any) {
 	fmt.Fprintf(os.Stderr, "gen-passthrough: "+format+"\n", a...)
