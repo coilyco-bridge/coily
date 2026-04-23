@@ -63,6 +63,42 @@ func TestWrap_MutatingWithoutTokenFails(t *testing.T) {
 	}
 }
 
+func TestWrap_KindFuncOverridesStaticKind(t *testing.T) {
+	// Static Kind says ReadOnly, KindFunc says Mutating. KindFunc wins,
+	// so the missing token must trigger ErrTokenRequired.
+	spec := verb.Spec{
+		Name:     "test.dyn",
+		Kind:     policy.ReadOnly,
+		KindFunc: func(_ *cli.Command) policy.Kind { return policy.Mutating },
+		Action:   func(_ context.Context, _ *cli.Command) error { return nil },
+	}
+	err := runWrapped(t, spec, fakeVerifier{ok: true}, newTestWriter(t))
+	if !errors.Is(err, policy.ErrTokenRequired) {
+		t.Errorf("err = %v, want ErrTokenRequired", err)
+	}
+}
+
+func TestWrap_KindFuncReadOnlyAllowsNoToken(t *testing.T) {
+	// Static Kind says Mutating, KindFunc says ReadOnly. KindFunc wins,
+	// so no token is needed and the action runs.
+	called := false
+	spec := verb.Spec{
+		Name:     "test.dyn",
+		Kind:     policy.Mutating,
+		KindFunc: func(_ *cli.Command) policy.Kind { return policy.ReadOnly },
+		Action: func(_ context.Context, _ *cli.Command) error {
+			called = true
+			return nil
+		},
+	}
+	if err := runWrapped(t, spec, nil, newTestWriter(t)); err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	if !called {
+		t.Error("action was not called")
+	}
+}
+
 func TestWrap_RejectsShellMetacharInArg(t *testing.T) {
 	spec := verb.Spec{
 		Name: "test.ro",

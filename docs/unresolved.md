@@ -21,7 +21,6 @@ out one agent per item, each touching a single file.
 
 ## Open questions
 
-13. [Should `coily lockdown` require a token?](unresolved/13-lockdown-token.md)
 14. [Token scoping granularity](unresolved/14-token-scoping.md)
 15. [Where does the coily config actually live?](unresolved/15-config-location.md)
 

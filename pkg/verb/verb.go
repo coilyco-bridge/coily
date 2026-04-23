@@ -27,7 +27,14 @@ type Spec struct {
 	Name string
 
 	// Kind is ReadOnly or Mutating. Mutating verbs require a confirmation token.
+	// Ignored when KindFunc is set.
 	Kind policy.Kind
+
+	// KindFunc lets a verb classify itself per-invocation based on flags.
+	// When non-nil, it is consulted instead of Kind. Use this for verbs
+	// where some flag combinations are read-only and others mutate (e.g.
+	// `lockdown` is ReadOnly without --apply --replace, but Mutating with).
+	KindFunc func(*cli.Command) policy.Kind
 
 	// ArgsFunc extracts the user-supplied string arguments from the
 	// *cli.Command. Returns three parts:
@@ -53,9 +60,13 @@ type Spec struct {
 func Wrap(spec Spec, verifier policy.TokenVerifier, writer *audit.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
 		args, positional, token := extractArgs(spec, cmd)
+		kind := spec.Kind
+		if spec.KindFunc != nil {
+			kind = spec.KindFunc(cmd)
+		}
 		inv := policy.Invocation{
 			Verb:       spec.Name,
-			Kind:       spec.Kind,
+			Kind:       kind,
 			Args:       args,
 			Positional: positional,
 			Token:      token,
