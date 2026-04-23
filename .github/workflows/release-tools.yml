@@ -123,6 +123,9 @@ jobs:
             chmod +x "staging/gh-${os}-${arch}"
           done
 
+      - name: Install bsdtar (reads xar, needed to crack the macOS aws-cli .pkg)
+        run: sudo apt-get update && sudo apt-get install -y libarchive-tools
+
       - name: Fetch aws CLI (all platforms)
         run: |
           set -euo pipefail
@@ -131,8 +134,8 @@ jobs:
           # NOTE: this step is the most fragile - upstream packaging
           # changes will break it. If you bump aws_version and this step
           # fails, re-derive the extraction below.
-          # `xar` is no longer packaged for Ubuntu, but `7z` (preinstalled
-          # on ubuntu-latest) reads xar archives.
+          # `xar` is no longer packaged for Ubuntu, so use `bsdtar` (from
+          # libarchive-tools) to read the macOS .pkg xar archive.
           for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64; do
             os="${plat%/*}"; arch="${plat#*/}"
             tmp="$(mktemp -d)"
@@ -140,7 +143,7 @@ jobs:
               darwin)
                 url="https://awscli.amazonaws.com/AWSCLIV2-${AWS_VERSION}.pkg"
                 curl -fsSL -o "$tmp/aws.pkg" "$url"
-                ( cd "$tmp" && 7z x -y aws.pkg >/dev/null )
+                ( cd "$tmp" && bsdtar -xf aws.pkg )
                 ( cd "$tmp" && cat aws-cli.pkg/Payload | gunzip -dc | cpio -id 2>/dev/null )
                 cp "$tmp/aws-cli/aws" "staging/aws-${os}-${arch}"
                 ;;
