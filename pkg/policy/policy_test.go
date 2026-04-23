@@ -82,13 +82,15 @@ func TestValidateArgSlice_IncludesIndexInErrorMessage(t *testing.T) {
 	}
 }
 
-type fakeVerifier struct{ ok bool }
+// fakeVerifier returns the configured scopes string on success, or err on
+// failure. Used to drive Enforce through every branch.
+type fakeVerifier struct {
+	scopes string
+	err    error
+}
 
-func (f fakeVerifier) Verify(_, _ string) error {
-	if f.ok {
-		return nil
-	}
-	return errors.New("bad token")
+func (f fakeVerifier) VerifyScopes(_ string) (string, error) {
+	return f.scopes, f.err
 }
 
 func TestEnforce_ReadOnlyAllowsMissingToken(t *testing.T) {
@@ -104,11 +106,12 @@ func TestEnforce_ReadOnlyAllowsMissingToken(t *testing.T) {
 
 func TestEnforce_MutatingRejectsMissingToken(t *testing.T) {
 	inv := policy.Invocation{
-		Verb: "aws.route53.change-resource-record-sets",
-		Kind: policy.Mutating,
-		Args: map[string]string{"--hosted-zone-id": "Z123"},
+		Verb:  "aws.route53.change-resource-record-sets",
+		Kind:  policy.Mutating,
+		Scope: "aws.route53:write",
+		Args:  map[string]string{"--hosted-zone-id": "Z123"},
 	}
-	err := policy.Enforce(inv, fakeVerifier{ok: true})
+	err := policy.Enforce(inv, fakeVerifier{scopes: "aws.route53:write"})
 	if !errors.Is(err, policy.ErrTokenRequired) {
 		t.Errorf("Enforce mutating without token: err = %v, want ErrTokenRequired", err)
 	}
@@ -118,9 +121,10 @@ func TestEnforce_MutatingRejectsBadToken(t *testing.T) {
 	inv := policy.Invocation{
 		Verb:  "aws.route53.change-resource-record-sets",
 		Kind:  policy.Mutating,
+		Scope: "aws.route53:write",
 		Token: "garbage",
 	}
-	err := policy.Enforce(inv, fakeVerifier{ok: false})
+	err := policy.Enforce(inv, fakeVerifier{err: errors.New("bad token")})
 	if err == nil {
 		t.Error("Enforce accepted bad token")
 	}
@@ -130,10 +134,11 @@ func TestEnforce_MutatingAcceptsValidToken(t *testing.T) {
 	inv := policy.Invocation{
 		Verb:  "aws.route53.change-resource-record-sets",
 		Kind:  policy.Mutating,
+		Scope: "aws.route53:write",
 		Token: "valid",
 		Args:  map[string]string{"--hosted-zone-id": "Z123"},
 	}
-	if err := policy.Enforce(inv, fakeVerifier{ok: true}); err != nil {
+	if err := policy.Enforce(inv, fakeVerifier{scopes: "aws.route53:write"}); err != nil {
 		t.Errorf("Enforce with valid token: %v", err)
 	}
 }
@@ -142,6 +147,7 @@ func TestEnforce_MutatingNoVerifierIsError(t *testing.T) {
 	inv := policy.Invocation{
 		Verb:  "aws.route53.change-resource-record-sets",
 		Kind:  policy.Mutating,
+		Scope: "aws.route53:write",
 		Token: "something",
 	}
 	err := policy.Enforce(inv, nil)
@@ -155,13 +161,155 @@ func TestEnforce_ArgsValidatedBeforeTokenCheck(t *testing.T) {
 	// the bad arg first. This keeps error messages deterministic and keeps
 	// the easier check from eclipsing the harder one.
 	inv := policy.Invocation{
-		Verb: "aws.route53.change-resource-record-sets",
-		Kind: policy.Mutating,
-		Args: map[string]string{"--zone": "Z123;rm"},
+		Verb:  "aws.route53.change-resource-record-sets",
+		Kind:  policy.Mutating,
+		Scope: "aws.route53:write",
+		Args:  map[string]string{"--zone": "Z123;rm"},
 	}
 	err := policy.Enforce(inv, nil)
 	if !errors.Is(err, policy.ErrShellMeta) {
 		t.Errorf("err = %v, want ErrShellMeta", err)
+	}
+}
+
+// --- new bucket-aware tests ---
+
+func TestEnforce_ReadScopeGrantsReadOnly(t *testing.T) {
+	// list verb requires aws.route53:read. Token holds aws.route53:read.
+	// (list is ReadOnly so this exercises Satisfies via auth, not Enforce
+	// directly. Tested through Satisfies below.)
+	if !policy.Satisfies("aws.route53:read", "aws.route53:read") {
+		t.Error("aws.route53:read should satisfy itself")
+	}
+}
+
+func TestEnforce_WriteScopeGrantsReadAndWrite(t *testing.T) {
+	if !policy.Satisfies("aws.route53:write", "aws.route53:read") {
+		t.Error("write should subsume read on the same service")
+	}
+	if !policy.Satisfies("aws.route53:write", "aws.route53:write") {
+		t.Error("write should satisfy write")
+	}
+}
+
+func TestEnforce_WriteScopeDoesNotGrantDelete(t *testing.T) {
+	if policy.Satisfies("aws.route53:write", "aws.route53:delete") {
+		t.Error("write must NOT subsume delete (kept separate)")
+	}
+}
+
+func TestEnforce_DeleteScopeDoesNotGrantWriteOrRead(t *testing.T) {
+	if policy.Satisfies("aws.route53:delete", "aws.route53:write") {
+		t.Error("delete must NOT grant write")
+	}
+	if policy.Satisfies("aws.route53:delete", "aws.route53:read") {
+		t.Error("delete must NOT grant read")
+	}
+}
+
+func TestEnforce_TwoScopesGrantBoth(t *testing.T) {
+	combined := "aws.route53:write,aws.route53:delete"
+	for _, req := range []string{
+		"aws.route53:read",
+		"aws.route53:write",
+		"aws.route53:delete",
+	} {
+		if !policy.Satisfies(combined, req) {
+			t.Errorf("combined %q should satisfy %q", combined, req)
+		}
+	}
+}
+
+func TestEnforce_DifferentServiceDoesNotSatisfy(t *testing.T) {
+	if policy.Satisfies("aws.s3:write", "aws.route53:write") {
+		t.Error("s3 scope must not satisfy route53")
+	}
+}
+
+func TestEnforce_RouteWriteTokenAllowsListVerbsAtPolicyLayer(t *testing.T) {
+	// A token with aws.route53:write should be acceptable for an
+	// invocation with required scope aws.route53:read. (Read verbs are
+	// ReadOnly so they bypass the token check entirely, but if a verb is
+	// ever upgraded to Mutating with a Read scope, the subsumption still
+	// works.)
+	inv := policy.Invocation{
+		Verb:  "aws.route53.list-hosted-zones",
+		Kind:  policy.Mutating, // hypothetical upgrade
+		Scope: "aws.route53:read",
+		Token: "valid",
+	}
+	if err := policy.Enforce(inv, fakeVerifier{scopes: "aws.route53:write"}); err != nil {
+		t.Errorf("write token failed for read-scoped verb: %v", err)
+	}
+}
+
+func TestEnforce_DeleteVerbRequiresDeleteScope(t *testing.T) {
+	inv := policy.Invocation{
+		Verb:  "aws.route53.delete-hosted-zone",
+		Kind:  policy.Mutating,
+		Scope: "aws.route53:delete",
+		Token: "valid",
+	}
+	// write scope alone fails.
+	err := policy.Enforce(inv, fakeVerifier{scopes: "aws.route53:write"})
+	if !errors.Is(err, policy.ErrTokenRequired) {
+		t.Errorf("write scope on delete verb: err = %v, want ErrTokenRequired", err)
+	}
+	// delete scope succeeds.
+	if err := policy.Enforce(inv, fakeVerifier{scopes: "aws.route53:delete"}); err != nil {
+		t.Errorf("delete scope on delete verb: %v", err)
+	}
+}
+
+func TestParseScope_AcceptsValid(t *testing.T) {
+	cases := []string{
+		"aws.route53:read",
+		"aws.route53:write",
+		"aws.route53:delete",
+		"aws.s3:write",
+		"gh.pr:write",
+		"kubectl.rollout:write",
+		"coily.eco:write",
+	}
+	for _, c := range cases {
+		if _, err := policy.ParseScope(c); err != nil {
+			t.Errorf("ParseScope(%q) err = %v, want nil", c, err)
+		}
+	}
+}
+
+func TestParseScope_RejectsInvalid(t *testing.T) {
+	cases := []string{
+		"",
+		"aws",
+		"aws.route53",
+		"aws.route53:",
+		"aws.route53:foo",
+		"aws.route53.change-resource-record-sets", // old format
+		"aws:write",
+		"AWS.ROUTE53:WRITE",
+		"aws.route53:write extra",
+	}
+	for _, c := range cases {
+		if _, err := policy.ParseScope(c); err == nil {
+			t.Errorf("ParseScope(%q) succeeded, want error", c)
+		}
+	}
+}
+
+func TestValidateScopeList(t *testing.T) {
+	if err := policy.ValidateScopeList("aws.route53:write,aws.route53:delete"); err != nil {
+		t.Errorf("err = %v, want nil", err)
+	}
+	if err := policy.ValidateScopeList("aws.route53:write, aws.route53:delete"); err != nil {
+		// extra spaces should be tolerated
+		t.Errorf("err = %v, want nil (spaces tolerated)", err)
+	}
+	if err := policy.ValidateScopeList(""); err == nil {
+		t.Error("empty list should fail")
+	}
+	if err := policy.ValidateScopeList("aws.route53:write,bogus"); err == nil {
+		t.Error("partial-bogus list should fail")
 	}
 }
 

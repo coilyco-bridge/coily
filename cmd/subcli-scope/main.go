@@ -265,9 +265,13 @@ func ClassifyAll(bin string, fetch HelpFetcher) []ClassifiedVerb {
 		help := fetch(bin, path)
 		kids := extractSubcommands(help)
 		if len(kids) == 0 {
+			label := "READONLY"
+			if verbclass.Classify(path) != verbclass.Read {
+				label = "MUTATING"
+			}
 			out = append(out, ClassifiedVerb{
 				Path:  append([]string{}, path...),
-				Label: verbclass.Label(path),
+				Label: label,
 			})
 			return
 		}

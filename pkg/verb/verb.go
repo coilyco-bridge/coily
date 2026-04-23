@@ -22,19 +22,28 @@ import (
 
 // Spec describes a verb before it is wrapped into a cli.ActionFunc.
 type Spec struct {
-	// Name is the dotted verb path for audit logging and token scope, e.g.
+	// Name is the dotted verb path used for audit logging, e.g.
 	// "aws.route53.change-resource-record-sets" or "lockdown".
 	Name string
 
-	// Kind is ReadOnly or Mutating. Mutating verbs require a confirmation token.
-	// Ignored when KindFunc is set.
+	// Kind is ReadOnly or Mutating. Mutating verbs require a confirmation
+	// token. If KindFunc is set, it overrides Kind per invocation (used by
+	// `coily lockdown` to switch on --apply --replace).
 	Kind policy.Kind
 
-	// KindFunc lets a verb classify itself per-invocation based on flags.
-	// When non-nil, it is consulted instead of Kind. Use this for verbs
-	// where some flag combinations are read-only and others mutate (e.g.
-	// `lockdown` is ReadOnly without --apply --replace, but Mutating with).
+	// KindFunc, if non-nil, is called per invocation to compute Kind
+	// dynamically from the *cli.Command. Used when a verb's classification
+	// depends on flag combinations (`coily lockdown --apply --replace` is
+	// Mutating, bare `coily lockdown` is ReadOnly). Takes precedence over
+	// the static Kind field.
 	KindFunc func(*cli.Command) policy.Kind
+
+	// Scope is the required token scope for mutating verbs, shaped as
+	// `<binary>.<service>:<bucket>` (e.g. `aws.route53:write`). Ignored
+	// for ReadOnly verbs. May be left empty for ReadOnly. For Mutating
+	// verbs, leaving Scope empty is a wiring bug and policy.Enforce will
+	// reject the invocation.
+	Scope string
 
 	// ArgsFunc extracts the user-supplied string arguments from the
 	// *cli.Command. Returns three parts:
@@ -67,6 +76,7 @@ func Wrap(spec Spec, verifier policy.TokenVerifier, writer *audit.Writer) cli.Ac
 		inv := policy.Invocation{
 			Verb:       spec.Name,
 			Kind:       kind,
+			Scope:      spec.Scope,
 			Args:       args,
 			Positional: positional,
 			Token:      token,

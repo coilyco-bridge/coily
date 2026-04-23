@@ -16,7 +16,7 @@ out one agent per item, each touching a single file.
 
 ## Open questions
 
-14. [Token scoping granularity](unresolved/14-token-scoping.md)
+(none open)
 
 ## What I would build next, in order
 

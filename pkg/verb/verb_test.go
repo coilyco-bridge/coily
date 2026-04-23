@@ -15,13 +15,16 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-type fakeVerifier struct{ ok bool }
+type fakeVerifier struct {
+	scopes string
+	ok     bool
+}
 
-func (f fakeVerifier) Verify(_, _ string) error {
+func (f fakeVerifier) VerifyScopes(_ string) (string, error) {
 	if f.ok {
-		return nil
+		return f.scopes, nil
 	}
-	return errors.New("bad token")
+	return "", errors.New("bad token")
 }
 
 func newTestWriter(t *testing.T) *audit.Writer {
@@ -55,9 +58,10 @@ func TestWrap_MutatingWithoutTokenFails(t *testing.T) {
 	spec := verb.Spec{
 		Name:   "test.mut",
 		Kind:   policy.Mutating,
+		Scope:  "test.mut:write",
 		Action: func(_ context.Context, _ *cli.Command) error { return nil },
 	}
-	err := runWrapped(t, spec, fakeVerifier{ok: true}, newTestWriter(t))
+	err := runWrapped(t, spec, fakeVerifier{ok: true, scopes: "test.mut:write"}, newTestWriter(t))
 	if !errors.Is(err, policy.ErrTokenRequired) {
 		t.Errorf("err = %v, want ErrTokenRequired", err)
 	}

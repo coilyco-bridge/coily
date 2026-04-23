@@ -9,11 +9,12 @@
 //	go run ./cmd/gen-passthrough <binary>   # e.g. aws, gh, kubectl
 //	go run ./cmd/gen-passthrough all        # regenerate every manifest
 //
-// Classification of mutating vs. read-only verbs lives in pkg/verbclass and
-// is shared with cmd/subcli-scope so the snapshot diff and the codegen agree
-// on what counts as a mutator. Wrong classification is a bug worth flagging:
-// an agent-facing tool that mis-classifies a mutator as read-only silently
-// drops token-gating for that verb.
+// Classification of leaves into one of three buckets (Read / Write /
+// Delete) is delegated to pkg/verbclass and shared with cmd/subcli-scope so
+// the snapshot diff and the codegen agree on labels. The bucket determines
+// the verb's Kind (ReadOnly vs Mutating) and the required token scope
+// (`<binary>.<service>:<bucket>`). Wrong classification is a bug worth
+// flagging - a mutator labelled Read silently drops token-gating.
 package main
 
 import (
@@ -111,7 +112,12 @@ type tree struct {
 	Help     string
 	Flags    []flagSpec
 	Children []*tree
+	// Mutating is true when Bucket is Write or Delete. Set on leaves only.
 	Mutating bool
+	// Scope is the full required scope string for mutating leaves
+	// (`<binary>.<service>:<bucket>`). Empty for read-only leaves and
+	// for group nodes.
+	Scope string
 }
 
 func buildTree(m Manifest) *tree {
@@ -129,10 +135,9 @@ func buildTree(m Manifest) *tree {
 
 	for _, c := range cmds {
 		node := &tree{
-			Name:     c.Path[len(c.Path)-1],
-			Path:     append([]string{}, c.Path...),
-			Help:     sanitize(c.Help),
-			Mutating: verbclass.Classify(c.Path),
+			Name: c.Path[len(c.Path)-1],
+			Path: append([]string{}, c.Path...),
+			Help: sanitize(c.Help),
 		}
 		for _, f := range c.Flags {
 			node.Flags = append(node.Flags, makeFlagSpec(f))
@@ -146,6 +151,10 @@ func buildTree(m Manifest) *tree {
 		}
 		parent.Children = append(parent.Children, node)
 	}
+
+	// Pass two: classify leaves only. Group nodes inherit Mutating=false
+	// and Scope="" because their Action is never invoked.
+	classifyLeaves(m.Binary, root)
 	return root
 }
 
@@ -179,6 +188,20 @@ func makeFlagSpec(f ManifestFlag) flagSpec {
 		Long:     "--" + bare,
 		Type:     t,
 		FlagKind: kind,
+	}
+}
+
+// classifyLeaves walks the tree and stamps Mutating + Scope on every leaf
+// (no children, non-empty path). Group nodes inherit Mutating=false and
+// Scope="" because their Action is never invoked.
+func classifyLeaves(binary string, node *tree) {
+	if len(node.Children) == 0 && len(node.Path) > 0 {
+		bucket := verbclass.Classify(node.Path)
+		node.Mutating = bucket != verbclass.Read
+		node.Scope = fmt.Sprintf("%s.%s:%s", binary, verbclass.Service(node.Path), bucket)
+	}
+	for _, c := range node.Children {
+		classifyLeaves(binary, c)
 	}
 }
 
@@ -287,6 +310,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 		verb.Spec{
 			Name: {{dottedPath $binary $node.Path | goString}},
 			Kind: policy.{{if $node.Mutating}}Mutating{{else}}ReadOnly{{end}},
+			Scope: {{$node.Scope | goString}},
 			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 				args := map[string]string{}
 				var positional []string

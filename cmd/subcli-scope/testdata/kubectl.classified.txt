@@ -1,17 +1,17 @@
 kubectl annotate MUTATING
 kubectl api-resources READONLY
 kubectl api-versions READONLY
-kubectl apply edit-last-applied READONLY
+kubectl apply edit-last-applied MUTATING
 kubectl apply set-last-applied MUTATING
 kubectl apply view-last-applied READONLY
-kubectl attach READONLY
+kubectl attach MUTATING
 kubectl auth can-i READONLY
 kubectl auth reconcile MUTATING
 kubectl auth whoami READONLY
 kubectl autoscale MUTATING
 kubectl certificate approve MUTATING
 kubectl certificate deny MUTATING
-kubectl cluster-info dump READONLY
+kubectl cluster-info dump MUTATING
 kubectl config current-context READONLY
 kubectl config delete-cluster MUTATING
 kubectl config delete-context MUTATING
@@ -29,46 +29,46 @@ kubectl config use-context MUTATING
 kubectl config view READONLY
 kubectl cordon MUTATING
 kubectl cp MUTATING
-kubectl create clusterrole READONLY
-kubectl create clusterrolebinding READONLY
-kubectl create configmap READONLY
-kubectl create cronjob READONLY
-kubectl create deployment READONLY
-kubectl create ingress READONLY
-kubectl create job READONLY
-kubectl create namespace READONLY
-kubectl create poddisruptionbudget READONLY
-kubectl create priorityclass READONLY
-kubectl create quota READONLY
-kubectl create role READONLY
-kubectl create rolebinding READONLY
-kubectl create secret docker-registry READONLY
-kubectl create secret generic READONLY
-kubectl create secret tls READONLY
-kubectl create service clusterip READONLY
-kubectl create service externalname READONLY
-kubectl create service loadbalancer READONLY
-kubectl create service nodeport READONLY
-kubectl create serviceaccount READONLY
-kubectl create token READONLY
-kubectl debug READONLY
+kubectl create clusterrole MUTATING
+kubectl create clusterrolebinding MUTATING
+kubectl create configmap MUTATING
+kubectl create cronjob MUTATING
+kubectl create deployment MUTATING
+kubectl create ingress MUTATING
+kubectl create job MUTATING
+kubectl create namespace MUTATING
+kubectl create poddisruptionbudget MUTATING
+kubectl create priorityclass MUTATING
+kubectl create quota MUTATING
+kubectl create role MUTATING
+kubectl create rolebinding MUTATING
+kubectl create secret docker-registry MUTATING
+kubectl create secret generic MUTATING
+kubectl create secret tls MUTATING
+kubectl create service clusterip MUTATING
+kubectl create service externalname MUTATING
+kubectl create service loadbalancer MUTATING
+kubectl create service nodeport MUTATING
+kubectl create serviceaccount MUTATING
+kubectl create token MUTATING
+kubectl debug MUTATING
 kubectl delete MUTATING
 kubectl describe READONLY
 kubectl diff READONLY
 kubectl drain MUTATING
 kubectl edit MUTATING
 kubectl events READONLY
-kubectl exec READONLY
+kubectl exec MUTATING
 kubectl explain READONLY
 kubectl expose MUTATING
-kubectl get READONLY
-kubectl kustomize READONLY
+kubectl get MUTATING
+kubectl kustomize MUTATING
 kubectl label MUTATING
 kubectl logs READONLY
 kubectl patch MUTATING
-kubectl plugin READONLY
-kubectl port-forward READONLY
-kubectl proxy READONLY
+kubectl plugin MUTATING
+kubectl port-forward MUTATING
+kubectl proxy MUTATING
 kubectl replace MUTATING
 kubectl rollout history READONLY
 kubectl rollout pause MUTATING
@@ -78,14 +78,14 @@ kubectl rollout status READONLY
 kubectl rollout undo MUTATING
 kubectl run MUTATING
 kubectl scale MUTATING
-kubectl set env READONLY
-kubectl set image READONLY
-kubectl set resources READONLY
-kubectl set selector READONLY
-kubectl set serviceaccount READONLY
-kubectl set subject READONLY
+kubectl set env MUTATING
+kubectl set image MUTATING
+kubectl set resources MUTATING
+kubectl set selector MUTATING
+kubectl set serviceaccount MUTATING
+kubectl set subject MUTATING
 kubectl taint MUTATING
-kubectl top node READONLY
-kubectl top pod READONLY
+kubectl top node MUTATING
+kubectl top pod MUTATING
 kubectl uncordon MUTATING
 kubectl wait READONLY

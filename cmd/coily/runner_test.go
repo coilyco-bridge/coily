@@ -11,7 +11,10 @@ import (
 
 	"github.com/coilysiren/coily/pkg/audit"
 	"github.com/coilysiren/coily/pkg/config"
+	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/shell"
+	"github.com/coilysiren/coily/pkg/verb"
+	"github.com/urfave/cli/v3"
 )
 
 // fakeVerifier is a tiny stand-in for *auth.Issuer. Records every call and
@@ -23,13 +26,20 @@ type fakeVerifier struct {
 	Err   error
 }
 
-type verifyCall struct{ Scope, Token string }
+type verifyCall struct{ Token string }
 
-func (f *fakeVerifier) Verify(scope, token string) error {
+// VerifyScopes implements policy.TokenVerifier. Records every call and
+// returns whatever Err is set to. When Err is nil, returns the constant
+// scope "test.svc:write" so subsumption checks against any required scope of
+// "test.svc:write" succeed.
+func (f *fakeVerifier) VerifyScopes(token string) (string, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	f.calls = append(f.calls, verifyCall{scope, token})
-	return f.Err
+	f.calls = append(f.calls, verifyCall{token})
+	if f.Err != nil {
+		return "", f.Err
+	}
+	return "test.svc:write", nil
 }
 
 // newTestRunner builds a Runner with no real disk-backed dependencies.
@@ -61,34 +71,63 @@ func TestRunner_VersionCommand(t *testing.T) {
 	}
 }
 
-// TestRunner_AuthVerify proves the verifier dependency is the one consulted
-// for a scope/token check, that audit logging happens, and that a verifier
-// error propagates back to the caller. Three properties from one test.
-func TestRunner_AuthVerify(t *testing.T) {
+// TestRunner_FakeVerifierWired proves the verifier dependency is the one
+// consulted on a Mutating verb path through verb.Wrap -> policy.Enforce.
+// Uses a fake that records calls and can return errors. Audit-write
+// is also exercised so we know the full pipeline runs.
+func TestRunner_FakeVerifierWired(t *testing.T) {
 	v := &fakeVerifier{}
 	r := newTestRunner(t, v)
 
-	// Happy path: fake returns nil, command should succeed and the verifier
-	// should have seen our scope/token.
-	cmd := r.authVerifyCommand()
-	if err := cmd.Run(context.Background(), []string{"verify", "--scope", "test.scope", "--token", "tok-abc"}); err != nil {
-		t.Fatalf("verify: %v", err)
-	}
-	if len(v.calls) != 1 || v.calls[0].Scope != "test.scope" || v.calls[0].Token != "tok-abc" {
-		t.Fatalf("verifier calls = %#v, want one {test.scope tok-abc}", v.calls)
+	// Construct a Mutating verb on the fly using verb.Wrap directly.
+	// Required scope "test.svc:write" matches what the fake reports, so
+	// subsumption succeeds and the action runs.
+	called := false
+	wrapped := verb.Wrap(
+		verb.Spec{
+			Name:  "test.mutator",
+			Kind:  policy.Mutating,
+			Scope: "test.svc:write",
+			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+				return nil, nil, c.String("token")
+			},
+			Action: func(_ context.Context, _ *cli.Command) error {
+				called = true
+				return nil
+			},
+		},
+		r.Verifier,
+		r.Audit,
+	)
+	cmd := &cli.Command{
+		Name: "test",
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: "token"},
+		},
+		Action: wrapped,
 	}
 
-	// Sad path: fake returns an error, command should fail with the same
-	// error. Reset call log first so we can re-assert cleanly.
+	// Happy path.
+	if err := cmd.Run(context.Background(), []string{"test", "--token", "tok-abc"}); err != nil {
+		t.Fatalf("happy: %v", err)
+	}
+	if !called {
+		t.Fatalf("action was not called on happy path")
+	}
+	if len(v.calls) != 1 || v.calls[0].Token != "tok-abc" {
+		t.Fatalf("verifier calls = %#v, want one {tok-abc}", v.calls)
+	}
+
+	// Sad path: verifier returns an error, action must not run.
 	v.calls = nil
 	v.Err = errors.New("nope")
-	cmd2 := r.authVerifyCommand()
-	err := cmd2.Run(context.Background(), []string{"verify", "--scope", "test.scope", "--token", "bad"})
-	if err == nil || err.Error() != "nope" {
-		t.Fatalf("verify err = %v, want \"nope\"", err)
+	called = false
+	err := cmd.Run(context.Background(), []string{"test", "--token", "bad"})
+	if err == nil {
+		t.Fatalf("sad path: expected error, got nil")
 	}
-	if len(v.calls) != 1 {
-		t.Fatalf("verifier calls = %#v, want one", v.calls)
+	if called {
+		t.Fatalf("action ran on sad path; policy gate is broken")
 	}
 
 	// Audit log file should exist and be non-empty after both invocations.
@@ -99,13 +138,11 @@ func TestRunner_AuthVerify(t *testing.T) {
 	if st.Size() == 0 {
 		t.Fatalf("audit log is empty; verb.Wrap should have written records")
 	}
-
-	// And the records should mention auth.verify.
 	b, readErr := os.ReadFile(r.Audit.Path)
 	if readErr != nil {
 		t.Fatalf("read audit log: %v", readErr)
 	}
-	if !bytes.Contains(b, []byte("auth.verify")) {
-		t.Fatalf("audit log missing auth.verify, got: %s", b)
+	if !bytes.Contains(b, []byte("test.mutator")) {
+		t.Fatalf("audit log missing test.mutator, got: %s", b)
 	}
 }
