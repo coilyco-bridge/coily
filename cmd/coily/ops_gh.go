@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/coilysiren/coily/pkg/ops/gh"
+	"github.com/urfave/cli/v3"
 )
 
-func init() {
-	rt := getRuntime()
-	registerCommand(gh.Command(rt.runner, rt.issuer, rt.audit))
+func (r *Runner) ghCommand() *cli.Command {
+	return gh.Command(r.Runner, r.Verifier, r.Audit)
 }

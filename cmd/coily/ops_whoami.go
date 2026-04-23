@@ -13,35 +13,34 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func init() { registerCommand(whoamiCmd) }
-
-var whoamiCmd = &cli.Command{
-	Name:  "whoami",
-	Usage: "Print the authenticated identity coily sees across aws, kubectl, and gh.",
-	Description: `whoami asks each underlying tool "who am I?" and unifies the results into a
+func (r *Runner) whoamiCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "whoami",
+		Usage: "Print the authenticated identity coily sees across aws, kubectl, and gh.",
+		Description: `whoami asks each underlying tool "who am I?" and unifies the results into a
 single yaml block. Useful for confirming which AWS account coily is pointed
 at before a write op, seeing which kubectl context is current, and checking
 which GitHub identity gh is authenticated as.
 
 Non-fatal. If any tool is not configured or returns an error, its block
 reports the error but the other tools still run.`,
-	Action: verb.Wrap(
-		verb.Spec{
-			Name:   "whoami",
-			Kind:   policy.ReadOnly,
-			Action: whoamiAction,
-		},
-		getRuntime().issuer,
-		getRuntime().audit,
-	),
+		Action: verb.Wrap(
+			verb.Spec{
+				Name:   "whoami",
+				Kind:   policy.ReadOnly,
+				Action: r.whoamiAction,
+			},
+			r.Verifier,
+			r.Audit,
+		),
+	}
 }
 
-func whoamiAction(ctx context.Context, _ *cli.Command) error {
-	r := getRuntime().runner
+func (r *Runner) whoamiAction(ctx context.Context, _ *cli.Command) error {
 	out := map[string]any{
-		"aws":     awsWhoami(ctx, r),
-		"kubectl": kubectlWhoami(ctx, r),
-		"gh":      ghWhoami(ctx, r),
+		"aws":     awsWhoami(ctx, r.Runner),
+		"kubectl": kubectlWhoami(ctx, r.Runner),
+		"gh":      ghWhoami(ctx, r.Runner),
 	}
 	b, err := yaml.Marshal(out)
 	if err != nil {

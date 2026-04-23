@@ -11,31 +11,38 @@ import (
 // Version is injected at build time via -ldflags "-X main.Version=<sha>".
 var Version = "dev"
 
-// registeredCommands is populated by init() functions in sibling files. Each
-// verb (or verb tree) lives in its own file and self-registers here. This
-// keeps main.go free of a central registration list, which is the thing
-// parallel feature branches would otherwise conflict on.
-//
-// Add a command by writing a new file in this package that calls
-// `registerCommand(myCmd)` from init().
-var registeredCommands []*cli.Command
+// devCommandBuilders is populated by init() in files with `//go:build dev`.
+// Empty in prod builds. Each builder receives the Runner and returns a
+// cli.Command. Kept separate from prod commands so the split is visible to
+// readers and auditors.
+var devCommandBuilders []func(*Runner) *cli.Command
 
-// devOnlyCommands is populated by init() in files with `//go:build dev`.
-// Empty in prod builds. Kept separate so the split is visible to readers and
-// auditors.
-var devOnlyCommands []*cli.Command
-
-func registerCommand(c *cli.Command)        { registeredCommands = append(registeredCommands, c) }
-func registerDevOnlyCommand(c *cli.Command) { devOnlyCommands = append(devOnlyCommands, c) }
+func registerDevCommandBuilder(b func(*Runner) *cli.Command) {
+	devCommandBuilders = append(devCommandBuilders, b)
+}
 
 func main() {
-	builtIns := append(append([]*cli.Command{}, registeredCommands...), devOnlyCommands...)
+	r := NewRunner()
+	if err := run(r, os.Args); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+// run wires a Runner into the urfave/cli v3 root command and executes it
+// against argv. Split out from main() so tests can drive a Runner with fake
+// dependencies through a real cli.Command tree.
+func run(r *Runner, argv []string) error {
+	builtIns := r.builtInCommands()
+	for _, b := range devCommandBuilders {
+		builtIns = append(builtIns, b(r))
+	}
 
 	reserved := map[string]bool{}
 	for _, c := range builtIns {
 		reserved[c.Name] = true
 	}
-	repoCmds := loadRepoCommands(reserved)
+	repoCfg, repoCmds := r.loadRepoCommands(reserved)
 
 	cmd := &cli.Command{
 		Name:                  "coily",
@@ -51,15 +58,30 @@ func main() {
 		},
 		Action: func(_ context.Context, c *cli.Command) error {
 			if c.Bool("list") {
-				listCommand(builtIns, repoCmds)
+				listCommand(builtIns, repoCmds, repoCfg)
 				return nil
 			}
 			return cli.ShowAppHelp(c)
 		},
 	}
 
-	if err := cmd.Run(context.Background(), os.Args); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+	return cmd.Run(context.Background(), argv)
+}
+
+// builtInCommands returns the prod-build verbs in registration order. Each
+// verb file contributes one builder method; this list is the single place
+// they are wired in. Adding a verb means writing the file and appending its
+// builder here.
+func (r *Runner) builtInCommands() []*cli.Command {
+	return []*cli.Command{
+		r.versionCommand(),
+		r.whoamiCommand(),
+		r.authCommand(),
+		r.lockdownCommand(),
+		r.installCompletionCommand(),
+		r.ecoCommand(),
+		r.awsCommand(),
+		r.ghCommand(),
+		r.kubectlCommand(),
 	}
 }

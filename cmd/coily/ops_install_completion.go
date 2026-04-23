@@ -12,12 +12,11 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func init() { registerCommand(installCompletionCmd) }
-
-var installCompletionCmd = &cli.Command{
-	Name:  "install-completion",
-	Usage: "Install shell tab-completion for coily.",
-	Description: `install-completion writes a small sourceable file that wires coily into the
+func (r *Runner) installCompletionCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "install-completion",
+		Usage: "Install shell tab-completion for coily.",
+		Description: `install-completion writes a small sourceable file that wires coily into the
 user's shell completion system. Supports bash, zsh, and fish. Shell is
 auto-detected from $SHELL unless --shell is passed.
 
@@ -30,28 +29,29 @@ After running, follow the printed instructions to source the file from your
 shell rc (or for fish, restart the shell).
 
 Pass --dry-run to print the script to stdout instead of writing.`,
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:  "shell",
-			Usage: "one of bash, zsh, fish. Default: auto-detect from $SHELL",
-		},
-		&cli.BoolFlag{
-			Name:  "dry-run",
-			Usage: "print the completion script to stdout instead of writing a file",
-		},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "install-completion",
-			Kind: policy.ReadOnly,
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				return map[string]string{"--shell": c.String("shell")}, nil, ""
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "shell",
+				Usage: "one of bash, zsh, fish. Default: auto-detect from $SHELL",
 			},
-			Action: installCompletionAction,
+			&cli.BoolFlag{
+				Name:  "dry-run",
+				Usage: "print the completion script to stdout instead of writing a file",
+			},
 		},
-		getRuntime().issuer,
-		getRuntime().audit,
-	),
+		Action: verb.Wrap(
+			verb.Spec{
+				Name: "install-completion",
+				Kind: policy.ReadOnly,
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+					return map[string]string{"--shell": c.String("shell")}, nil, ""
+				},
+				Action: installCompletionAction,
+			},
+			r.Verifier,
+			r.Audit,
+		),
+	}
 }
 
 func installCompletionAction(_ context.Context, c *cli.Command) error {

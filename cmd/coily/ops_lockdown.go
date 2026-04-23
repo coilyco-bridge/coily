@@ -13,50 +13,50 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func init() { registerCommand(lockdownCmd) }
-
-var lockdownCmd = &cli.Command{
-	Name:  "lockdown",
-	Usage: "Write per-repo Claude Code permissions that force all ops through coily.",
-	Description: `lockdown renders a .claude/settings.json (or settings.local.json) for the
+func (r *Runner) lockdownCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "lockdown",
+		Usage: "Write per-repo Claude Code permissions that force all ops through coily.",
+		Description: `lockdown renders a .claude/settings.json (or settings.local.json) for the
 target directory with the canonical allow/deny lists baked into coily.
 
 Without --apply, prints the plan (diff of before/after) and exits. With
 --apply, writes the file to disk. Existing allow/deny entries are merged,
 not replaced, unless --replace is also set.`,
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:  "path",
-			Usage: "directory whose .claude/ subdir to target",
-			Value: ".",
-		},
-		&cli.BoolFlag{
-			Name:  "local",
-			Usage: "write to .claude/settings.local.json instead of settings.json",
-		},
-		&cli.BoolFlag{
-			Name:  "apply",
-			Usage: "actually write the file (default: dry-run)",
-		},
-		&cli.BoolFlag{
-			Name:  "replace",
-			Usage: "replace existing allow/deny entries instead of merging",
-		},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "lockdown",
-			Kind: policy.ReadOnly,
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				return map[string]string{
-					"--path": c.String("path"),
-				}, nil, ""
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "path",
+				Usage: "directory whose .claude/ subdir to target",
+				Value: ".",
 			},
-			Action: lockdownAction,
+			&cli.BoolFlag{
+				Name:  "local",
+				Usage: "write to .claude/settings.local.json instead of settings.json",
+			},
+			&cli.BoolFlag{
+				Name:  "apply",
+				Usage: "actually write the file (default: dry-run)",
+			},
+			&cli.BoolFlag{
+				Name:  "replace",
+				Usage: "replace existing allow/deny entries instead of merging",
+			},
 		},
-		getRuntime().issuer,
-		getRuntime().audit,
-	),
+		Action: verb.Wrap(
+			verb.Spec{
+				Name: "lockdown",
+				Kind: policy.ReadOnly,
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+					return map[string]string{
+						"--path": c.String("path"),
+					}, nil, ""
+				},
+				Action: lockdownAction,
+			},
+			r.Verifier,
+			r.Audit,
+		),
+	}
 }
 
 func lockdownAction(_ context.Context, c *cli.Command) error {

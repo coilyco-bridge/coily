@@ -16,7 +16,9 @@ import (
 // exactly the kind of "edit that has consequences" the threat model warns
 // about. Keeping it out of /usr/local/bin/coily means an agent that lands
 // inside the coily allowlist cannot steer its own future sessions.
-func init() { registerDevOnlyCommand(installSkillCmd) }
+func init() {
+	registerDevCommandBuilder(func(_ *Runner) *cli.Command { return installSkillCmd })
+}
 
 var installSkillCmd = &cli.Command{
 	Name:  "install-skill",
