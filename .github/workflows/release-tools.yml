@@ -144,6 +144,8 @@ jobs:
                 url="https://awscli.amazonaws.com/AWSCLIV2-${AWS_VERSION}.pkg"
                 curl -fsSL -o "$tmp/aws.pkg" "$url"
                 ( cd "$tmp" && bsdtar -xf aws.pkg )
+                echo "--- $tmp after bsdtar ---"
+                find "$tmp" -maxdepth 3 -print
                 ( cd "$tmp" && cat aws-cli.pkg/Payload | gunzip -dc | cpio -id 2>/dev/null )
                 cp "$tmp/aws-cli/aws" "staging/aws-${os}-${arch}"
                 ;;
