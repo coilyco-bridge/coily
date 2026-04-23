@@ -29,12 +29,39 @@ kubectl config use-context MUTATING
 kubectl config view READONLY
 kubectl cordon MUTATING
 kubectl cp MUTATING
+kubectl create clusterrole READONLY
+kubectl create clusterrolebinding READONLY
+kubectl create configmap READONLY
+kubectl create cronjob READONLY
+kubectl create deployment READONLY
+kubectl create ingress READONLY
+kubectl create job READONLY
+kubectl create namespace READONLY
+kubectl create poddisruptionbudget READONLY
+kubectl create priorityclass READONLY
+kubectl create quota READONLY
+kubectl create role READONLY
+kubectl create rolebinding READONLY
+kubectl create secret docker-registry READONLY
+kubectl create secret generic READONLY
+kubectl create secret tls READONLY
+kubectl create service clusterip READONLY
+kubectl create service externalname READONLY
+kubectl create service loadbalancer READONLY
+kubectl create service nodeport READONLY
+kubectl create serviceaccount READONLY
+kubectl create token READONLY
 kubectl debug READONLY
+kubectl delete MUTATING
 kubectl describe READONLY
 kubectl diff READONLY
 kubectl drain MUTATING
+kubectl edit MUTATING
 kubectl events READONLY
 kubectl exec READONLY
+kubectl explain READONLY
+kubectl expose MUTATING
+kubectl get READONLY
 kubectl kustomize READONLY
 kubectl label MUTATING
 kubectl logs READONLY
@@ -49,7 +76,14 @@ kubectl rollout restart MUTATING
 kubectl rollout resume MUTATING
 kubectl rollout status READONLY
 kubectl rollout undo MUTATING
+kubectl run MUTATING
 kubectl scale MUTATING
+kubectl set env READONLY
+kubectl set image READONLY
+kubectl set resources READONLY
+kubectl set selector READONLY
+kubectl set serviceaccount READONLY
+kubectl set subject READONLY
 kubectl taint MUTATING
 kubectl top node READONLY
 kubectl top pod READONLY

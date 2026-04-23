@@ -624,6 +624,7 @@ aws ssm label-parameter-version MUTATING
 aws ssm list-association-versions READONLY
 aws ssm list-associations READONLY
 aws ssm list-command-invocations READONLY
+aws ssm list-commands READONLY
 aws ssm list-compliance-items READONLY
 aws ssm list-compliance-summaries READONLY
 aws ssm list-document-metadata-history READONLY

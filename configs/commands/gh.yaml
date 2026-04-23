@@ -1,6 +1,6 @@
 binary: gh
 bin_version: gh version 2.66.1 (2025-01-31)
-scanned_at: "2026-04-22T22:01:30Z"
+scanned_at: "2026-04-23T00:58:49Z"
 commands:
     - path:
         - issue

@@ -306,6 +306,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				args[{{.Long | goString}}] = c.String({{.Bare | goString}})
 				{{- end}}
 				{{- end}}
+				positional = append(positional, c.Args().Slice()...)
 				return args, positional, c.String("token")
 			},
 			Action: func(ctx context.Context, c *cli.Command) error {
@@ -327,6 +328,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				{{- end}}
 				}
 				{{- end}}
+				// Forward any trailing positional args after flags so verbs
+				// like "gh api <endpoint>", "kubectl get <resource>", and
+				// "aws s3 cp <src> <dst>" reach the underlying tool.
+				argv = append(argv, c.Args().Slice()...)
 				_ = strconv.Itoa // keep strconv imported even when no flags
 				return r.Exec(ctx, BinaryName, argv...)
 			},

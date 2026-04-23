@@ -5,6 +5,36 @@ import (
 	"testing"
 )
 
+// TestRenderForwardsPositionalArgs locks in the fix for "gh api <endpoint>"
+// and friends. The generated Action must append c.Args().Slice() after the
+// flag block so trailing positionals reach the underlying tool. Likewise the
+// ArgsFunc must hand positionals into policy.Enforce (mixed with any
+// stringSlice flag values that already accumulated in `positional`).
+func TestRenderForwardsPositionalArgs(t *testing.T) {
+	m := Manifest{
+		Binary: "gh",
+		Commands: []ManifestCommand{
+			{Path: []string{"api"}, Help: "Make a GitHub API request.", Flags: []ManifestFlag{{Name: "--method"}}},
+		},
+	}
+	code, err := render(m)
+	if err != nil {
+		t.Fatalf("render: %v", err)
+	}
+	wants := []string{
+		// Action appends positionals after the flag loop.
+		`argv = append(argv, c.Args().Slice()...)`,
+		// ArgsFunc folds positionals into the slice handed to policy.
+		`positional = append(positional, c.Args().Slice()...)`,
+		`return args, positional, c.String("token")`,
+	}
+	for _, w := range wants {
+		if !strings.Contains(code, w) {
+			t.Errorf("rendered code missing %q\n--- code ---\n%s", w, code)
+		}
+	}
+}
+
 // TestMakeFlagSpec covers the per-flag conversion that drives the codegen.
 // Defaults to StringFlag when Type is unset; maps the four known Type
 // vocabulary values (string, bool, int, stringSlice) to the matching

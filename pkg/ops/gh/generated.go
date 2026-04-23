@@ -32,21 +32,21 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Usage: "Makes an authenticated HTTP request to the GitHub API and prints the response.",
 				Flags: []cli.Flag{
 					&cli.StringFlag{Name: "cache"},
-					&cli.StringSliceFlag{Name: "field"},
-					&cli.StringSliceFlag{Name: "header"},
+					&cli.StringFlag{Name: "field"},
+					&cli.StringFlag{Name: "header"},
 					&cli.StringFlag{Name: "hostname"},
-					&cli.BoolFlag{Name: "include"},
+					&cli.StringFlag{Name: "include"},
 					&cli.StringFlag{Name: "input"},
 					&cli.StringFlag{Name: "jq"},
 					&cli.StringFlag{Name: "method"},
-					&cli.BoolFlag{Name: "paginate"},
+					&cli.StringFlag{Name: "paginate"},
 					&cli.StringFlag{Name: "preview"},
-					&cli.StringSliceFlag{Name: "raw-field"},
-					&cli.BoolFlag{Name: "silent"},
-					&cli.BoolFlag{Name: "slurp"},
+					&cli.StringFlag{Name: "raw-field"},
+					&cli.StringFlag{Name: "silent"},
+					&cli.StringFlag{Name: "slurp"},
 					&cli.StringFlag{Name: "template"},
-					&cli.BoolFlag{Name: "verbose"},
-					&cli.BoolFlag{Name: "help"},
+					&cli.StringFlag{Name: "verbose"},
+					&cli.StringFlag{Name: "help"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
@@ -54,112 +54,78 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Kind: policy.ReadOnly,
 						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 							args := map[string]string{}
-							var positional []string
-							_ = positional
 							args["--cache"] = c.String("cache")
-							for _, v := range c.StringSlice("field") {
-								positional = append(positional, v)
-							}
-							for _, v := range c.StringSlice("header") {
-								positional = append(positional, v)
-							}
+							args["--field"] = c.String("field")
+							args["--header"] = c.String("header")
 							args["--hostname"] = c.String("hostname")
-							if c.Bool("include") {
-								args["--include"] = "true"
-							}
+							args["--include"] = c.String("include")
 							args["--input"] = c.String("input")
 							args["--jq"] = c.String("jq")
 							args["--method"] = c.String("method")
-							if c.Bool("paginate") {
-								args["--paginate"] = "true"
-							}
+							args["--paginate"] = c.String("paginate")
 							args["--preview"] = c.String("preview")
-							for _, v := range c.StringSlice("raw-field") {
-								positional = append(positional, v)
-							}
-							if c.Bool("silent") {
-								args["--silent"] = "true"
-							}
-							if c.Bool("slurp") {
-								args["--slurp"] = "true"
-							}
+							args["--raw-field"] = c.String("raw-field")
+							args["--silent"] = c.String("silent")
+							args["--slurp"] = c.String("slurp")
 							args["--template"] = c.String("template")
-							if c.Bool("verbose") {
-								args["--verbose"] = "true"
-							}
-							if c.Bool("help") {
-								args["--help"] = "true"
-							}
-							return args, positional, c.String("token")
+							args["--verbose"] = c.String("verbose")
+							args["--help"] = c.String("help")
+							return args, c.Args().Slice(), c.String("token")
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"api"}
 							if c.IsSet("cache") {
-								argv = append(argv, "--cache", c.String("cache"))
+								argv = append(argv, "--"+"cache", c.String("cache"))
 							}
 							if c.IsSet("field") {
-								for _, v := range c.StringSlice("field") {
-									argv = append(argv, "--field", v)
-								}
+								argv = append(argv, "--"+"field", c.String("field"))
 							}
 							if c.IsSet("header") {
-								for _, v := range c.StringSlice("header") {
-									argv = append(argv, "--header", v)
-								}
+								argv = append(argv, "--"+"header", c.String("header"))
 							}
 							if c.IsSet("hostname") {
-								argv = append(argv, "--hostname", c.String("hostname"))
+								argv = append(argv, "--"+"hostname", c.String("hostname"))
 							}
 							if c.IsSet("include") {
-								if c.Bool("include") {
-									argv = append(argv, "--include")
-								}
+								argv = append(argv, "--"+"include", c.String("include"))
 							}
 							if c.IsSet("input") {
-								argv = append(argv, "--input", c.String("input"))
+								argv = append(argv, "--"+"input", c.String("input"))
 							}
 							if c.IsSet("jq") {
-								argv = append(argv, "--jq", c.String("jq"))
+								argv = append(argv, "--"+"jq", c.String("jq"))
 							}
 							if c.IsSet("method") {
-								argv = append(argv, "--method", c.String("method"))
+								argv = append(argv, "--"+"method", c.String("method"))
 							}
 							if c.IsSet("paginate") {
-								if c.Bool("paginate") {
-									argv = append(argv, "--paginate")
-								}
+								argv = append(argv, "--"+"paginate", c.String("paginate"))
 							}
 							if c.IsSet("preview") {
-								argv = append(argv, "--preview", c.String("preview"))
+								argv = append(argv, "--"+"preview", c.String("preview"))
 							}
 							if c.IsSet("raw-field") {
-								for _, v := range c.StringSlice("raw-field") {
-									argv = append(argv, "--raw-field", v)
-								}
+								argv = append(argv, "--"+"raw-field", c.String("raw-field"))
 							}
 							if c.IsSet("silent") {
-								if c.Bool("silent") {
-									argv = append(argv, "--silent")
-								}
+								argv = append(argv, "--"+"silent", c.String("silent"))
 							}
 							if c.IsSet("slurp") {
-								if c.Bool("slurp") {
-									argv = append(argv, "--slurp")
-								}
+								argv = append(argv, "--"+"slurp", c.String("slurp"))
 							}
 							if c.IsSet("template") {
-								argv = append(argv, "--template", c.String("template"))
+								argv = append(argv, "--"+"template", c.String("template"))
 							}
 							if c.IsSet("verbose") {
-								if c.Bool("verbose") {
-									argv = append(argv, "--verbose")
-								}
+								argv = append(argv, "--"+"verbose", c.String("verbose"))
 							}
 							if c.IsSet("help") {
-								if c.Bool("help") {
-									argv = append(argv, "--help")
-								}
+								argv = append(argv, "--"+"help", c.String("help"))
 							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
 							_ = strconv.Itoa // keep strconv imported even when no flags
 							return r.Exec(ctx, BinaryName, argv...)
 						},
@@ -177,7 +143,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "comment"},
 							&cli.StringFlag{Name: "reason"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -185,28 +152,30 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--comment"] = c.String("comment")
 									args["--reason"] = c.String("reason")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "close"}
 									if c.IsSet("comment") {
-										argv = append(argv, "--comment", c.String("comment"))
+										argv = append(argv, "--"+"comment", c.String("comment"))
 									}
 									if c.IsSet("reason") {
-										argv = append(argv, "--reason", c.String("reason"))
+										argv = append(argv, "--"+"reason", c.String("reason"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -220,10 +189,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "body"},
 							&cli.StringFlag{Name: "body-file"},
-							&cli.BoolFlag{Name: "edit-last"},
-							&cli.BoolFlag{Name: "editor"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "edit-last"},
+							&cli.StringFlag{Name: "editor"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -231,52 +201,42 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--body"] = c.String("body")
 									args["--body-file"] = c.String("body-file")
-									if c.Bool("edit-last") {
-										args["--edit-last"] = "true"
-									}
-									if c.Bool("editor") {
-										args["--editor"] = "true"
-									}
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--edit-last"] = c.String("edit-last")
+									args["--editor"] = c.String("editor")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "comment"}
 									if c.IsSet("body") {
-										argv = append(argv, "--body", c.String("body"))
+										argv = append(argv, "--"+"body", c.String("body"))
 									}
 									if c.IsSet("body-file") {
-										argv = append(argv, "--body-file", c.String("body-file"))
+										argv = append(argv, "--"+"body-file", c.String("body-file"))
 									}
 									if c.IsSet("edit-last") {
-										if c.Bool("edit-last") {
-											argv = append(argv, "--edit-last")
-										}
+										argv = append(argv, "--"+"edit-last", c.String("edit-last"))
 									}
 									if c.IsSet("editor") {
-										if c.Bool("editor") {
-											argv = append(argv, "--editor")
-										}
+										argv = append(argv, "--"+"editor", c.String("editor"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -291,15 +251,16 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "assignee"},
 							&cli.StringFlag{Name: "body"},
 							&cli.StringFlag{Name: "body-file"},
-							&cli.BoolFlag{Name: "editor"},
+							&cli.StringFlag{Name: "editor"},
 							&cli.StringFlag{Name: "label"},
 							&cli.StringFlag{Name: "milestone"},
 							&cli.StringFlag{Name: "project"},
 							&cli.StringFlag{Name: "recover"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "title"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -307,72 +268,66 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--assignee"] = c.String("assignee")
 									args["--body"] = c.String("body")
 									args["--body-file"] = c.String("body-file")
-									if c.Bool("editor") {
-										args["--editor"] = "true"
-									}
+									args["--editor"] = c.String("editor")
 									args["--label"] = c.String("label")
 									args["--milestone"] = c.String("milestone")
 									args["--project"] = c.String("project")
 									args["--recover"] = c.String("recover")
 									args["--template"] = c.String("template")
 									args["--title"] = c.String("title")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "create"}
 									if c.IsSet("assignee") {
-										argv = append(argv, "--assignee", c.String("assignee"))
+										argv = append(argv, "--"+"assignee", c.String("assignee"))
 									}
 									if c.IsSet("body") {
-										argv = append(argv, "--body", c.String("body"))
+										argv = append(argv, "--"+"body", c.String("body"))
 									}
 									if c.IsSet("body-file") {
-										argv = append(argv, "--body-file", c.String("body-file"))
+										argv = append(argv, "--"+"body-file", c.String("body-file"))
 									}
 									if c.IsSet("editor") {
-										if c.Bool("editor") {
-											argv = append(argv, "--editor")
-										}
+										argv = append(argv, "--"+"editor", c.String("editor"))
 									}
 									if c.IsSet("label") {
-										argv = append(argv, "--label", c.String("label"))
+										argv = append(argv, "--"+"label", c.String("label"))
 									}
 									if c.IsSet("milestone") {
-										argv = append(argv, "--milestone", c.String("milestone"))
+										argv = append(argv, "--"+"milestone", c.String("milestone"))
 									}
 									if c.IsSet("project") {
-										argv = append(argv, "--project", c.String("project"))
+										argv = append(argv, "--"+"project", c.String("project"))
 									}
 									if c.IsSet("recover") {
-										argv = append(argv, "--recover", c.String("recover"))
+										argv = append(argv, "--"+"recover", c.String("recover"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("title") {
-										argv = append(argv, "--title", c.String("title"))
+										argv = append(argv, "--"+"title", c.String("title"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -384,8 +339,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "delete",
 						Usage: "Delete issue",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "yes"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "yes"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -393,28 +349,26 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("yes") {
-										args["--yes"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--yes"] = c.String("yes")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "delete"}
 									if c.IsSet("yes") {
-										if c.Bool("yes") {
-											argv = append(argv, "--yes")
-										}
+										argv = append(argv, "--"+"yes", c.String("yes"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -428,10 +382,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "base"},
 							&cli.StringFlag{Name: "branch-repo"},
-							&cli.BoolFlag{Name: "checkout"},
-							&cli.BoolFlag{Name: "list"},
+							&cli.StringFlag{Name: "checkout"},
+							&cli.StringFlag{Name: "list"},
 							&cli.StringFlag{Name: "name"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -439,48 +394,42 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--base"] = c.String("base")
 									args["--branch-repo"] = c.String("branch-repo")
-									if c.Bool("checkout") {
-										args["--checkout"] = "true"
-									}
-									if c.Bool("list") {
-										args["--list"] = "true"
-									}
+									args["--checkout"] = c.String("checkout")
+									args["--list"] = c.String("list")
 									args["--name"] = c.String("name")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "develop"}
 									if c.IsSet("base") {
-										argv = append(argv, "--base", c.String("base"))
+										argv = append(argv, "--"+"base", c.String("base"))
 									}
 									if c.IsSet("branch-repo") {
-										argv = append(argv, "--branch-repo", c.String("branch-repo"))
+										argv = append(argv, "--"+"branch-repo", c.String("branch-repo"))
 									}
 									if c.IsSet("checkout") {
-										if c.Bool("checkout") {
-											argv = append(argv, "--checkout")
-										}
+										argv = append(argv, "--"+"checkout", c.String("checkout"))
 									}
 									if c.IsSet("list") {
-										if c.Bool("list") {
-											argv = append(argv, "--list")
-										}
+										argv = append(argv, "--"+"list", c.String("list"))
 									}
 									if c.IsSet("name") {
-										argv = append(argv, "--name", c.String("name"))
+										argv = append(argv, "--"+"name", c.String("name"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -500,10 +449,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "milestone"},
 							&cli.StringFlag{Name: "remove-assignee"},
 							&cli.StringFlag{Name: "remove-label"},
-							&cli.BoolFlag{Name: "remove-milestone"},
+							&cli.StringFlag{Name: "remove-milestone"},
 							&cli.StringFlag{Name: "remove-project"},
 							&cli.StringFlag{Name: "title"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -511,8 +461,6 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--add-assignee"] = c.String("add-assignee")
 									args["--add-label"] = c.String("add-label")
 									args["--add-project"] = c.String("add-project")
@@ -521,58 +469,58 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--milestone"] = c.String("milestone")
 									args["--remove-assignee"] = c.String("remove-assignee")
 									args["--remove-label"] = c.String("remove-label")
-									if c.Bool("remove-milestone") {
-										args["--remove-milestone"] = "true"
-									}
+									args["--remove-milestone"] = c.String("remove-milestone")
 									args["--remove-project"] = c.String("remove-project")
 									args["--title"] = c.String("title")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "edit"}
 									if c.IsSet("add-assignee") {
-										argv = append(argv, "--add-assignee", c.String("add-assignee"))
+										argv = append(argv, "--"+"add-assignee", c.String("add-assignee"))
 									}
 									if c.IsSet("add-label") {
-										argv = append(argv, "--add-label", c.String("add-label"))
+										argv = append(argv, "--"+"add-label", c.String("add-label"))
 									}
 									if c.IsSet("add-project") {
-										argv = append(argv, "--add-project", c.String("add-project"))
+										argv = append(argv, "--"+"add-project", c.String("add-project"))
 									}
 									if c.IsSet("body") {
-										argv = append(argv, "--body", c.String("body"))
+										argv = append(argv, "--"+"body", c.String("body"))
 									}
 									if c.IsSet("body-file") {
-										argv = append(argv, "--body-file", c.String("body-file"))
+										argv = append(argv, "--"+"body-file", c.String("body-file"))
 									}
 									if c.IsSet("milestone") {
-										argv = append(argv, "--milestone", c.String("milestone"))
+										argv = append(argv, "--"+"milestone", c.String("milestone"))
 									}
 									if c.IsSet("remove-assignee") {
-										argv = append(argv, "--remove-assignee", c.String("remove-assignee"))
+										argv = append(argv, "--"+"remove-assignee", c.String("remove-assignee"))
 									}
 									if c.IsSet("remove-label") {
-										argv = append(argv, "--remove-label", c.String("remove-label"))
+										argv = append(argv, "--"+"remove-label", c.String("remove-label"))
 									}
 									if c.IsSet("remove-milestone") {
-										if c.Bool("remove-milestone") {
-											argv = append(argv, "--remove-milestone")
-										}
+										argv = append(argv, "--"+"remove-milestone", c.String("remove-milestone"))
 									}
 									if c.IsSet("remove-project") {
-										argv = append(argv, "--remove-project", c.String("remove-project"))
+										argv = append(argv, "--"+"remove-project", c.String("remove-project"))
 									}
 									if c.IsSet("title") {
-										argv = append(argv, "--title", c.String("title"))
+										argv = append(argv, "--"+"title", c.String("title"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -590,14 +538,15 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "label"},
-							&cli.IntFlag{Name: "limit"},
+							&cli.StringFlag{Name: "limit"},
 							&cli.StringFlag{Name: "mention"},
 							&cli.StringFlag{Name: "milestone"},
 							&cli.StringFlag{Name: "search"},
 							&cli.StringFlag{Name: "state"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -605,76 +554,74 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--app"] = c.String("app")
 									args["--assignee"] = c.String("assignee")
 									args["--author"] = c.String("author")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--label"] = c.String("label")
-									args["--limit"] = strconv.Itoa(int(c.Int("limit")))
+									args["--limit"] = c.String("limit")
 									args["--mention"] = c.String("mention")
 									args["--milestone"] = c.String("milestone")
 									args["--search"] = c.String("search")
 									args["--state"] = c.String("state")
 									args["--template"] = c.String("template")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "list"}
 									if c.IsSet("app") {
-										argv = append(argv, "--app", c.String("app"))
+										argv = append(argv, "--"+"app", c.String("app"))
 									}
 									if c.IsSet("assignee") {
-										argv = append(argv, "--assignee", c.String("assignee"))
+										argv = append(argv, "--"+"assignee", c.String("assignee"))
 									}
 									if c.IsSet("author") {
-										argv = append(argv, "--author", c.String("author"))
+										argv = append(argv, "--"+"author", c.String("author"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("label") {
-										argv = append(argv, "--label", c.String("label"))
+										argv = append(argv, "--"+"label", c.String("label"))
 									}
 									if c.IsSet("limit") {
-										argv = append(argv, "--limit", strconv.Itoa(int(c.Int("limit"))))
+										argv = append(argv, "--"+"limit", c.String("limit"))
 									}
 									if c.IsSet("mention") {
-										argv = append(argv, "--mention", c.String("mention"))
+										argv = append(argv, "--"+"mention", c.String("mention"))
 									}
 									if c.IsSet("milestone") {
-										argv = append(argv, "--milestone", c.String("milestone"))
+										argv = append(argv, "--"+"milestone", c.String("milestone"))
 									}
 									if c.IsSet("search") {
-										argv = append(argv, "--search", c.String("search"))
+										argv = append(argv, "--"+"search", c.String("search"))
 									}
 									if c.IsSet("state") {
-										argv = append(argv, "--state", c.String("state"))
+										argv = append(argv, "--"+"state", c.String("state"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -687,7 +634,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Lock issue conversation",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "reason"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -695,24 +643,26 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--reason"] = c.String("reason")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "lock"}
 									if c.IsSet("reason") {
-										argv = append(argv, "--reason", c.String("reason"))
+										argv = append(argv, "--"+"reason", c.String("reason"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -724,7 +674,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "pin",
 						Usage: "Pin an issue to a repository.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -732,20 +683,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "pin"}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -758,7 +711,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Reopen issue",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "comment"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -766,24 +720,26 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--comment"] = c.String("comment")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "reopen"}
 									if c.IsSet("comment") {
-										argv = append(argv, "--comment", c.String("comment"))
+										argv = append(argv, "--"+"comment", c.String("comment"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -798,7 +754,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -806,32 +763,34 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--template"] = c.String("template")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "status"}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -843,7 +802,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "transfer",
 						Usage: "Transfer issue to another repository",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -851,20 +811,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "transfer"}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -876,7 +838,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "unlock",
 						Usage: "Unlock issue conversation",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -884,20 +847,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "unlock"}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -909,7 +874,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "unpin",
 						Usage: "Unpin an issue from a repository.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -917,20 +883,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "unpin"}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -942,12 +910,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "view",
 						Usage: "Display the title, body, and other information about an issue.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "comments"},
+							&cli.StringFlag{Name: "comments"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -955,48 +924,42 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("comments") {
-										args["--comments"] = "true"
-									}
+									args["--comments"] = c.String("comments")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--template"] = c.String("template")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "view"}
 									if c.IsSet("comments") {
-										if c.Bool("comments") {
-											argv = append(argv, "--comments")
-										}
+										argv = append(argv, "--"+"comments", c.String("comments"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1015,10 +978,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Check out a pull request in git",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "branch"},
-							&cli.BoolFlag{Name: "detach"},
-							&cli.BoolFlag{Name: "force"},
-							&cli.BoolFlag{Name: "recurse-submodules"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "detach"},
+							&cli.StringFlag{Name: "force"},
+							&cli.StringFlag{Name: "recurse-submodules"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1026,48 +990,38 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--branch"] = c.String("branch")
-									if c.Bool("detach") {
-										args["--detach"] = "true"
-									}
-									if c.Bool("force") {
-										args["--force"] = "true"
-									}
-									if c.Bool("recurse-submodules") {
-										args["--recurse-submodules"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--detach"] = c.String("detach")
+									args["--force"] = c.String("force")
+									args["--recurse-submodules"] = c.String("recurse-submodules")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "checkout"}
 									if c.IsSet("branch") {
-										argv = append(argv, "--branch", c.String("branch"))
+										argv = append(argv, "--"+"branch", c.String("branch"))
 									}
 									if c.IsSet("detach") {
-										if c.Bool("detach") {
-											argv = append(argv, "--detach")
-										}
+										argv = append(argv, "--"+"detach", c.String("detach"))
 									}
 									if c.IsSet("force") {
-										if c.Bool("force") {
-											argv = append(argv, "--force")
-										}
+										argv = append(argv, "--"+"force", c.String("force"))
 									}
 									if c.IsSet("recurse-submodules") {
-										if c.Bool("recurse-submodules") {
-											argv = append(argv, "--recurse-submodules")
-										}
+										argv = append(argv, "--"+"recurse-submodules", c.String("recurse-submodules"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1079,14 +1033,16 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "checks",
 						Usage: "Show CI status for a single pull request.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "fail-fast"},
+							&cli.StringFlag{Name: "fail-fast"},
+							&cli.StringFlag{Name: "interval"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
-							&cli.BoolFlag{Name: "required"},
+							&cli.StringFlag{Name: "required"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "watch"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "watch"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1094,64 +1050,54 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("fail-fast") {
-										args["--fail-fast"] = "true"
-									}
+									args["--fail-fast"] = c.String("fail-fast")
+									args["--interval"] = c.String("interval")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
-									if c.Bool("required") {
-										args["--required"] = "true"
-									}
+									args["--required"] = c.String("required")
 									args["--template"] = c.String("template")
-									if c.Bool("watch") {
-										args["--watch"] = "true"
-									}
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--watch"] = c.String("watch")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "checks"}
 									if c.IsSet("fail-fast") {
-										if c.Bool("fail-fast") {
-											argv = append(argv, "--fail-fast")
-										}
+										argv = append(argv, "--"+"fail-fast", c.String("fail-fast"))
+									}
+									if c.IsSet("interval") {
+										argv = append(argv, "--"+"interval", c.String("interval"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("required") {
-										if c.Bool("required") {
-											argv = append(argv, "--required")
-										}
+										argv = append(argv, "--"+"required", c.String("required"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("watch") {
-										if c.Bool("watch") {
-											argv = append(argv, "--watch")
-										}
+										argv = append(argv, "--"+"watch", c.String("watch"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1164,8 +1110,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Close a pull request",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "comment"},
-							&cli.BoolFlag{Name: "delete-branch"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "delete-branch"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1173,32 +1120,30 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--comment"] = c.String("comment")
-									if c.Bool("delete-branch") {
-										args["--delete-branch"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--delete-branch"] = c.String("delete-branch")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "close"}
 									if c.IsSet("comment") {
-										argv = append(argv, "--comment", c.String("comment"))
+										argv = append(argv, "--"+"comment", c.String("comment"))
 									}
 									if c.IsSet("delete-branch") {
-										if c.Bool("delete-branch") {
-											argv = append(argv, "--delete-branch")
-										}
+										argv = append(argv, "--"+"delete-branch", c.String("delete-branch"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1212,10 +1157,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "body"},
 							&cli.StringFlag{Name: "body-file"},
-							&cli.BoolFlag{Name: "edit-last"},
-							&cli.BoolFlag{Name: "editor"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "edit-last"},
+							&cli.StringFlag{Name: "editor"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1223,52 +1169,42 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--body"] = c.String("body")
 									args["--body-file"] = c.String("body-file")
-									if c.Bool("edit-last") {
-										args["--edit-last"] = "true"
-									}
-									if c.Bool("editor") {
-										args["--editor"] = "true"
-									}
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--edit-last"] = c.String("edit-last")
+									args["--editor"] = c.String("editor")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "comment"}
 									if c.IsSet("body") {
-										argv = append(argv, "--body", c.String("body"))
+										argv = append(argv, "--"+"body", c.String("body"))
 									}
 									if c.IsSet("body-file") {
-										argv = append(argv, "--body-file", c.String("body-file"))
+										argv = append(argv, "--"+"body-file", c.String("body-file"))
 									}
 									if c.IsSet("edit-last") {
-										if c.Bool("edit-last") {
-											argv = append(argv, "--edit-last")
-										}
+										argv = append(argv, "--"+"edit-last", c.String("edit-last"))
 									}
 									if c.IsSet("editor") {
-										if c.Bool("editor") {
-											argv = append(argv, "--editor")
-										}
+										argv = append(argv, "--"+"editor", c.String("editor"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1284,23 +1220,24 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "base"},
 							&cli.StringFlag{Name: "body"},
 							&cli.StringFlag{Name: "body-file"},
-							&cli.BoolFlag{Name: "draft"},
-							&cli.BoolFlag{Name: "dry-run"},
-							&cli.BoolFlag{Name: "editor"},
-							&cli.BoolFlag{Name: "fill"},
-							&cli.BoolFlag{Name: "fill-first"},
-							&cli.BoolFlag{Name: "fill-verbose"},
+							&cli.StringFlag{Name: "draft"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "editor"},
+							&cli.StringFlag{Name: "fill"},
+							&cli.StringFlag{Name: "fill-first"},
+							&cli.StringFlag{Name: "fill-verbose"},
 							&cli.StringFlag{Name: "head"},
 							&cli.StringFlag{Name: "label"},
 							&cli.StringFlag{Name: "milestone"},
-							&cli.BoolFlag{Name: "no-maintainer-edit"},
+							&cli.StringFlag{Name: "no-maintainer-edit"},
 							&cli.StringFlag{Name: "project"},
 							&cli.StringFlag{Name: "recover"},
 							&cli.StringFlag{Name: "reviewer"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "title"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1308,132 +1245,102 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--assignee"] = c.String("assignee")
 									args["--base"] = c.String("base")
 									args["--body"] = c.String("body")
 									args["--body-file"] = c.String("body-file")
-									if c.Bool("draft") {
-										args["--draft"] = "true"
-									}
-									if c.Bool("dry-run") {
-										args["--dry-run"] = "true"
-									}
-									if c.Bool("editor") {
-										args["--editor"] = "true"
-									}
-									if c.Bool("fill") {
-										args["--fill"] = "true"
-									}
-									if c.Bool("fill-first") {
-										args["--fill-first"] = "true"
-									}
-									if c.Bool("fill-verbose") {
-										args["--fill-verbose"] = "true"
-									}
+									args["--draft"] = c.String("draft")
+									args["--dry-run"] = c.String("dry-run")
+									args["--editor"] = c.String("editor")
+									args["--fill"] = c.String("fill")
+									args["--fill-first"] = c.String("fill-first")
+									args["--fill-verbose"] = c.String("fill-verbose")
 									args["--head"] = c.String("head")
 									args["--label"] = c.String("label")
 									args["--milestone"] = c.String("milestone")
-									if c.Bool("no-maintainer-edit") {
-										args["--no-maintainer-edit"] = "true"
-									}
+									args["--no-maintainer-edit"] = c.String("no-maintainer-edit")
 									args["--project"] = c.String("project")
 									args["--recover"] = c.String("recover")
 									args["--reviewer"] = c.String("reviewer")
 									args["--template"] = c.String("template")
 									args["--title"] = c.String("title")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "create"}
 									if c.IsSet("assignee") {
-										argv = append(argv, "--assignee", c.String("assignee"))
+										argv = append(argv, "--"+"assignee", c.String("assignee"))
 									}
 									if c.IsSet("base") {
-										argv = append(argv, "--base", c.String("base"))
+										argv = append(argv, "--"+"base", c.String("base"))
 									}
 									if c.IsSet("body") {
-										argv = append(argv, "--body", c.String("body"))
+										argv = append(argv, "--"+"body", c.String("body"))
 									}
 									if c.IsSet("body-file") {
-										argv = append(argv, "--body-file", c.String("body-file"))
+										argv = append(argv, "--"+"body-file", c.String("body-file"))
 									}
 									if c.IsSet("draft") {
-										if c.Bool("draft") {
-											argv = append(argv, "--draft")
-										}
+										argv = append(argv, "--"+"draft", c.String("draft"))
 									}
 									if c.IsSet("dry-run") {
-										if c.Bool("dry-run") {
-											argv = append(argv, "--dry-run")
-										}
+										argv = append(argv, "--"+"dry-run", c.String("dry-run"))
 									}
 									if c.IsSet("editor") {
-										if c.Bool("editor") {
-											argv = append(argv, "--editor")
-										}
+										argv = append(argv, "--"+"editor", c.String("editor"))
 									}
 									if c.IsSet("fill") {
-										if c.Bool("fill") {
-											argv = append(argv, "--fill")
-										}
+										argv = append(argv, "--"+"fill", c.String("fill"))
 									}
 									if c.IsSet("fill-first") {
-										if c.Bool("fill-first") {
-											argv = append(argv, "--fill-first")
-										}
+										argv = append(argv, "--"+"fill-first", c.String("fill-first"))
 									}
 									if c.IsSet("fill-verbose") {
-										if c.Bool("fill-verbose") {
-											argv = append(argv, "--fill-verbose")
-										}
+										argv = append(argv, "--"+"fill-verbose", c.String("fill-verbose"))
 									}
 									if c.IsSet("head") {
-										argv = append(argv, "--head", c.String("head"))
+										argv = append(argv, "--"+"head", c.String("head"))
 									}
 									if c.IsSet("label") {
-										argv = append(argv, "--label", c.String("label"))
+										argv = append(argv, "--"+"label", c.String("label"))
 									}
 									if c.IsSet("milestone") {
-										argv = append(argv, "--milestone", c.String("milestone"))
+										argv = append(argv, "--"+"milestone", c.String("milestone"))
 									}
 									if c.IsSet("no-maintainer-edit") {
-										if c.Bool("no-maintainer-edit") {
-											argv = append(argv, "--no-maintainer-edit")
-										}
+										argv = append(argv, "--"+"no-maintainer-edit", c.String("no-maintainer-edit"))
 									}
 									if c.IsSet("project") {
-										argv = append(argv, "--project", c.String("project"))
+										argv = append(argv, "--"+"project", c.String("project"))
 									}
 									if c.IsSet("recover") {
-										argv = append(argv, "--recover", c.String("recover"))
+										argv = append(argv, "--"+"recover", c.String("recover"))
 									}
 									if c.IsSet("reviewer") {
-										argv = append(argv, "--reviewer", c.String("reviewer"))
+										argv = append(argv, "--"+"reviewer", c.String("reviewer"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("title") {
-										argv = append(argv, "--title", c.String("title"))
+										argv = append(argv, "--"+"title", c.String("title"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1446,10 +1353,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "View changes in a pull request.",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "color"},
-							&cli.BoolFlag{Name: "name-only"},
-							&cli.BoolFlag{Name: "patch"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "name-only"},
+							&cli.StringFlag{Name: "patch"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1457,48 +1365,38 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--color"] = c.String("color")
-									if c.Bool("name-only") {
-										args["--name-only"] = "true"
-									}
-									if c.Bool("patch") {
-										args["--patch"] = "true"
-									}
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--name-only"] = c.String("name-only")
+									args["--patch"] = c.String("patch")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "diff"}
 									if c.IsSet("color") {
-										argv = append(argv, "--color", c.String("color"))
+										argv = append(argv, "--"+"color", c.String("color"))
 									}
 									if c.IsSet("name-only") {
-										if c.Bool("name-only") {
-											argv = append(argv, "--name-only")
-										}
+										argv = append(argv, "--"+"name-only", c.String("name-only"))
 									}
 									if c.IsSet("patch") {
-										if c.Bool("patch") {
-											argv = append(argv, "--patch")
-										}
+										argv = append(argv, "--"+"patch", c.String("patch"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1520,11 +1418,12 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "milestone"},
 							&cli.StringFlag{Name: "remove-assignee"},
 							&cli.StringFlag{Name: "remove-label"},
-							&cli.BoolFlag{Name: "remove-milestone"},
+							&cli.StringFlag{Name: "remove-milestone"},
 							&cli.StringFlag{Name: "remove-project"},
 							&cli.StringFlag{Name: "remove-reviewer"},
 							&cli.StringFlag{Name: "title"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1532,8 +1431,6 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--add-assignee"] = c.String("add-assignee")
 									args["--add-label"] = c.String("add-label")
 									args["--add-project"] = c.String("add-project")
@@ -1544,68 +1441,68 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--milestone"] = c.String("milestone")
 									args["--remove-assignee"] = c.String("remove-assignee")
 									args["--remove-label"] = c.String("remove-label")
-									if c.Bool("remove-milestone") {
-										args["--remove-milestone"] = "true"
-									}
+									args["--remove-milestone"] = c.String("remove-milestone")
 									args["--remove-project"] = c.String("remove-project")
 									args["--remove-reviewer"] = c.String("remove-reviewer")
 									args["--title"] = c.String("title")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "edit"}
 									if c.IsSet("add-assignee") {
-										argv = append(argv, "--add-assignee", c.String("add-assignee"))
+										argv = append(argv, "--"+"add-assignee", c.String("add-assignee"))
 									}
 									if c.IsSet("add-label") {
-										argv = append(argv, "--add-label", c.String("add-label"))
+										argv = append(argv, "--"+"add-label", c.String("add-label"))
 									}
 									if c.IsSet("add-project") {
-										argv = append(argv, "--add-project", c.String("add-project"))
+										argv = append(argv, "--"+"add-project", c.String("add-project"))
 									}
 									if c.IsSet("add-reviewer") {
-										argv = append(argv, "--add-reviewer", c.String("add-reviewer"))
+										argv = append(argv, "--"+"add-reviewer", c.String("add-reviewer"))
 									}
 									if c.IsSet("base") {
-										argv = append(argv, "--base", c.String("base"))
+										argv = append(argv, "--"+"base", c.String("base"))
 									}
 									if c.IsSet("body") {
-										argv = append(argv, "--body", c.String("body"))
+										argv = append(argv, "--"+"body", c.String("body"))
 									}
 									if c.IsSet("body-file") {
-										argv = append(argv, "--body-file", c.String("body-file"))
+										argv = append(argv, "--"+"body-file", c.String("body-file"))
 									}
 									if c.IsSet("milestone") {
-										argv = append(argv, "--milestone", c.String("milestone"))
+										argv = append(argv, "--"+"milestone", c.String("milestone"))
 									}
 									if c.IsSet("remove-assignee") {
-										argv = append(argv, "--remove-assignee", c.String("remove-assignee"))
+										argv = append(argv, "--"+"remove-assignee", c.String("remove-assignee"))
 									}
 									if c.IsSet("remove-label") {
-										argv = append(argv, "--remove-label", c.String("remove-label"))
+										argv = append(argv, "--"+"remove-label", c.String("remove-label"))
 									}
 									if c.IsSet("remove-milestone") {
-										if c.Bool("remove-milestone") {
-											argv = append(argv, "--remove-milestone")
-										}
+										argv = append(argv, "--"+"remove-milestone", c.String("remove-milestone"))
 									}
 									if c.IsSet("remove-project") {
-										argv = append(argv, "--remove-project", c.String("remove-project"))
+										argv = append(argv, "--"+"remove-project", c.String("remove-project"))
 									}
 									if c.IsSet("remove-reviewer") {
-										argv = append(argv, "--remove-reviewer", c.String("remove-reviewer"))
+										argv = append(argv, "--"+"remove-reviewer", c.String("remove-reviewer"))
 									}
 									if c.IsSet("title") {
-										argv = append(argv, "--title", c.String("title"))
+										argv = append(argv, "--"+"title", c.String("title"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1621,17 +1518,18 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "assignee"},
 							&cli.StringFlag{Name: "author"},
 							&cli.StringFlag{Name: "base"},
-							&cli.BoolFlag{Name: "draft"},
+							&cli.StringFlag{Name: "draft"},
 							&cli.StringFlag{Name: "head"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "label"},
-							&cli.IntFlag{Name: "limit"},
+							&cli.StringFlag{Name: "limit"},
 							&cli.StringFlag{Name: "search"},
 							&cli.StringFlag{Name: "state"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1639,84 +1537,78 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--app"] = c.String("app")
 									args["--assignee"] = c.String("assignee")
 									args["--author"] = c.String("author")
 									args["--base"] = c.String("base")
-									if c.Bool("draft") {
-										args["--draft"] = "true"
-									}
+									args["--draft"] = c.String("draft")
 									args["--head"] = c.String("head")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--label"] = c.String("label")
-									args["--limit"] = strconv.Itoa(int(c.Int("limit")))
+									args["--limit"] = c.String("limit")
 									args["--search"] = c.String("search")
 									args["--state"] = c.String("state")
 									args["--template"] = c.String("template")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "list"}
 									if c.IsSet("app") {
-										argv = append(argv, "--app", c.String("app"))
+										argv = append(argv, "--"+"app", c.String("app"))
 									}
 									if c.IsSet("assignee") {
-										argv = append(argv, "--assignee", c.String("assignee"))
+										argv = append(argv, "--"+"assignee", c.String("assignee"))
 									}
 									if c.IsSet("author") {
-										argv = append(argv, "--author", c.String("author"))
+										argv = append(argv, "--"+"author", c.String("author"))
 									}
 									if c.IsSet("base") {
-										argv = append(argv, "--base", c.String("base"))
+										argv = append(argv, "--"+"base", c.String("base"))
 									}
 									if c.IsSet("draft") {
-										if c.Bool("draft") {
-											argv = append(argv, "--draft")
-										}
+										argv = append(argv, "--"+"draft", c.String("draft"))
 									}
 									if c.IsSet("head") {
-										argv = append(argv, "--head", c.String("head"))
+										argv = append(argv, "--"+"head", c.String("head"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("label") {
-										argv = append(argv, "--label", c.String("label"))
+										argv = append(argv, "--"+"label", c.String("label"))
 									}
 									if c.IsSet("limit") {
-										argv = append(argv, "--limit", strconv.Itoa(int(c.Int("limit"))))
+										argv = append(argv, "--"+"limit", c.String("limit"))
 									}
 									if c.IsSet("search") {
-										argv = append(argv, "--search", c.String("search"))
+										argv = append(argv, "--"+"search", c.String("search"))
 									}
 									if c.IsSet("state") {
-										argv = append(argv, "--state", c.String("state"))
+										argv = append(argv, "--"+"state", c.String("state"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1729,7 +1621,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Lock pull request conversation",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "reason"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1737,24 +1630,26 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--reason"] = c.String("reason")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "lock"}
 									if c.IsSet("reason") {
-										argv = append(argv, "--reason", c.String("reason"))
+										argv = append(argv, "--"+"reason", c.String("reason"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1766,19 +1661,20 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "merge",
 						Usage: "Merge a pull request on GitHub.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "admin"},
+							&cli.StringFlag{Name: "admin"},
 							&cli.StringFlag{Name: "author-email"},
-							&cli.BoolFlag{Name: "auto"},
+							&cli.StringFlag{Name: "auto"},
 							&cli.StringFlag{Name: "body"},
 							&cli.StringFlag{Name: "body-file"},
-							&cli.BoolFlag{Name: "delete-branch"},
-							&cli.BoolFlag{Name: "disable-auto"},
+							&cli.StringFlag{Name: "delete-branch"},
+							&cli.StringFlag{Name: "disable-auto"},
 							&cli.StringFlag{Name: "match-head-commit"},
-							&cli.BoolFlag{Name: "merge"},
-							&cli.BoolFlag{Name: "rebase"},
-							&cli.BoolFlag{Name: "squash"},
+							&cli.StringFlag{Name: "merge"},
+							&cli.StringFlag{Name: "rebase"},
+							&cli.StringFlag{Name: "squash"},
 							&cli.StringFlag{Name: "subject"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1786,96 +1682,70 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("admin") {
-										args["--admin"] = "true"
-									}
+									args["--admin"] = c.String("admin")
 									args["--author-email"] = c.String("author-email")
-									if c.Bool("auto") {
-										args["--auto"] = "true"
-									}
+									args["--auto"] = c.String("auto")
 									args["--body"] = c.String("body")
 									args["--body-file"] = c.String("body-file")
-									if c.Bool("delete-branch") {
-										args["--delete-branch"] = "true"
-									}
-									if c.Bool("disable-auto") {
-										args["--disable-auto"] = "true"
-									}
+									args["--delete-branch"] = c.String("delete-branch")
+									args["--disable-auto"] = c.String("disable-auto")
 									args["--match-head-commit"] = c.String("match-head-commit")
-									if c.Bool("merge") {
-										args["--merge"] = "true"
-									}
-									if c.Bool("rebase") {
-										args["--rebase"] = "true"
-									}
-									if c.Bool("squash") {
-										args["--squash"] = "true"
-									}
+									args["--merge"] = c.String("merge")
+									args["--rebase"] = c.String("rebase")
+									args["--squash"] = c.String("squash")
 									args["--subject"] = c.String("subject")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "merge"}
 									if c.IsSet("admin") {
-										if c.Bool("admin") {
-											argv = append(argv, "--admin")
-										}
+										argv = append(argv, "--"+"admin", c.String("admin"))
 									}
 									if c.IsSet("author-email") {
-										argv = append(argv, "--author-email", c.String("author-email"))
+										argv = append(argv, "--"+"author-email", c.String("author-email"))
 									}
 									if c.IsSet("auto") {
-										if c.Bool("auto") {
-											argv = append(argv, "--auto")
-										}
+										argv = append(argv, "--"+"auto", c.String("auto"))
 									}
 									if c.IsSet("body") {
-										argv = append(argv, "--body", c.String("body"))
+										argv = append(argv, "--"+"body", c.String("body"))
 									}
 									if c.IsSet("body-file") {
-										argv = append(argv, "--body-file", c.String("body-file"))
+										argv = append(argv, "--"+"body-file", c.String("body-file"))
 									}
 									if c.IsSet("delete-branch") {
-										if c.Bool("delete-branch") {
-											argv = append(argv, "--delete-branch")
-										}
+										argv = append(argv, "--"+"delete-branch", c.String("delete-branch"))
 									}
 									if c.IsSet("disable-auto") {
-										if c.Bool("disable-auto") {
-											argv = append(argv, "--disable-auto")
-										}
+										argv = append(argv, "--"+"disable-auto", c.String("disable-auto"))
 									}
 									if c.IsSet("match-head-commit") {
-										argv = append(argv, "--match-head-commit", c.String("match-head-commit"))
+										argv = append(argv, "--"+"match-head-commit", c.String("match-head-commit"))
 									}
 									if c.IsSet("merge") {
-										if c.Bool("merge") {
-											argv = append(argv, "--merge")
-										}
+										argv = append(argv, "--"+"merge", c.String("merge"))
 									}
 									if c.IsSet("rebase") {
-										if c.Bool("rebase") {
-											argv = append(argv, "--rebase")
-										}
+										argv = append(argv, "--"+"rebase", c.String("rebase"))
 									}
 									if c.IsSet("squash") {
-										if c.Bool("squash") {
-											argv = append(argv, "--squash")
-										}
+										argv = append(argv, "--"+"squash", c.String("squash"))
 									}
 									if c.IsSet("subject") {
-										argv = append(argv, "--subject", c.String("subject"))
+										argv = append(argv, "--"+"subject", c.String("subject"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1887,8 +1757,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "ready",
 						Usage: "Mark a pull request as ready for review.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "undo"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "undo"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1896,28 +1767,26 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("undo") {
-										args["--undo"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--undo"] = c.String("undo")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "ready"}
 									if c.IsSet("undo") {
-										if c.Bool("undo") {
-											argv = append(argv, "--undo")
-										}
+										argv = append(argv, "--"+"undo", c.String("undo"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1930,7 +1799,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Reopen a pull request",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "comment"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1938,24 +1808,26 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--comment"] = c.String("comment")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "reopen"}
 									if c.IsSet("comment") {
-										argv = append(argv, "--comment", c.String("comment"))
+										argv = append(argv, "--"+"comment", c.String("comment"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -1967,12 +1839,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "review",
 						Usage: "Add a review to a pull request.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "approve"},
+							&cli.StringFlag{Name: "approve"},
 							&cli.StringFlag{Name: "body"},
 							&cli.StringFlag{Name: "body-file"},
-							&cli.BoolFlag{Name: "comment"},
-							&cli.BoolFlag{Name: "request-changes"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "comment"},
+							&cli.StringFlag{Name: "request-changes"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1980,52 +1853,42 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("approve") {
-										args["--approve"] = "true"
-									}
+									args["--approve"] = c.String("approve")
 									args["--body"] = c.String("body")
 									args["--body-file"] = c.String("body-file")
-									if c.Bool("comment") {
-										args["--comment"] = "true"
-									}
-									if c.Bool("request-changes") {
-										args["--request-changes"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--comment"] = c.String("comment")
+									args["--request-changes"] = c.String("request-changes")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "review"}
 									if c.IsSet("approve") {
-										if c.Bool("approve") {
-											argv = append(argv, "--approve")
-										}
+										argv = append(argv, "--"+"approve", c.String("approve"))
 									}
 									if c.IsSet("body") {
-										argv = append(argv, "--body", c.String("body"))
+										argv = append(argv, "--"+"body", c.String("body"))
 									}
 									if c.IsSet("body-file") {
-										argv = append(argv, "--body-file", c.String("body-file"))
+										argv = append(argv, "--"+"body-file", c.String("body-file"))
 									}
 									if c.IsSet("comment") {
-										if c.Bool("comment") {
-											argv = append(argv, "--comment")
-										}
+										argv = append(argv, "--"+"comment", c.String("comment"))
 									}
 									if c.IsSet("request-changes") {
-										if c.Bool("request-changes") {
-											argv = append(argv, "--request-changes")
-										}
+										argv = append(argv, "--"+"request-changes", c.String("request-changes"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2037,11 +1900,12 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "status",
 						Usage: "Show status of relevant pull requests",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "conflict-status"},
+							&cli.StringFlag{Name: "conflict-status"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2049,40 +1913,38 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("conflict-status") {
-										args["--conflict-status"] = "true"
-									}
+									args["--conflict-status"] = c.String("conflict-status")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--template"] = c.String("template")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "status"}
 									if c.IsSet("conflict-status") {
-										if c.Bool("conflict-status") {
-											argv = append(argv, "--conflict-status")
-										}
+										argv = append(argv, "--"+"conflict-status", c.String("conflict-status"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2094,7 +1956,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "unlock",
 						Usage: "Unlock pull request conversation",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2102,20 +1965,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "unlock"}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2127,12 +1992,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "view",
 						Usage: "Display the title, body, and other information about a pull request.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "comments"},
+							&cli.StringFlag{Name: "comments"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2140,48 +2006,42 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("comments") {
-										args["--comments"] = "true"
-									}
+									args["--comments"] = c.String("comments")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--template"] = c.String("template")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "view"}
 									if c.IsSet("comments") {
-										if c.Bool("comments") {
-											argv = append(argv, "--comments")
-										}
+										argv = append(argv, "--"+"comments", c.String("comments"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2200,18 +2060,19 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Create a new GitHub Release for a repository.",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "discussion-category"},
-							&cli.BoolFlag{Name: "draft"},
-							&cli.BoolFlag{Name: "generate-notes"},
-							&cli.BoolFlag{Name: "latest"},
+							&cli.StringFlag{Name: "draft"},
+							&cli.StringFlag{Name: "generate-notes"},
+							&cli.StringFlag{Name: "latest"},
 							&cli.StringFlag{Name: "notes"},
 							&cli.StringFlag{Name: "notes-file"},
-							&cli.BoolFlag{Name: "notes-from-tag"},
+							&cli.StringFlag{Name: "notes-from-tag"},
 							&cli.StringFlag{Name: "notes-start-tag"},
-							&cli.BoolFlag{Name: "prerelease"},
+							&cli.StringFlag{Name: "prerelease"},
 							&cli.StringFlag{Name: "target"},
 							&cli.StringFlag{Name: "title"},
-							&cli.BoolFlag{Name: "verify-tag"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "verify-tag"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2219,92 +2080,70 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--discussion-category"] = c.String("discussion-category")
-									if c.Bool("draft") {
-										args["--draft"] = "true"
-									}
-									if c.Bool("generate-notes") {
-										args["--generate-notes"] = "true"
-									}
-									if c.Bool("latest") {
-										args["--latest"] = "true"
-									}
+									args["--draft"] = c.String("draft")
+									args["--generate-notes"] = c.String("generate-notes")
+									args["--latest"] = c.String("latest")
 									args["--notes"] = c.String("notes")
 									args["--notes-file"] = c.String("notes-file")
-									if c.Bool("notes-from-tag") {
-										args["--notes-from-tag"] = "true"
-									}
+									args["--notes-from-tag"] = c.String("notes-from-tag")
 									args["--notes-start-tag"] = c.String("notes-start-tag")
-									if c.Bool("prerelease") {
-										args["--prerelease"] = "true"
-									}
+									args["--prerelease"] = c.String("prerelease")
 									args["--target"] = c.String("target")
 									args["--title"] = c.String("title")
-									if c.Bool("verify-tag") {
-										args["--verify-tag"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--verify-tag"] = c.String("verify-tag")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "create"}
 									if c.IsSet("discussion-category") {
-										argv = append(argv, "--discussion-category", c.String("discussion-category"))
+										argv = append(argv, "--"+"discussion-category", c.String("discussion-category"))
 									}
 									if c.IsSet("draft") {
-										if c.Bool("draft") {
-											argv = append(argv, "--draft")
-										}
+										argv = append(argv, "--"+"draft", c.String("draft"))
 									}
 									if c.IsSet("generate-notes") {
-										if c.Bool("generate-notes") {
-											argv = append(argv, "--generate-notes")
-										}
+										argv = append(argv, "--"+"generate-notes", c.String("generate-notes"))
 									}
 									if c.IsSet("latest") {
-										if c.Bool("latest") {
-											argv = append(argv, "--latest")
-										}
+										argv = append(argv, "--"+"latest", c.String("latest"))
 									}
 									if c.IsSet("notes") {
-										argv = append(argv, "--notes", c.String("notes"))
+										argv = append(argv, "--"+"notes", c.String("notes"))
 									}
 									if c.IsSet("notes-file") {
-										argv = append(argv, "--notes-file", c.String("notes-file"))
+										argv = append(argv, "--"+"notes-file", c.String("notes-file"))
 									}
 									if c.IsSet("notes-from-tag") {
-										if c.Bool("notes-from-tag") {
-											argv = append(argv, "--notes-from-tag")
-										}
+										argv = append(argv, "--"+"notes-from-tag", c.String("notes-from-tag"))
 									}
 									if c.IsSet("notes-start-tag") {
-										argv = append(argv, "--notes-start-tag", c.String("notes-start-tag"))
+										argv = append(argv, "--"+"notes-start-tag", c.String("notes-start-tag"))
 									}
 									if c.IsSet("prerelease") {
-										if c.Bool("prerelease") {
-											argv = append(argv, "--prerelease")
-										}
+										argv = append(argv, "--"+"prerelease", c.String("prerelease"))
 									}
 									if c.IsSet("target") {
-										argv = append(argv, "--target", c.String("target"))
+										argv = append(argv, "--"+"target", c.String("target"))
 									}
 									if c.IsSet("title") {
-										argv = append(argv, "--title", c.String("title"))
+										argv = append(argv, "--"+"title", c.String("title"))
 									}
 									if c.IsSet("verify-tag") {
-										if c.Bool("verify-tag") {
-											argv = append(argv, "--verify-tag")
-										}
+										argv = append(argv, "--"+"verify-tag", c.String("verify-tag"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2316,9 +2155,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "delete",
 						Usage: "Delete a release",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "cleanup-tag"},
-							&cli.BoolFlag{Name: "yes"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "cleanup-tag"},
+							&cli.StringFlag{Name: "yes"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2326,36 +2166,30 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("cleanup-tag") {
-										args["--cleanup-tag"] = "true"
-									}
-									if c.Bool("yes") {
-										args["--yes"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--cleanup-tag"] = c.String("cleanup-tag")
+									args["--yes"] = c.String("yes")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "delete"}
 									if c.IsSet("cleanup-tag") {
-										if c.Bool("cleanup-tag") {
-											argv = append(argv, "--cleanup-tag")
-										}
+										argv = append(argv, "--"+"cleanup-tag", c.String("cleanup-tag"))
 									}
 									if c.IsSet("yes") {
-										if c.Bool("yes") {
-											argv = append(argv, "--yes")
-										}
+										argv = append(argv, "--"+"yes", c.String("yes"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2368,12 +2202,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Download assets from a GitHub release.",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "archive"},
-							&cli.BoolFlag{Name: "clobber"},
+							&cli.StringFlag{Name: "clobber"},
 							&cli.StringFlag{Name: "dir"},
 							&cli.StringFlag{Name: "output"},
 							&cli.StringFlag{Name: "pattern"},
-							&cli.BoolFlag{Name: "skip-existing"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "skip-existing"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2381,52 +2216,46 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--archive"] = c.String("archive")
-									if c.Bool("clobber") {
-										args["--clobber"] = "true"
-									}
+									args["--clobber"] = c.String("clobber")
 									args["--dir"] = c.String("dir")
 									args["--output"] = c.String("output")
 									args["--pattern"] = c.String("pattern")
-									if c.Bool("skip-existing") {
-										args["--skip-existing"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--skip-existing"] = c.String("skip-existing")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "download"}
 									if c.IsSet("archive") {
-										argv = append(argv, "--archive", c.String("archive"))
+										argv = append(argv, "--"+"archive", c.String("archive"))
 									}
 									if c.IsSet("clobber") {
-										if c.Bool("clobber") {
-											argv = append(argv, "--clobber")
-										}
+										argv = append(argv, "--"+"clobber", c.String("clobber"))
 									}
 									if c.IsSet("dir") {
-										argv = append(argv, "--dir", c.String("dir"))
+										argv = append(argv, "--"+"dir", c.String("dir"))
 									}
 									if c.IsSet("output") {
-										argv = append(argv, "--output", c.String("output"))
+										argv = append(argv, "--"+"output", c.String("output"))
 									}
 									if c.IsSet("pattern") {
-										argv = append(argv, "--pattern", c.String("pattern"))
+										argv = append(argv, "--"+"pattern", c.String("pattern"))
 									}
 									if c.IsSet("skip-existing") {
-										if c.Bool("skip-existing") {
-											argv = append(argv, "--skip-existing")
-										}
+										argv = append(argv, "--"+"skip-existing", c.String("skip-existing"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2439,16 +2268,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Edit a release",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "discussion-category"},
-							&cli.BoolFlag{Name: "draft"},
-							&cli.BoolFlag{Name: "latest"},
+							&cli.StringFlag{Name: "draft"},
+							&cli.StringFlag{Name: "latest"},
 							&cli.StringFlag{Name: "notes"},
 							&cli.StringFlag{Name: "notes-file"},
-							&cli.BoolFlag{Name: "prerelease"},
+							&cli.StringFlag{Name: "prerelease"},
 							&cli.StringFlag{Name: "tag"},
 							&cli.StringFlag{Name: "target"},
 							&cli.StringFlag{Name: "title"},
-							&cli.BoolFlag{Name: "verify-tag"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "verify-tag"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2456,76 +2286,62 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--discussion-category"] = c.String("discussion-category")
-									if c.Bool("draft") {
-										args["--draft"] = "true"
-									}
-									if c.Bool("latest") {
-										args["--latest"] = "true"
-									}
+									args["--draft"] = c.String("draft")
+									args["--latest"] = c.String("latest")
 									args["--notes"] = c.String("notes")
 									args["--notes-file"] = c.String("notes-file")
-									if c.Bool("prerelease") {
-										args["--prerelease"] = "true"
-									}
+									args["--prerelease"] = c.String("prerelease")
 									args["--tag"] = c.String("tag")
 									args["--target"] = c.String("target")
 									args["--title"] = c.String("title")
-									if c.Bool("verify-tag") {
-										args["--verify-tag"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--verify-tag"] = c.String("verify-tag")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "edit"}
 									if c.IsSet("discussion-category") {
-										argv = append(argv, "--discussion-category", c.String("discussion-category"))
+										argv = append(argv, "--"+"discussion-category", c.String("discussion-category"))
 									}
 									if c.IsSet("draft") {
-										if c.Bool("draft") {
-											argv = append(argv, "--draft")
-										}
+										argv = append(argv, "--"+"draft", c.String("draft"))
 									}
 									if c.IsSet("latest") {
-										if c.Bool("latest") {
-											argv = append(argv, "--latest")
-										}
+										argv = append(argv, "--"+"latest", c.String("latest"))
 									}
 									if c.IsSet("notes") {
-										argv = append(argv, "--notes", c.String("notes"))
+										argv = append(argv, "--"+"notes", c.String("notes"))
 									}
 									if c.IsSet("notes-file") {
-										argv = append(argv, "--notes-file", c.String("notes-file"))
+										argv = append(argv, "--"+"notes-file", c.String("notes-file"))
 									}
 									if c.IsSet("prerelease") {
-										if c.Bool("prerelease") {
-											argv = append(argv, "--prerelease")
-										}
+										argv = append(argv, "--"+"prerelease", c.String("prerelease"))
 									}
 									if c.IsSet("tag") {
-										argv = append(argv, "--tag", c.String("tag"))
+										argv = append(argv, "--"+"tag", c.String("tag"))
 									}
 									if c.IsSet("target") {
-										argv = append(argv, "--target", c.String("target"))
+										argv = append(argv, "--"+"target", c.String("target"))
 									}
 									if c.IsSet("title") {
-										argv = append(argv, "--title", c.String("title"))
+										argv = append(argv, "--"+"title", c.String("title"))
 									}
 									if c.IsSet("verify-tag") {
-										if c.Bool("verify-tag") {
-											argv = append(argv, "--verify-tag")
-										}
+										argv = append(argv, "--"+"verify-tag", c.String("verify-tag"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2537,14 +2353,15 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "list",
 						Usage: "List releases in a repository",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "exclude-drafts"},
-							&cli.BoolFlag{Name: "exclude-pre-releases"},
+							&cli.StringFlag{Name: "exclude-drafts"},
+							&cli.StringFlag{Name: "exclude-pre-releases"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
-							&cli.IntFlag{Name: "limit"},
+							&cli.StringFlag{Name: "limit"},
 							&cli.StringFlag{Name: "order"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2552,56 +2369,50 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("exclude-drafts") {
-										args["--exclude-drafts"] = "true"
-									}
-									if c.Bool("exclude-pre-releases") {
-										args["--exclude-pre-releases"] = "true"
-									}
+									args["--exclude-drafts"] = c.String("exclude-drafts")
+									args["--exclude-pre-releases"] = c.String("exclude-pre-releases")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
-									args["--limit"] = strconv.Itoa(int(c.Int("limit")))
+									args["--limit"] = c.String("limit")
 									args["--order"] = c.String("order")
 									args["--template"] = c.String("template")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "list"}
 									if c.IsSet("exclude-drafts") {
-										if c.Bool("exclude-drafts") {
-											argv = append(argv, "--exclude-drafts")
-										}
+										argv = append(argv, "--"+"exclude-drafts", c.String("exclude-drafts"))
 									}
 									if c.IsSet("exclude-pre-releases") {
-										if c.Bool("exclude-pre-releases") {
-											argv = append(argv, "--exclude-pre-releases")
-										}
+										argv = append(argv, "--"+"exclude-pre-releases", c.String("exclude-pre-releases"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("limit") {
-										argv = append(argv, "--limit", strconv.Itoa(int(c.Int("limit"))))
+										argv = append(argv, "--"+"limit", c.String("limit"))
 									}
 									if c.IsSet("order") {
-										argv = append(argv, "--order", c.String("order"))
+										argv = append(argv, "--"+"order", c.String("order"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2613,8 +2424,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "upload",
 						Usage: "Upload asset files to a GitHub Release.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "clobber"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "clobber"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2622,28 +2434,26 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("clobber") {
-										args["--clobber"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--clobber"] = c.String("clobber")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "upload"}
 									if c.IsSet("clobber") {
-										if c.Bool("clobber") {
-											argv = append(argv, "--clobber")
-										}
+										argv = append(argv, "--"+"clobber", c.String("clobber"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2658,8 +2468,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2667,40 +2478,38 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--template"] = c.String("template")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "view"}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2718,8 +2527,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "archive",
 						Usage: "Archive a GitHub repository.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "yes"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "yes"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2727,28 +2536,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("yes") {
-										args["--yes"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--yes"] = c.String("yes")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "archive"}
 									if c.IsSet("yes") {
-										if c.Bool("yes") {
-											argv = append(argv, "--yes")
-										}
+										argv = append(argv, "--"+"yes", c.String("yes"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2764,8 +2567,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Name:  "create",
 								Usage: "Create a new autolink reference for a repository.",
 								Flags: []cli.Flag{
-									&cli.BoolFlag{Name: "numeric"},
-									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "numeric"},
+									&cli.StringFlag{Name: "help"},
+									&cli.StringFlag{Name: "repo"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -2773,28 +2577,26 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.Mutating,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											var positional []string
-											_ = positional
-											if c.Bool("numeric") {
-												args["--numeric"] = "true"
-											}
-											if c.Bool("help") {
-												args["--help"] = "true"
-											}
-											return args, positional, c.String("token")
+											args["--numeric"] = c.String("numeric")
+											args["--help"] = c.String("help")
+											args["--repo"] = c.String("repo")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "autolink", "create"}
 											if c.IsSet("numeric") {
-												if c.Bool("numeric") {
-													argv = append(argv, "--numeric")
-												}
+												argv = append(argv, "--"+"numeric", c.String("numeric"))
 											}
 											if c.IsSet("help") {
-												if c.Bool("help") {
-													argv = append(argv, "--help")
-												}
+												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											if c.IsSet("repo") {
+												argv = append(argv, "--"+"repo", c.String("repo"))
+											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -2809,8 +2611,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.StringFlag{Name: "jq"},
 									&cli.StringFlag{Name: "json"},
 									&cli.StringFlag{Name: "template"},
-									&cli.BoolFlag{Name: "web"},
-									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "web"},
+									&cli.StringFlag{Name: "help"},
+									&cli.StringFlag{Name: "repo"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -2818,40 +2621,38 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											var positional []string
-											_ = positional
 											args["--jq"] = c.String("jq")
 											args["--json"] = c.String("json")
 											args["--template"] = c.String("template")
-											if c.Bool("web") {
-												args["--web"] = "true"
-											}
-											if c.Bool("help") {
-												args["--help"] = "true"
-											}
-											return args, positional, c.String("token")
+											args["--web"] = c.String("web")
+											args["--help"] = c.String("help")
+											args["--repo"] = c.String("repo")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "autolink", "list"}
 											if c.IsSet("jq") {
-												argv = append(argv, "--jq", c.String("jq"))
+												argv = append(argv, "--"+"jq", c.String("jq"))
 											}
 											if c.IsSet("json") {
-												argv = append(argv, "--json", c.String("json"))
+												argv = append(argv, "--"+"json", c.String("json"))
 											}
 											if c.IsSet("template") {
-												argv = append(argv, "--template", c.String("template"))
+												argv = append(argv, "--"+"template", c.String("template"))
 											}
 											if c.IsSet("web") {
-												if c.Bool("web") {
-													argv = append(argv, "--web")
-												}
+												argv = append(argv, "--"+"web", c.String("web"))
 											}
 											if c.IsSet("help") {
-												if c.Bool("help") {
-													argv = append(argv, "--help")
-												}
+												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											if c.IsSet("repo") {
+												argv = append(argv, "--"+"repo", c.String("repo"))
+											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -2866,7 +2667,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.StringFlag{Name: "jq"},
 									&cli.StringFlag{Name: "json"},
 									&cli.StringFlag{Name: "template"},
-									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "help"},
+									&cli.StringFlag{Name: "repo"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -2874,32 +2676,34 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											var positional []string
-											_ = positional
 											args["--jq"] = c.String("jq")
 											args["--json"] = c.String("json")
 											args["--template"] = c.String("template")
-											if c.Bool("help") {
-												args["--help"] = "true"
-											}
-											return args, positional, c.String("token")
+											args["--help"] = c.String("help")
+											args["--repo"] = c.String("repo")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "autolink", "view"}
 											if c.IsSet("jq") {
-												argv = append(argv, "--jq", c.String("jq"))
+												argv = append(argv, "--"+"jq", c.String("jq"))
 											}
 											if c.IsSet("json") {
-												argv = append(argv, "--json", c.String("json"))
+												argv = append(argv, "--"+"json", c.String("json"))
 											}
 											if c.IsSet("template") {
-												argv = append(argv, "--template", c.String("template"))
+												argv = append(argv, "--"+"template", c.String("template"))
 											}
 											if c.IsSet("help") {
-												if c.Bool("help") {
-													argv = append(argv, "--help")
-												}
+												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											if c.IsSet("repo") {
+												argv = append(argv, "--"+"repo", c.String("repo"))
+											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -2914,7 +2718,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Clone a GitHub repository locally.",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "upstream-remote-name"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2922,24 +2726,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--upstream-remote-name"] = c.String("upstream-remote-name")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "clone"}
 									if c.IsSet("upstream-remote-name") {
-										argv = append(argv, "--upstream-remote-name", c.String("upstream-remote-name"))
+										argv = append(argv, "--"+"upstream-remote-name", c.String("upstream-remote-name"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -2951,24 +2753,24 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "create",
 						Usage: "Create a new GitHub repository.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "add-readme"},
-							&cli.BoolFlag{Name: "clone"},
+							&cli.StringFlag{Name: "add-readme"},
+							&cli.StringFlag{Name: "clone"},
 							&cli.StringFlag{Name: "description"},
-							&cli.BoolFlag{Name: "disable-issues"},
-							&cli.BoolFlag{Name: "disable-wiki"},
+							&cli.StringFlag{Name: "disable-issues"},
+							&cli.StringFlag{Name: "disable-wiki"},
 							&cli.StringFlag{Name: "gitignore"},
 							&cli.StringFlag{Name: "homepage"},
-							&cli.BoolFlag{Name: "include-all-branches"},
-							&cli.BoolFlag{Name: "internal"},
+							&cli.StringFlag{Name: "include-all-branches"},
+							&cli.StringFlag{Name: "internal"},
 							&cli.StringFlag{Name: "license"},
-							&cli.BoolFlag{Name: "private"},
-							&cli.BoolFlag{Name: "public"},
-							&cli.BoolFlag{Name: "push"},
+							&cli.StringFlag{Name: "private"},
+							&cli.StringFlag{Name: "public"},
+							&cli.StringFlag{Name: "push"},
 							&cli.StringFlag{Name: "remote"},
 							&cli.StringFlag{Name: "source"},
 							&cli.StringFlag{Name: "team"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2976,124 +2778,86 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("add-readme") {
-										args["--add-readme"] = "true"
-									}
-									if c.Bool("clone") {
-										args["--clone"] = "true"
-									}
+									args["--add-readme"] = c.String("add-readme")
+									args["--clone"] = c.String("clone")
 									args["--description"] = c.String("description")
-									if c.Bool("disable-issues") {
-										args["--disable-issues"] = "true"
-									}
-									if c.Bool("disable-wiki") {
-										args["--disable-wiki"] = "true"
-									}
+									args["--disable-issues"] = c.String("disable-issues")
+									args["--disable-wiki"] = c.String("disable-wiki")
 									args["--gitignore"] = c.String("gitignore")
 									args["--homepage"] = c.String("homepage")
-									if c.Bool("include-all-branches") {
-										args["--include-all-branches"] = "true"
-									}
-									if c.Bool("internal") {
-										args["--internal"] = "true"
-									}
+									args["--include-all-branches"] = c.String("include-all-branches")
+									args["--internal"] = c.String("internal")
 									args["--license"] = c.String("license")
-									if c.Bool("private") {
-										args["--private"] = "true"
-									}
-									if c.Bool("public") {
-										args["--public"] = "true"
-									}
-									if c.Bool("push") {
-										args["--push"] = "true"
-									}
+									args["--private"] = c.String("private")
+									args["--public"] = c.String("public")
+									args["--push"] = c.String("push")
 									args["--remote"] = c.String("remote")
 									args["--source"] = c.String("source")
 									args["--team"] = c.String("team")
 									args["--template"] = c.String("template")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "create"}
 									if c.IsSet("add-readme") {
-										if c.Bool("add-readme") {
-											argv = append(argv, "--add-readme")
-										}
+										argv = append(argv, "--"+"add-readme", c.String("add-readme"))
 									}
 									if c.IsSet("clone") {
-										if c.Bool("clone") {
-											argv = append(argv, "--clone")
-										}
+										argv = append(argv, "--"+"clone", c.String("clone"))
 									}
 									if c.IsSet("description") {
-										argv = append(argv, "--description", c.String("description"))
+										argv = append(argv, "--"+"description", c.String("description"))
 									}
 									if c.IsSet("disable-issues") {
-										if c.Bool("disable-issues") {
-											argv = append(argv, "--disable-issues")
-										}
+										argv = append(argv, "--"+"disable-issues", c.String("disable-issues"))
 									}
 									if c.IsSet("disable-wiki") {
-										if c.Bool("disable-wiki") {
-											argv = append(argv, "--disable-wiki")
-										}
+										argv = append(argv, "--"+"disable-wiki", c.String("disable-wiki"))
 									}
 									if c.IsSet("gitignore") {
-										argv = append(argv, "--gitignore", c.String("gitignore"))
+										argv = append(argv, "--"+"gitignore", c.String("gitignore"))
 									}
 									if c.IsSet("homepage") {
-										argv = append(argv, "--homepage", c.String("homepage"))
+										argv = append(argv, "--"+"homepage", c.String("homepage"))
 									}
 									if c.IsSet("include-all-branches") {
-										if c.Bool("include-all-branches") {
-											argv = append(argv, "--include-all-branches")
-										}
+										argv = append(argv, "--"+"include-all-branches", c.String("include-all-branches"))
 									}
 									if c.IsSet("internal") {
-										if c.Bool("internal") {
-											argv = append(argv, "--internal")
-										}
+										argv = append(argv, "--"+"internal", c.String("internal"))
 									}
 									if c.IsSet("license") {
-										argv = append(argv, "--license", c.String("license"))
+										argv = append(argv, "--"+"license", c.String("license"))
 									}
 									if c.IsSet("private") {
-										if c.Bool("private") {
-											argv = append(argv, "--private")
-										}
+										argv = append(argv, "--"+"private", c.String("private"))
 									}
 									if c.IsSet("public") {
-										if c.Bool("public") {
-											argv = append(argv, "--public")
-										}
+										argv = append(argv, "--"+"public", c.String("public"))
 									}
 									if c.IsSet("push") {
-										if c.Bool("push") {
-											argv = append(argv, "--push")
-										}
+										argv = append(argv, "--"+"push", c.String("push"))
 									}
 									if c.IsSet("remote") {
-										argv = append(argv, "--remote", c.String("remote"))
+										argv = append(argv, "--"+"remote", c.String("remote"))
 									}
 									if c.IsSet("source") {
-										argv = append(argv, "--source", c.String("source"))
+										argv = append(argv, "--"+"source", c.String("source"))
 									}
 									if c.IsSet("team") {
-										argv = append(argv, "--team", c.String("team"))
+										argv = append(argv, "--"+"team", c.String("team"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3105,8 +2869,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "delete",
 						Usage: "Delete a GitHub repository.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "yes"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "yes"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3114,28 +2878,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("yes") {
-										args["--yes"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--yes"] = c.String("yes")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "delete"}
 									if c.IsSet("yes") {
-										if c.Bool("yes") {
-											argv = append(argv, "--yes")
-										}
+										argv = append(argv, "--"+"yes", c.String("yes"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3151,9 +2909,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Name:  "add",
 								Usage: "Add a deploy key to a GitHub repository.",
 								Flags: []cli.Flag{
-									&cli.BoolFlag{Name: "allow-write"},
+									&cli.StringFlag{Name: "allow-write"},
 									&cli.StringFlag{Name: "title"},
-									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "help"},
+									&cli.StringFlag{Name: "repo"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -3161,32 +2920,30 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											var positional []string
-											_ = positional
-											if c.Bool("allow-write") {
-												args["--allow-write"] = "true"
-											}
+											args["--allow-write"] = c.String("allow-write")
 											args["--title"] = c.String("title")
-											if c.Bool("help") {
-												args["--help"] = "true"
-											}
-											return args, positional, c.String("token")
+											args["--help"] = c.String("help")
+											args["--repo"] = c.String("repo")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "deploy-key", "add"}
 											if c.IsSet("allow-write") {
-												if c.Bool("allow-write") {
-													argv = append(argv, "--allow-write")
-												}
+												argv = append(argv, "--"+"allow-write", c.String("allow-write"))
 											}
 											if c.IsSet("title") {
-												argv = append(argv, "--title", c.String("title"))
+												argv = append(argv, "--"+"title", c.String("title"))
 											}
 											if c.IsSet("help") {
-												if c.Bool("help") {
-													argv = append(argv, "--help")
-												}
+												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											if c.IsSet("repo") {
+												argv = append(argv, "--"+"repo", c.String("repo"))
+											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3198,7 +2955,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Name:  "delete",
 								Usage: "Delete a deploy key from a GitHub repository",
 								Flags: []cli.Flag{
-									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "help"},
+									&cli.StringFlag{Name: "repo"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -3206,20 +2964,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.Mutating,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											var positional []string
-											_ = positional
-											if c.Bool("help") {
-												args["--help"] = "true"
-											}
-											return args, positional, c.String("token")
+											args["--help"] = c.String("help")
+											args["--repo"] = c.String("repo")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "deploy-key", "delete"}
 											if c.IsSet("help") {
-												if c.Bool("help") {
-													argv = append(argv, "--help")
-												}
+												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											if c.IsSet("repo") {
+												argv = append(argv, "--"+"repo", c.String("repo"))
+											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3234,7 +2994,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.StringFlag{Name: "jq"},
 									&cli.StringFlag{Name: "json"},
 									&cli.StringFlag{Name: "template"},
-									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "help"},
+									&cli.StringFlag{Name: "repo"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -3242,32 +3003,34 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											var positional []string
-											_ = positional
 											args["--jq"] = c.String("jq")
 											args["--json"] = c.String("json")
 											args["--template"] = c.String("template")
-											if c.Bool("help") {
-												args["--help"] = "true"
-											}
-											return args, positional, c.String("token")
+											args["--help"] = c.String("help")
+											args["--repo"] = c.String("repo")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "deploy-key", "list"}
 											if c.IsSet("jq") {
-												argv = append(argv, "--jq", c.String("jq"))
+												argv = append(argv, "--"+"jq", c.String("jq"))
 											}
 											if c.IsSet("json") {
-												argv = append(argv, "--json", c.String("json"))
+												argv = append(argv, "--"+"json", c.String("json"))
 											}
 											if c.IsSet("template") {
-												argv = append(argv, "--template", c.String("template"))
+												argv = append(argv, "--"+"template", c.String("template"))
 											}
 											if c.IsSet("help") {
-												if c.Bool("help") {
-													argv = append(argv, "--help")
-												}
+												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											if c.IsSet("repo") {
+												argv = append(argv, "--"+"repo", c.String("repo"))
+											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3281,29 +3044,29 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "edit",
 						Usage: "Edit repository settings.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "accept-visibility-change-consequences"},
+							&cli.StringFlag{Name: "accept-visibility-change-consequences"},
 							&cli.StringFlag{Name: "add-topic"},
-							&cli.BoolFlag{Name: "allow-forking"},
-							&cli.BoolFlag{Name: "allow-update-branch"},
+							&cli.StringFlag{Name: "allow-forking"},
+							&cli.StringFlag{Name: "allow-update-branch"},
 							&cli.StringFlag{Name: "default-branch"},
-							&cli.BoolFlag{Name: "delete-branch-on-merge"},
+							&cli.StringFlag{Name: "delete-branch-on-merge"},
 							&cli.StringFlag{Name: "description"},
-							&cli.BoolFlag{Name: "enable-advanced-security"},
-							&cli.BoolFlag{Name: "enable-auto-merge"},
-							&cli.BoolFlag{Name: "enable-discussions"},
-							&cli.BoolFlag{Name: "enable-issues"},
-							&cli.BoolFlag{Name: "enable-merge-commit"},
-							&cli.BoolFlag{Name: "enable-projects"},
-							&cli.BoolFlag{Name: "enable-rebase-merge"},
-							&cli.BoolFlag{Name: "enable-secret-scanning"},
-							&cli.BoolFlag{Name: "enable-secret-scanning-push-protection"},
-							&cli.BoolFlag{Name: "enable-squash-merge"},
-							&cli.BoolFlag{Name: "enable-wiki"},
+							&cli.StringFlag{Name: "enable-advanced-security"},
+							&cli.StringFlag{Name: "enable-auto-merge"},
+							&cli.StringFlag{Name: "enable-discussions"},
+							&cli.StringFlag{Name: "enable-issues"},
+							&cli.StringFlag{Name: "enable-merge-commit"},
+							&cli.StringFlag{Name: "enable-projects"},
+							&cli.StringFlag{Name: "enable-rebase-merge"},
+							&cli.StringFlag{Name: "enable-secret-scanning"},
+							&cli.StringFlag{Name: "enable-secret-scanning-push-protection"},
+							&cli.StringFlag{Name: "enable-squash-merge"},
+							&cli.StringFlag{Name: "enable-wiki"},
 							&cli.StringFlag{Name: "homepage"},
 							&cli.StringFlag{Name: "remove-topic"},
-							&cli.BoolFlag{Name: "template"},
+							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "visibility"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3311,172 +3074,106 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("accept-visibility-change-consequences") {
-										args["--accept-visibility-change-consequences"] = "true"
-									}
+									args["--accept-visibility-change-consequences"] = c.String("accept-visibility-change-consequences")
 									args["--add-topic"] = c.String("add-topic")
-									if c.Bool("allow-forking") {
-										args["--allow-forking"] = "true"
-									}
-									if c.Bool("allow-update-branch") {
-										args["--allow-update-branch"] = "true"
-									}
+									args["--allow-forking"] = c.String("allow-forking")
+									args["--allow-update-branch"] = c.String("allow-update-branch")
 									args["--default-branch"] = c.String("default-branch")
-									if c.Bool("delete-branch-on-merge") {
-										args["--delete-branch-on-merge"] = "true"
-									}
+									args["--delete-branch-on-merge"] = c.String("delete-branch-on-merge")
 									args["--description"] = c.String("description")
-									if c.Bool("enable-advanced-security") {
-										args["--enable-advanced-security"] = "true"
-									}
-									if c.Bool("enable-auto-merge") {
-										args["--enable-auto-merge"] = "true"
-									}
-									if c.Bool("enable-discussions") {
-										args["--enable-discussions"] = "true"
-									}
-									if c.Bool("enable-issues") {
-										args["--enable-issues"] = "true"
-									}
-									if c.Bool("enable-merge-commit") {
-										args["--enable-merge-commit"] = "true"
-									}
-									if c.Bool("enable-projects") {
-										args["--enable-projects"] = "true"
-									}
-									if c.Bool("enable-rebase-merge") {
-										args["--enable-rebase-merge"] = "true"
-									}
-									if c.Bool("enable-secret-scanning") {
-										args["--enable-secret-scanning"] = "true"
-									}
-									if c.Bool("enable-secret-scanning-push-protection") {
-										args["--enable-secret-scanning-push-protection"] = "true"
-									}
-									if c.Bool("enable-squash-merge") {
-										args["--enable-squash-merge"] = "true"
-									}
-									if c.Bool("enable-wiki") {
-										args["--enable-wiki"] = "true"
-									}
+									args["--enable-advanced-security"] = c.String("enable-advanced-security")
+									args["--enable-auto-merge"] = c.String("enable-auto-merge")
+									args["--enable-discussions"] = c.String("enable-discussions")
+									args["--enable-issues"] = c.String("enable-issues")
+									args["--enable-merge-commit"] = c.String("enable-merge-commit")
+									args["--enable-projects"] = c.String("enable-projects")
+									args["--enable-rebase-merge"] = c.String("enable-rebase-merge")
+									args["--enable-secret-scanning"] = c.String("enable-secret-scanning")
+									args["--enable-secret-scanning-push-protection"] = c.String("enable-secret-scanning-push-protection")
+									args["--enable-squash-merge"] = c.String("enable-squash-merge")
+									args["--enable-wiki"] = c.String("enable-wiki")
 									args["--homepage"] = c.String("homepage")
 									args["--remove-topic"] = c.String("remove-topic")
-									if c.Bool("template") {
-										args["--template"] = "true"
-									}
+									args["--template"] = c.String("template")
 									args["--visibility"] = c.String("visibility")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "edit"}
 									if c.IsSet("accept-visibility-change-consequences") {
-										if c.Bool("accept-visibility-change-consequences") {
-											argv = append(argv, "--accept-visibility-change-consequences")
-										}
+										argv = append(argv, "--"+"accept-visibility-change-consequences", c.String("accept-visibility-change-consequences"))
 									}
 									if c.IsSet("add-topic") {
-										argv = append(argv, "--add-topic", c.String("add-topic"))
+										argv = append(argv, "--"+"add-topic", c.String("add-topic"))
 									}
 									if c.IsSet("allow-forking") {
-										if c.Bool("allow-forking") {
-											argv = append(argv, "--allow-forking")
-										}
+										argv = append(argv, "--"+"allow-forking", c.String("allow-forking"))
 									}
 									if c.IsSet("allow-update-branch") {
-										if c.Bool("allow-update-branch") {
-											argv = append(argv, "--allow-update-branch")
-										}
+										argv = append(argv, "--"+"allow-update-branch", c.String("allow-update-branch"))
 									}
 									if c.IsSet("default-branch") {
-										argv = append(argv, "--default-branch", c.String("default-branch"))
+										argv = append(argv, "--"+"default-branch", c.String("default-branch"))
 									}
 									if c.IsSet("delete-branch-on-merge") {
-										if c.Bool("delete-branch-on-merge") {
-											argv = append(argv, "--delete-branch-on-merge")
-										}
+										argv = append(argv, "--"+"delete-branch-on-merge", c.String("delete-branch-on-merge"))
 									}
 									if c.IsSet("description") {
-										argv = append(argv, "--description", c.String("description"))
+										argv = append(argv, "--"+"description", c.String("description"))
 									}
 									if c.IsSet("enable-advanced-security") {
-										if c.Bool("enable-advanced-security") {
-											argv = append(argv, "--enable-advanced-security")
-										}
+										argv = append(argv, "--"+"enable-advanced-security", c.String("enable-advanced-security"))
 									}
 									if c.IsSet("enable-auto-merge") {
-										if c.Bool("enable-auto-merge") {
-											argv = append(argv, "--enable-auto-merge")
-										}
+										argv = append(argv, "--"+"enable-auto-merge", c.String("enable-auto-merge"))
 									}
 									if c.IsSet("enable-discussions") {
-										if c.Bool("enable-discussions") {
-											argv = append(argv, "--enable-discussions")
-										}
+										argv = append(argv, "--"+"enable-discussions", c.String("enable-discussions"))
 									}
 									if c.IsSet("enable-issues") {
-										if c.Bool("enable-issues") {
-											argv = append(argv, "--enable-issues")
-										}
+										argv = append(argv, "--"+"enable-issues", c.String("enable-issues"))
 									}
 									if c.IsSet("enable-merge-commit") {
-										if c.Bool("enable-merge-commit") {
-											argv = append(argv, "--enable-merge-commit")
-										}
+										argv = append(argv, "--"+"enable-merge-commit", c.String("enable-merge-commit"))
 									}
 									if c.IsSet("enable-projects") {
-										if c.Bool("enable-projects") {
-											argv = append(argv, "--enable-projects")
-										}
+										argv = append(argv, "--"+"enable-projects", c.String("enable-projects"))
 									}
 									if c.IsSet("enable-rebase-merge") {
-										if c.Bool("enable-rebase-merge") {
-											argv = append(argv, "--enable-rebase-merge")
-										}
+										argv = append(argv, "--"+"enable-rebase-merge", c.String("enable-rebase-merge"))
 									}
 									if c.IsSet("enable-secret-scanning") {
-										if c.Bool("enable-secret-scanning") {
-											argv = append(argv, "--enable-secret-scanning")
-										}
+										argv = append(argv, "--"+"enable-secret-scanning", c.String("enable-secret-scanning"))
 									}
 									if c.IsSet("enable-secret-scanning-push-protection") {
-										if c.Bool("enable-secret-scanning-push-protection") {
-											argv = append(argv, "--enable-secret-scanning-push-protection")
-										}
+										argv = append(argv, "--"+"enable-secret-scanning-push-protection", c.String("enable-secret-scanning-push-protection"))
 									}
 									if c.IsSet("enable-squash-merge") {
-										if c.Bool("enable-squash-merge") {
-											argv = append(argv, "--enable-squash-merge")
-										}
+										argv = append(argv, "--"+"enable-squash-merge", c.String("enable-squash-merge"))
 									}
 									if c.IsSet("enable-wiki") {
-										if c.Bool("enable-wiki") {
-											argv = append(argv, "--enable-wiki")
-										}
+										argv = append(argv, "--"+"enable-wiki", c.String("enable-wiki"))
 									}
 									if c.IsSet("homepage") {
-										argv = append(argv, "--homepage", c.String("homepage"))
+										argv = append(argv, "--"+"homepage", c.String("homepage"))
 									}
 									if c.IsSet("remove-topic") {
-										argv = append(argv, "--remove-topic", c.String("remove-topic"))
+										argv = append(argv, "--"+"remove-topic", c.String("remove-topic"))
 									}
 									if c.IsSet("template") {
-										if c.Bool("template") {
-											argv = append(argv, "--template")
-										}
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("visibility") {
-										argv = append(argv, "--visibility", c.String("visibility"))
+										argv = append(argv, "--"+"visibility", c.String("visibility"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3488,13 +3185,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "fork",
 						Usage: "Create a fork of a repository.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "clone"},
-							&cli.BoolFlag{Name: "default-branch-only"},
+							&cli.StringFlag{Name: "clone"},
+							&cli.StringFlag{Name: "default-branch-only"},
 							&cli.StringFlag{Name: "fork-name"},
 							&cli.StringFlag{Name: "org"},
-							&cli.BoolFlag{Name: "remote"},
+							&cli.StringFlag{Name: "remote"},
 							&cli.StringFlag{Name: "remote-name"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3502,56 +3199,42 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("clone") {
-										args["--clone"] = "true"
-									}
-									if c.Bool("default-branch-only") {
-										args["--default-branch-only"] = "true"
-									}
+									args["--clone"] = c.String("clone")
+									args["--default-branch-only"] = c.String("default-branch-only")
 									args["--fork-name"] = c.String("fork-name")
 									args["--org"] = c.String("org")
-									if c.Bool("remote") {
-										args["--remote"] = "true"
-									}
+									args["--remote"] = c.String("remote")
 									args["--remote-name"] = c.String("remote-name")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "fork"}
 									if c.IsSet("clone") {
-										if c.Bool("clone") {
-											argv = append(argv, "--clone")
-										}
+										argv = append(argv, "--"+"clone", c.String("clone"))
 									}
 									if c.IsSet("default-branch-only") {
-										if c.Bool("default-branch-only") {
-											argv = append(argv, "--default-branch-only")
-										}
+										argv = append(argv, "--"+"default-branch-only", c.String("default-branch-only"))
 									}
 									if c.IsSet("fork-name") {
-										argv = append(argv, "--fork-name", c.String("fork-name"))
+										argv = append(argv, "--"+"fork-name", c.String("fork-name"))
 									}
 									if c.IsSet("org") {
-										argv = append(argv, "--org", c.String("org"))
+										argv = append(argv, "--"+"org", c.String("org"))
 									}
 									if c.IsSet("remote") {
-										if c.Bool("remote") {
-											argv = append(argv, "--remote")
-										}
+										argv = append(argv, "--"+"remote", c.String("remote"))
 									}
 									if c.IsSet("remote-name") {
-										argv = append(argv, "--remote-name", c.String("remote-name"))
+										argv = append(argv, "--"+"remote-name", c.String("remote-name"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3567,7 +3250,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Name:  "list",
 								Usage: "List available repository gitignore templates",
 								Flags: []cli.Flag{
-									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "help"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -3575,20 +3258,18 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											var positional []string
-											_ = positional
-											if c.Bool("help") {
-												args["--help"] = "true"
-											}
-											return args, positional, c.String("token")
+											args["--help"] = c.String("help")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "gitignore", "list"}
 											if c.IsSet("help") {
-												if c.Bool("help") {
-													argv = append(argv, "--help")
-												}
+												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3600,7 +3281,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Name:  "view",
 								Usage: "View an available repository '.gitignore' template.",
 								Flags: []cli.Flag{
-									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "help"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -3608,20 +3289,18 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											var positional []string
-											_ = positional
-											if c.Bool("help") {
-												args["--help"] = "true"
-											}
-											return args, positional, c.String("token")
+											args["--help"] = c.String("help")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "gitignore", "view"}
 											if c.IsSet("help") {
-												if c.Bool("help") {
-													argv = append(argv, "--help")
-												}
+												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3639,7 +3318,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Name:  "list",
 								Usage: "List common repository licenses.",
 								Flags: []cli.Flag{
-									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "help"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -3647,20 +3326,18 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											var positional []string
-											_ = positional
-											if c.Bool("help") {
-												args["--help"] = "true"
-											}
-											return args, positional, c.String("token")
+											args["--help"] = c.String("help")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "license", "list"}
 											if c.IsSet("help") {
-												if c.Bool("help") {
-													argv = append(argv, "--help")
-												}
+												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3672,8 +3349,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Name:  "view",
 								Usage: "View a specific repository license by license key or SPDX ID.",
 								Flags: []cli.Flag{
-									&cli.BoolFlag{Name: "web"},
-									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "web"},
+									&cli.StringFlag{Name: "help"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -3681,28 +3358,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										Kind: policy.ReadOnly,
 										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 											args := map[string]string{}
-											var positional []string
-											_ = positional
-											if c.Bool("web") {
-												args["--web"] = "true"
-											}
-											if c.Bool("help") {
-												args["--help"] = "true"
-											}
-											return args, positional, c.String("token")
+											args["--web"] = c.String("web")
+											args["--help"] = c.String("help")
+											return args, c.Args().Slice(), c.String("token")
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "license", "view"}
 											if c.IsSet("web") {
-												if c.Bool("web") {
-													argv = append(argv, "--web")
-												}
+												argv = append(argv, "--"+"web", c.String("web"))
 											}
 											if c.IsSet("help") {
-												if c.Bool("help") {
-													argv = append(argv, "--help")
-												}
+												argv = append(argv, "--"+"help", c.String("help"))
 											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
 											_ = strconv.Itoa // keep strconv imported even when no flags
 											return r.Exec(ctx, BinaryName, argv...)
 										},
@@ -3716,18 +3387,18 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "list",
 						Usage: "List repositories owned by a user or organization.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "archived"},
-							&cli.BoolFlag{Name: "fork"},
+							&cli.StringFlag{Name: "archived"},
+							&cli.StringFlag{Name: "fork"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "language"},
-							&cli.IntFlag{Name: "limit"},
-							&cli.BoolFlag{Name: "no-archived"},
-							&cli.BoolFlag{Name: "source"},
+							&cli.StringFlag{Name: "limit"},
+							&cli.StringFlag{Name: "no-archived"},
+							&cli.StringFlag{Name: "source"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "topic"},
 							&cli.StringFlag{Name: "visibility"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3735,80 +3406,62 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("archived") {
-										args["--archived"] = "true"
-									}
-									if c.Bool("fork") {
-										args["--fork"] = "true"
-									}
+									args["--archived"] = c.String("archived")
+									args["--fork"] = c.String("fork")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--language"] = c.String("language")
-									args["--limit"] = strconv.Itoa(int(c.Int("limit")))
-									if c.Bool("no-archived") {
-										args["--no-archived"] = "true"
-									}
-									if c.Bool("source") {
-										args["--source"] = "true"
-									}
+									args["--limit"] = c.String("limit")
+									args["--no-archived"] = c.String("no-archived")
+									args["--source"] = c.String("source")
 									args["--template"] = c.String("template")
 									args["--topic"] = c.String("topic")
 									args["--visibility"] = c.String("visibility")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "list"}
 									if c.IsSet("archived") {
-										if c.Bool("archived") {
-											argv = append(argv, "--archived")
-										}
+										argv = append(argv, "--"+"archived", c.String("archived"))
 									}
 									if c.IsSet("fork") {
-										if c.Bool("fork") {
-											argv = append(argv, "--fork")
-										}
+										argv = append(argv, "--"+"fork", c.String("fork"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("language") {
-										argv = append(argv, "--language", c.String("language"))
+										argv = append(argv, "--"+"language", c.String("language"))
 									}
 									if c.IsSet("limit") {
-										argv = append(argv, "--limit", strconv.Itoa(int(c.Int("limit"))))
+										argv = append(argv, "--"+"limit", c.String("limit"))
 									}
 									if c.IsSet("no-archived") {
-										if c.Bool("no-archived") {
-											argv = append(argv, "--no-archived")
-										}
+										argv = append(argv, "--"+"no-archived", c.String("no-archived"))
 									}
 									if c.IsSet("source") {
-										if c.Bool("source") {
-											argv = append(argv, "--source")
-										}
+										argv = append(argv, "--"+"source", c.String("source"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("topic") {
-										argv = append(argv, "--topic", c.String("topic"))
+										argv = append(argv, "--"+"topic", c.String("topic"))
 									}
 									if c.IsSet("visibility") {
-										argv = append(argv, "--visibility", c.String("visibility"))
+										argv = append(argv, "--"+"visibility", c.String("visibility"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3820,8 +3473,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "rename",
 						Usage: "Rename a GitHub repository.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "yes"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
+							&cli.StringFlag{Name: "yes"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3829,28 +3483,26 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("yes") {
-										args["--yes"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--repo"] = c.String("repo")
+									args["--yes"] = c.String("yes")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "rename"}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
 									if c.IsSet("yes") {
-										if c.Bool("yes") {
-											argv = append(argv, "--yes")
-										}
+										argv = append(argv, "--"+"yes", c.String("yes"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3863,9 +3515,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Sync destination repository from source repository.",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "branch"},
-							&cli.BoolFlag{Name: "force"},
+							&cli.StringFlag{Name: "force"},
 							&cli.StringFlag{Name: "source"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3873,36 +3525,30 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--branch"] = c.String("branch")
-									if c.Bool("force") {
-										args["--force"] = "true"
-									}
+									args["--force"] = c.String("force")
 									args["--source"] = c.String("source")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "sync"}
 									if c.IsSet("branch") {
-										argv = append(argv, "--branch", c.String("branch"))
+										argv = append(argv, "--"+"branch", c.String("branch"))
 									}
 									if c.IsSet("force") {
-										if c.Bool("force") {
-											argv = append(argv, "--force")
-										}
+										argv = append(argv, "--"+"force", c.String("force"))
 									}
 									if c.IsSet("source") {
-										argv = append(argv, "--source", c.String("source"))
+										argv = append(argv, "--"+"source", c.String("source"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3914,8 +3560,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "unarchive",
 						Usage: "Unarchive a GitHub repository.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "yes"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "yes"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3923,28 +3569,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("yes") {
-										args["--yes"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--yes"] = c.String("yes")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "unarchive"}
 									if c.IsSet("yes") {
-										if c.Bool("yes") {
-											argv = append(argv, "--yes")
-										}
+										argv = append(argv, "--"+"yes", c.String("yes"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -3960,8 +3600,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3969,44 +3609,38 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--branch"] = c.String("branch")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--template"] = c.String("template")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "view"}
 									if c.IsSet("branch") {
-										argv = append(argv, "--branch", c.String("branch"))
+										argv = append(argv, "--"+"branch", c.String("branch"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4024,7 +3658,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "cancel",
 						Usage: "Cancel a workflow run",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4032,20 +3667,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "cancel"}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4057,7 +3694,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "delete",
 						Usage: "Delete a workflow run",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4065,20 +3703,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "delete"}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4093,7 +3733,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "dir"},
 							&cli.StringFlag{Name: "name"},
 							&cli.StringFlag{Name: "pattern"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4101,32 +3742,34 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--dir"] = c.String("dir")
 									args["--name"] = c.String("name")
 									args["--pattern"] = c.String("pattern")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "download"}
 									if c.IsSet("dir") {
-										argv = append(argv, "--dir", c.String("dir"))
+										argv = append(argv, "--"+"dir", c.String("dir"))
 									}
 									if c.IsSet("name") {
-										argv = append(argv, "--name", c.String("name"))
+										argv = append(argv, "--"+"name", c.String("name"))
 									}
 									if c.IsSet("pattern") {
-										argv = append(argv, "--pattern", c.String("pattern"))
+										argv = append(argv, "--"+"pattern", c.String("pattern"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4138,19 +3781,20 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "list",
 						Usage: "List recent workflow runs.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "all"},
+							&cli.StringFlag{Name: "all"},
 							&cli.StringFlag{Name: "branch"},
 							&cli.StringFlag{Name: "commit"},
 							&cli.StringFlag{Name: "created"},
 							&cli.StringFlag{Name: "event"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
-							&cli.IntFlag{Name: "limit"},
+							&cli.StringFlag{Name: "limit"},
 							&cli.StringFlag{Name: "status"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "user"},
 							&cli.StringFlag{Name: "workflow"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4158,72 +3802,70 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("all") {
-										args["--all"] = "true"
-									}
+									args["--all"] = c.String("all")
 									args["--branch"] = c.String("branch")
 									args["--commit"] = c.String("commit")
 									args["--created"] = c.String("created")
 									args["--event"] = c.String("event")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
-									args["--limit"] = strconv.Itoa(int(c.Int("limit")))
+									args["--limit"] = c.String("limit")
 									args["--status"] = c.String("status")
 									args["--template"] = c.String("template")
 									args["--user"] = c.String("user")
 									args["--workflow"] = c.String("workflow")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "list"}
 									if c.IsSet("all") {
-										if c.Bool("all") {
-											argv = append(argv, "--all")
-										}
+										argv = append(argv, "--"+"all", c.String("all"))
 									}
 									if c.IsSet("branch") {
-										argv = append(argv, "--branch", c.String("branch"))
+										argv = append(argv, "--"+"branch", c.String("branch"))
 									}
 									if c.IsSet("commit") {
-										argv = append(argv, "--commit", c.String("commit"))
+										argv = append(argv, "--"+"commit", c.String("commit"))
 									}
 									if c.IsSet("created") {
-										argv = append(argv, "--created", c.String("created"))
+										argv = append(argv, "--"+"created", c.String("created"))
 									}
 									if c.IsSet("event") {
-										argv = append(argv, "--event", c.String("event"))
+										argv = append(argv, "--"+"event", c.String("event"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("limit") {
-										argv = append(argv, "--limit", strconv.Itoa(int(c.Int("limit"))))
+										argv = append(argv, "--"+"limit", c.String("limit"))
 									}
 									if c.IsSet("status") {
-										argv = append(argv, "--status", c.String("status"))
+										argv = append(argv, "--"+"status", c.String("status"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("user") {
-										argv = append(argv, "--user", c.String("user"))
+										argv = append(argv, "--"+"user", c.String("user"))
 									}
 									if c.IsSet("workflow") {
-										argv = append(argv, "--workflow", c.String("workflow"))
+										argv = append(argv, "--"+"workflow", c.String("workflow"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4235,10 +3877,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "rerun",
 						Usage: "Rerun an entire run, only failed jobs, or a specific job from a run.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "debug"},
-							&cli.BoolFlag{Name: "failed"},
+							&cli.StringFlag{Name: "debug"},
+							&cli.StringFlag{Name: "failed"},
 							&cli.StringFlag{Name: "job"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4246,40 +3889,34 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("debug") {
-										args["--debug"] = "true"
-									}
-									if c.Bool("failed") {
-										args["--failed"] = "true"
-									}
+									args["--debug"] = c.String("debug")
+									args["--failed"] = c.String("failed")
 									args["--job"] = c.String("job")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "rerun"}
 									if c.IsSet("debug") {
-										if c.Bool("debug") {
-											argv = append(argv, "--debug")
-										}
+										argv = append(argv, "--"+"debug", c.String("debug"))
 									}
 									if c.IsSet("failed") {
-										if c.Bool("failed") {
-											argv = append(argv, "--failed")
-										}
+										argv = append(argv, "--"+"failed", c.String("failed"))
 									}
 									if c.IsSet("job") {
-										argv = append(argv, "--job", c.String("job"))
+										argv = append(argv, "--"+"job", c.String("job"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4292,16 +3929,17 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "View a summary of a workflow run.",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "attempt"},
-							&cli.BoolFlag{Name: "exit-status"},
+							&cli.StringFlag{Name: "exit-status"},
 							&cli.StringFlag{Name: "job"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
-							&cli.BoolFlag{Name: "log"},
-							&cli.BoolFlag{Name: "log-failed"},
+							&cli.StringFlag{Name: "log"},
+							&cli.StringFlag{Name: "log-failed"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "verbose"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "verbose"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4309,80 +3947,62 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--attempt"] = c.String("attempt")
-									if c.Bool("exit-status") {
-										args["--exit-status"] = "true"
-									}
+									args["--exit-status"] = c.String("exit-status")
 									args["--job"] = c.String("job")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
-									if c.Bool("log") {
-										args["--log"] = "true"
-									}
-									if c.Bool("log-failed") {
-										args["--log-failed"] = "true"
-									}
+									args["--log"] = c.String("log")
+									args["--log-failed"] = c.String("log-failed")
 									args["--template"] = c.String("template")
-									if c.Bool("verbose") {
-										args["--verbose"] = "true"
-									}
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--verbose"] = c.String("verbose")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "view"}
 									if c.IsSet("attempt") {
-										argv = append(argv, "--attempt", c.String("attempt"))
+										argv = append(argv, "--"+"attempt", c.String("attempt"))
 									}
 									if c.IsSet("exit-status") {
-										if c.Bool("exit-status") {
-											argv = append(argv, "--exit-status")
-										}
+										argv = append(argv, "--"+"exit-status", c.String("exit-status"))
 									}
 									if c.IsSet("job") {
-										argv = append(argv, "--job", c.String("job"))
+										argv = append(argv, "--"+"job", c.String("job"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("log") {
-										if c.Bool("log") {
-											argv = append(argv, "--log")
-										}
+										argv = append(argv, "--"+"log", c.String("log"))
 									}
 									if c.IsSet("log-failed") {
-										if c.Bool("log-failed") {
-											argv = append(argv, "--log-failed")
-										}
+										argv = append(argv, "--"+"log-failed", c.String("log-failed"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("verbose") {
-										if c.Bool("verbose") {
-											argv = append(argv, "--verbose")
-										}
+										argv = append(argv, "--"+"verbose", c.String("verbose"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4394,9 +4014,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "watch",
 						Usage: "Watch a run until it completes, showing its progress.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "exit-status"},
-							&cli.IntFlag{Name: "interval"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "exit-status"},
+							&cli.StringFlag{Name: "interval"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4404,32 +4025,30 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("exit-status") {
-										args["--exit-status"] = "true"
-									}
-									args["--interval"] = strconv.Itoa(int(c.Int("interval")))
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--exit-status"] = c.String("exit-status")
+									args["--interval"] = c.String("interval")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "watch"}
 									if c.IsSet("exit-status") {
-										if c.Bool("exit-status") {
-											argv = append(argv, "--exit-status")
-										}
+										argv = append(argv, "--"+"exit-status", c.String("exit-status"))
 									}
 									if c.IsSet("interval") {
-										argv = append(argv, "--interval", strconv.Itoa(int(c.Int("interval"))))
+										argv = append(argv, "--"+"interval", c.String("interval"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4452,14 +4071,14 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "language"},
-							&cli.IntFlag{Name: "limit"},
+							&cli.StringFlag{Name: "limit"},
 							&cli.StringFlag{Name: "match"},
 							&cli.StringFlag{Name: "owner"},
 							&cli.StringFlag{Name: "repo"},
 							&cli.StringFlag{Name: "size"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4467,72 +4086,66 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--extension"] = c.String("extension")
 									args["--filename"] = c.String("filename")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--language"] = c.String("language")
-									args["--limit"] = strconv.Itoa(int(c.Int("limit")))
+									args["--limit"] = c.String("limit")
 									args["--match"] = c.String("match")
 									args["--owner"] = c.String("owner")
 									args["--repo"] = c.String("repo")
 									args["--size"] = c.String("size")
 									args["--template"] = c.String("template")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "code"}
 									if c.IsSet("extension") {
-										argv = append(argv, "--extension", c.String("extension"))
+										argv = append(argv, "--"+"extension", c.String("extension"))
 									}
 									if c.IsSet("filename") {
-										argv = append(argv, "--filename", c.String("filename"))
+										argv = append(argv, "--"+"filename", c.String("filename"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("language") {
-										argv = append(argv, "--language", c.String("language"))
+										argv = append(argv, "--"+"language", c.String("language"))
 									}
 									if c.IsSet("limit") {
-										argv = append(argv, "--limit", strconv.Itoa(int(c.Int("limit"))))
+										argv = append(argv, "--"+"limit", c.String("limit"))
 									}
 									if c.IsSet("match") {
-										argv = append(argv, "--match", c.String("match"))
+										argv = append(argv, "--"+"match", c.String("match"))
 									}
 									if c.IsSet("owner") {
-										argv = append(argv, "--owner", c.String("owner"))
+										argv = append(argv, "--"+"owner", c.String("owner"))
 									}
 									if c.IsSet("repo") {
-										argv = append(argv, "--repo", c.String("repo"))
+										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
 									if c.IsSet("size") {
-										argv = append(argv, "--size", c.String("size"))
+										argv = append(argv, "--"+"size", c.String("size"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4555,8 +4168,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "hash"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
-							&cli.IntFlag{Name: "limit"},
-							&cli.BoolFlag{Name: "merge"},
+							&cli.StringFlag{Name: "limit"},
+							&cli.StringFlag{Name: "merge"},
 							&cli.StringFlag{Name: "order"},
 							&cli.StringFlag{Name: "owner"},
 							&cli.StringFlag{Name: "parent"},
@@ -4565,8 +4178,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "tree"},
 							&cli.StringFlag{Name: "visibility"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4574,8 +4187,6 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--author"] = c.String("author")
 									args["--author-date"] = c.String("author-date")
 									args["--author-email"] = c.String("author-email")
@@ -4587,10 +4198,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--hash"] = c.String("hash")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
-									args["--limit"] = strconv.Itoa(int(c.Int("limit")))
-									if c.Bool("merge") {
-										args["--merge"] = "true"
-									}
+									args["--limit"] = c.String("limit")
+									args["--merge"] = c.String("merge")
 									args["--order"] = c.String("order")
 									args["--owner"] = c.String("owner")
 									args["--parent"] = c.String("parent")
@@ -4599,91 +4208,85 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--tree"] = c.String("tree")
 									args["--visibility"] = c.String("visibility")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "commits"}
 									if c.IsSet("author") {
-										argv = append(argv, "--author", c.String("author"))
+										argv = append(argv, "--"+"author", c.String("author"))
 									}
 									if c.IsSet("author-date") {
-										argv = append(argv, "--author-date", c.String("author-date"))
+										argv = append(argv, "--"+"author-date", c.String("author-date"))
 									}
 									if c.IsSet("author-email") {
-										argv = append(argv, "--author-email", c.String("author-email"))
+										argv = append(argv, "--"+"author-email", c.String("author-email"))
 									}
 									if c.IsSet("author-name") {
-										argv = append(argv, "--author-name", c.String("author-name"))
+										argv = append(argv, "--"+"author-name", c.String("author-name"))
 									}
 									if c.IsSet("committer") {
-										argv = append(argv, "--committer", c.String("committer"))
+										argv = append(argv, "--"+"committer", c.String("committer"))
 									}
 									if c.IsSet("committer-date") {
-										argv = append(argv, "--committer-date", c.String("committer-date"))
+										argv = append(argv, "--"+"committer-date", c.String("committer-date"))
 									}
 									if c.IsSet("committer-email") {
-										argv = append(argv, "--committer-email", c.String("committer-email"))
+										argv = append(argv, "--"+"committer-email", c.String("committer-email"))
 									}
 									if c.IsSet("committer-name") {
-										argv = append(argv, "--committer-name", c.String("committer-name"))
+										argv = append(argv, "--"+"committer-name", c.String("committer-name"))
 									}
 									if c.IsSet("hash") {
-										argv = append(argv, "--hash", c.String("hash"))
+										argv = append(argv, "--"+"hash", c.String("hash"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("limit") {
-										argv = append(argv, "--limit", strconv.Itoa(int(c.Int("limit"))))
+										argv = append(argv, "--"+"limit", c.String("limit"))
 									}
 									if c.IsSet("merge") {
-										if c.Bool("merge") {
-											argv = append(argv, "--merge")
-										}
+										argv = append(argv, "--"+"merge", c.String("merge"))
 									}
 									if c.IsSet("order") {
-										argv = append(argv, "--order", c.String("order"))
+										argv = append(argv, "--"+"order", c.String("order"))
 									}
 									if c.IsSet("owner") {
-										argv = append(argv, "--owner", c.String("owner"))
+										argv = append(argv, "--"+"owner", c.String("owner"))
 									}
 									if c.IsSet("parent") {
-										argv = append(argv, "--parent", c.String("parent"))
+										argv = append(argv, "--"+"parent", c.String("parent"))
 									}
 									if c.IsSet("repo") {
-										argv = append(argv, "--repo", c.String("repo"))
+										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
 									if c.IsSet("sort") {
-										argv = append(argv, "--sort", c.String("sort"))
+										argv = append(argv, "--"+"sort", c.String("sort"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("tree") {
-										argv = append(argv, "--tree", c.String("tree"))
+										argv = append(argv, "--"+"tree", c.String("tree"))
 									}
 									if c.IsSet("visibility") {
-										argv = append(argv, "--visibility", c.String("visibility"))
+										argv = append(argv, "--"+"visibility", c.String("visibility"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4696,33 +4299,33 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Search for issues on GitHub.",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "app"},
-							&cli.BoolFlag{Name: "archived"},
+							&cli.StringFlag{Name: "archived"},
 							&cli.StringFlag{Name: "assignee"},
 							&cli.StringFlag{Name: "author"},
 							&cli.StringFlag{Name: "closed"},
 							&cli.StringFlag{Name: "commenter"},
-							&cli.IntFlag{Name: "comments"},
+							&cli.StringFlag{Name: "comments"},
 							&cli.StringFlag{Name: "created"},
-							&cli.BoolFlag{Name: "include-prs"},
-							&cli.IntFlag{Name: "interactions"},
+							&cli.StringFlag{Name: "include-prs"},
+							&cli.StringFlag{Name: "interactions"},
 							&cli.StringFlag{Name: "involves"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "label"},
 							&cli.StringFlag{Name: "language"},
-							&cli.IntFlag{Name: "limit"},
-							&cli.BoolFlag{Name: "locked"},
+							&cli.StringFlag{Name: "limit"},
+							&cli.StringFlag{Name: "locked"},
 							&cli.StringFlag{Name: "match"},
 							&cli.StringFlag{Name: "mentions"},
 							&cli.StringFlag{Name: "milestone"},
-							&cli.BoolFlag{Name: "no-assignee"},
-							&cli.BoolFlag{Name: "no-label"},
-							&cli.BoolFlag{Name: "no-milestone"},
-							&cli.BoolFlag{Name: "no-project"},
+							&cli.StringFlag{Name: "no-assignee"},
+							&cli.StringFlag{Name: "no-label"},
+							&cli.StringFlag{Name: "no-milestone"},
+							&cli.StringFlag{Name: "no-project"},
 							&cli.StringFlag{Name: "order"},
 							&cli.StringFlag{Name: "owner"},
 							&cli.StringFlag{Name: "project"},
-							&cli.IntFlag{Name: "reactions"},
+							&cli.StringFlag{Name: "reactions"},
 							&cli.StringFlag{Name: "repo"},
 							&cli.StringFlag{Name: "sort"},
 							&cli.StringFlag{Name: "state"},
@@ -4730,8 +4333,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "updated"},
 							&cli.StringFlag{Name: "visibility"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4739,50 +4342,34 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--app"] = c.String("app")
-									if c.Bool("archived") {
-										args["--archived"] = "true"
-									}
+									args["--archived"] = c.String("archived")
 									args["--assignee"] = c.String("assignee")
 									args["--author"] = c.String("author")
 									args["--closed"] = c.String("closed")
 									args["--commenter"] = c.String("commenter")
-									args["--comments"] = strconv.Itoa(int(c.Int("comments")))
+									args["--comments"] = c.String("comments")
 									args["--created"] = c.String("created")
-									if c.Bool("include-prs") {
-										args["--include-prs"] = "true"
-									}
-									args["--interactions"] = strconv.Itoa(int(c.Int("interactions")))
+									args["--include-prs"] = c.String("include-prs")
+									args["--interactions"] = c.String("interactions")
 									args["--involves"] = c.String("involves")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--label"] = c.String("label")
 									args["--language"] = c.String("language")
-									args["--limit"] = strconv.Itoa(int(c.Int("limit")))
-									if c.Bool("locked") {
-										args["--locked"] = "true"
-									}
+									args["--limit"] = c.String("limit")
+									args["--locked"] = c.String("locked")
 									args["--match"] = c.String("match")
 									args["--mentions"] = c.String("mentions")
 									args["--milestone"] = c.String("milestone")
-									if c.Bool("no-assignee") {
-										args["--no-assignee"] = "true"
-									}
-									if c.Bool("no-label") {
-										args["--no-label"] = "true"
-									}
-									if c.Bool("no-milestone") {
-										args["--no-milestone"] = "true"
-									}
-									if c.Bool("no-project") {
-										args["--no-project"] = "true"
-									}
+									args["--no-assignee"] = c.String("no-assignee")
+									args["--no-label"] = c.String("no-label")
+									args["--no-milestone"] = c.String("no-milestone")
+									args["--no-project"] = c.String("no-project")
 									args["--order"] = c.String("order")
 									args["--owner"] = c.String("owner")
 									args["--project"] = c.String("project")
-									args["--reactions"] = strconv.Itoa(int(c.Int("reactions")))
+									args["--reactions"] = c.String("reactions")
 									args["--repo"] = c.String("repo")
 									args["--sort"] = c.String("sort")
 									args["--state"] = c.String("state")
@@ -4790,145 +4377,127 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--updated"] = c.String("updated")
 									args["--visibility"] = c.String("visibility")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "issues"}
 									if c.IsSet("app") {
-										argv = append(argv, "--app", c.String("app"))
+										argv = append(argv, "--"+"app", c.String("app"))
 									}
 									if c.IsSet("archived") {
-										if c.Bool("archived") {
-											argv = append(argv, "--archived")
-										}
+										argv = append(argv, "--"+"archived", c.String("archived"))
 									}
 									if c.IsSet("assignee") {
-										argv = append(argv, "--assignee", c.String("assignee"))
+										argv = append(argv, "--"+"assignee", c.String("assignee"))
 									}
 									if c.IsSet("author") {
-										argv = append(argv, "--author", c.String("author"))
+										argv = append(argv, "--"+"author", c.String("author"))
 									}
 									if c.IsSet("closed") {
-										argv = append(argv, "--closed", c.String("closed"))
+										argv = append(argv, "--"+"closed", c.String("closed"))
 									}
 									if c.IsSet("commenter") {
-										argv = append(argv, "--commenter", c.String("commenter"))
+										argv = append(argv, "--"+"commenter", c.String("commenter"))
 									}
 									if c.IsSet("comments") {
-										argv = append(argv, "--comments", strconv.Itoa(int(c.Int("comments"))))
+										argv = append(argv, "--"+"comments", c.String("comments"))
 									}
 									if c.IsSet("created") {
-										argv = append(argv, "--created", c.String("created"))
+										argv = append(argv, "--"+"created", c.String("created"))
 									}
 									if c.IsSet("include-prs") {
-										if c.Bool("include-prs") {
-											argv = append(argv, "--include-prs")
-										}
+										argv = append(argv, "--"+"include-prs", c.String("include-prs"))
 									}
 									if c.IsSet("interactions") {
-										argv = append(argv, "--interactions", strconv.Itoa(int(c.Int("interactions"))))
+										argv = append(argv, "--"+"interactions", c.String("interactions"))
 									}
 									if c.IsSet("involves") {
-										argv = append(argv, "--involves", c.String("involves"))
+										argv = append(argv, "--"+"involves", c.String("involves"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("label") {
-										argv = append(argv, "--label", c.String("label"))
+										argv = append(argv, "--"+"label", c.String("label"))
 									}
 									if c.IsSet("language") {
-										argv = append(argv, "--language", c.String("language"))
+										argv = append(argv, "--"+"language", c.String("language"))
 									}
 									if c.IsSet("limit") {
-										argv = append(argv, "--limit", strconv.Itoa(int(c.Int("limit"))))
+										argv = append(argv, "--"+"limit", c.String("limit"))
 									}
 									if c.IsSet("locked") {
-										if c.Bool("locked") {
-											argv = append(argv, "--locked")
-										}
+										argv = append(argv, "--"+"locked", c.String("locked"))
 									}
 									if c.IsSet("match") {
-										argv = append(argv, "--match", c.String("match"))
+										argv = append(argv, "--"+"match", c.String("match"))
 									}
 									if c.IsSet("mentions") {
-										argv = append(argv, "--mentions", c.String("mentions"))
+										argv = append(argv, "--"+"mentions", c.String("mentions"))
 									}
 									if c.IsSet("milestone") {
-										argv = append(argv, "--milestone", c.String("milestone"))
+										argv = append(argv, "--"+"milestone", c.String("milestone"))
 									}
 									if c.IsSet("no-assignee") {
-										if c.Bool("no-assignee") {
-											argv = append(argv, "--no-assignee")
-										}
+										argv = append(argv, "--"+"no-assignee", c.String("no-assignee"))
 									}
 									if c.IsSet("no-label") {
-										if c.Bool("no-label") {
-											argv = append(argv, "--no-label")
-										}
+										argv = append(argv, "--"+"no-label", c.String("no-label"))
 									}
 									if c.IsSet("no-milestone") {
-										if c.Bool("no-milestone") {
-											argv = append(argv, "--no-milestone")
-										}
+										argv = append(argv, "--"+"no-milestone", c.String("no-milestone"))
 									}
 									if c.IsSet("no-project") {
-										if c.Bool("no-project") {
-											argv = append(argv, "--no-project")
-										}
+										argv = append(argv, "--"+"no-project", c.String("no-project"))
 									}
 									if c.IsSet("order") {
-										argv = append(argv, "--order", c.String("order"))
+										argv = append(argv, "--"+"order", c.String("order"))
 									}
 									if c.IsSet("owner") {
-										argv = append(argv, "--owner", c.String("owner"))
+										argv = append(argv, "--"+"owner", c.String("owner"))
 									}
 									if c.IsSet("project") {
-										argv = append(argv, "--project", c.String("project"))
+										argv = append(argv, "--"+"project", c.String("project"))
 									}
 									if c.IsSet("reactions") {
-										argv = append(argv, "--reactions", strconv.Itoa(int(c.Int("reactions"))))
+										argv = append(argv, "--"+"reactions", c.String("reactions"))
 									}
 									if c.IsSet("repo") {
-										argv = append(argv, "--repo", c.String("repo"))
+										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
 									if c.IsSet("sort") {
-										argv = append(argv, "--sort", c.String("sort"))
+										argv = append(argv, "--"+"sort", c.String("sort"))
 									}
 									if c.IsSet("state") {
-										argv = append(argv, "--state", c.String("state"))
+										argv = append(argv, "--"+"state", c.String("state"))
 									}
 									if c.IsSet("team-mentions") {
-										argv = append(argv, "--team-mentions", c.String("team-mentions"))
+										argv = append(argv, "--"+"team-mentions", c.String("team-mentions"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("updated") {
-										argv = append(argv, "--updated", c.String("updated"))
+										argv = append(argv, "--"+"updated", c.String("updated"))
 									}
 									if c.IsSet("visibility") {
-										argv = append(argv, "--visibility", c.String("visibility"))
+										argv = append(argv, "--"+"visibility", c.String("visibility"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -4941,38 +4510,38 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Search for pull requests on GitHub.",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "app"},
-							&cli.BoolFlag{Name: "archived"},
+							&cli.StringFlag{Name: "archived"},
 							&cli.StringFlag{Name: "assignee"},
 							&cli.StringFlag{Name: "author"},
 							&cli.StringFlag{Name: "base"},
 							&cli.StringFlag{Name: "checks"},
 							&cli.StringFlag{Name: "closed"},
 							&cli.StringFlag{Name: "commenter"},
-							&cli.IntFlag{Name: "comments"},
+							&cli.StringFlag{Name: "comments"},
 							&cli.StringFlag{Name: "created"},
-							&cli.BoolFlag{Name: "draft"},
+							&cli.StringFlag{Name: "draft"},
 							&cli.StringFlag{Name: "head"},
-							&cli.IntFlag{Name: "interactions"},
+							&cli.StringFlag{Name: "interactions"},
 							&cli.StringFlag{Name: "involves"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "label"},
 							&cli.StringFlag{Name: "language"},
-							&cli.IntFlag{Name: "limit"},
-							&cli.BoolFlag{Name: "locked"},
+							&cli.StringFlag{Name: "limit"},
+							&cli.StringFlag{Name: "locked"},
 							&cli.StringFlag{Name: "match"},
 							&cli.StringFlag{Name: "mentions"},
-							&cli.BoolFlag{Name: "merged"},
+							&cli.StringFlag{Name: "merged"},
 							&cli.StringFlag{Name: "merged-at"},
 							&cli.StringFlag{Name: "milestone"},
-							&cli.BoolFlag{Name: "no-assignee"},
-							&cli.BoolFlag{Name: "no-label"},
-							&cli.BoolFlag{Name: "no-milestone"},
-							&cli.BoolFlag{Name: "no-project"},
+							&cli.StringFlag{Name: "no-assignee"},
+							&cli.StringFlag{Name: "no-label"},
+							&cli.StringFlag{Name: "no-milestone"},
+							&cli.StringFlag{Name: "no-project"},
 							&cli.StringFlag{Name: "order"},
 							&cli.StringFlag{Name: "owner"},
 							&cli.StringFlag{Name: "project"},
-							&cli.IntFlag{Name: "reactions"},
+							&cli.StringFlag{Name: "reactions"},
 							&cli.StringFlag{Name: "repo"},
 							&cli.StringFlag{Name: "review"},
 							&cli.StringFlag{Name: "review-requested"},
@@ -4983,8 +4552,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "updated"},
 							&cli.StringFlag{Name: "visibility"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4992,57 +4561,39 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--app"] = c.String("app")
-									if c.Bool("archived") {
-										args["--archived"] = "true"
-									}
+									args["--archived"] = c.String("archived")
 									args["--assignee"] = c.String("assignee")
 									args["--author"] = c.String("author")
 									args["--base"] = c.String("base")
 									args["--checks"] = c.String("checks")
 									args["--closed"] = c.String("closed")
 									args["--commenter"] = c.String("commenter")
-									args["--comments"] = strconv.Itoa(int(c.Int("comments")))
+									args["--comments"] = c.String("comments")
 									args["--created"] = c.String("created")
-									if c.Bool("draft") {
-										args["--draft"] = "true"
-									}
+									args["--draft"] = c.String("draft")
 									args["--head"] = c.String("head")
-									args["--interactions"] = strconv.Itoa(int(c.Int("interactions")))
+									args["--interactions"] = c.String("interactions")
 									args["--involves"] = c.String("involves")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--label"] = c.String("label")
 									args["--language"] = c.String("language")
-									args["--limit"] = strconv.Itoa(int(c.Int("limit")))
-									if c.Bool("locked") {
-										args["--locked"] = "true"
-									}
+									args["--limit"] = c.String("limit")
+									args["--locked"] = c.String("locked")
 									args["--match"] = c.String("match")
 									args["--mentions"] = c.String("mentions")
-									if c.Bool("merged") {
-										args["--merged"] = "true"
-									}
+									args["--merged"] = c.String("merged")
 									args["--merged-at"] = c.String("merged-at")
 									args["--milestone"] = c.String("milestone")
-									if c.Bool("no-assignee") {
-										args["--no-assignee"] = "true"
-									}
-									if c.Bool("no-label") {
-										args["--no-label"] = "true"
-									}
-									if c.Bool("no-milestone") {
-										args["--no-milestone"] = "true"
-									}
-									if c.Bool("no-project") {
-										args["--no-project"] = "true"
-									}
+									args["--no-assignee"] = c.String("no-assignee")
+									args["--no-label"] = c.String("no-label")
+									args["--no-milestone"] = c.String("no-milestone")
+									args["--no-project"] = c.String("no-project")
 									args["--order"] = c.String("order")
 									args["--owner"] = c.String("owner")
 									args["--project"] = c.String("project")
-									args["--reactions"] = strconv.Itoa(int(c.Int("reactions")))
+									args["--reactions"] = c.String("reactions")
 									args["--repo"] = c.String("repo")
 									args["--review"] = c.String("review")
 									args["--review-requested"] = c.String("review-requested")
@@ -5053,171 +4604,151 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--updated"] = c.String("updated")
 									args["--visibility"] = c.String("visibility")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "prs"}
 									if c.IsSet("app") {
-										argv = append(argv, "--app", c.String("app"))
+										argv = append(argv, "--"+"app", c.String("app"))
 									}
 									if c.IsSet("archived") {
-										if c.Bool("archived") {
-											argv = append(argv, "--archived")
-										}
+										argv = append(argv, "--"+"archived", c.String("archived"))
 									}
 									if c.IsSet("assignee") {
-										argv = append(argv, "--assignee", c.String("assignee"))
+										argv = append(argv, "--"+"assignee", c.String("assignee"))
 									}
 									if c.IsSet("author") {
-										argv = append(argv, "--author", c.String("author"))
+										argv = append(argv, "--"+"author", c.String("author"))
 									}
 									if c.IsSet("base") {
-										argv = append(argv, "--base", c.String("base"))
+										argv = append(argv, "--"+"base", c.String("base"))
 									}
 									if c.IsSet("checks") {
-										argv = append(argv, "--checks", c.String("checks"))
+										argv = append(argv, "--"+"checks", c.String("checks"))
 									}
 									if c.IsSet("closed") {
-										argv = append(argv, "--closed", c.String("closed"))
+										argv = append(argv, "--"+"closed", c.String("closed"))
 									}
 									if c.IsSet("commenter") {
-										argv = append(argv, "--commenter", c.String("commenter"))
+										argv = append(argv, "--"+"commenter", c.String("commenter"))
 									}
 									if c.IsSet("comments") {
-										argv = append(argv, "--comments", strconv.Itoa(int(c.Int("comments"))))
+										argv = append(argv, "--"+"comments", c.String("comments"))
 									}
 									if c.IsSet("created") {
-										argv = append(argv, "--created", c.String("created"))
+										argv = append(argv, "--"+"created", c.String("created"))
 									}
 									if c.IsSet("draft") {
-										if c.Bool("draft") {
-											argv = append(argv, "--draft")
-										}
+										argv = append(argv, "--"+"draft", c.String("draft"))
 									}
 									if c.IsSet("head") {
-										argv = append(argv, "--head", c.String("head"))
+										argv = append(argv, "--"+"head", c.String("head"))
 									}
 									if c.IsSet("interactions") {
-										argv = append(argv, "--interactions", strconv.Itoa(int(c.Int("interactions"))))
+										argv = append(argv, "--"+"interactions", c.String("interactions"))
 									}
 									if c.IsSet("involves") {
-										argv = append(argv, "--involves", c.String("involves"))
+										argv = append(argv, "--"+"involves", c.String("involves"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("label") {
-										argv = append(argv, "--label", c.String("label"))
+										argv = append(argv, "--"+"label", c.String("label"))
 									}
 									if c.IsSet("language") {
-										argv = append(argv, "--language", c.String("language"))
+										argv = append(argv, "--"+"language", c.String("language"))
 									}
 									if c.IsSet("limit") {
-										argv = append(argv, "--limit", strconv.Itoa(int(c.Int("limit"))))
+										argv = append(argv, "--"+"limit", c.String("limit"))
 									}
 									if c.IsSet("locked") {
-										if c.Bool("locked") {
-											argv = append(argv, "--locked")
-										}
+										argv = append(argv, "--"+"locked", c.String("locked"))
 									}
 									if c.IsSet("match") {
-										argv = append(argv, "--match", c.String("match"))
+										argv = append(argv, "--"+"match", c.String("match"))
 									}
 									if c.IsSet("mentions") {
-										argv = append(argv, "--mentions", c.String("mentions"))
+										argv = append(argv, "--"+"mentions", c.String("mentions"))
 									}
 									if c.IsSet("merged") {
-										if c.Bool("merged") {
-											argv = append(argv, "--merged")
-										}
+										argv = append(argv, "--"+"merged", c.String("merged"))
 									}
 									if c.IsSet("merged-at") {
-										argv = append(argv, "--merged-at", c.String("merged-at"))
+										argv = append(argv, "--"+"merged-at", c.String("merged-at"))
 									}
 									if c.IsSet("milestone") {
-										argv = append(argv, "--milestone", c.String("milestone"))
+										argv = append(argv, "--"+"milestone", c.String("milestone"))
 									}
 									if c.IsSet("no-assignee") {
-										if c.Bool("no-assignee") {
-											argv = append(argv, "--no-assignee")
-										}
+										argv = append(argv, "--"+"no-assignee", c.String("no-assignee"))
 									}
 									if c.IsSet("no-label") {
-										if c.Bool("no-label") {
-											argv = append(argv, "--no-label")
-										}
+										argv = append(argv, "--"+"no-label", c.String("no-label"))
 									}
 									if c.IsSet("no-milestone") {
-										if c.Bool("no-milestone") {
-											argv = append(argv, "--no-milestone")
-										}
+										argv = append(argv, "--"+"no-milestone", c.String("no-milestone"))
 									}
 									if c.IsSet("no-project") {
-										if c.Bool("no-project") {
-											argv = append(argv, "--no-project")
-										}
+										argv = append(argv, "--"+"no-project", c.String("no-project"))
 									}
 									if c.IsSet("order") {
-										argv = append(argv, "--order", c.String("order"))
+										argv = append(argv, "--"+"order", c.String("order"))
 									}
 									if c.IsSet("owner") {
-										argv = append(argv, "--owner", c.String("owner"))
+										argv = append(argv, "--"+"owner", c.String("owner"))
 									}
 									if c.IsSet("project") {
-										argv = append(argv, "--project", c.String("project"))
+										argv = append(argv, "--"+"project", c.String("project"))
 									}
 									if c.IsSet("reactions") {
-										argv = append(argv, "--reactions", strconv.Itoa(int(c.Int("reactions"))))
+										argv = append(argv, "--"+"reactions", c.String("reactions"))
 									}
 									if c.IsSet("repo") {
-										argv = append(argv, "--repo", c.String("repo"))
+										argv = append(argv, "--"+"repo", c.String("repo"))
 									}
 									if c.IsSet("review") {
-										argv = append(argv, "--review", c.String("review"))
+										argv = append(argv, "--"+"review", c.String("review"))
 									}
 									if c.IsSet("review-requested") {
-										argv = append(argv, "--review-requested", c.String("review-requested"))
+										argv = append(argv, "--"+"review-requested", c.String("review-requested"))
 									}
 									if c.IsSet("reviewed-by") {
-										argv = append(argv, "--reviewed-by", c.String("reviewed-by"))
+										argv = append(argv, "--"+"reviewed-by", c.String("reviewed-by"))
 									}
 									if c.IsSet("sort") {
-										argv = append(argv, "--sort", c.String("sort"))
+										argv = append(argv, "--"+"sort", c.String("sort"))
 									}
 									if c.IsSet("state") {
-										argv = append(argv, "--state", c.String("state"))
+										argv = append(argv, "--"+"state", c.String("state"))
 									}
 									if c.IsSet("team-mentions") {
-										argv = append(argv, "--team-mentions", c.String("team-mentions"))
+										argv = append(argv, "--"+"team-mentions", c.String("team-mentions"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("updated") {
-										argv = append(argv, "--updated", c.String("updated"))
+										argv = append(argv, "--"+"updated", c.String("updated"))
 									}
 									if c.IsSet("visibility") {
-										argv = append(argv, "--visibility", c.String("visibility"))
+										argv = append(argv, "--"+"visibility", c.String("visibility"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5229,31 +4760,31 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "repos",
 						Usage: "Search for repositories on GitHub.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "archived"},
+							&cli.StringFlag{Name: "archived"},
 							&cli.StringFlag{Name: "created"},
-							&cli.IntFlag{Name: "followers"},
-							&cli.IntFlag{Name: "forks"},
-							&cli.IntFlag{Name: "good-first-issues"},
-							&cli.IntFlag{Name: "help-wanted-issues"},
+							&cli.StringFlag{Name: "followers"},
+							&cli.StringFlag{Name: "forks"},
+							&cli.StringFlag{Name: "good-first-issues"},
+							&cli.StringFlag{Name: "help-wanted-issues"},
 							&cli.StringFlag{Name: "include-forks"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "language"},
 							&cli.StringFlag{Name: "license"},
-							&cli.IntFlag{Name: "limit"},
+							&cli.StringFlag{Name: "limit"},
 							&cli.StringFlag{Name: "match"},
-							&cli.IntFlag{Name: "number-topics"},
+							&cli.StringFlag{Name: "number-topics"},
 							&cli.StringFlag{Name: "order"},
 							&cli.StringFlag{Name: "owner"},
 							&cli.StringFlag{Name: "size"},
 							&cli.StringFlag{Name: "sort"},
-							&cli.IntFlag{Name: "stars"},
+							&cli.StringFlag{Name: "stars"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "topic"},
 							&cli.StringFlag{Name: "updated"},
 							&cli.StringFlag{Name: "visibility"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "help"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5261,124 +4792,114 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("archived") {
-										args["--archived"] = "true"
-									}
+									args["--archived"] = c.String("archived")
 									args["--created"] = c.String("created")
-									args["--followers"] = strconv.Itoa(int(c.Int("followers")))
-									args["--forks"] = strconv.Itoa(int(c.Int("forks")))
-									args["--good-first-issues"] = strconv.Itoa(int(c.Int("good-first-issues")))
-									args["--help-wanted-issues"] = strconv.Itoa(int(c.Int("help-wanted-issues")))
+									args["--followers"] = c.String("followers")
+									args["--forks"] = c.String("forks")
+									args["--good-first-issues"] = c.String("good-first-issues")
+									args["--help-wanted-issues"] = c.String("help-wanted-issues")
 									args["--include-forks"] = c.String("include-forks")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--language"] = c.String("language")
 									args["--license"] = c.String("license")
-									args["--limit"] = strconv.Itoa(int(c.Int("limit")))
+									args["--limit"] = c.String("limit")
 									args["--match"] = c.String("match")
-									args["--number-topics"] = strconv.Itoa(int(c.Int("number-topics")))
+									args["--number-topics"] = c.String("number-topics")
 									args["--order"] = c.String("order")
 									args["--owner"] = c.String("owner")
 									args["--size"] = c.String("size")
 									args["--sort"] = c.String("sort")
-									args["--stars"] = strconv.Itoa(int(c.Int("stars")))
+									args["--stars"] = c.String("stars")
 									args["--template"] = c.String("template")
 									args["--topic"] = c.String("topic")
 									args["--updated"] = c.String("updated")
 									args["--visibility"] = c.String("visibility")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--help"] = c.String("help")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "repos"}
 									if c.IsSet("archived") {
-										if c.Bool("archived") {
-											argv = append(argv, "--archived")
-										}
+										argv = append(argv, "--"+"archived", c.String("archived"))
 									}
 									if c.IsSet("created") {
-										argv = append(argv, "--created", c.String("created"))
+										argv = append(argv, "--"+"created", c.String("created"))
 									}
 									if c.IsSet("followers") {
-										argv = append(argv, "--followers", strconv.Itoa(int(c.Int("followers"))))
+										argv = append(argv, "--"+"followers", c.String("followers"))
 									}
 									if c.IsSet("forks") {
-										argv = append(argv, "--forks", strconv.Itoa(int(c.Int("forks"))))
+										argv = append(argv, "--"+"forks", c.String("forks"))
 									}
 									if c.IsSet("good-first-issues") {
-										argv = append(argv, "--good-first-issues", strconv.Itoa(int(c.Int("good-first-issues"))))
+										argv = append(argv, "--"+"good-first-issues", c.String("good-first-issues"))
 									}
 									if c.IsSet("help-wanted-issues") {
-										argv = append(argv, "--help-wanted-issues", strconv.Itoa(int(c.Int("help-wanted-issues"))))
+										argv = append(argv, "--"+"help-wanted-issues", c.String("help-wanted-issues"))
 									}
 									if c.IsSet("include-forks") {
-										argv = append(argv, "--include-forks", c.String("include-forks"))
+										argv = append(argv, "--"+"include-forks", c.String("include-forks"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("language") {
-										argv = append(argv, "--language", c.String("language"))
+										argv = append(argv, "--"+"language", c.String("language"))
 									}
 									if c.IsSet("license") {
-										argv = append(argv, "--license", c.String("license"))
+										argv = append(argv, "--"+"license", c.String("license"))
 									}
 									if c.IsSet("limit") {
-										argv = append(argv, "--limit", strconv.Itoa(int(c.Int("limit"))))
+										argv = append(argv, "--"+"limit", c.String("limit"))
 									}
 									if c.IsSet("match") {
-										argv = append(argv, "--match", c.String("match"))
+										argv = append(argv, "--"+"match", c.String("match"))
 									}
 									if c.IsSet("number-topics") {
-										argv = append(argv, "--number-topics", strconv.Itoa(int(c.Int("number-topics"))))
+										argv = append(argv, "--"+"number-topics", c.String("number-topics"))
 									}
 									if c.IsSet("order") {
-										argv = append(argv, "--order", c.String("order"))
+										argv = append(argv, "--"+"order", c.String("order"))
 									}
 									if c.IsSet("owner") {
-										argv = append(argv, "--owner", c.String("owner"))
+										argv = append(argv, "--"+"owner", c.String("owner"))
 									}
 									if c.IsSet("size") {
-										argv = append(argv, "--size", c.String("size"))
+										argv = append(argv, "--"+"size", c.String("size"))
 									}
 									if c.IsSet("sort") {
-										argv = append(argv, "--sort", c.String("sort"))
+										argv = append(argv, "--"+"sort", c.String("sort"))
 									}
 									if c.IsSet("stars") {
-										argv = append(argv, "--stars", strconv.Itoa(int(c.Int("stars"))))
+										argv = append(argv, "--"+"stars", c.String("stars"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("topic") {
-										argv = append(argv, "--topic", c.String("topic"))
+										argv = append(argv, "--"+"topic", c.String("topic"))
 									}
 									if c.IsSet("updated") {
-										argv = append(argv, "--updated", c.String("updated"))
+										argv = append(argv, "--"+"updated", c.String("updated"))
 									}
 									if c.IsSet("visibility") {
-										argv = append(argv, "--visibility", c.String("visibility"))
+										argv = append(argv, "--"+"visibility", c.String("visibility"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5399,8 +4920,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "app"},
 							&cli.StringFlag{Name: "env"},
 							&cli.StringFlag{Name: "org"},
-							&cli.BoolFlag{Name: "user"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "user"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5408,40 +4930,38 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--app"] = c.String("app")
 									args["--env"] = c.String("env")
 									args["--org"] = c.String("org")
-									if c.Bool("user") {
-										args["--user"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--user"] = c.String("user")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"secret", "delete"}
 									if c.IsSet("app") {
-										argv = append(argv, "--app", c.String("app"))
+										argv = append(argv, "--"+"app", c.String("app"))
 									}
 									if c.IsSet("env") {
-										argv = append(argv, "--env", c.String("env"))
+										argv = append(argv, "--"+"env", c.String("env"))
 									}
 									if c.IsSet("org") {
-										argv = append(argv, "--org", c.String("org"))
+										argv = append(argv, "--"+"org", c.String("org"))
 									}
 									if c.IsSet("user") {
-										if c.Bool("user") {
-											argv = append(argv, "--user")
-										}
+										argv = append(argv, "--"+"user", c.String("user"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5459,8 +4979,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "org"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "user"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "user"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5468,52 +4989,50 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--app"] = c.String("app")
 									args["--env"] = c.String("env")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
 									args["--org"] = c.String("org")
 									args["--template"] = c.String("template")
-									if c.Bool("user") {
-										args["--user"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--user"] = c.String("user")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"secret", "list"}
 									if c.IsSet("app") {
-										argv = append(argv, "--app", c.String("app"))
+										argv = append(argv, "--"+"app", c.String("app"))
 									}
 									if c.IsSet("env") {
-										argv = append(argv, "--env", c.String("env"))
+										argv = append(argv, "--"+"env", c.String("env"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("org") {
-										argv = append(argv, "--org", c.String("org"))
+										argv = append(argv, "--"+"org", c.String("org"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("user") {
-										if c.Bool("user") {
-											argv = append(argv, "--user")
-										}
+										argv = append(argv, "--"+"user", c.String("user"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5529,12 +5048,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "body"},
 							&cli.StringFlag{Name: "env"},
 							&cli.StringFlag{Name: "env-file"},
-							&cli.BoolFlag{Name: "no-store"},
+							&cli.StringFlag{Name: "no-store"},
 							&cli.StringFlag{Name: "org"},
 							&cli.StringFlag{Name: "repos"},
-							&cli.BoolFlag{Name: "user"},
+							&cli.StringFlag{Name: "user"},
 							&cli.StringFlag{Name: "visibility"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5542,64 +5062,58 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--app"] = c.String("app")
 									args["--body"] = c.String("body")
 									args["--env"] = c.String("env")
 									args["--env-file"] = c.String("env-file")
-									if c.Bool("no-store") {
-										args["--no-store"] = "true"
-									}
+									args["--no-store"] = c.String("no-store")
 									args["--org"] = c.String("org")
 									args["--repos"] = c.String("repos")
-									if c.Bool("user") {
-										args["--user"] = "true"
-									}
+									args["--user"] = c.String("user")
 									args["--visibility"] = c.String("visibility")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"secret", "set"}
 									if c.IsSet("app") {
-										argv = append(argv, "--app", c.String("app"))
+										argv = append(argv, "--"+"app", c.String("app"))
 									}
 									if c.IsSet("body") {
-										argv = append(argv, "--body", c.String("body"))
+										argv = append(argv, "--"+"body", c.String("body"))
 									}
 									if c.IsSet("env") {
-										argv = append(argv, "--env", c.String("env"))
+										argv = append(argv, "--"+"env", c.String("env"))
 									}
 									if c.IsSet("env-file") {
-										argv = append(argv, "--env-file", c.String("env-file"))
+										argv = append(argv, "--"+"env-file", c.String("env-file"))
 									}
 									if c.IsSet("no-store") {
-										if c.Bool("no-store") {
-											argv = append(argv, "--no-store")
-										}
+										argv = append(argv, "--"+"no-store", c.String("no-store"))
 									}
 									if c.IsSet("org") {
-										argv = append(argv, "--org", c.String("org"))
+										argv = append(argv, "--"+"org", c.String("org"))
 									}
 									if c.IsSet("repos") {
-										argv = append(argv, "--repos", c.String("repos"))
+										argv = append(argv, "--"+"repos", c.String("repos"))
 									}
 									if c.IsSet("user") {
-										if c.Bool("user") {
-											argv = append(argv, "--user")
-										}
+										argv = append(argv, "--"+"user", c.String("user"))
 									}
 									if c.IsSet("visibility") {
-										argv = append(argv, "--visibility", c.String("visibility"))
+										argv = append(argv, "--"+"visibility", c.String("visibility"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5617,7 +5131,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "disable",
 						Usage: "Disable a workflow, preventing it from running or showing up when listing workflows.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5625,20 +5140,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "disable"}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5650,7 +5167,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "enable",
 						Usage: "Enable a workflow, allowing it to be run and show up when listing workflows.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5658,20 +5176,22 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "enable"}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5683,12 +5203,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "list",
 						Usage: "List workflow files, hiding disabled workflows by default.",
 						Flags: []cli.Flag{
-							&cli.BoolFlag{Name: "all"},
+							&cli.StringFlag{Name: "all"},
 							&cli.StringFlag{Name: "jq"},
 							&cli.StringFlag{Name: "json"},
-							&cli.IntFlag{Name: "limit"},
+							&cli.StringFlag{Name: "limit"},
 							&cli.StringFlag{Name: "template"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5696,44 +5217,42 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									if c.Bool("all") {
-										args["--all"] = "true"
-									}
+									args["--all"] = c.String("all")
 									args["--jq"] = c.String("jq")
 									args["--json"] = c.String("json")
-									args["--limit"] = strconv.Itoa(int(c.Int("limit")))
+									args["--limit"] = c.String("limit")
 									args["--template"] = c.String("template")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "list"}
 									if c.IsSet("all") {
-										if c.Bool("all") {
-											argv = append(argv, "--all")
-										}
+										argv = append(argv, "--"+"all", c.String("all"))
 									}
 									if c.IsSet("jq") {
-										argv = append(argv, "--jq", c.String("jq"))
+										argv = append(argv, "--"+"jq", c.String("jq"))
 									}
 									if c.IsSet("json") {
-										argv = append(argv, "--json", c.String("json"))
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("limit") {
-										argv = append(argv, "--limit", strconv.Itoa(int(c.Int("limit"))))
+										argv = append(argv, "--"+"limit", c.String("limit"))
 									}
 									if c.IsSet("template") {
-										argv = append(argv, "--template", c.String("template"))
+										argv = append(argv, "--"+"template", c.String("template"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5745,11 +5264,12 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Name:  "run",
 						Usage: "Create a 'workflow_dispatch' event for a given workflow.",
 						Flags: []cli.Flag{
-							&cli.StringSliceFlag{Name: "field"},
-							&cli.BoolFlag{Name: "json"},
-							&cli.StringSliceFlag{Name: "raw-field"},
+							&cli.StringFlag{Name: "field"},
+							&cli.StringFlag{Name: "json"},
+							&cli.StringFlag{Name: "raw-field"},
 							&cli.StringFlag{Name: "ref"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5757,48 +5277,38 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.Mutating,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
-									for _, v := range c.StringSlice("field") {
-										positional = append(positional, v)
-									}
-									if c.Bool("json") {
-										args["--json"] = "true"
-									}
-									for _, v := range c.StringSlice("raw-field") {
-										positional = append(positional, v)
-									}
+									args["--field"] = c.String("field")
+									args["--json"] = c.String("json")
+									args["--raw-field"] = c.String("raw-field")
 									args["--ref"] = c.String("ref")
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "run"}
 									if c.IsSet("field") {
-										for _, v := range c.StringSlice("field") {
-											argv = append(argv, "--field", v)
-										}
+										argv = append(argv, "--"+"field", c.String("field"))
 									}
 									if c.IsSet("json") {
-										if c.Bool("json") {
-											argv = append(argv, "--json")
-										}
+										argv = append(argv, "--"+"json", c.String("json"))
 									}
 									if c.IsSet("raw-field") {
-										for _, v := range c.StringSlice("raw-field") {
-											argv = append(argv, "--raw-field", v)
-										}
+										argv = append(argv, "--"+"raw-field", c.String("raw-field"))
 									}
 									if c.IsSet("ref") {
-										argv = append(argv, "--ref", c.String("ref"))
+										argv = append(argv, "--"+"ref", c.String("ref"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},
@@ -5811,9 +5321,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "View the summary of a workflow",
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "ref"},
-							&cli.BoolFlag{Name: "web"},
-							&cli.BoolFlag{Name: "yaml"},
-							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "web"},
+							&cli.StringFlag{Name: "yaml"},
+							&cli.StringFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5821,40 +5332,34 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Kind: policy.ReadOnly,
 								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 									args := map[string]string{}
-									var positional []string
-									_ = positional
 									args["--ref"] = c.String("ref")
-									if c.Bool("web") {
-										args["--web"] = "true"
-									}
-									if c.Bool("yaml") {
-										args["--yaml"] = "true"
-									}
-									if c.Bool("help") {
-										args["--help"] = "true"
-									}
-									return args, positional, c.String("token")
+									args["--web"] = c.String("web")
+									args["--yaml"] = c.String("yaml")
+									args["--help"] = c.String("help")
+									args["--repo"] = c.String("repo")
+									return args, c.Args().Slice(), c.String("token")
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "view"}
 									if c.IsSet("ref") {
-										argv = append(argv, "--ref", c.String("ref"))
+										argv = append(argv, "--"+"ref", c.String("ref"))
 									}
 									if c.IsSet("web") {
-										if c.Bool("web") {
-											argv = append(argv, "--web")
-										}
+										argv = append(argv, "--"+"web", c.String("web"))
 									}
 									if c.IsSet("yaml") {
-										if c.Bool("yaml") {
-											argv = append(argv, "--yaml")
-										}
+										argv = append(argv, "--"+"yaml", c.String("yaml"))
 									}
 									if c.IsSet("help") {
-										if c.Bool("help") {
-											argv = append(argv, "--help")
-										}
+										argv = append(argv, "--"+"help", c.String("help"))
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--"+"repo", c.String("repo"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
 									_ = strconv.Itoa // keep strconv imported even when no flags
 									return r.Exec(ctx, BinaryName, argv...)
 								},

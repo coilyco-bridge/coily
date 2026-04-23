@@ -1,5 +1,996 @@
 commands:
     - path:
+        - create
+      help: Create a resource from a file or from stdin.
+      children:
+        - clusterrole
+        - clusterrolebinding
+        - configmap
+        - cronjob
+        - deployment
+        - ingress
+        - job
+        - namespace
+        - poddisruptionbudget
+        - priorityclass
+        - quota
+        - role
+        - rolebinding
+        - secret
+        - service
+        - serviceaccount
+        - token
+    - path:
+        - create
+        - clusterrole
+      help: Create a cluster role.
+      flags:
+        - name: --aggregation-rule
+          type: string
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --non-resource-url
+          type: stringSlice
+        - name: --output
+          type: string
+        - name: --resource
+          type: stringSlice
+        - name: --resource-name
+          type: stringSlice
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+        - name: --verb
+          type: stringSlice
+    - path:
+        - create
+        - clusterrolebinding
+      help: Create a cluster role binding for a particular cluster role.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --clusterrole
+          type: string
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --group
+          type: stringSlice
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --serviceaccount
+          type: stringSlice
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --user
+          type: stringSlice
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - configmap
+      help: Create a config map based on a file, directory, or specified literal value.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --append-hash
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --from-env-file
+          type: stringSlice
+        - name: --from-file
+          type: stringSlice
+        - name: --from-literal
+          type: stringSlice
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - cronjob
+      help: Create a cron job with the specified name.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --image
+          type: string
+        - name: --output
+          type: string
+        - name: --restart
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --schedule
+          type: string
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - deployment
+      help: Create a deployment with the specified name.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --image
+          type: stringSlice
+        - name: --output
+          type: string
+        - name: --port
+          type: int
+        - name: --replicas
+          type: int
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - ingress
+      help: Create an ingress with the specified name.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --annotation
+          type: stringSlice
+        - name: --class
+          type: string
+        - name: --default-backend
+          type: string
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --output
+          type: string
+        - name: --rule
+          type: stringSlice
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - job
+      help: Create a job with the specified name.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --from
+          type: string
+        - name: --image
+          type: string
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - namespace
+      help: Create a namespace with the specified name.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - poddisruptionbudget
+      help: Create a pod disruption budget with the specified name, selector, and desired minimum available pods.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --max-unavailable
+          type: string
+        - name: --min-available
+          type: string
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --selector
+          type: string
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - priorityclass
+      help: Create a priority class with the specified name, value, globalDefault and description.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --description
+          type: string
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --global-default
+          type: bool
+        - name: --output
+          type: string
+        - name: --preemption-policy
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+        - name: --value
+          type: int
+    - path:
+        - create
+        - quota
+      help: Create a resource quota with the specified name, hard limits, and optional scopes.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --hard
+          type: string
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --scopes
+          type: string
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - role
+      help: Create a role with single rule.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --output
+          type: string
+        - name: --resource
+          type: stringSlice
+        - name: --resource-name
+          type: stringSlice
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+        - name: --verb
+          type: stringSlice
+    - path:
+        - create
+        - rolebinding
+      help: Create a role binding for a particular role or cluster role.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --clusterrole
+          type: string
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --group
+          type: stringSlice
+        - name: --output
+          type: string
+        - name: --role
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --serviceaccount
+          type: stringSlice
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --user
+          type: stringSlice
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - secret
+      help: Create a secret using specified subcommand.
+      children:
+        - docker-registry
+        - generic
+        - tls
+    - path:
+        - create
+        - secret
+        - docker-registry
+      help: Create a new secret for use with Docker registries.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --append-hash
+          type: bool
+        - name: --docker-email
+          type: string
+        - name: --docker-password
+          type: string
+        - name: --docker-server
+          type: string
+        - name: --docker-username
+          type: string
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --from-file
+          type: stringSlice
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - secret
+        - generic
+      help: Create a secret based on a file, directory, or specified literal value.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --append-hash
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --from-env-file
+          type: stringSlice
+        - name: --from-file
+          type: stringSlice
+        - name: --from-literal
+          type: stringSlice
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --type
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - secret
+        - tls
+      help: Create a TLS secret from the given public/private key pair.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --append-hash
+          type: bool
+        - name: --cert
+          type: string
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --key
+          type: string
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - service
+      help: Create a service using a specified subcommand.
+      children:
+        - clusterip
+        - externalname
+        - loadbalancer
+        - nodeport
+    - path:
+        - create
+        - service
+        - clusterip
+      help: Create a ClusterIP service with the specified name.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --clusterip
+          type: string
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --tcp
+          type: stringSlice
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - service
+        - externalname
+      help: Create an ExternalName service with the specified name.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --external-name
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --tcp
+          type: stringSlice
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - service
+        - loadbalancer
+      help: Create a LoadBalancer service with the specified name.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --tcp
+          type: stringSlice
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - service
+        - nodeport
+      help: Create a NodePort service with the specified name.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --node-port
+          type: int
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --tcp
+          type: stringSlice
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - serviceaccount
+      help: Create a service account with the specified name.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --output
+          type: string
+        - name: --save-config
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --validate
+          type: string
+    - path:
+        - create
+        - token
+      help: Request a service account token.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --audience
+          type: stringSlice
+        - name: --bound-object-kind
+          type: string
+        - name: --bound-object-name
+          type: string
+        - name: --bound-object-uid
+          type: string
+        - name: --duration
+          type: string
+        - name: --output
+          type: string
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+    - path:
+        - expose
+      help: Expose a resource as a new Kubernetes service.
+      flags:
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --cluster-ip
+          type: string
+        - name: --dry-run
+          type: string
+        - name: --external-ip
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --filename
+          type: stringSlice
+        - name: --kustomize
+          type: string
+        - name: --labels
+          type: string
+        - name: --load-balancer-ip
+          type: string
+        - name: --name
+          type: string
+        - name: --output
+          type: string
+        - name: --override-type
+          type: string
+        - name: --overrides
+          type: string
+        - name: --port
+          type: string
+        - name: --protocol
+          type: string
+        - name: --recursive
+          type: bool
+        - name: --save-config
+          type: bool
+        - name: --selector
+          type: string
+        - name: --session-affinity
+          type: string
+        - name: --show-managed-fields
+          type: bool
+        - name: --target-port
+          type: string
+        - name: --template
+          type: string
+        - name: --type
+          type: string
+    - path:
+        - set
+      help: Configure application resources.
+      children:
+        - env
+        - image
+        - resources
+        - selector
+        - serviceaccount
+        - subject
+    - path:
+        - set
+        - env
+      help: Update environment variables on a pod template.
+      flags:
+        - name: --all
+          type: bool
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --containers
+          type: string
+        - name: --dry-run
+          type: string
+        - name: --env
+          type: stringSlice
+        - name: --field-manager
+          type: string
+        - name: --filename
+          type: stringSlice
+        - name: --from
+          type: string
+        - name: --keys
+          type: stringSlice
+        - name: --kustomize
+          type: string
+        - name: --list
+          type: bool
+        - name: --local
+          type: bool
+        - name: --output
+          type: string
+        - name: --overwrite
+          type: bool
+        - name: --prefix
+          type: string
+        - name: --recursive
+          type: bool
+        - name: --resolve
+          type: bool
+        - name: --selector
+          type: string
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+    - path:
+        - set
+        - image
+      help: Update existing container image(s) of resources.
+      flags:
+        - name: --all
+          type: bool
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --filename
+          type: stringSlice
+        - name: --kustomize
+          type: string
+        - name: --local
+          type: bool
+        - name: --output
+          type: string
+        - name: --recursive
+          type: bool
+        - name: --selector
+          type: string
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+    - path:
+        - set
+        - resources
+      help: Specify compute resource requirements (CPU, memory) for any resource that defines a pod template.
+      flags:
+        - name: --all
+          type: bool
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --containers
+          type: string
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --filename
+          type: stringSlice
+        - name: --kustomize
+          type: string
+        - name: --limits
+          type: string
+        - name: --local
+          type: bool
+        - name: --output
+          type: string
+        - name: --recursive
+          type: bool
+        - name: --requests
+          type: string
+        - name: --selector
+          type: string
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+    - path:
+        - set
+        - selector
+      help: Set the selector on a resource.
+      flags:
+        - name: --all
+          type: bool
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --filename
+          type: stringSlice
+        - name: --local
+          type: bool
+        - name: --output
+          type: string
+        - name: --recursive
+          type: bool
+        - name: --resource-version
+          type: string
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+    - path:
+        - set
+        - serviceaccount
+      help: Update the service account of pod template resources.
+      flags:
+        - name: --all
+          type: bool
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --filename
+          type: stringSlice
+        - name: --kustomize
+          type: string
+        - name: --local
+          type: bool
+        - name: --output
+          type: string
+        - name: --recursive
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+    - path:
+        - set
+        - subject
+      help: Update the user, group, or service account in a role binding or cluster role binding.
+      flags:
+        - name: --all
+          type: bool
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --dry-run
+          type: string
+        - name: --field-manager
+          type: string
+        - name: --filename
+          type: stringSlice
+        - name: --group
+          type: stringSlice
+        - name: --kustomize
+          type: string
+        - name: --local
+          type: bool
+        - name: --output
+          type: string
+        - name: --recursive
+          type: bool
+        - name: --selector
+          type: string
+        - name: --serviceaccount
+          type: stringSlice
+        - name: --show-managed-fields
+          type: bool
+        - name: --template
+          type: string
+        - name: --user
+          type: stringSlice
+    - path:
+        - explain
+      help: List the fields for supported resources.
+      flags:
+        - name: --api-version
+          type: string
+        - name: --output
+          type: string
+        - name: --recursive
+          type: bool
+    - path:
+        - get
+      help: Display one or many resources.
+      flags:
+        - name: --all-namespaces
+          type: bool
+        - name: --allow-missing-template-keys
+          type: bool
+        - name: --chunk-size
+          type: int
+        - name: --field-selector
+          type: string
+        - name: --filename
+          type: stringSlice
+        - name: --ignore-not-found
+          type: bool
+        - name: --kustomize
+          type: string
+        - name: --label-columns
+          type: stringSlice
+        - name: --no-headers
+          type: bool
+        - name: --output
+          type: string
+        - name: --output-watch-events
+          type: bool
+        - name: --raw
+          type: string
+        - name: --recursive
+          type: bool
+        - name: --selector
+          type: string
+        - name: --server-print
+          type: bool
+        - name: --show-kind
+          type: bool
+        - name: --show-labels
+          type: bool
+        - name: --show-managed-fields
+          type: bool
+        - name: --sort-by
+          type: string
+        - name: --subresource
+          type: string
+        - name: --template
+          type: string
+        - name: --watch
+          type: bool
+        - name: --watch-only
+          type: bool
+    - path:
+        - delete
+      help: Delete resources by file names, stdin, resources and names, or by resources and label selector.
+      flags:
+        - name: --all
+          type: bool
+        - name: --all-namespaces
+          type: bool
+        - name: --cascade
+          type: string
+        - name: --dry-run
+          type: string
+        - name: --field-selector
+          type: string
+        - name: --filename
+          type: stringSlice
+        - name: --force
+          type: bool
+        - name: --grace-period
+          type: int
+        - name: --ignore-not-found
+          type: bool
+        - name: --kustomize
+          type: string
+        - name: --now
+          type: bool
+        - name: --output
+          type: string
+        - name: --raw
+          type: string
+        - name: --recursive
+          type: bool
+        - name: --selector
+          type: string
+        - name: --timeout
+          type: string
+        - name: --wait
+          type: bool
+    - path:
         - rollout
       help: Manage the rollout of one or many resources.
       children:
@@ -802,23 +1793,23 @@ commands:
     - path:
         - config
         - current-context
-      help: help
+      help: Display the current-context.
     - path:
         - config
         - delete-cluster
-      help: deleted cluster help from /Users/kai/.kube/config
+      help: Delete the specified cluster from the kubeconfig.
     - path:
         - config
         - delete-context
-      help: 'warning: this removed your active context, use "kubectl config use-context" to select a different one'
+      help: Delete the specified context from the kubeconfig.
     - path:
         - config
         - delete-user
-      help: deleted user help from /Users/kai/.kube/config
+      help: Delete the specified user from the kubeconfig.
     - path:
         - config
         - get-clusters
-      help: NAME
+      help: Display clusters defined in the kubeconfig.
     - path:
         - config
         - get-contexts
@@ -831,7 +1822,7 @@ commands:
     - path:
         - config
         - get-users
-      help: NAME
+      help: Display users defined in the kubeconfig.
     - path:
         - config
         - rename-context
@@ -846,15 +1837,62 @@ commands:
     - path:
         - config
         - set-cluster
-      help: Cluster "help" set.
+      help: Set a cluster entry in kubeconfig.
+      flags:
+        - name: --certificate-authority
+          type: string
+        - name: --embed-certs
+          type: bool
+        - name: --insecure-skip-tls-verify
+          type: bool
+        - name: --proxy-url
+          type: string
+        - name: --server
+          type: string
+        - name: --tls-server-name
+          type: string
     - path:
         - config
         - set-context
-      help: Context "help" created.
+      help: Set a context entry in kubeconfig.
+      flags:
+        - name: --cluster
+          type: string
+        - name: --current
+          type: bool
+        - name: --namespace
+          type: string
+        - name: --user
+          type: string
     - path:
         - config
         - set-credentials
-      help: User "help" set.
+      help: Set a user entry in kubeconfig.
+      flags:
+        - name: --auth-provider
+          type: string
+        - name: --auth-provider-arg
+          type: stringSlice
+        - name: --client-certificate
+          type: string
+        - name: --client-key
+          type: string
+        - name: --embed-certs
+          type: bool
+        - name: --exec-api-version
+          type: string
+        - name: --exec-arg
+          type: stringSlice
+        - name: --exec-command
+          type: string
+        - name: --exec-env
+          type: stringSlice
+        - name: --password
+          type: string
+        - name: --token
+          type: string
+        - name: --username
+          type: string
     - path:
         - config
         - unset
@@ -862,7 +1900,7 @@ commands:
     - path:
         - config
         - use-context
-      help: Switched to context "help".
+      help: Set the current-context in a kubeconfig file.
     - path:
         - config
         - view

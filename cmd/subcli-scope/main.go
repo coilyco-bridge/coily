@@ -777,13 +777,16 @@ func sections(help string) []string {
 	return all
 }
 
+// commandSectionHeaderRE matches every shape of "commands" section header
+// across our supported CLIs. kubectl groups commands under headers like
+// "Basic Commands (Beginner):", "Deploy Commands:", "Other Commands:".
+// gh and aws use plain "COMMANDS:" / "SUBCOMMANDS:" / "SERVICES:" / "TOPICS:".
+// Allow an optional parenthetical qualifier after the keyword and a trailing
+// colon, since both vary across sections and tools.
+var commandSectionHeaderRE = regexp.MustCompile(`^(?:[A-Z0-9-]+\s+)*(?:COMMANDS|SUBCOMMANDS|SERVICES|TOPICS)(?:\s*\([^)]*\))?:?$`)
+
 func isCommandSectionHeader(upper string) bool {
-	for _, suffix := range []string{"COMMANDS", "COMMANDS:", "SUBCOMMANDS", "SUBCOMMANDS:", "SERVICES", "SERVICES:", "TOPICS", "TOPICS:"} {
-		if strings.HasSuffix(upper, suffix) {
-			return true
-		}
-	}
-	return false
+	return commandSectionHeaderRE.MatchString(upper)
 }
 
 func looksLikeHeader(line string) bool {

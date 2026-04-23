@@ -47,6 +47,7 @@ gh pr status READONLY
 gh pr unlock MUTATING
 gh pr view READONLY
 gh project READONLY
+gh reference READONLY
 gh release create MUTATING
 gh release delete MUTATING
 gh release download READONLY

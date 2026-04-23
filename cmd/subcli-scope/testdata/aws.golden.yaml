@@ -10082,6 +10082,7 @@ commands:
         - list-association-versions
         - list-associations
         - list-command-invocations
+        - list-commands
         - list-compliance-items
         - list-compliance-summaries
         - list-document-metadata-history
@@ -14680,6 +14681,63 @@ commands:
           type: stringSlice
         - name: --details
           type: bool
+        - name: --cli-input-json
+          type: string
+        - name: --starting-token
+          type: string
+        - name: --page-size
+          type: int
+        - name: --max-items
+          type: int
+        - name: --generate-cli-skeleton
+          type: string
+        - name: --debug
+          type: bool
+        - name: --endpoint-url
+          type: string
+        - name: --no-verify-ssl
+          type: bool
+        - name: --no-paginate
+          type: bool
+        - name: --output
+          type: string
+        - name: --query
+          type: string
+        - name: --profile
+          type: string
+        - name: --region
+          type: string
+        - name: --version
+          type: string
+        - name: --color
+          type: string
+        - name: --no-sign-request
+          type: bool
+        - name: --ca-bundle
+          type: string
+        - name: --cli-read-timeout
+          type: string
+        - name: --cli-connect-timeout
+          type: string
+        - name: --cli-binary-format
+          type: string
+        - name: --no-cli-pager
+          type: bool
+        - name: --cli-auto-prompt
+          type: bool
+        - name: --no-cli-auto-prompt
+          type: bool
+    - path:
+        - ssm
+        - list-commands
+      help: Lists the commands requested by users of the Amazon Web Services account.
+      flags:
+        - name: --command-id
+          type: string
+        - name: --instance-id
+          type: string
+        - name: --filters
+          type: stringSlice
         - name: --cli-input-json
           type: string
         - name: --starting-token

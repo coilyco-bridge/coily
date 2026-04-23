@@ -1,6 +1,6 @@
 binary: aws
 bin_version: aws-cli/2.26.5 Python/3.13.3 Darwin/24.6.0 source/arm64
-scanned_at: "2026-04-22T06:24:05Z"
+scanned_at: "2026-04-23T00:58:55Z"
 commands:
     - path:
         - route53
@@ -10085,6 +10085,7 @@ commands:
         - list-association-versions
         - list-associations
         - list-command-invocations
+        - list-commands
         - list-compliance-items
         - list-compliance-summaries
         - list-document-metadata-history
@@ -14729,6 +14730,10 @@ commands:
           type: bool
         - name: --no-cli-auto-prompt
           type: bool
+    - path:
+        - ssm
+        - list-commands
+      help: Lists the commands requested by users of the Amazon Web Services account.
     - path:
         - ssm
         - list-compliance-items
