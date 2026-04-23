@@ -19,7 +19,6 @@ out one agent per item, each touching a single file.
 
 8. [Embedded sub-binaries](unresolved/08-embedded-binaries.md)
 9. [SDK-native ssh/scp/tailscale](unresolved/09-sdk-ssh.md)
-10. [`coily eco world`](unresolved/10-eco-world.md)
 11. [Self-update v2 + adversarial review](unresolved/11-self-update.md)
 12. [Layer 3 integration tests (end-to-end)](unresolved/12-layer3-tests.md)
 

@@ -19,7 +19,16 @@ type Config struct {
 	Audit     Audit     `yaml:"audit"`
 	AWS       AWS       `yaml:"aws"`
 	Tokens    Tokens    `yaml:"tokens"`
+	Eco       Eco       `yaml:"eco"`
 	Loaded    time.Time `yaml:"-"`
+}
+
+// Eco is the local-side config for `coily eco world` verbs. configs_dir
+// points at a checkout of the eco-configs repo (the same one
+// eco-cycle-prep/worldgen.py operates on). Optional: if empty, world
+// verbs require --configs-dir explicitly.
+type Eco struct {
+	ConfigsDir string `yaml:"configs_dir"`
 }
 
 type KaiServer struct {
