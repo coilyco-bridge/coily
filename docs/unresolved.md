@@ -7,10 +7,7 @@ out one agent per item, each touching a single file.
 
 ## Known bugs and rough edges
 
-1. [Pass-through flag types are all strings](unresolved/01-flag-types.md)
-2. [Mutating-verb classifier is prefix-based and will misclassify](unresolved/02-classifier-prefixes.md)
 3. [aws s3api help field is groff garbage](unresolved/03-s3api-groff.md)
-4. [gh api's --method flag clashes with coily's structure](unresolved/04-gh-api-method.md)
 5. [kubectl context "help" is real](unresolved/05-kubectl-help-context.md)
 6. [Audit log perms are 0600 but the default path is ~/.local/state](unresolved/06-audit-log-perms.md)
 7. [`runtime` is init-time. Test isolation is awkward](unresolved/07-runtime-singleton.md)
@@ -33,17 +30,20 @@ out one agent per item, each touching a single file.
 
 ## What I would build next, in order
 
-1. Fix flag types in gen-passthrough (bug #1 above). Highest-utility fix.
-2. Extend summary() to handle s3api-style aws help (bug #3).
-3. Add a docs/audit.md explaining the log format and a `coily audit tail`
+1. Extend summary() to handle s3api-style aws help (bug #3).
+2. Add a docs/audit.md explaining the log format and a `coily audit tail`
    verb so Kai can review it easily.
-4. Pass runtime into verbs explicitly so cmd/coily/ becomes testable (#7).
-5. Then: embedded binaries (#8). Big lift but closes the threat model.
+3. Pass runtime into verbs explicitly so cmd/coily/ becomes testable (#7).
+4. Then: embedded binaries (#8). Big lift but closes the threat model.
 
 ## Things that are done but deserve skepticism
 
 - **Classifier heuristic**. High-confidence on common cases. Low-
-  confidence on the long tail. See features.md test #13.
+  confidence on the long tail. The per-tool classification snapshot at
+  `cmd/subcli-scope/testdata/<tool>.classified.txt` makes a wrong label
+  show up in the diff on every fixture refresh, so misses surface during
+  review instead of silently dropping the policy gate. See features.md
+  test #13 for the full coverage plan.
 - **Completion scripts**. The bash/zsh/fish scripts I wrote are standard
   patterns for urfave/cli v3, but I did not verify any of them work
   end-to-end in a live shell. Sub-agent test #9 should catch regressions.

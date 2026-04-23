@@ -13,6 +13,56 @@ import (
 // instead of asserting against them. Set via `go test -update`.
 var updateGolden = flag.Bool("update", false, "rewrite golden files instead of comparing")
 
+// writeGoldenAndManifest is the -update writer extracted out of the test
+// body. It refreshes both the golden YAML (used by the assertion path) and
+// the live configs/commands/<bin>.yaml manifest (consumed by the codegen),
+// preserving the binary/bin_version/scanned_at metadata from the prior
+// manifest so a parser-only refresh doesn't blow away the live-capture
+// stamps.
+func writeGoldenAndManifest(t *testing.T, binary, goldenPath string, goldenYAML []byte, commands []Command) {
+	t.Helper()
+	if err := os.WriteFile(goldenPath, goldenYAML, 0o644); err != nil {
+		t.Fatalf("write golden: %v", err)
+	}
+	t.Logf("wrote %s", goldenPath)
+	m := Manifest{
+		Binary:    binary,
+		ScannedAt: "fixture-regen",
+		Commands:  commands,
+	}
+	manifestPath := filepath.Join("..", "..", "configs", "commands", binary+".yaml")
+	prevBinVer, prevScanned := readPriorManifestStamps(manifestPath)
+	if prevBinVer != "" {
+		m.BinVersion = prevBinVer
+	}
+	if prevScanned != "" {
+		m.ScannedAt = prevScanned
+	}
+	mb, err := yaml.Marshal(&m)
+	if err != nil {
+		t.Fatalf("marshal manifest: %v", err)
+	}
+	if err := os.WriteFile(manifestPath, mb, 0o644); err != nil {
+		t.Fatalf("write manifest: %v", err)
+	}
+	t.Logf("wrote %s", manifestPath)
+}
+
+// readPriorManifestStamps returns the (bin_version, scanned_at) fields from
+// an existing manifest at path. Empty strings on missing-file or any parse
+// error: the caller treats those as "no prior stamps" and uses defaults.
+func readPriorManifestStamps(path string) (binVer, scannedAt string) {
+	existing, err := os.ReadFile(path)
+	if err != nil {
+		return "", ""
+	}
+	var prev Manifest
+	if err := yaml.Unmarshal(existing, &prev); err != nil {
+		return "", ""
+	}
+	return prev.BinVersion, prev.ScannedAt
+}
+
 // TestScanAgainstFixtures runs the parser against captured help-text fixtures
 // for each target CLI and compares the resulting manifest to a committed
 // golden. This catches two classes of regression:
@@ -58,10 +108,7 @@ func TestScanAgainstFixtures(t *testing.T) {
 			}
 
 			if *updateGolden {
-				if err := os.WriteFile(goldenPath, gotYAML, 0o644); err != nil {
-					t.Fatalf("write golden: %v", err)
-				}
-				t.Logf("wrote %s", goldenPath)
+				writeGoldenAndManifest(t, tc.binary, goldenPath, gotYAML, got)
 				return
 			}
 
@@ -82,6 +129,124 @@ func TestScanAgainstFixtures(t *testing.T) {
 					"run `go test ./cmd/subcli-scope -update` if the change is intentional.\n"+
 					"first divergent region follows:\n%s",
 					tc.binary, firstDiff(string(wantYAML), string(gotYAML)))
+			}
+		})
+	}
+}
+
+// TestClassifiedSnapshotAgainstFixtures regenerates the per-tool
+// classification snapshot from the captured help fixtures and compares it
+// to the committed golden. Diffing this file is the cheap way to surface a
+// new verb that got the wrong READONLY/MUTATING label - the classification
+// would otherwise only become visible inside generated.go, where the noise
+// of regenerated commands hides it.
+//
+// The snapshot covers EVERY discovered verb, including ones the scope
+// allow/deny filter rejects. That is the point: a filtered-out verb today
+// might be in scope tomorrow, and a wrong label today rides along silently.
+func TestClassifiedSnapshotAgainstFixtures(t *testing.T) {
+	cases := []struct{ binary string }{{"aws"}, {"gh"}, {"kubectl"}}
+	for _, tc := range cases {
+		t.Run(tc.binary, func(t *testing.T) {
+			fixtureDir := filepath.Join("testdata", "fixtures")
+			if _, err := os.Stat(filepath.Join(fixtureDir, tc.binary, "help.txt")); err != nil {
+				t.Skipf("no fixture captured for %s", tc.binary)
+			}
+			got := renderClassified(tc.binary, ClassifyAll(tc.binary, fixtureFetcher(fixtureDir)))
+			snapPath := filepath.Join("testdata", tc.binary+".classified.txt")
+			if *updateGolden {
+				if err := os.WriteFile(snapPath, []byte(got), 0o644); err != nil {
+					t.Fatalf("write snapshot: %v", err)
+				}
+				t.Logf("wrote %s", snapPath)
+				return
+			}
+			want, err := os.ReadFile(snapPath)
+			if err != nil {
+				t.Fatalf("read snapshot %s: %v (run with -update to create)", snapPath, err)
+			}
+			if got != string(want) {
+				t.Errorf("classification snapshot differs for %s.\n"+
+					"run `go test ./cmd/subcli-scope -update` if intentional.\n"+
+					"first divergent region:\n%s",
+					tc.binary, firstDiff(string(want), got))
+			}
+		})
+	}
+}
+
+// TestExtractFlagsTypes is a unit test on the per-dialect type detection.
+// One mini-help-snippet per CLI, asserting every flag's inferred Type.
+// When a help format drifts (gh adding a typed placeholder shape, kubectl
+// rewriting the Options block) this is the test that should fail first.
+func TestExtractFlagsTypes(t *testing.T) {
+	cases := []struct {
+		name string
+		in   string
+		want []Flag
+	}{
+		{
+			name: "aws options bool string int list",
+			in: "FOO()                  FOO()\n" +
+				"\nNAME\n       foo -\n" +
+				"\nDESCRIPTION\n       Does foo.\n" +
+				"\nOPTIONS\n" +
+				"       --name (string)\n" +
+				"          The name.\n" +
+				"\n       --debug (boolean)\n" +
+				"          Turn on debug logging.\n" +
+				"\n       --max-items (integer)\n" +
+				"          Cap.\n" +
+				"\n       --tags (list)\n" +
+				"          Tags.\n",
+			want: []Flag{
+				{Name: "--name", Type: "string"},
+				{Name: "--debug", Type: "bool"},
+				{Name: "--max-items", Type: "int"},
+				{Name: "--tags", Type: "stringSlice"},
+			},
+		},
+		{
+			name: "gh flags block string bool stringSlice",
+			in: "USAGE\n  gh api\n\n" +
+				"FLAGS\n" +
+				"  -X, --method string         The HTTP method for the request\n" +
+				"  -F, --field key=value       Add a typed parameter in key=value format\n" +
+				"      --paginate              Make additional HTTP requests\n",
+			want: []Flag{
+				{Name: "--method", Type: "string"},
+				{Name: "--field", Type: "stringSlice"},
+				{Name: "--paginate", Type: "bool"},
+			},
+		},
+		{
+			name: "kubectl options bool stringSlice int string",
+			in: "Apply a thing.\n\n" +
+				"Options:\n" +
+				"    --all=false:\n\tSelect all.\n" +
+				"    -f, --filename=[]:\n\tThe files.\n" +
+				"    --grace-period=-1:\n\tPeriod.\n" +
+				"    --dry-run='none':\n\tDry run mode.\n" +
+				"\nUsage:\n  kubectl apply\n",
+			want: []Flag{
+				{Name: "--all", Type: "bool"},
+				{Name: "--filename", Type: "stringSlice"},
+				{Name: "--grace-period", Type: "int"},
+				{Name: "--dry-run", Type: "string"},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := extractFlags(tc.in)
+			if len(got) != len(tc.want) {
+				t.Fatalf("got %d flags, want %d.\ngot=%+v\nwant=%+v", len(got), len(tc.want), got, tc.want)
+			}
+			for i := range got {
+				if got[i].Name != tc.want[i].Name || got[i].Type != tc.want[i].Type {
+					t.Errorf("flag[%d] = %+v, want %+v", i, got[i], tc.want[i])
+				}
 			}
 		})
 	}

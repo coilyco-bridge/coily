@@ -52,6 +52,10 @@ type ManifestCommand struct {
 type ManifestFlag struct {
 	Name string `yaml:"name"`
 	Help string `yaml:"help,omitempty"`
+	// Type mirrors the subcli-scope-emitted flag type (string, bool, int,
+	// stringSlice). Currently unused by the skill generator but kept on the
+	// struct so yaml unmarshal doesn't drop the field on round-trip.
+	Type string `yaml:"type,omitempty"`
 }
 
 // Options configures a generator run.
