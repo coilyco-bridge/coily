@@ -43,9 +43,7 @@ permissions:
 
 jobs:
   build-and-release:
-    # ubuntu-22.04 still ships `xar` in apt; ubuntu-24.04+ dropped it, and
-    # bsdtar's xar support on Ubuntu mangles the output paths.
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     env:
       # Pull workflow_dispatch inputs into env so downstream `run:` blocks
       # never interpolate untrusted-looking ${{ }} into shell strings.
@@ -125,9 +123,6 @@ jobs:
             chmod +x "staging/gh-${os}-${arch}"
           done
 
-      - name: Install xar (needed to crack the macOS aws-cli .pkg)
-        run: sudo apt-get update && sudo apt-get install -y xar
-
       - name: Fetch aws CLI (all platforms)
         run: |
           set -euo pipefail
@@ -136,6 +131,9 @@ jobs:
           # NOTE: this step is the most fragile - upstream packaging
           # changes will break it. If you bump aws_version and this step
           # fails, re-derive the extraction below.
+          # Ubuntu dropped `xar` from apt and bsdtar's xar support
+          # mangles output paths, so extract the macOS .pkg (a xar
+          # archive) via a minimal pure-Python reader.
           for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64; do
             os="${plat%/*}"; arch="${plat#*/}"
             tmp="$(mktemp -d)"
@@ -143,7 +141,7 @@ jobs:
               darwin)
                 url="https://awscli.amazonaws.com/AWSCLIV2-${AWS_VERSION}.pkg"
                 curl -fsSL -o "$tmp/aws.pkg" "$url"
-                ( cd "$tmp" && xar -xf aws.pkg )
+                python3 scripts/extract-xar.py "$tmp/aws.pkg" "$tmp"
                 ( cd "$tmp" && cat aws-cli.pkg/Payload | gunzip -dc | cpio -id 2>/dev/null )
                 cp "$tmp/aws-cli/aws" "staging/aws-${os}-${arch}"
                 ;;
