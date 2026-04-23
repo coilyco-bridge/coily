@@ -1,12 +1,12 @@
 # Release the pinned aws / kubectl / gh binaries to the `tools-latest`
 # GitHub Release. coily fetches them at runtime, verifies the sha256 from
-# the in-tree pkg/shell/tools.json manifest, and caches under
+# the in-tree pkg/shell/tools.yaml manifest, and caches under
 # ~/.cache/coily/bin. PATH is never trusted.
 #
 # This workflow:
 #   1. Downloads each (tool, goos, goarch) from upstream.
 #   2. Computes sha256 over the bytes.
-#   3. Updates pkg/shell/tools.json with real SHAs (commits back to main).
+#   3. Updates pkg/shell/tools.yaml with real SHAs (commits back to main).
 #   4. Force-overwrites the `tools-latest` release with the binaries attached.
 #
 # Run manually via workflow_dispatch when bumping pinned versions, or on
@@ -36,7 +36,7 @@ on:
     branches: [main]
     # Skip the self-triggering loop from this workflow's own commit back to main.
     paths-ignore:
-      - "pkg/shell/tools.json"
+      - "pkg/shell/tools.yaml"
 
 permissions:
   contents: write
@@ -126,14 +126,18 @@ jobs:
       - name: Fetch aws CLI (all platforms)
         run: |
           set -euo pipefail
-          # AWS CLI ships as platform installers (.pkg, .zip). Pull the
-          # `dist/aws` binary out of the macOS .pkg and the Linux zip.
-          # NOTE: this step is the most fragile - upstream packaging
-          # changes will break it. If you bump aws_version and this step
-          # fails, re-derive the extraction below.
-          # Ubuntu dropped `xar` from apt and bsdtar's xar support
-          # mangles output paths, so extract the macOS .pkg (a xar
-          # archive) via a minimal pure-Python reader.
+          # AWS CLI v2 ships as a PyInstaller onedir bundle inside
+          # platform installers (.pkg for macOS, .zip for Linux). The
+          # `aws` launcher alone cannot boot: it dlopens `Python`
+          # (bundled shared lib) from its own directory and resolves
+          # site-packages there too. So we tar up the whole `dist/`
+          # tree per platform. coily's FetchingResolver handles
+          # archive entries by extracting into
+          # ~/.cache/coily/bin/<sha>/ and running dist/aws.
+          #
+          # NOTE: Ubuntu dropped `xar` from apt and bsdtar's xar
+          # support mangles output paths, so macOS .pkg cracking goes
+          # through the pure-Python reader in scripts/extract-xar.py.
           for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64; do
             os="${plat%/*}"; arch="${plat#*/}"
             tmp="$(mktemp -d)"
@@ -143,7 +147,8 @@ jobs:
                 curl -fsSL -o "$tmp/aws.pkg" "$url"
                 python3 scripts/extract-xar.py "$tmp/aws.pkg" "$tmp"
                 ( cd "$tmp" && cat aws-cli.pkg/Payload | gunzip -dc | cpio -id 2>/dev/null )
-                cp "$tmp/aws-cli/aws" "staging/aws-${os}-${arch}"
+                # Layout: $tmp/aws-cli/dist/{aws, Python, ...}
+                tar -C "$tmp/aws-cli" -czf "staging/aws-${os}-${arch}.tar.gz" dist
                 ;;
               linux)
                 if [ "$arch" = "amd64" ]; then
@@ -153,10 +158,10 @@ jobs:
                 fi
                 curl -fsSL -o "$tmp/aws.zip" "$url"
                 unzip -q "$tmp/aws.zip" -d "$tmp"
-                cp "$tmp/aws/dist/aws" "staging/aws-${os}-${arch}"
+                # Layout: $tmp/aws/dist/{aws, Python, ...}
+                tar -C "$tmp/aws" -czf "staging/aws-${os}-${arch}.tar.gz" dist
                 ;;
             esac
-            chmod +x "staging/aws-${os}-${arch}"
           done
 
       - name: Compute sha256 for every staged binary
@@ -170,21 +175,34 @@ jobs:
           done
           cat shas.txt
 
-      - name: Update pkg/shell/tools.json with real SHAs
+      - name: Update pkg/shell/tools.yaml with real SHAs
         run: |
           set -euo pipefail
           python3 <<'PY'
-          import json, os, pathlib
+          import os, pathlib
+          import yaml
           shas = {}
           for line in pathlib.Path("shas.txt").read_text().splitlines():
               name, sum_ = line.split()
               shas[name] = sum_
-          manifest = json.loads(pathlib.Path("pkg/shell/tools.json").read_text())
+          manifest = yaml.safe_load(pathlib.Path("pkg/shell/tools.yaml").read_text())
           versions = {
               "aws":     os.environ["AWS_VERSION"],
               "kubectl": os.environ["KUBECTL_VERSION"],
               "gh":      os.environ["GH_VERSION"],
           }
+          # aws is a PyInstaller onedir bundle - ship the whole dist/
+          # tree as a tarball and point `entry` at the launcher inside.
+          # kubectl and gh stay single-file downloads.
+          def asset_basename(tool: str, goos: str, goarch: str) -> str:
+              base = f"{tool}-{goos}-{goarch}"
+              if tool == "aws":
+                  return f"{base}.tar.gz"
+              return base
+          def archive_fields(tool: str):
+              if tool == "aws":
+                  return {"archive": "tar.gz", "entry": "dist/aws"}
+              return None
           def upstream_url(tool: str, goos: str, goarch: str, version: str) -> str:
               if tool == "kubectl":
                   return f"https://dl.k8s.io/release/v{version}/bin/{goos}/{goarch}/kubectl"
@@ -201,14 +219,22 @@ jobs:
           for tool, plats in manifest["tools"].items():
               for plat_key, entry in plats.items():
                   goos, goarch = plat_key.split("/")
-                  asset = f"{tool}-{goos}-{goarch}"
+                  asset = asset_basename(tool, goos, goarch)
                   if asset in shas:
                       version = versions.get(tool, entry.get("version", ""))
                       entry["sha256"]       = shas[asset]
                       entry["version"]      = version
                       entry["url"]          = f"{manifest['release_url_base']}/{asset}"
                       entry["upstream_url"] = upstream_url(tool, goos, goarch, version)
-          pathlib.Path("pkg/shell/tools.json").write_text(json.dumps(manifest, indent=2) + "\n")
+                      extras = archive_fields(tool)
+                      if extras is not None:
+                          entry.update(extras)
+                      else:
+                          entry.pop("archive", None)
+                          entry.pop("entry", None)
+          pathlib.Path("pkg/shell/tools.yaml").write_text(
+              yaml.safe_dump(manifest, sort_keys=False)
+          )
           PY
 
       - name: Verify manifest (schema + upstream cross-check)
@@ -219,11 +245,11 @@ jobs:
           set -euo pipefail
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet pkg/shell/tools.json; then
+          if git diff --quiet pkg/shell/tools.yaml; then
             echo "manifest unchanged"
           else
-            git add pkg/shell/tools.json
-            git commit -m "Refresh tools.json (aws=${AWS_VERSION}, kubectl=${KUBECTL_VERSION}, gh=${GH_VERSION})"
+            git add pkg/shell/tools.yaml
+            git commit -m "Refresh tools.yaml (aws=${AWS_VERSION}, kubectl=${KUBECTL_VERSION}, gh=${GH_VERSION})"
             git push
           fi
 

@@ -46,9 +46,9 @@ repos:
         stages: [pre-commit, pre-push]
 
       - id: verify-tools-manifest
-        name: verify pkg/shell/tools.json (schema + upstream cross-check)
-        description: Reject placeholder SHAs and cross-check kubectl entries against upstream .sha256.
-        entry: python3 scripts/verify-tools-manifest.py
+        name: verify pkg/shell/tools.yaml (schema + upstream cross-check)
+        description: Schema-check every entry and cross-check kubectl entries against upstream .sha256. Placeholder SHAs are tolerated locally because the release-tools workflow is what fills them in; the workflow re-runs this verifier without --allow-placeholders before committing its refresh.
+        entry: python3 scripts/verify-tools-manifest.py --allow-placeholders
         language: system
-        files: ^pkg/shell/tools\.json$
+        files: ^pkg/shell/tools\.yaml$
         pass_filenames: false

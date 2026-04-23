@@ -5,7 +5,7 @@
 // the verb layer.
 //
 // Production runs use FetchingResolver (see tools.go). It consults an
-// in-tree manifest (tools.json) and a per-user download cache instead of
+// in-tree manifest (tools.yaml) and a per-user download cache instead of
 // $PATH. PATH is intentionally not trusted - an agent who swaps
 // /usr/local/bin/aws is ignored. PathResolver is kept for tests and for
 // any caller that genuinely wants $PATH.

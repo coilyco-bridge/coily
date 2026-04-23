@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# Verify pkg/shell/tools.json is internally coherent and, where possible,
+# Verify pkg/shell/tools.yaml is internally coherent and, where possible,
 # cross-check entries against upstream-published checksums.
 #
 # Runs in two places:
-#   1. pre-commit (local + CI) when pkg/shell/tools.json is staged.
+#   1. pre-commit (local + CI) when pkg/shell/tools.yaml is staged.
 #   2. .github/workflows/release-tools.yml, after the workflow rewrites
 #      the manifest and before it commits the result.
 #
@@ -28,14 +28,16 @@
 #       cosign verification of checksums.txt.
 #     - aws: no upstream per-binary checksum published. No cross-check.
 
-import json
+import argparse
 import pathlib
 import re
 import sys
 import urllib.error
 import urllib.request
 
-MANIFEST_PATH = pathlib.Path("pkg/shell/tools.json")
+import yaml
+
+MANIFEST_PATH = pathlib.Path("pkg/shell/tools.yaml")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -49,19 +51,41 @@ def http_get(url: str, timeout: int = 30) -> bytes:
         return resp.read()
 
 
-def check_schema(tool: str, platform: str, entry: dict, base_url: str, errors: list[str]) -> None:
+def check_schema(
+    tool: str,
+    platform: str,
+    entry: dict,
+    base_url: str,
+    errors: list[str],
+    allow_placeholders: bool = False,
+) -> bool:
+    """Validate one entry. Returns True iff the entry is eligible for
+    upstream cross-check (all schema rules pass AND sha is a real hex
+    string)."""
     sha = entry.get("sha256", "")
+    sha_ok = True
     if sha.startswith("PLACEHOLDER_"):
-        fail(f"{tool} {platform}: sha256 is still a placeholder", errors)
-        return
-    if not HEX64.match(sha):
+        if not allow_placeholders:
+            fail(f"{tool} {platform}: sha256 is still a placeholder", errors)
+        sha_ok = False
+    elif not HEX64.match(sha):
         fail(f"{tool} {platform}: sha256 is not 64 hex chars: {sha!r}", errors)
+        sha_ok = False
 
     url = entry.get("url", "")
     if not url.startswith(base_url):
         fail(f"{tool} {platform}: url not under release_url_base: {url!r}", errors)
 
-    expected_basename = f"{tool}-{platform.replace('/', '-')}"
+    base_name = f"{tool}-{platform.replace('/', '-')}"
+    archive = entry.get("archive", "")
+    if archive:
+        if archive != "tar.gz":
+            fail(f"{tool} {platform}: unsupported archive format {archive!r}", errors)
+        expected_basename = f"{base_name}.{archive}"
+        if not entry.get("entry"):
+            fail(f"{tool} {platform}: archive is set but `entry` path is empty", errors)
+    else:
+        expected_basename = base_name
     if not url.endswith("/" + expected_basename):
         fail(f"{tool} {platform}: url basename should be {expected_basename!r}: {url!r}", errors)
 
@@ -70,6 +94,8 @@ def check_schema(tool: str, platform: str, entry: dict, base_url: str, errors: l
 
     if not entry.get("upstream_url"):
         fail(f"{tool} {platform}: upstream_url is empty", errors)
+
+    return sha_ok
 
 
 def cross_check_kubectl(platform: str, entry: dict, errors: list[str]) -> bool:
@@ -95,13 +121,27 @@ def cross_check_kubectl(platform: str, entry: dict, errors: list[str]) -> bool:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-placeholders",
+        action="store_true",
+        help=(
+            "Don't error on PLACEHOLDER_* sha256 values. Used by "
+            "pre-commit when a schema change is committed ahead of the "
+            "release-tools workflow rewriting real SHAs. The workflow "
+            "itself always runs without this flag so release-time "
+            "manifests cannot slip through with placeholders."
+        ),
+    )
+    args = parser.parse_args()
+
     if not MANIFEST_PATH.exists():
         print(f"error: {MANIFEST_PATH} not found (run from repo root)", file=sys.stderr)
         return 2
     try:
-        manifest = json.loads(MANIFEST_PATH.read_text())
-    except json.JSONDecodeError as e:
-        print(f"error: {MANIFEST_PATH} is not valid JSON: {e}", file=sys.stderr)
+        manifest = yaml.safe_load(MANIFEST_PATH.read_text())
+    except yaml.YAMLError as e:
+        print(f"error: {MANIFEST_PATH} is not valid YAML: {e}", file=sys.stderr)
         return 2
 
     base_url = manifest.get("release_url_base", "")
@@ -116,9 +156,15 @@ def main() -> int:
 
     for tool, platforms in tools.items():
         for platform, entry in platforms.items():
-            check_schema(tool, platform, entry, base_url, errors)
-            if entry.get("sha256", "").startswith("PLACEHOLDER_"):
-                # Schema check already recorded the error; skip cross-check.
+            sha_concrete = check_schema(
+                tool,
+                platform,
+                entry,
+                base_url,
+                errors,
+                allow_placeholders=args.allow_placeholders,
+            )
+            if not sha_concrete:
                 continue
             if tool == "kubectl":
                 if cross_check_kubectl(platform, entry, errors):
@@ -128,12 +174,12 @@ def main() -> int:
                 skipped += 1
 
     if errors:
-        print("tools.json verification FAILED:", file=sys.stderr)
+        print("tools.yaml verification FAILED:", file=sys.stderr)
         for e in errors:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    print(f"tools.json OK ({cross_checked} cross-checked, {skipped} schema-only)")
+    print(f"tools.yaml OK ({cross_checked} cross-checked, {skipped} schema-only)")
     return 0
 
 

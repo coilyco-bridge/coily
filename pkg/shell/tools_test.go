@@ -1,9 +1,11 @@
 package shell_test
 
 import (
+	"archive/tar"
+	"bytes"
+	"compress/gzip"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -12,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/coilysiren/coily/pkg/shell"
+	"gopkg.in/yaml.v3"
 )
 
 // fixtureManifest builds a single-entry ToolManifest pointing at the given
@@ -246,7 +249,7 @@ func TestFetchingResolver_HTTPErrorPropagates(t *testing.T) {
 }
 
 func TestEmbeddedManifest_ParsesAndCoversCoreTools(t *testing.T) {
-	// The in-tree tools.json must always be valid JSON and must always
+	// The in-tree tools.yaml must always be valid YAML and must always
 	// pin aws / kubectl / gh on the four platforms coily targets. SHAs
 	// can be placeholders pre-release; the parse must still succeed.
 	m, err := shell.LoadEmbeddedManifest()
@@ -267,12 +270,244 @@ func TestEmbeddedManifest_ParsesAndCoversCoreTools(t *testing.T) {
 	}
 }
 
+// buildTarGz returns a tar.gz byte slice containing the given files.
+// Used to synthesize archive fixtures for the archive-resolver tests
+// without depending on any on-disk tooling. Files is an ordered list
+// of (relative path, mode, contents). Directories are created
+// implicitly from file parents.
+func buildTarGz(t *testing.T, files []struct {
+	Name string
+	Mode int64
+	Data []byte
+}) []byte {
+	t.Helper()
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	tw := tar.NewWriter(gz)
+	seenDirs := map[string]bool{}
+	for _, f := range files {
+		dir := filepath.Dir(f.Name)
+		if dir != "." && !seenDirs[dir] {
+			if err := tw.WriteHeader(&tar.Header{
+				Name:     dir + "/",
+				Mode:     0o700,
+				Typeflag: tar.TypeDir,
+			}); err != nil {
+				t.Fatalf("tar write dir: %v", err)
+			}
+			seenDirs[dir] = true
+		}
+		if err := tw.WriteHeader(&tar.Header{
+			Name:     f.Name,
+			Mode:     f.Mode,
+			Size:     int64(len(f.Data)),
+			Typeflag: tar.TypeReg,
+		}); err != nil {
+			t.Fatalf("tar write file: %v", err)
+		}
+		if _, err := tw.Write(f.Data); err != nil {
+			t.Fatalf("tar write body: %v", err)
+		}
+	}
+	if err := tw.Close(); err != nil {
+		t.Fatalf("tar close: %v", err)
+	}
+	if err := gz.Close(); err != nil {
+		t.Fatalf("gzip close: %v", err)
+	}
+	return buf.Bytes()
+}
+
+func TestFetchingResolver_ArchiveExtractsBundle(t *testing.T) {
+	// Simulates aws-cli's dist/ bundle: a launcher plus a sibling
+	// shared lib. The Resolve result must point at dist/aws and the
+	// sibling Python file must land next to it so dlopen() works.
+	archive := buildTarGz(t, []struct {
+		Name string
+		Mode int64
+		Data []byte
+	}{
+		{"dist/aws", 0o755, []byte("#!/bin/sh\nexec ./Python aws.py \"$@\"\n")},
+		{"dist/Python", 0o755, []byte("fake-python-shared-lib")},
+		{"dist/aws.py", 0o644, []byte("print('hello')")},
+	})
+	want := sha256Hex(archive)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Write(archive)
+	}))
+	defer srv.Close()
+
+	cache := t.TempDir()
+	r := &shell.FetchingResolver{
+		Manifest: &shell.ToolManifest{
+			Tools: map[string]map[string]shell.PlatformEntry{
+				"aws": {
+					"linux/amd64": {
+						Version: "test-1.0",
+						URL:     srv.URL + "/aws.tar.gz",
+						SHA256:  want,
+						Archive: "tar.gz",
+						Entry:   "dist/aws",
+					},
+				},
+			},
+		},
+		CacheDir: cache,
+		GOOS:     "linux",
+		GOARCH:   "amd64",
+	}
+	path, err := r.Resolve("aws")
+	if err != nil {
+		t.Fatalf("Resolve: %v", err)
+	}
+	if filepath.Base(path) != "aws" || filepath.Base(filepath.Dir(path)) != "dist" {
+		t.Errorf("Resolve path = %q, want .../dist/aws", path)
+	}
+	// Entry content
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read entry: %v", err)
+	}
+	if !strings.Contains(string(got), "exec ./Python") {
+		t.Errorf("entry content = %q, want aws launcher stub", got)
+	}
+	// Sibling shared lib must be present so the launcher can dlopen it.
+	if _, err := os.Stat(filepath.Join(filepath.Dir(path), "Python")); err != nil {
+		t.Errorf("sibling Python missing: %v", err)
+	}
+	// Seal marker must exist at the archive root.
+	if _, err := os.Stat(filepath.Join(cache, want, ".coily-archive-sha256")); err != nil {
+		t.Errorf("seal marker missing: %v", err)
+	}
+
+	// Second Resolve: no new HTTP hit required. Use a fresh server that
+	// would fail if called, to prove cache hit.
+	fail := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		http.Error(w, "should not be called", http.StatusInternalServerError)
+	}))
+	defer fail.Close()
+	r.Manifest.Tools["aws"]["linux/amd64"] = shell.PlatformEntry{
+		Version: "test-1.0",
+		URL:     fail.URL + "/aws.tar.gz",
+		SHA256:  want,
+		Archive: "tar.gz",
+		Entry:   "dist/aws",
+	}
+	if _, err := r.Resolve("aws"); err != nil {
+		t.Errorf("second Resolve (cache hit) failed: %v", err)
+	}
+}
+
+func TestFetchingResolver_ArchiveChecksumMismatchCleansUp(t *testing.T) {
+	archive := buildTarGz(t, []struct {
+		Name string
+		Mode int64
+		Data []byte
+	}{
+		{"dist/aws", 0o755, []byte("launcher")},
+	})
+	wrongSHA := sha256Hex([]byte("some other payload"))
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Write(archive)
+	}))
+	defer srv.Close()
+
+	cache := t.TempDir()
+	r := &shell.FetchingResolver{
+		Manifest: &shell.ToolManifest{
+			Tools: map[string]map[string]shell.PlatformEntry{
+				"aws": {
+					"linux/amd64": {
+						Version: "test-1.0",
+						URL:     srv.URL + "/aws.tar.gz",
+						SHA256:  wrongSHA,
+						Archive: "tar.gz",
+						Entry:   "dist/aws",
+					},
+				},
+			},
+		},
+		CacheDir: cache,
+		GOOS:     "linux",
+		GOARCH:   "amd64",
+	}
+	_, err := r.Resolve("aws")
+	if err == nil {
+		t.Fatal("expected sha256 mismatch error, got nil")
+	}
+	if !strings.Contains(err.Error(), "sha256 mismatch") {
+		t.Errorf("err = %v, want sha256 mismatch", err)
+	}
+	// No archive dir should remain after a failed extraction.
+	if _, err := os.Stat(filepath.Join(cache, wrongSHA)); err == nil {
+		t.Errorf("archive dir exists after failed extraction")
+	}
+}
+
+func TestFetchingResolver_ArchiveRejectsUnsafePaths(t *testing.T) {
+	// A tarball whose entry path escapes the extract root must be
+	// rejected without writing any files outside the cache.
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	tw := tar.NewWriter(gz)
+	body := []byte("pwned")
+	if err := tw.WriteHeader(&tar.Header{
+		Name:     "../../../etc/passwd",
+		Mode:     0o644,
+		Size:     int64(len(body)),
+		Typeflag: tar.TypeReg,
+	}); err != nil {
+		t.Fatalf("tar header: %v", err)
+	}
+	if _, err := tw.Write(body); err != nil {
+		t.Fatalf("tar body: %v", err)
+	}
+	tw.Close()
+	gz.Close()
+	archive := buf.Bytes()
+	want := sha256Hex(archive)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Write(archive)
+	}))
+	defer srv.Close()
+
+	cache := t.TempDir()
+	r := &shell.FetchingResolver{
+		Manifest: &shell.ToolManifest{
+			Tools: map[string]map[string]shell.PlatformEntry{
+				"aws": {
+					"linux/amd64": {
+						Version: "test-1.0",
+						URL:     srv.URL + "/aws.tar.gz",
+						SHA256:  want,
+						Archive: "tar.gz",
+						Entry:   "dist/aws",
+					},
+				},
+			},
+		},
+		CacheDir: cache,
+		GOOS:     "linux",
+		GOARCH:   "amd64",
+	}
+	_, err := r.Resolve("aws")
+	if err == nil {
+		t.Fatal("expected unsafe-path rejection, got nil")
+	}
+	if !strings.Contains(err.Error(), "unsafe path") {
+		t.Errorf("err = %v, want unsafe path", err)
+	}
+}
+
 func TestParseManifest_RejectsGarbage(t *testing.T) {
-	if _, err := shell.ParseManifest([]byte("not json")); err == nil {
+	if _, err := shell.ParseManifest([]byte("\t: : not yaml")); err == nil {
 		t.Error("expected parse error for garbage")
 	}
-	// Valid JSON but no Tools map.
-	b, _ := json.Marshal(map[string]string{"release_tag": "x"})
+	// Valid YAML but no Tools map.
+	b, _ := yaml.Marshal(map[string]string{"release_tag": "x"})
 	if _, err := shell.ParseManifest(b); err == nil {
 		t.Error("expected error for manifest with no tools map")
 	}

@@ -37,7 +37,7 @@ The agent's allowlist only trusts `coily`, never `coily-dev`. Dev builds have `-
 
 Those are the one thing coily *does* publish - not coily itself. The `tools-latest` GitHub Release holds pinned `aws` / `kubectl` / `gh` binaries for `darwin/{arm64,amd64}` and `linux/{arm64,amd64}`, refreshed by [`.github/workflows/release-tools.yml`](.github/workflows/release-tools.yml) on a weekly schedule and on workflow_dispatch.
 
-On first use coily reads the embedded [`pkg/shell/tools.json`](pkg/shell/tools.json) manifest (baked into the binary at build time), fetches the matching binary from `tools-latest`, verifies sha256 against the pin, and caches under `~/.cache/coily/bin/<sha256>/<tool>`. Subsequent runs hit the cache and re-verify the hash before exec. `$PATH` is never consulted for these tools, so an agent who swaps `/usr/local/bin/aws` is ignored. See [docs/threat-model.md](docs/threat-model.md) for the full reasoning.
+On first use coily reads the embedded [`pkg/shell/tools.yaml`](pkg/shell/tools.yaml) manifest (baked into the binary at build time), fetches the matching binary from `tools-latest`, verifies sha256 against the pin, and caches under `~/.cache/coily/bin/<sha256>/<tool>`. Subsequent runs hit the cache and re-verify the hash before exec. `$PATH` is never consulted for these tools, so an agent who swaps `/usr/local/bin/aws` is ignored. See [docs/threat-model.md](docs/threat-model.md) for the full reasoning.
 
 ## Per-repo commands (`.coily/coily.yaml`)
 
@@ -61,7 +61,7 @@ commands:
 ## Architectural decisions
 
 - **Single binary**, single trust boundary. One entry in the Claude allowlist, `Bash(coily:*)`.
-- **Pin `aws`/`kubectl`/`gh` by sha256** in an embedded manifest ([`pkg/shell/tools.json`](pkg/shell/tools.json)). coily fetches the binaries on demand from the `tools-latest` GitHub Release, verifies the hash, and caches under `~/.cache/coily/bin/<sha256>/<tool>`. `$PATH` is never consulted, so an agent substituting `/usr/local/bin/aws` to intercept shell-outs is ignored. The binaries themselves aren't `//go:embed`'d because ~30MB x 3 tools x 4 platforms is too much to ship in-tree.
+- **Pin `aws`/`kubectl`/`gh` by sha256** in an embedded manifest ([`pkg/shell/tools.yaml`](pkg/shell/tools.yaml)). coily fetches the binaries on demand from the `tools-latest` GitHub Release, verifies the hash, and caches under `~/.cache/coily/bin/<sha256>/<tool>`. `$PATH` is never consulted, so an agent substituting `/usr/local/bin/aws` to intercept shell-outs is ignored. The binaries themselves aren't `//go:embed`'d because ~30MB x 3 tools x 4 platforms is too much to ship in-tree.
 - **SDK-native for simple APIs.** ssh/scp (`golang.org/x/crypto/ssh`) and tailscale (`tailscale.com/client/tailscale`). No subprocess means no argv to a shell.
 - **Mirror the sub-CLIs exactly.** `coily aws ssm get-parameter` takes the same args as `aws ssm get-parameter`, not a reinvented interface.
 - **Config is embedded, not loaded from disk.** Changes require rebuild + sudo install.
