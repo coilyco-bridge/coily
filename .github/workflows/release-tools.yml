@@ -18,20 +18,25 @@ on:
   workflow_dispatch:
     inputs:
       aws_version:
-        description: "aws-cli v2 version (e.g. 2.17.0)"
-        required: true
-        default: "2.17.0"
+        description: "aws-cli v2 version (e.g. 2.17.0). Leave blank to auto-resolve latest."
+        required: false
+        default: ""
       kubectl_version:
-        description: "kubectl version (e.g. 1.31.0)"
-        required: true
-        default: "1.31.0"
+        description: "kubectl version (e.g. 1.31.0). Leave blank to auto-resolve latest."
+        required: false
+        default: ""
       gh_version:
-        description: "gh version (e.g. 2.55.0)"
-        required: true
-        default: "2.55.0"
+        description: "gh version (e.g. 2.55.0). Leave blank to auto-resolve latest."
+        required: false
+        default: ""
   schedule:
     # Sunday 06:00 UTC. Refreshes against patch releases.
     - cron: "0 6 * * 0"
+  push:
+    branches: [main]
+    # Skip the self-triggering loop from this workflow's own commit back to main.
+    paths-ignore:
+      - "pkg/shell/tools.json"
 
 permissions:
   contents: write
@@ -42,13 +47,42 @@ jobs:
     env:
       # Pull workflow_dispatch inputs into env so downstream `run:` blocks
       # never interpolate untrusted-looking ${{ }} into shell strings.
-      # Schedule events have no inputs, so fall back to the same defaults
-      # the inputs above declare.
-      AWS_VERSION: ${{ github.event.inputs.aws_version || '2.17.0' }}
-      KUBECTL_VERSION: ${{ github.event.inputs.kubectl_version || '1.31.0' }}
-      GH_VERSION: ${{ github.event.inputs.gh_version || '2.55.0' }}
+      # Empty on schedule/push events, or when the user left inputs blank.
+      # The "Resolve versions" step below fills in anything empty by
+      # querying upstream for latest.
+      AWS_VERSION_INPUT: ${{ github.event.inputs.aws_version }}
+      KUBECTL_VERSION_INPUT: ${{ github.event.inputs.kubectl_version }}
+      GH_VERSION_INPUT: ${{ github.event.inputs.gh_version }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Resolve versions (auto-latest for anything blank)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # kubectl: official "stable" pointer, strip leading v.
+          if [ -z "$KUBECTL_VERSION_INPUT" ]; then
+            KUBECTL_VERSION="$(curl -fsSL https://dl.k8s.io/release/stable.txt | sed 's/^v//')"
+          else
+            KUBECTL_VERSION="$KUBECTL_VERSION_INPUT"
+          fi
+          # gh: GitHub's own CLI, latest release tag like "v2.55.0".
+          if [ -z "$GH_VERSION_INPUT" ]; then
+            GH_VERSION="$(gh release view --repo cli/cli --json tagName -q '.tagName' | sed 's/^v//')"
+          else
+            GH_VERSION="$GH_VERSION_INPUT"
+          fi
+          # aws-cli v2: tags on aws/aws-cli are already bare "2.17.0".
+          if [ -z "$AWS_VERSION_INPUT" ]; then
+            AWS_VERSION="$(gh release view --repo aws/aws-cli --json tagName -q '.tagName')"
+          else
+            AWS_VERSION="$AWS_VERSION_INPUT"
+          fi
+          echo "Resolved: aws=$AWS_VERSION kubectl=$KUBECTL_VERSION gh=$GH_VERSION"
+          echo "AWS_VERSION=$AWS_VERSION"         >> "$GITHUB_ENV"
+          echo "KUBECTL_VERSION=$KUBECTL_VERSION" >> "$GITHUB_ENV"
+          echo "GH_VERSION=$GH_VERSION"           >> "$GITHUB_ENV"
 
       - name: Prepare staging dir
         run: mkdir -p staging
@@ -156,6 +190,9 @@ jobs:
                       entry["url"]     = f"{manifest['release_url_base']}/{asset}"
           pathlib.Path("pkg/shell/tools.json").write_text(json.dumps(manifest, indent=2) + "\n")
           PY
+
+      - name: Verify manifest (schema + upstream cross-check)
+        run: python3 scripts/verify-tools-manifest.py
 
       - name: Commit updated manifest
         run: |

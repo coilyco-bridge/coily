@@ -44,3 +44,11 @@ repos:
         language: system
         pass_filenames: false
         stages: [pre-commit, pre-push]
+
+      - id: verify-tools-manifest
+        name: verify pkg/shell/tools.json (schema + upstream cross-check)
+        description: Reject placeholder SHAs and cross-check kubectl entries against upstream .sha256.
+        entry: python3 scripts/verify-tools-manifest.py
+        language: system
+        files: ^pkg/shell/tools\.json$
+        pass_filenames: false
