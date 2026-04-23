@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/verb"
@@ -10,10 +12,10 @@ import (
 )
 
 // ecoCommand wraps the eco game server which runs as a systemd unit on
-// kai-server. All verbs ultimately shell out to
-// `ssh <user>@<host> sudo <systemctl|journalctl> ... eco-server`.
-// The ssh target is taken from embedded config (kai_server.tailscale_host
-// and ssh_user).
+// kai-server. All verbs run a `sudo <systemctl|journalctl> ... eco-server`
+// command on kai-server through pkg/ssh, which wraps
+// golang.org/x/crypto/ssh. No ssh subprocess is spawned. The ssh target is
+// taken from embedded config (kai_server.tailscale_host and ssh_user).
 func (r *Runner) ecoCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "eco",
@@ -147,11 +149,14 @@ func (r *Runner) ecoStartCommand() *cli.Command {
 	}
 }
 
-// ecoRemote returns a cli.ActionFunc that ssh's into kai-server and runs the
-// given argv (as a single composed remote command, since ssh's last
-// positional is passed to a remote shell). Every element of remoteArgv is
-// hardcoded at compile time. No user input reaches here, so no runtime
-// metacharacter risk from this path.
+// ecoRemote returns a cli.ActionFunc that runs the given argv on kai-server
+// through pkg/ssh (golang.org/x/crypto/ssh under the hood, no ssh
+// subprocess). The remote command is composed as a single space-joined
+// string because crypto/ssh's session API takes one string (which the
+// remote shell parses), the same shape ssh(1) uses. Every element of
+// remoteArgv is hardcoded at compile time in this file. No user input
+// reaches here, so no runtime metacharacter risk from this path. If we ever
+// take user input, add policy.ValidateArgSlice at the entry point.
 func (r *Runner) ecoRemote(remoteArgv []string) cli.ActionFunc {
 	return func(ctx context.Context, _ *cli.Command) error {
 		host := r.Cfg.KaiServer.TailscaleHost
@@ -159,12 +164,12 @@ func (r *Runner) ecoRemote(remoteArgv []string) cli.ActionFunc {
 		if host == "" || user == "" {
 			return fmt.Errorf("eco: kai_server.tailscale_host or ssh_user not configured")
 		}
-		target := user + "@" + host
-		// ssh takes the remote command as its last argv element. We compose
-		// the remote command as space-joined because all remoteArgv elements
-		// are compile-time constants in this file. If we ever take user
-		// input here, add policy.ValidateArgSlice at the entry point.
-		argv := append([]string{target}, remoteArgv...)
-		return r.Runner.Exec(ctx, "ssh", argv...)
+		cmd := strings.Join(remoteArgv, " ")
+		// Stream stdout/stderr live. Some eco verbs (`tail --follow`) run
+		// indefinitely, so buffering the whole output is wrong.
+		if err := r.SSH.Stream(ctx, host, user, cmd, os.Stdout, os.Stderr); err != nil {
+			return fmt.Errorf("eco: remote %s: %w", remoteArgv[0], err)
+		}
+		return nil
 	}
 }

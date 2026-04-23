@@ -11,6 +11,7 @@ import (
 	"github.com/coilysiren/coily/pkg/config"
 	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/shell"
+	coilyssh "github.com/coilysiren/coily/pkg/ssh"
 )
 
 // expandHome turns a leading "~/" or "~" into the user's home directory.
@@ -42,20 +43,22 @@ func defaultStatePath(name string) string {
 	return filepath.Join(home, ".local", "state", "coily", name)
 }
 
-// Runner owns the audit writer, token verifier, shell runner, and embedded
-// config. Constructed once in main() and threaded into every cli.Command
-// action via methods on this struct. Tests construct a Runner directly with
-// fakes for Audit and Verifier.
+// Runner owns the audit writer, token verifier, shell runner, ssh client,
+// and embedded config. Constructed once in main() and threaded into every
+// cli.Command action via methods on this struct. Tests construct a Runner
+// directly with fakes for Audit, Verifier, or SSH.
 //
 // The fields are interfaces (or interface-shaped) where they need to be
 // swappable. Cfg is the loaded *config.Config. Runner is the shell exec
 // gateway. Audit is the JSONL writer. Verifier is what policy.Enforce calls
-// to validate confirmation tokens for mutating verbs.
+// to validate confirmation tokens for mutating verbs. SSH is the SDK-backed
+// ssh client (replaces shelling out to /usr/bin/ssh, see pkg/ssh).
 type Runner struct {
 	Cfg      *config.Config
 	Runner   *shell.Runner
 	Audit    *audit.Writer
 	Verifier policy.TokenVerifier
+	SSH      *coilyssh.Client
 }
 
 // NewRunner builds the production Runner from embedded config. Exits the
@@ -89,5 +92,9 @@ func NewRunner() *Runner {
 		Runner:   &shell.Runner{Stdout: os.Stdout, Stderr: os.Stderr, Stdin: os.Stdin},
 		Audit:    aw,
 		Verifier: auth.NewIssuer(issuerKey),
+		// SSH wraps golang.org/x/crypto/ssh. Auth uses ssh-agent (KeyPath
+		// empty), host keys verified against ~/.ssh/known_hosts. See
+		// pkg/ssh/ssh.go.
+		SSH: &coilyssh.Client{},
 	}
 }
