@@ -123,6 +123,9 @@ jobs:
             chmod +x "staging/gh-${os}-${arch}"
           done
 
+      - name: Install xar (needed to extract the macOS aws-cli .pkg on Linux)
+        run: sudo apt-get update && sudo apt-get install -y xar
+
       - name: Fetch aws CLI (all platforms)
         run: |
           set -euo pipefail
