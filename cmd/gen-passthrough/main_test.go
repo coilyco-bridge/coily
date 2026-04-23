@@ -1,11 +1,55 @@
 package main
 
 import (
+	"bytes"
+	"go/format"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/coilysiren/coily/pkg/verbclass"
+	"gopkg.in/yaml.v3"
 )
+
+// TestGeneratedFilesAreFresh asserts every committed
+// pkg/ops/<binary>/generated.go matches the output of the current
+// generator applied to the current manifest. Prior regression: the
+// flag-typing commit didn't regenerate pkg/ops/aws/generated.go, so
+// `coily aws ssm get-parameter --name ...` silently dropped --name at
+// runtime. A drift check here fails fast instead of waiting for a user
+// to trip over a missing flag.
+func TestGeneratedFilesAreFresh(t *testing.T) {
+	for _, bin := range []string{"aws", "gh", "kubectl"} {
+		t.Run(bin, func(t *testing.T) {
+			manifestPath := filepath.Join("..", "..", "configs", "commands", bin+".yaml")
+			raw, err := os.ReadFile(manifestPath)
+			if err != nil {
+				t.Fatalf("read %s: %v", manifestPath, err)
+			}
+			var m Manifest
+			if err := yaml.Unmarshal(raw, &m); err != nil {
+				t.Fatalf("parse %s: %v", manifestPath, err)
+			}
+			code, err := render(m)
+			if err != nil {
+				t.Fatalf("render %s: %v", bin, err)
+			}
+			formatted, err := format.Source([]byte(code))
+			if err != nil {
+				t.Fatalf("gofmt %s: %v", bin, err)
+			}
+			committedPath := filepath.Join("..", "..", "pkg", "ops", bin, "generated.go")
+			committed, err := os.ReadFile(committedPath)
+			if err != nil {
+				t.Fatalf("read %s: %v", committedPath, err)
+			}
+			if !bytes.Equal(formatted, committed) {
+				t.Errorf("%s is stale; run `make gen-passthrough` and commit the result", committedPath)
+			}
+		})
+	}
+}
 
 // TestRenderForwardsPositionalArgs locks in the fix for "gh api <endpoint>"
 // and friends. The generated Action must append c.Args().Slice() after the

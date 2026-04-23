@@ -24,2664 +24,7374 @@ const BinaryName = "kubectl"
 // logging apply uniformly.
 func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Command {
 	return &cli.Command{
-		Name:     BinaryName,
-		Usage:    "Pass-through to " + BinaryName + ".",
+		Name:  BinaryName,
+		Usage: "Pass-through to " + BinaryName + ".",
 		Commands: []*cli.Command{
 			&cli.Command{
-	Name: "annotate",
-	Usage: "Update the annotations on one or more resources.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "all"},
-		&cli.StringFlag{Name: "all-namespaces"},
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "dry-run"},
-		&cli.StringFlag{Name: "field-manager"},
-		&cli.StringFlag{Name: "field-selector"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "list"},
-		&cli.StringFlag{Name: "local"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "overwrite"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "resource-version"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.annotate",
-			Kind: policy.Mutating,
-			Scope: "kubectl.annotate:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--all"] = c.String("all")
-				args["--all-namespaces"] = c.String("all-namespaces")
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--dry-run"] = c.String("dry-run")
-				args["--field-manager"] = c.String("field-manager")
-				args["--field-selector"] = c.String("field-selector")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--list"] = c.String("list")
-				args["--local"] = c.String("local")
-				args["--output"] = c.String("output")
-				args["--overwrite"] = c.String("overwrite")
-				args["--recursive"] = c.String("recursive")
-				args["--resource-version"] = c.String("resource-version")
-				args["--selector"] = c.String("selector")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
+				Name:  "annotate",
+				Usage: "Update the annotations on one or more resources.",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "all"},
+					&cli.BoolFlag{Name: "all-namespaces"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
+					&cli.StringFlag{Name: "dry-run"},
+					&cli.StringFlag{Name: "field-manager"},
+					&cli.StringFlag{Name: "field-selector"},
+					&cli.StringSliceFlag{Name: "filename"},
+					&cli.StringFlag{Name: "kustomize"},
+					&cli.BoolFlag{Name: "list"},
+					&cli.BoolFlag{Name: "local"},
+					&cli.StringFlag{Name: "output"},
+					&cli.BoolFlag{Name: "overwrite"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.StringFlag{Name: "resource-version"},
+					&cli.StringFlag{Name: "selector"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
+					&cli.StringFlag{Name: "template"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.annotate",
+						Kind:  policy.Mutating,
+						Scope: "kubectl.annotate:write",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							if c.Bool("all") {
+								args["--all"] = "true"
+							}
+							if c.Bool("all-namespaces") {
+								args["--all-namespaces"] = "true"
+							}
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
+							args["--dry-run"] = c.String("dry-run")
+							args["--field-manager"] = c.String("field-manager")
+							args["--field-selector"] = c.String("field-selector")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
+							args["--kustomize"] = c.String("kustomize")
+							if c.Bool("list") {
+								args["--list"] = "true"
+							}
+							if c.Bool("local") {
+								args["--local"] = "true"
+							}
+							args["--output"] = c.String("output")
+							if c.Bool("overwrite") {
+								args["--overwrite"] = "true"
+							}
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							args["--resource-version"] = c.String("resource-version")
+							args["--selector"] = c.String("selector")
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
+							args["--template"] = c.String("template")
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"annotate"}
+							if c.IsSet("all") {
+								if c.Bool("all") {
+									argv = append(argv, "--all")
+								}
+							}
+							if c.IsSet("all-namespaces") {
+								if c.Bool("all-namespaces") {
+									argv = append(argv, "--all-namespaces")
+								}
+							}
+							if c.IsSet("allow-missing-template-keys") {
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
+							}
+							if c.IsSet("dry-run") {
+								argv = append(argv, "--dry-run", c.String("dry-run"))
+							}
+							if c.IsSet("field-manager") {
+								argv = append(argv, "--field-manager", c.String("field-manager"))
+							}
+							if c.IsSet("field-selector") {
+								argv = append(argv, "--field-selector", c.String("field-selector"))
+							}
+							if c.IsSet("filename") {
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
+							}
+							if c.IsSet("kustomize") {
+								argv = append(argv, "--kustomize", c.String("kustomize"))
+							}
+							if c.IsSet("list") {
+								if c.Bool("list") {
+									argv = append(argv, "--list")
+								}
+							}
+							if c.IsSet("local") {
+								if c.Bool("local") {
+									argv = append(argv, "--local")
+								}
+							}
+							if c.IsSet("output") {
+								argv = append(argv, "--output", c.String("output"))
+							}
+							if c.IsSet("overwrite") {
+								if c.Bool("overwrite") {
+									argv = append(argv, "--overwrite")
+								}
+							}
+							if c.IsSet("recursive") {
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
+							}
+							if c.IsSet("resource-version") {
+								argv = append(argv, "--resource-version", c.String("resource-version"))
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("show-managed-fields") {
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
+							}
+							if c.IsSet("template") {
+								argv = append(argv, "--template", c.String("template"))
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "annotate",  }
-				if c.IsSet("all") {
-					argv = append(argv, "--" + "all", c.String("all"))
-				}
-				if c.IsSet("all-namespaces") {
-					argv = append(argv, "--" + "all-namespaces", c.String("all-namespaces"))
-				}
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("dry-run") {
-					argv = append(argv, "--" + "dry-run", c.String("dry-run"))
-				}
-				if c.IsSet("field-manager") {
-					argv = append(argv, "--" + "field-manager", c.String("field-manager"))
-				}
-				if c.IsSet("field-selector") {
-					argv = append(argv, "--" + "field-selector", c.String("field-selector"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("list") {
-					argv = append(argv, "--" + "list", c.String("list"))
-				}
-				if c.IsSet("local") {
-					argv = append(argv, "--" + "local", c.String("local"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("overwrite") {
-					argv = append(argv, "--" + "overwrite", c.String("overwrite"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("resource-version") {
-					argv = append(argv, "--" + "resource-version", c.String("resource-version"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "api-resources",
-	Usage: "Print the supported API resources on the server.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "api-group"},
-		&cli.StringFlag{Name: "cached"},
-		&cli.StringFlag{Name: "categories"},
-		&cli.StringFlag{Name: "namespaced"},
-		&cli.StringFlag{Name: "no-headers"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "sort-by"},
-		&cli.StringFlag{Name: "verbs"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.api-resources",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.api-resources:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--api-group"] = c.String("api-group")
-				args["--cached"] = c.String("cached")
-				args["--categories"] = c.String("categories")
-				args["--namespaced"] = c.String("namespaced")
-				args["--no-headers"] = c.String("no-headers")
-				args["--output"] = c.String("output")
-				args["--sort-by"] = c.String("sort-by")
-				args["--verbs"] = c.String("verbs")
-				return args, nil, c.String("token")
+				Name:  "api-resources",
+				Usage: "Print the supported API resources on the server.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "api-group"},
+					&cli.BoolFlag{Name: "cached"},
+					&cli.StringSliceFlag{Name: "categories"},
+					&cli.BoolFlag{Name: "namespaced"},
+					&cli.BoolFlag{Name: "no-headers"},
+					&cli.StringFlag{Name: "output"},
+					&cli.StringFlag{Name: "sort-by"},
+					&cli.StringSliceFlag{Name: "verbs"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.api-resources",
+						Kind:  policy.ReadOnly,
+						Scope: "kubectl.api-resources:read",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							args["--api-group"] = c.String("api-group")
+							if c.Bool("cached") {
+								args["--cached"] = "true"
+							}
+							for _, v := range c.StringSlice("categories") {
+								positional = append(positional, v)
+							}
+							if c.Bool("namespaced") {
+								args["--namespaced"] = "true"
+							}
+							if c.Bool("no-headers") {
+								args["--no-headers"] = "true"
+							}
+							args["--output"] = c.String("output")
+							args["--sort-by"] = c.String("sort-by")
+							for _, v := range c.StringSlice("verbs") {
+								positional = append(positional, v)
+							}
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"api-resources"}
+							if c.IsSet("api-group") {
+								argv = append(argv, "--api-group", c.String("api-group"))
+							}
+							if c.IsSet("cached") {
+								if c.Bool("cached") {
+									argv = append(argv, "--cached")
+								}
+							}
+							if c.IsSet("categories") {
+								for _, v := range c.StringSlice("categories") {
+									argv = append(argv, "--categories", v)
+								}
+							}
+							if c.IsSet("namespaced") {
+								if c.Bool("namespaced") {
+									argv = append(argv, "--namespaced")
+								}
+							}
+							if c.IsSet("no-headers") {
+								if c.Bool("no-headers") {
+									argv = append(argv, "--no-headers")
+								}
+							}
+							if c.IsSet("output") {
+								argv = append(argv, "--output", c.String("output"))
+							}
+							if c.IsSet("sort-by") {
+								argv = append(argv, "--sort-by", c.String("sort-by"))
+							}
+							if c.IsSet("verbs") {
+								for _, v := range c.StringSlice("verbs") {
+									argv = append(argv, "--verbs", v)
+								}
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "api-resources",  }
-				if c.IsSet("api-group") {
-					argv = append(argv, "--" + "api-group", c.String("api-group"))
-				}
-				if c.IsSet("cached") {
-					argv = append(argv, "--" + "cached", c.String("cached"))
-				}
-				if c.IsSet("categories") {
-					argv = append(argv, "--" + "categories", c.String("categories"))
-				}
-				if c.IsSet("namespaced") {
-					argv = append(argv, "--" + "namespaced", c.String("namespaced"))
-				}
-				if c.IsSet("no-headers") {
-					argv = append(argv, "--" + "no-headers", c.String("no-headers"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("sort-by") {
-					argv = append(argv, "--" + "sort-by", c.String("sort-by"))
-				}
-				if c.IsSet("verbs") {
-					argv = append(argv, "--" + "verbs", c.String("verbs"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "api-versions",
-	Usage: "Print the supported API versions on the server, in the form of 'group/version'.",
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.api-versions",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.api-versions:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				return args, nil, c.String("token")
+				Name:  "api-versions",
+				Usage: "Print the supported API versions on the server, in the form of 'group/version'.",
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.api-versions",
+						Kind:  policy.ReadOnly,
+						Scope: "kubectl.api-versions:read",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"api-versions"}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "api-versions",  }
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "apply",
-	Usage: "Apply a configuration to a resource by file name or stdin.",
-	Commands: []*cli.Command{
-		&cli.Command{
-	Name: "edit-last-applied",
-	Usage: "Edit the latest last-applied-configuration annotations of resources from the default editor.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "field-manager"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-		&cli.StringFlag{Name: "validate"},
-		&cli.StringFlag{Name: "windows-line-endings"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.apply.edit-last-applied",
-			Kind: policy.Mutating,
-			Scope: "kubectl.apply:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--field-manager"] = c.String("field-manager")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--output"] = c.String("output")
-				args["--recursive"] = c.String("recursive")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				args["--validate"] = c.String("validate")
-				args["--windows-line-endings"] = c.String("windows-line-endings")
-				return args, nil, c.String("token")
+				Name:  "apply",
+				Usage: "Apply a configuration to a resource by file name or stdin.",
+				Commands: []*cli.Command{
+					&cli.Command{
+						Name:  "edit-last-applied",
+						Usage: "Edit the latest last-applied-configuration annotations of resources from the default editor.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "validate"},
+							&cli.BoolFlag{Name: "windows-line-endings"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.apply.edit-last-applied",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.apply:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--validate"] = c.String("validate")
+									if c.Bool("windows-line-endings") {
+										args["--windows-line-endings"] = "true"
+									}
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"apply", "edit-last-applied"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									if c.IsSet("windows-line-endings") {
+										if c.Bool("windows-line-endings") {
+											argv = append(argv, "--windows-line-endings")
+										}
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "set-last-applied",
+						Usage: "Set the latest last-applied-configuration annotations by setting it to match the contents of a file.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.BoolFlag{Name: "create-annotation"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.apply.set-last-applied",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.apply:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									if c.Bool("create-annotation") {
+										args["--create-annotation"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--output"] = c.String("output")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"apply", "set-last-applied"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("create-annotation") {
+										if c.Bool("create-annotation") {
+											argv = append(argv, "--create-annotation")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "view-last-applied",
+						Usage: "View the latest last-applied-configuration annotations by type/name or file.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "all"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.StringFlag{Name: "selector"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.apply.view-last-applied",
+								Kind:  policy.ReadOnly,
+								Scope: "kubectl.apply:read",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("all") {
+										args["--all"] = "true"
+									}
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									args["--selector"] = c.String("selector")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"apply", "view-last-applied"}
+									if c.IsSet("all") {
+										if c.Bool("all") {
+											argv = append(argv, "--all")
+										}
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+				},
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "apply", "edit-last-applied",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("field-manager") {
-					argv = append(argv, "--" + "field-manager", c.String("field-manager"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				if c.IsSet("validate") {
-					argv = append(argv, "--" + "validate", c.String("validate"))
-				}
-				if c.IsSet("windows-line-endings") {
-					argv = append(argv, "--" + "windows-line-endings", c.String("windows-line-endings"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "set-last-applied",
-	Usage: "Set the latest last-applied-configuration annotations by setting it to match the contents of a file.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "create-annotation"},
-		&cli.StringFlag{Name: "dry-run"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.apply.set-last-applied",
-			Kind: policy.Mutating,
-			Scope: "kubectl.apply:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--create-annotation"] = c.String("create-annotation")
-				args["--dry-run"] = c.String("dry-run")
-				args["--filename"] = c.String("filename")
-				args["--output"] = c.String("output")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "apply", "set-last-applied",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("create-annotation") {
-					argv = append(argv, "--" + "create-annotation", c.String("create-annotation"))
-				}
-				if c.IsSet("dry-run") {
-					argv = append(argv, "--" + "dry-run", c.String("dry-run"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "view-last-applied",
-	Usage: "View the latest last-applied-configuration annotations by type/name or file.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "all"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "selector"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.apply.view-last-applied",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.apply:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--all"] = c.String("all")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--output"] = c.String("output")
-				args["--recursive"] = c.String("recursive")
-				args["--selector"] = c.String("selector")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "apply", "view-last-applied",  }
-				if c.IsSet("all") {
-					argv = append(argv, "--" + "all", c.String("all"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-	},
-},
 			&cli.Command{
-	Name: "auth",
-	Usage: "Inspect authorization",
-	Commands: []*cli.Command{
-		&cli.Command{
-	Name: "can-i",
-	Usage: "Check whether an action is allowed.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "all-namespaces"},
-		&cli.StringFlag{Name: "list"},
-		&cli.StringFlag{Name: "no-headers"},
-		&cli.StringFlag{Name: "quiet"},
-		&cli.StringFlag{Name: "subresource"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.auth.can-i",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.auth:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--all-namespaces"] = c.String("all-namespaces")
-				args["--list"] = c.String("list")
-				args["--no-headers"] = c.String("no-headers")
-				args["--quiet"] = c.String("quiet")
-				args["--subresource"] = c.String("subresource")
-				return args, nil, c.String("token")
+				Name:  "auth",
+				Usage: "Inspect authorization",
+				Commands: []*cli.Command{
+					&cli.Command{
+						Name:  "can-i",
+						Usage: "Check whether an action is allowed.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "all-namespaces"},
+							&cli.BoolFlag{Name: "list"},
+							&cli.BoolFlag{Name: "no-headers"},
+							&cli.BoolFlag{Name: "quiet"},
+							&cli.StringFlag{Name: "subresource"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.auth.can-i",
+								Kind:  policy.ReadOnly,
+								Scope: "kubectl.auth:read",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("all-namespaces") {
+										args["--all-namespaces"] = "true"
+									}
+									if c.Bool("list") {
+										args["--list"] = "true"
+									}
+									if c.Bool("no-headers") {
+										args["--no-headers"] = "true"
+									}
+									if c.Bool("quiet") {
+										args["--quiet"] = "true"
+									}
+									args["--subresource"] = c.String("subresource")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"auth", "can-i"}
+									if c.IsSet("all-namespaces") {
+										if c.Bool("all-namespaces") {
+											argv = append(argv, "--all-namespaces")
+										}
+									}
+									if c.IsSet("list") {
+										if c.Bool("list") {
+											argv = append(argv, "--list")
+										}
+									}
+									if c.IsSet("no-headers") {
+										if c.Bool("no-headers") {
+											argv = append(argv, "--no-headers")
+										}
+									}
+									if c.IsSet("quiet") {
+										if c.Bool("quiet") {
+											argv = append(argv, "--quiet")
+										}
+									}
+									if c.IsSet("subresource") {
+										argv = append(argv, "--subresource", c.String("subresource"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "reconcile",
+						Usage: "Reconciles rules for RBAC role, role binding, cluster role, and cluster role binding objects.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "remove-extra-permissions"},
+							&cli.BoolFlag{Name: "remove-extra-subjects"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.auth.reconcile",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.auth:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									if c.Bool("remove-extra-permissions") {
+										args["--remove-extra-permissions"] = "true"
+									}
+									if c.Bool("remove-extra-subjects") {
+										args["--remove-extra-subjects"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"auth", "reconcile"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("remove-extra-permissions") {
+										if c.Bool("remove-extra-permissions") {
+											argv = append(argv, "--remove-extra-permissions")
+										}
+									}
+									if c.IsSet("remove-extra-subjects") {
+										if c.Bool("remove-extra-subjects") {
+											argv = append(argv, "--remove-extra-subjects")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "whoami",
+						Usage: "Experimental: Check who you are and your attributes (groups, extra).",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.auth.whoami",
+								Kind:  policy.ReadOnly,
+								Scope: "kubectl.auth:read",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--output"] = c.String("output")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"auth", "whoami"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+				},
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "auth", "can-i",  }
-				if c.IsSet("all-namespaces") {
-					argv = append(argv, "--" + "all-namespaces", c.String("all-namespaces"))
-				}
-				if c.IsSet("list") {
-					argv = append(argv, "--" + "list", c.String("list"))
-				}
-				if c.IsSet("no-headers") {
-					argv = append(argv, "--" + "no-headers", c.String("no-headers"))
-				}
-				if c.IsSet("quiet") {
-					argv = append(argv, "--" + "quiet", c.String("quiet"))
-				}
-				if c.IsSet("subresource") {
-					argv = append(argv, "--" + "subresource", c.String("subresource"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "reconcile",
-	Usage: "Reconciles rules for RBAC role, role binding, cluster role, and cluster role binding objects.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "dry-run"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "remove-extra-permissions"},
-		&cli.StringFlag{Name: "remove-extra-subjects"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.auth.reconcile",
-			Kind: policy.Mutating,
-			Scope: "kubectl.auth:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--dry-run"] = c.String("dry-run")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--output"] = c.String("output")
-				args["--recursive"] = c.String("recursive")
-				args["--remove-extra-permissions"] = c.String("remove-extra-permissions")
-				args["--remove-extra-subjects"] = c.String("remove-extra-subjects")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "auth", "reconcile",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("dry-run") {
-					argv = append(argv, "--" + "dry-run", c.String("dry-run"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("remove-extra-permissions") {
-					argv = append(argv, "--" + "remove-extra-permissions", c.String("remove-extra-permissions"))
-				}
-				if c.IsSet("remove-extra-subjects") {
-					argv = append(argv, "--" + "remove-extra-subjects", c.String("remove-extra-subjects"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "whoami",
-	Usage: "Experimental: Check who you are and your attributes (groups, extra).",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.auth.whoami",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.auth:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--output"] = c.String("output")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "auth", "whoami",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-	},
-},
 			&cli.Command{
-	Name: "autoscale",
-	Usage: "Creates an autoscaler that automatically chooses and sets the number of pods that run in a Kubernetes cluster.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "cpu-percent"},
-		&cli.StringFlag{Name: "dry-run"},
-		&cli.StringFlag{Name: "field-manager"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "max"},
-		&cli.StringFlag{Name: "min"},
-		&cli.StringFlag{Name: "name"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "save-config"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.autoscale",
-			Kind: policy.Mutating,
-			Scope: "kubectl.autoscale:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--cpu-percent"] = c.String("cpu-percent")
-				args["--dry-run"] = c.String("dry-run")
-				args["--field-manager"] = c.String("field-manager")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--max"] = c.String("max")
-				args["--min"] = c.String("min")
-				args["--name"] = c.String("name")
-				args["--output"] = c.String("output")
-				args["--recursive"] = c.String("recursive")
-				args["--save-config"] = c.String("save-config")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
+				Name:  "autoscale",
+				Usage: "Creates an autoscaler that automatically chooses and sets the number of pods that run in a Kubernetes cluster.",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
+					&cli.IntFlag{Name: "cpu-percent"},
+					&cli.StringFlag{Name: "dry-run"},
+					&cli.StringFlag{Name: "field-manager"},
+					&cli.StringSliceFlag{Name: "filename"},
+					&cli.StringFlag{Name: "kustomize"},
+					&cli.IntFlag{Name: "max"},
+					&cli.IntFlag{Name: "min"},
+					&cli.StringFlag{Name: "name"},
+					&cli.StringFlag{Name: "output"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.BoolFlag{Name: "save-config"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
+					&cli.StringFlag{Name: "template"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.autoscale",
+						Kind:  policy.Mutating,
+						Scope: "kubectl.autoscale:write",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
+							args["--cpu-percent"] = strconv.Itoa(int(c.Int("cpu-percent")))
+							args["--dry-run"] = c.String("dry-run")
+							args["--field-manager"] = c.String("field-manager")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
+							args["--kustomize"] = c.String("kustomize")
+							args["--max"] = strconv.Itoa(int(c.Int("max")))
+							args["--min"] = strconv.Itoa(int(c.Int("min")))
+							args["--name"] = c.String("name")
+							args["--output"] = c.String("output")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							if c.Bool("save-config") {
+								args["--save-config"] = "true"
+							}
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
+							args["--template"] = c.String("template")
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"autoscale"}
+							if c.IsSet("allow-missing-template-keys") {
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
+							}
+							if c.IsSet("cpu-percent") {
+								argv = append(argv, "--cpu-percent", strconv.Itoa(int(c.Int("cpu-percent"))))
+							}
+							if c.IsSet("dry-run") {
+								argv = append(argv, "--dry-run", c.String("dry-run"))
+							}
+							if c.IsSet("field-manager") {
+								argv = append(argv, "--field-manager", c.String("field-manager"))
+							}
+							if c.IsSet("filename") {
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
+							}
+							if c.IsSet("kustomize") {
+								argv = append(argv, "--kustomize", c.String("kustomize"))
+							}
+							if c.IsSet("max") {
+								argv = append(argv, "--max", strconv.Itoa(int(c.Int("max"))))
+							}
+							if c.IsSet("min") {
+								argv = append(argv, "--min", strconv.Itoa(int(c.Int("min"))))
+							}
+							if c.IsSet("name") {
+								argv = append(argv, "--name", c.String("name"))
+							}
+							if c.IsSet("output") {
+								argv = append(argv, "--output", c.String("output"))
+							}
+							if c.IsSet("recursive") {
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
+							}
+							if c.IsSet("save-config") {
+								if c.Bool("save-config") {
+									argv = append(argv, "--save-config")
+								}
+							}
+							if c.IsSet("show-managed-fields") {
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
+							}
+							if c.IsSet("template") {
+								argv = append(argv, "--template", c.String("template"))
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "autoscale",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("cpu-percent") {
-					argv = append(argv, "--" + "cpu-percent", c.String("cpu-percent"))
-				}
-				if c.IsSet("dry-run") {
-					argv = append(argv, "--" + "dry-run", c.String("dry-run"))
-				}
-				if c.IsSet("field-manager") {
-					argv = append(argv, "--" + "field-manager", c.String("field-manager"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("max") {
-					argv = append(argv, "--" + "max", c.String("max"))
-				}
-				if c.IsSet("min") {
-					argv = append(argv, "--" + "min", c.String("min"))
-				}
-				if c.IsSet("name") {
-					argv = append(argv, "--" + "name", c.String("name"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("save-config") {
-					argv = append(argv, "--" + "save-config", c.String("save-config"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "certificate",
-	Usage: "Modify certificate resources.",
-	Commands: []*cli.Command{
-		&cli.Command{
-	Name: "approve",
-	Usage: "Approve a certificate signing request.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "force"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.certificate.approve",
-			Kind: policy.Mutating,
-			Scope: "kubectl.certificate:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--filename"] = c.String("filename")
-				args["--force"] = c.String("force")
-				args["--kustomize"] = c.String("kustomize")
-				args["--output"] = c.String("output")
-				args["--recursive"] = c.String("recursive")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
+				Name:  "certificate",
+				Usage: "Modify certificate resources.",
+				Commands: []*cli.Command{
+					&cli.Command{
+						Name:  "approve",
+						Usage: "Approve a certificate signing request.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.BoolFlag{Name: "force"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.certificate.approve",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.certificate:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									if c.Bool("force") {
+										args["--force"] = "true"
+									}
+									args["--kustomize"] = c.String("kustomize")
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"certificate", "approve"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("force") {
+										if c.Bool("force") {
+											argv = append(argv, "--force")
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "deny",
+						Usage: "Deny a certificate signing request.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.BoolFlag{Name: "force"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.certificate.deny",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.certificate:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									if c.Bool("force") {
+										args["--force"] = "true"
+									}
+									args["--kustomize"] = c.String("kustomize")
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"certificate", "deny"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("force") {
+										if c.Bool("force") {
+											argv = append(argv, "--force")
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+				},
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "certificate", "approve",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("force") {
-					argv = append(argv, "--" + "force", c.String("force"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "deny",
-	Usage: "Deny a certificate signing request.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "force"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.certificate.deny",
-			Kind: policy.Mutating,
-			Scope: "kubectl.certificate:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--filename"] = c.String("filename")
-				args["--force"] = c.String("force")
-				args["--kustomize"] = c.String("kustomize")
-				args["--output"] = c.String("output")
-				args["--recursive"] = c.String("recursive")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "certificate", "deny",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("force") {
-					argv = append(argv, "--" + "force", c.String("force"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-	},
-},
 			&cli.Command{
-	Name: "cluster-info",
-	Usage: "Display addresses of the control plane and services with label kubernetes.io/cluster-service=true.",
-	Commands: []*cli.Command{
-		&cli.Command{
-	Name: "dump",
-	Usage: "Dump cluster information out suitable for debugging and diagnosing cluster problems.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "all-namespaces"},
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "namespaces"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "output-directory"},
-		&cli.StringFlag{Name: "pod-running-timeout"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.cluster-info.dump",
-			Kind: policy.Mutating,
-			Scope: "kubectl.cluster-info:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--all-namespaces"] = c.String("all-namespaces")
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--namespaces"] = c.String("namespaces")
-				args["--output"] = c.String("output")
-				args["--output-directory"] = c.String("output-directory")
-				args["--pod-running-timeout"] = c.String("pod-running-timeout")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
+				Name:  "cluster-info",
+				Usage: "Display addresses of the control plane and services with label kubernetes.io/cluster-service=true.",
+				Commands: []*cli.Command{
+					&cli.Command{
+						Name:  "dump",
+						Usage: "Dump cluster information out suitable for debugging and diagnosing cluster problems.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "all-namespaces"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringSliceFlag{Name: "namespaces"},
+							&cli.StringFlag{Name: "output"},
+							&cli.StringFlag{Name: "output-directory"},
+							&cli.StringFlag{Name: "pod-running-timeout"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.cluster-info.dump",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.cluster-info:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("all-namespaces") {
+										args["--all-namespaces"] = "true"
+									}
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									for _, v := range c.StringSlice("namespaces") {
+										positional = append(positional, v)
+									}
+									args["--output"] = c.String("output")
+									args["--output-directory"] = c.String("output-directory")
+									args["--pod-running-timeout"] = c.String("pod-running-timeout")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"cluster-info", "dump"}
+									if c.IsSet("all-namespaces") {
+										if c.Bool("all-namespaces") {
+											argv = append(argv, "--all-namespaces")
+										}
+									}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("namespaces") {
+										for _, v := range c.StringSlice("namespaces") {
+											argv = append(argv, "--namespaces", v)
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("output-directory") {
+										argv = append(argv, "--output-directory", c.String("output-directory"))
+									}
+									if c.IsSet("pod-running-timeout") {
+										argv = append(argv, "--pod-running-timeout", c.String("pod-running-timeout"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+				},
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "cluster-info", "dump",  }
-				if c.IsSet("all-namespaces") {
-					argv = append(argv, "--" + "all-namespaces", c.String("all-namespaces"))
-				}
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("namespaces") {
-					argv = append(argv, "--" + "namespaces", c.String("namespaces"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("output-directory") {
-					argv = append(argv, "--" + "output-directory", c.String("output-directory"))
-				}
-				if c.IsSet("pod-running-timeout") {
-					argv = append(argv, "--" + "pod-running-timeout", c.String("pod-running-timeout"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-	},
-},
 			&cli.Command{
-	Name: "config",
-	Usage: "Modify kubeconfig files using subcommands like 'kubectl config set current-context my-context'",
-	Commands: []*cli.Command{
-		&cli.Command{
-	Name: "current-context",
-	Usage: "help",
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.current-context",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.config:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				return args, nil, c.String("token")
+				Name:  "config",
+				Usage: "Modify kubeconfig files using subcommands like 'kubectl config set current-context my-context'",
+				Commands: []*cli.Command{
+					&cli.Command{
+						Name:  "current-context",
+						Usage: "Display the current-context.",
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.current-context",
+								Kind:  policy.ReadOnly,
+								Scope: "kubectl.config:read",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "current-context"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "delete-cluster",
+						Usage: "Delete the specified cluster from the kubeconfig.",
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.delete-cluster",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.config:delete",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "delete-cluster"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "delete-context",
+						Usage: "Delete the specified context from the kubeconfig.",
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.delete-context",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.config:delete",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "delete-context"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "delete-user",
+						Usage: "Delete the specified user from the kubeconfig.",
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.delete-user",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.config:delete",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "delete-user"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "get-clusters",
+						Usage: "Display clusters defined in the kubeconfig.",
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.get-clusters",
+								Kind:  policy.ReadOnly,
+								Scope: "kubectl.config:read",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "get-clusters"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "get-contexts",
+						Usage: "Display one or many contexts from the kubeconfig file.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "no-headers"},
+							&cli.StringFlag{Name: "output"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.get-contexts",
+								Kind:  policy.ReadOnly,
+								Scope: "kubectl.config:read",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("no-headers") {
+										args["--no-headers"] = "true"
+									}
+									args["--output"] = c.String("output")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "get-contexts"}
+									if c.IsSet("no-headers") {
+										if c.Bool("no-headers") {
+											argv = append(argv, "--no-headers")
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "get-users",
+						Usage: "Display users defined in the kubeconfig.",
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.get-users",
+								Kind:  policy.ReadOnly,
+								Scope: "kubectl.config:read",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "get-users"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "rename-context",
+						Usage: "Renames a context from the kubeconfig file.",
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.rename-context",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.config:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "rename-context"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "set",
+						Usage: "Set an individual value in a kubeconfig file.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "set-raw-bytes"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.set",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.config:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("set-raw-bytes") {
+										args["--set-raw-bytes"] = "true"
+									}
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "set"}
+									if c.IsSet("set-raw-bytes") {
+										if c.Bool("set-raw-bytes") {
+											argv = append(argv, "--set-raw-bytes")
+										}
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "set-cluster",
+						Usage: "Set a cluster entry in kubeconfig.",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "certificate-authority"},
+							&cli.BoolFlag{Name: "embed-certs"},
+							&cli.BoolFlag{Name: "insecure-skip-tls-verify"},
+							&cli.StringFlag{Name: "proxy-url"},
+							&cli.StringFlag{Name: "server"},
+							&cli.StringFlag{Name: "tls-server-name"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.set-cluster",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.config:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									args["--certificate-authority"] = c.String("certificate-authority")
+									if c.Bool("embed-certs") {
+										args["--embed-certs"] = "true"
+									}
+									if c.Bool("insecure-skip-tls-verify") {
+										args["--insecure-skip-tls-verify"] = "true"
+									}
+									args["--proxy-url"] = c.String("proxy-url")
+									args["--server"] = c.String("server")
+									args["--tls-server-name"] = c.String("tls-server-name")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "set-cluster"}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("embed-certs") {
+										if c.Bool("embed-certs") {
+											argv = append(argv, "--embed-certs")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("proxy-url") {
+										argv = append(argv, "--proxy-url", c.String("proxy-url"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "set-context",
+						Usage: "Set a context entry in kubeconfig.",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "cluster"},
+							&cli.BoolFlag{Name: "current"},
+							&cli.StringFlag{Name: "namespace"},
+							&cli.StringFlag{Name: "user"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.set-context",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.config:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									args["--cluster"] = c.String("cluster")
+									if c.Bool("current") {
+										args["--current"] = "true"
+									}
+									args["--namespace"] = c.String("namespace")
+									args["--user"] = c.String("user")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "set-context"}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("current") {
+										if c.Bool("current") {
+											argv = append(argv, "--current")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "set-credentials",
+						Usage: "Set a user entry in kubeconfig.",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "auth-provider"},
+							&cli.StringSliceFlag{Name: "auth-provider-arg"},
+							&cli.StringFlag{Name: "client-certificate"},
+							&cli.StringFlag{Name: "client-key"},
+							&cli.BoolFlag{Name: "embed-certs"},
+							&cli.StringFlag{Name: "exec-api-version"},
+							&cli.StringSliceFlag{Name: "exec-arg"},
+							&cli.StringFlag{Name: "exec-command"},
+							&cli.StringSliceFlag{Name: "exec-env"},
+							&cli.StringFlag{Name: "password"},
+							&cli.StringFlag{Name: "token"},
+							&cli.StringFlag{Name: "username"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.set-credentials",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.config:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									args["--auth-provider"] = c.String("auth-provider")
+									for _, v := range c.StringSlice("auth-provider-arg") {
+										positional = append(positional, v)
+									}
+									args["--client-certificate"] = c.String("client-certificate")
+									args["--client-key"] = c.String("client-key")
+									if c.Bool("embed-certs") {
+										args["--embed-certs"] = "true"
+									}
+									args["--exec-api-version"] = c.String("exec-api-version")
+									for _, v := range c.StringSlice("exec-arg") {
+										positional = append(positional, v)
+									}
+									args["--exec-command"] = c.String("exec-command")
+									for _, v := range c.StringSlice("exec-env") {
+										positional = append(positional, v)
+									}
+									args["--password"] = c.String("password")
+									args["--token"] = c.String("token")
+									args["--username"] = c.String("username")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "set-credentials"}
+									if c.IsSet("auth-provider") {
+										argv = append(argv, "--auth-provider", c.String("auth-provider"))
+									}
+									if c.IsSet("auth-provider-arg") {
+										for _, v := range c.StringSlice("auth-provider-arg") {
+											argv = append(argv, "--auth-provider-arg", v)
+										}
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("embed-certs") {
+										if c.Bool("embed-certs") {
+											argv = append(argv, "--embed-certs")
+										}
+									}
+									if c.IsSet("exec-api-version") {
+										argv = append(argv, "--exec-api-version", c.String("exec-api-version"))
+									}
+									if c.IsSet("exec-arg") {
+										for _, v := range c.StringSlice("exec-arg") {
+											argv = append(argv, "--exec-arg", v)
+										}
+									}
+									if c.IsSet("exec-command") {
+										argv = append(argv, "--exec-command", c.String("exec-command"))
+									}
+									if c.IsSet("exec-env") {
+										for _, v := range c.StringSlice("exec-env") {
+											argv = append(argv, "--exec-env", v)
+										}
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "unset",
+						Usage: "Unset an individual value in a kubeconfig file.",
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.unset",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.config:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "unset"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "use-context",
+						Usage: "Set the current-context in a kubeconfig file.",
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.use-context",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.config:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "use-context"}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "view",
+						Usage: "Display merged kubeconfig settings or a specified kubeconfig file.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.BoolFlag{Name: "flatten"},
+							&cli.BoolFlag{Name: "merge"},
+							&cli.BoolFlag{Name: "minify"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "raw"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.config.view",
+								Kind:  policy.ReadOnly,
+								Scope: "kubectl.config:read",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									if c.Bool("flatten") {
+										args["--flatten"] = "true"
+									}
+									if c.Bool("merge") {
+										args["--merge"] = "true"
+									}
+									if c.Bool("minify") {
+										args["--minify"] = "true"
+									}
+									args["--output"] = c.String("output")
+									if c.Bool("raw") {
+										args["--raw"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"config", "view"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("flatten") {
+										if c.Bool("flatten") {
+											argv = append(argv, "--flatten")
+										}
+									}
+									if c.IsSet("merge") {
+										if c.Bool("merge") {
+											argv = append(argv, "--merge")
+										}
+									}
+									if c.IsSet("minify") {
+										if c.Bool("minify") {
+											argv = append(argv, "--minify")
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("raw") {
+										if c.Bool("raw") {
+											argv = append(argv, "--raw")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+				},
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "current-context",  }
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "delete-cluster",
-	Usage: "deleted cluster help from /Users/kai/.kube/config",
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.delete-cluster",
-			Kind: policy.Mutating,
-			Scope: "kubectl.config:delete",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "delete-cluster",  }
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "delete-context",
-	Usage: "warning: this removed your active context, use 'kubectl config use-context' to select a different one",
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.delete-context",
-			Kind: policy.Mutating,
-			Scope: "kubectl.config:delete",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "delete-context",  }
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "delete-user",
-	Usage: "deleted user help from /Users/kai/.kube/config",
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.delete-user",
-			Kind: policy.Mutating,
-			Scope: "kubectl.config:delete",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "delete-user",  }
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "get-clusters",
-	Usage: "NAME",
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.get-clusters",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.config:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "get-clusters",  }
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "get-contexts",
-	Usage: "Display one or many contexts from the kubeconfig file.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "no-headers"},
-		&cli.StringFlag{Name: "output"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.get-contexts",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.config:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--no-headers"] = c.String("no-headers")
-				args["--output"] = c.String("output")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "get-contexts",  }
-				if c.IsSet("no-headers") {
-					argv = append(argv, "--" + "no-headers", c.String("no-headers"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "get-users",
-	Usage: "NAME",
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.get-users",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.config:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "get-users",  }
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "rename-context",
-	Usage: "Renames a context from the kubeconfig file.",
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.rename-context",
-			Kind: policy.Mutating,
-			Scope: "kubectl.config:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "rename-context",  }
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "set",
-	Usage: "Set an individual value in a kubeconfig file.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "set-raw-bytes"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.set",
-			Kind: policy.Mutating,
-			Scope: "kubectl.config:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--set-raw-bytes"] = c.String("set-raw-bytes")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "set",  }
-				if c.IsSet("set-raw-bytes") {
-					argv = append(argv, "--" + "set-raw-bytes", c.String("set-raw-bytes"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "set-cluster",
-	Usage: "Cluster 'help' set.",
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.set-cluster",
-			Kind: policy.Mutating,
-			Scope: "kubectl.config:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "set-cluster",  }
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "set-context",
-	Usage: "Context 'help' created.",
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.set-context",
-			Kind: policy.Mutating,
-			Scope: "kubectl.config:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "set-context",  }
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "set-credentials",
-	Usage: "User 'help' set.",
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.set-credentials",
-			Kind: policy.Mutating,
-			Scope: "kubectl.config:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "set-credentials",  }
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "unset",
-	Usage: "Unset an individual value in a kubeconfig file.",
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.unset",
-			Kind: policy.Mutating,
-			Scope: "kubectl.config:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "unset",  }
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "use-context",
-	Usage: "Switched to context 'help'.",
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.use-context",
-			Kind: policy.Mutating,
-			Scope: "kubectl.config:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "use-context",  }
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "view",
-	Usage: "Display merged kubeconfig settings or a specified kubeconfig file.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "flatten"},
-		&cli.StringFlag{Name: "merge"},
-		&cli.StringFlag{Name: "minify"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "raw"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.config.view",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.config:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--flatten"] = c.String("flatten")
-				args["--merge"] = c.String("merge")
-				args["--minify"] = c.String("minify")
-				args["--output"] = c.String("output")
-				args["--raw"] = c.String("raw")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "config", "view",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("flatten") {
-					argv = append(argv, "--" + "flatten", c.String("flatten"))
-				}
-				if c.IsSet("merge") {
-					argv = append(argv, "--" + "merge", c.String("merge"))
-				}
-				if c.IsSet("minify") {
-					argv = append(argv, "--" + "minify", c.String("minify"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("raw") {
-					argv = append(argv, "--" + "raw", c.String("raw"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-	},
-},
 			&cli.Command{
-	Name: "cordon",
-	Usage: "Mark node as unschedulable.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "dry-run"},
-		&cli.StringFlag{Name: "selector"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.cordon",
-			Kind: policy.Mutating,
-			Scope: "kubectl.cordon:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--dry-run"] = c.String("dry-run")
-				args["--selector"] = c.String("selector")
-				return args, nil, c.String("token")
+				Name:  "cordon",
+				Usage: "Mark node as unschedulable.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "dry-run"},
+					&cli.StringFlag{Name: "selector"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.cordon",
+						Kind:  policy.Mutating,
+						Scope: "kubectl.cordon:write",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							args["--dry-run"] = c.String("dry-run")
+							args["--selector"] = c.String("selector")
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"cordon"}
+							if c.IsSet("dry-run") {
+								argv = append(argv, "--dry-run", c.String("dry-run"))
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "cordon",  }
-				if c.IsSet("dry-run") {
-					argv = append(argv, "--" + "dry-run", c.String("dry-run"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "describe",
-	Usage: "Show details of a specific resource or group of resources.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "all-namespaces"},
-		&cli.StringFlag{Name: "chunk-size"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "show-events"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.describe",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.describe:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--all-namespaces"] = c.String("all-namespaces")
-				args["--chunk-size"] = c.String("chunk-size")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--recursive"] = c.String("recursive")
-				args["--selector"] = c.String("selector")
-				args["--show-events"] = c.String("show-events")
-				return args, nil, c.String("token")
+				Name:  "create",
+				Usage: "Create a resource from a file or from stdin.",
+				Commands: []*cli.Command{
+					&cli.Command{
+						Name:  "clusterrole",
+						Usage: "Create a cluster role.",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "aggregation-rule"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "non-resource-url"},
+							&cli.StringFlag{Name: "output"},
+							&cli.StringSliceFlag{Name: "resource"},
+							&cli.StringSliceFlag{Name: "resource-name"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "validate"},
+							&cli.StringSliceFlag{Name: "verb"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.clusterrole",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									args["--aggregation-rule"] = c.String("aggregation-rule")
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("non-resource-url") {
+										positional = append(positional, v)
+									}
+									args["--output"] = c.String("output")
+									for _, v := range c.StringSlice("resource") {
+										positional = append(positional, v)
+									}
+									for _, v := range c.StringSlice("resource-name") {
+										positional = append(positional, v)
+									}
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--validate"] = c.String("validate")
+									for _, v := range c.StringSlice("verb") {
+										positional = append(positional, v)
+									}
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "clusterrole"}
+									if c.IsSet("aggregation-rule") {
+										argv = append(argv, "--aggregation-rule", c.String("aggregation-rule"))
+									}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("non-resource-url") {
+										for _, v := range c.StringSlice("non-resource-url") {
+											argv = append(argv, "--non-resource-url", v)
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("resource") {
+										for _, v := range c.StringSlice("resource") {
+											argv = append(argv, "--resource", v)
+										}
+									}
+									if c.IsSet("resource-name") {
+										for _, v := range c.StringSlice("resource-name") {
+											argv = append(argv, "--resource-name", v)
+										}
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									if c.IsSet("verb") {
+										for _, v := range c.StringSlice("verb") {
+											argv = append(argv, "--verb", v)
+										}
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "clusterrolebinding",
+						Usage: "Create a cluster role binding for a particular cluster role.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "clusterrole"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "group"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.StringSliceFlag{Name: "serviceaccount"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringSliceFlag{Name: "user"},
+							&cli.StringFlag{Name: "validate"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.clusterrolebinding",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--clusterrole"] = c.String("clusterrole")
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("group") {
+										positional = append(positional, v)
+									}
+									args["--output"] = c.String("output")
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									for _, v := range c.StringSlice("serviceaccount") {
+										positional = append(positional, v)
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									for _, v := range c.StringSlice("user") {
+										positional = append(positional, v)
+									}
+									args["--validate"] = c.String("validate")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "clusterrolebinding"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("clusterrole") {
+										argv = append(argv, "--clusterrole", c.String("clusterrole"))
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("group") {
+										for _, v := range c.StringSlice("group") {
+											argv = append(argv, "--group", v)
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("serviceaccount") {
+										for _, v := range c.StringSlice("serviceaccount") {
+											argv = append(argv, "--serviceaccount", v)
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("user") {
+										for _, v := range c.StringSlice("user") {
+											argv = append(argv, "--user", v)
+										}
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "configmap",
+						Usage: "Create a config map based on a file, directory, or specified literal value.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.BoolFlag{Name: "append-hash"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "from-env-file"},
+							&cli.StringSliceFlag{Name: "from-file"},
+							&cli.StringSliceFlag{Name: "from-literal"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "validate"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.configmap",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									if c.Bool("append-hash") {
+										args["--append-hash"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("from-env-file") {
+										positional = append(positional, v)
+									}
+									for _, v := range c.StringSlice("from-file") {
+										positional = append(positional, v)
+									}
+									for _, v := range c.StringSlice("from-literal") {
+										positional = append(positional, v)
+									}
+									args["--output"] = c.String("output")
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--validate"] = c.String("validate")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "configmap"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("append-hash") {
+										if c.Bool("append-hash") {
+											argv = append(argv, "--append-hash")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("from-env-file") {
+										for _, v := range c.StringSlice("from-env-file") {
+											argv = append(argv, "--from-env-file", v)
+										}
+									}
+									if c.IsSet("from-file") {
+										for _, v := range c.StringSlice("from-file") {
+											argv = append(argv, "--from-file", v)
+										}
+									}
+									if c.IsSet("from-literal") {
+										for _, v := range c.StringSlice("from-literal") {
+											argv = append(argv, "--from-literal", v)
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "cronjob",
+						Usage: "Create a cron job with the specified name.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringFlag{Name: "image"},
+							&cli.StringFlag{Name: "output"},
+							&cli.StringFlag{Name: "restart"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.StringFlag{Name: "schedule"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "validate"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.cronjob",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									args["--image"] = c.String("image")
+									args["--output"] = c.String("output")
+									args["--restart"] = c.String("restart")
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									args["--schedule"] = c.String("schedule")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--validate"] = c.String("validate")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "cronjob"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("image") {
+										argv = append(argv, "--image", c.String("image"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("restart") {
+										argv = append(argv, "--restart", c.String("restart"))
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("schedule") {
+										argv = append(argv, "--schedule", c.String("schedule"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "deployment",
+						Usage: "Create a deployment with the specified name.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "image"},
+							&cli.StringFlag{Name: "output"},
+							&cli.IntFlag{Name: "port"},
+							&cli.IntFlag{Name: "replicas"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "validate"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.deployment",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("image") {
+										positional = append(positional, v)
+									}
+									args["--output"] = c.String("output")
+									args["--port"] = strconv.Itoa(int(c.Int("port")))
+									args["--replicas"] = strconv.Itoa(int(c.Int("replicas")))
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--validate"] = c.String("validate")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "deployment"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("image") {
+										for _, v := range c.StringSlice("image") {
+											argv = append(argv, "--image", v)
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("port") {
+										argv = append(argv, "--port", strconv.Itoa(int(c.Int("port"))))
+									}
+									if c.IsSet("replicas") {
+										argv = append(argv, "--replicas", strconv.Itoa(int(c.Int("replicas"))))
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "ingress",
+						Usage: "Create an ingress with the specified name.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringSliceFlag{Name: "annotation"},
+							&cli.StringFlag{Name: "class"},
+							&cli.StringFlag{Name: "default-backend"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringFlag{Name: "output"},
+							&cli.StringSliceFlag{Name: "rule"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "validate"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.ingress",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									for _, v := range c.StringSlice("annotation") {
+										positional = append(positional, v)
+									}
+									args["--class"] = c.String("class")
+									args["--default-backend"] = c.String("default-backend")
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									args["--output"] = c.String("output")
+									for _, v := range c.StringSlice("rule") {
+										positional = append(positional, v)
+									}
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--validate"] = c.String("validate")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "ingress"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("annotation") {
+										for _, v := range c.StringSlice("annotation") {
+											argv = append(argv, "--annotation", v)
+										}
+									}
+									if c.IsSet("class") {
+										argv = append(argv, "--class", c.String("class"))
+									}
+									if c.IsSet("default-backend") {
+										argv = append(argv, "--default-backend", c.String("default-backend"))
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("rule") {
+										for _, v := range c.StringSlice("rule") {
+											argv = append(argv, "--rule", v)
+										}
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "job",
+						Usage: "Create a job with the specified name.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringFlag{Name: "from"},
+							&cli.StringFlag{Name: "image"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "validate"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.job",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									args["--from"] = c.String("from")
+									args["--image"] = c.String("image")
+									args["--output"] = c.String("output")
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--validate"] = c.String("validate")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "job"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("from") {
+										argv = append(argv, "--from", c.String("from"))
+									}
+									if c.IsSet("image") {
+										argv = append(argv, "--image", c.String("image"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "namespace",
+						Usage: "Create a namespace with the specified name.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "validate"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.namespace",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									args["--output"] = c.String("output")
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--validate"] = c.String("validate")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "namespace"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "poddisruptionbudget",
+						Usage: "Create a pod disruption budget with the specified name, selector, and desired minimum available pods.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringFlag{Name: "max-unavailable"},
+							&cli.StringFlag{Name: "min-available"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.StringFlag{Name: "selector"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "validate"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.poddisruptionbudget",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									args["--max-unavailable"] = c.String("max-unavailable")
+									args["--min-available"] = c.String("min-available")
+									args["--output"] = c.String("output")
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									args["--selector"] = c.String("selector")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--validate"] = c.String("validate")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "poddisruptionbudget"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("max-unavailable") {
+										argv = append(argv, "--max-unavailable", c.String("max-unavailable"))
+									}
+									if c.IsSet("min-available") {
+										argv = append(argv, "--min-available", c.String("min-available"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "priorityclass",
+						Usage: "Create a priority class with the specified name, value, globalDefault and description.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "description"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.BoolFlag{Name: "global-default"},
+							&cli.StringFlag{Name: "output"},
+							&cli.StringFlag{Name: "preemption-policy"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "validate"},
+							&cli.IntFlag{Name: "value"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.priorityclass",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--description"] = c.String("description")
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									if c.Bool("global-default") {
+										args["--global-default"] = "true"
+									}
+									args["--output"] = c.String("output")
+									args["--preemption-policy"] = c.String("preemption-policy")
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--validate"] = c.String("validate")
+									args["--value"] = strconv.Itoa(int(c.Int("value")))
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "priorityclass"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("description") {
+										argv = append(argv, "--description", c.String("description"))
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("global-default") {
+										if c.Bool("global-default") {
+											argv = append(argv, "--global-default")
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("preemption-policy") {
+										argv = append(argv, "--preemption-policy", c.String("preemption-policy"))
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									if c.IsSet("value") {
+										argv = append(argv, "--value", strconv.Itoa(int(c.Int("value"))))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "quota",
+						Usage: "Create a resource quota with the specified name, hard limits, and optional scopes.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringFlag{Name: "hard"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.StringFlag{Name: "scopes"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "validate"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.quota",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									args["--hard"] = c.String("hard")
+									args["--output"] = c.String("output")
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									args["--scopes"] = c.String("scopes")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--validate"] = c.String("validate")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "quota"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("hard") {
+										argv = append(argv, "--hard", c.String("hard"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("scopes") {
+										argv = append(argv, "--scopes", c.String("scopes"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "role",
+						Usage: "Create a role with single rule.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringFlag{Name: "output"},
+							&cli.StringSliceFlag{Name: "resource"},
+							&cli.StringSliceFlag{Name: "resource-name"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "validate"},
+							&cli.StringSliceFlag{Name: "verb"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.role",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									args["--output"] = c.String("output")
+									for _, v := range c.StringSlice("resource") {
+										positional = append(positional, v)
+									}
+									for _, v := range c.StringSlice("resource-name") {
+										positional = append(positional, v)
+									}
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--validate"] = c.String("validate")
+									for _, v := range c.StringSlice("verb") {
+										positional = append(positional, v)
+									}
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "role"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("resource") {
+										for _, v := range c.StringSlice("resource") {
+											argv = append(argv, "--resource", v)
+										}
+									}
+									if c.IsSet("resource-name") {
+										for _, v := range c.StringSlice("resource-name") {
+											argv = append(argv, "--resource-name", v)
+										}
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									if c.IsSet("verb") {
+										for _, v := range c.StringSlice("verb") {
+											argv = append(argv, "--verb", v)
+										}
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "rolebinding",
+						Usage: "Create a role binding for a particular role or cluster role.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "clusterrole"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "group"},
+							&cli.StringFlag{Name: "output"},
+							&cli.StringFlag{Name: "role"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.StringSliceFlag{Name: "serviceaccount"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringSliceFlag{Name: "user"},
+							&cli.StringFlag{Name: "validate"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.rolebinding",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--clusterrole"] = c.String("clusterrole")
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("group") {
+										positional = append(positional, v)
+									}
+									args["--output"] = c.String("output")
+									args["--role"] = c.String("role")
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									for _, v := range c.StringSlice("serviceaccount") {
+										positional = append(positional, v)
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									for _, v := range c.StringSlice("user") {
+										positional = append(positional, v)
+									}
+									args["--validate"] = c.String("validate")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "rolebinding"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("clusterrole") {
+										argv = append(argv, "--clusterrole", c.String("clusterrole"))
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("group") {
+										for _, v := range c.StringSlice("group") {
+											argv = append(argv, "--group", v)
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("role") {
+										argv = append(argv, "--role", c.String("role"))
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("serviceaccount") {
+										for _, v := range c.StringSlice("serviceaccount") {
+											argv = append(argv, "--serviceaccount", v)
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("user") {
+										for _, v := range c.StringSlice("user") {
+											argv = append(argv, "--user", v)
+										}
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "secret",
+						Usage: "Create a secret using specified subcommand.",
+						Commands: []*cli.Command{
+							&cli.Command{
+								Name:  "docker-registry",
+								Usage: "Create a new secret for use with Docker registries.",
+								Flags: []cli.Flag{
+									&cli.BoolFlag{Name: "allow-missing-template-keys"},
+									&cli.BoolFlag{Name: "append-hash"},
+									&cli.StringFlag{Name: "docker-email"},
+									&cli.StringFlag{Name: "docker-password"},
+									&cli.StringFlag{Name: "docker-server"},
+									&cli.StringFlag{Name: "docker-username"},
+									&cli.StringFlag{Name: "dry-run"},
+									&cli.StringFlag{Name: "field-manager"},
+									&cli.StringSliceFlag{Name: "from-file"},
+									&cli.StringFlag{Name: "output"},
+									&cli.BoolFlag{Name: "save-config"},
+									&cli.BoolFlag{Name: "show-managed-fields"},
+									&cli.StringFlag{Name: "template"},
+									&cli.StringFlag{Name: "validate"},
+								},
+								Action: verb.Wrap(
+									verb.Spec{
+										Name:  "kubectl.create.secret.docker-registry",
+										Kind:  policy.Mutating,
+										Scope: "kubectl.create:write",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+											args := map[string]string{}
+											var positional []string
+											_ = positional
+											if c.Bool("allow-missing-template-keys") {
+												args["--allow-missing-template-keys"] = "true"
+											}
+											if c.Bool("append-hash") {
+												args["--append-hash"] = "true"
+											}
+											args["--docker-email"] = c.String("docker-email")
+											args["--docker-password"] = c.String("docker-password")
+											args["--docker-server"] = c.String("docker-server")
+											args["--docker-username"] = c.String("docker-username")
+											args["--dry-run"] = c.String("dry-run")
+											args["--field-manager"] = c.String("field-manager")
+											for _, v := range c.StringSlice("from-file") {
+												positional = append(positional, v)
+											}
+											args["--output"] = c.String("output")
+											if c.Bool("save-config") {
+												args["--save-config"] = "true"
+											}
+											if c.Bool("show-managed-fields") {
+												args["--show-managed-fields"] = "true"
+											}
+											args["--template"] = c.String("template")
+											args["--validate"] = c.String("validate")
+											positional = append(positional, c.Args().Slice()...)
+											return args, positional, c.String("token")
+										},
+										Action: func(ctx context.Context, c *cli.Command) error {
+											argv := []string{"create", "secret", "docker-registry"}
+											if c.IsSet("allow-missing-template-keys") {
+												if c.Bool("allow-missing-template-keys") {
+													argv = append(argv, "--allow-missing-template-keys")
+												}
+											}
+											if c.IsSet("append-hash") {
+												if c.Bool("append-hash") {
+													argv = append(argv, "--append-hash")
+												}
+											}
+											if c.IsSet("docker-email") {
+												argv = append(argv, "--docker-email", c.String("docker-email"))
+											}
+											if c.IsSet("docker-password") {
+												argv = append(argv, "--docker-password", c.String("docker-password"))
+											}
+											if c.IsSet("docker-server") {
+												argv = append(argv, "--docker-server", c.String("docker-server"))
+											}
+											if c.IsSet("docker-username") {
+												argv = append(argv, "--docker-username", c.String("docker-username"))
+											}
+											if c.IsSet("dry-run") {
+												argv = append(argv, "--dry-run", c.String("dry-run"))
+											}
+											if c.IsSet("field-manager") {
+												argv = append(argv, "--field-manager", c.String("field-manager"))
+											}
+											if c.IsSet("from-file") {
+												for _, v := range c.StringSlice("from-file") {
+													argv = append(argv, "--from-file", v)
+												}
+											}
+											if c.IsSet("output") {
+												argv = append(argv, "--output", c.String("output"))
+											}
+											if c.IsSet("save-config") {
+												if c.Bool("save-config") {
+													argv = append(argv, "--save-config")
+												}
+											}
+											if c.IsSet("show-managed-fields") {
+												if c.Bool("show-managed-fields") {
+													argv = append(argv, "--show-managed-fields")
+												}
+											}
+											if c.IsSet("template") {
+												argv = append(argv, "--template", c.String("template"))
+											}
+											if c.IsSet("validate") {
+												argv = append(argv, "--validate", c.String("validate"))
+											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
+											_ = strconv.Itoa // keep strconv imported even when no flags
+											return r.Exec(ctx, BinaryName, argv...)
+										},
+									},
+									v, w,
+								),
+							},
+							&cli.Command{
+								Name:  "generic",
+								Usage: "Create a secret based on a file, directory, or specified literal value.",
+								Flags: []cli.Flag{
+									&cli.BoolFlag{Name: "allow-missing-template-keys"},
+									&cli.BoolFlag{Name: "append-hash"},
+									&cli.StringFlag{Name: "dry-run"},
+									&cli.StringFlag{Name: "field-manager"},
+									&cli.StringSliceFlag{Name: "from-env-file"},
+									&cli.StringSliceFlag{Name: "from-file"},
+									&cli.StringSliceFlag{Name: "from-literal"},
+									&cli.StringFlag{Name: "output"},
+									&cli.BoolFlag{Name: "save-config"},
+									&cli.BoolFlag{Name: "show-managed-fields"},
+									&cli.StringFlag{Name: "template"},
+									&cli.StringFlag{Name: "type"},
+									&cli.StringFlag{Name: "validate"},
+								},
+								Action: verb.Wrap(
+									verb.Spec{
+										Name:  "kubectl.create.secret.generic",
+										Kind:  policy.Mutating,
+										Scope: "kubectl.create:write",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+											args := map[string]string{}
+											var positional []string
+											_ = positional
+											if c.Bool("allow-missing-template-keys") {
+												args["--allow-missing-template-keys"] = "true"
+											}
+											if c.Bool("append-hash") {
+												args["--append-hash"] = "true"
+											}
+											args["--dry-run"] = c.String("dry-run")
+											args["--field-manager"] = c.String("field-manager")
+											for _, v := range c.StringSlice("from-env-file") {
+												positional = append(positional, v)
+											}
+											for _, v := range c.StringSlice("from-file") {
+												positional = append(positional, v)
+											}
+											for _, v := range c.StringSlice("from-literal") {
+												positional = append(positional, v)
+											}
+											args["--output"] = c.String("output")
+											if c.Bool("save-config") {
+												args["--save-config"] = "true"
+											}
+											if c.Bool("show-managed-fields") {
+												args["--show-managed-fields"] = "true"
+											}
+											args["--template"] = c.String("template")
+											args["--type"] = c.String("type")
+											args["--validate"] = c.String("validate")
+											positional = append(positional, c.Args().Slice()...)
+											return args, positional, c.String("token")
+										},
+										Action: func(ctx context.Context, c *cli.Command) error {
+											argv := []string{"create", "secret", "generic"}
+											if c.IsSet("allow-missing-template-keys") {
+												if c.Bool("allow-missing-template-keys") {
+													argv = append(argv, "--allow-missing-template-keys")
+												}
+											}
+											if c.IsSet("append-hash") {
+												if c.Bool("append-hash") {
+													argv = append(argv, "--append-hash")
+												}
+											}
+											if c.IsSet("dry-run") {
+												argv = append(argv, "--dry-run", c.String("dry-run"))
+											}
+											if c.IsSet("field-manager") {
+												argv = append(argv, "--field-manager", c.String("field-manager"))
+											}
+											if c.IsSet("from-env-file") {
+												for _, v := range c.StringSlice("from-env-file") {
+													argv = append(argv, "--from-env-file", v)
+												}
+											}
+											if c.IsSet("from-file") {
+												for _, v := range c.StringSlice("from-file") {
+													argv = append(argv, "--from-file", v)
+												}
+											}
+											if c.IsSet("from-literal") {
+												for _, v := range c.StringSlice("from-literal") {
+													argv = append(argv, "--from-literal", v)
+												}
+											}
+											if c.IsSet("output") {
+												argv = append(argv, "--output", c.String("output"))
+											}
+											if c.IsSet("save-config") {
+												if c.Bool("save-config") {
+													argv = append(argv, "--save-config")
+												}
+											}
+											if c.IsSet("show-managed-fields") {
+												if c.Bool("show-managed-fields") {
+													argv = append(argv, "--show-managed-fields")
+												}
+											}
+											if c.IsSet("template") {
+												argv = append(argv, "--template", c.String("template"))
+											}
+											if c.IsSet("type") {
+												argv = append(argv, "--type", c.String("type"))
+											}
+											if c.IsSet("validate") {
+												argv = append(argv, "--validate", c.String("validate"))
+											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
+											_ = strconv.Itoa // keep strconv imported even when no flags
+											return r.Exec(ctx, BinaryName, argv...)
+										},
+									},
+									v, w,
+								),
+							},
+							&cli.Command{
+								Name:  "tls",
+								Usage: "Create a TLS secret from the given public/private key pair.",
+								Flags: []cli.Flag{
+									&cli.BoolFlag{Name: "allow-missing-template-keys"},
+									&cli.BoolFlag{Name: "append-hash"},
+									&cli.StringFlag{Name: "cert"},
+									&cli.StringFlag{Name: "dry-run"},
+									&cli.StringFlag{Name: "field-manager"},
+									&cli.StringFlag{Name: "key"},
+									&cli.StringFlag{Name: "output"},
+									&cli.BoolFlag{Name: "save-config"},
+									&cli.BoolFlag{Name: "show-managed-fields"},
+									&cli.StringFlag{Name: "template"},
+									&cli.StringFlag{Name: "validate"},
+								},
+								Action: verb.Wrap(
+									verb.Spec{
+										Name:  "kubectl.create.secret.tls",
+										Kind:  policy.Mutating,
+										Scope: "kubectl.create:write",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+											args := map[string]string{}
+											var positional []string
+											_ = positional
+											if c.Bool("allow-missing-template-keys") {
+												args["--allow-missing-template-keys"] = "true"
+											}
+											if c.Bool("append-hash") {
+												args["--append-hash"] = "true"
+											}
+											args["--cert"] = c.String("cert")
+											args["--dry-run"] = c.String("dry-run")
+											args["--field-manager"] = c.String("field-manager")
+											args["--key"] = c.String("key")
+											args["--output"] = c.String("output")
+											if c.Bool("save-config") {
+												args["--save-config"] = "true"
+											}
+											if c.Bool("show-managed-fields") {
+												args["--show-managed-fields"] = "true"
+											}
+											args["--template"] = c.String("template")
+											args["--validate"] = c.String("validate")
+											positional = append(positional, c.Args().Slice()...)
+											return args, positional, c.String("token")
+										},
+										Action: func(ctx context.Context, c *cli.Command) error {
+											argv := []string{"create", "secret", "tls"}
+											if c.IsSet("allow-missing-template-keys") {
+												if c.Bool("allow-missing-template-keys") {
+													argv = append(argv, "--allow-missing-template-keys")
+												}
+											}
+											if c.IsSet("append-hash") {
+												if c.Bool("append-hash") {
+													argv = append(argv, "--append-hash")
+												}
+											}
+											if c.IsSet("cert") {
+												argv = append(argv, "--cert", c.String("cert"))
+											}
+											if c.IsSet("dry-run") {
+												argv = append(argv, "--dry-run", c.String("dry-run"))
+											}
+											if c.IsSet("field-manager") {
+												argv = append(argv, "--field-manager", c.String("field-manager"))
+											}
+											if c.IsSet("key") {
+												argv = append(argv, "--key", c.String("key"))
+											}
+											if c.IsSet("output") {
+												argv = append(argv, "--output", c.String("output"))
+											}
+											if c.IsSet("save-config") {
+												if c.Bool("save-config") {
+													argv = append(argv, "--save-config")
+												}
+											}
+											if c.IsSet("show-managed-fields") {
+												if c.Bool("show-managed-fields") {
+													argv = append(argv, "--show-managed-fields")
+												}
+											}
+											if c.IsSet("template") {
+												argv = append(argv, "--template", c.String("template"))
+											}
+											if c.IsSet("validate") {
+												argv = append(argv, "--validate", c.String("validate"))
+											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
+											_ = strconv.Itoa // keep strconv imported even when no flags
+											return r.Exec(ctx, BinaryName, argv...)
+										},
+									},
+									v, w,
+								),
+							},
+						},
+					},
+					&cli.Command{
+						Name:  "service",
+						Usage: "Create a service using a specified subcommand.",
+						Commands: []*cli.Command{
+							&cli.Command{
+								Name:  "clusterip",
+								Usage: "Create a ClusterIP service with the specified name.",
+								Flags: []cli.Flag{
+									&cli.BoolFlag{Name: "allow-missing-template-keys"},
+									&cli.StringFlag{Name: "clusterip"},
+									&cli.StringFlag{Name: "dry-run"},
+									&cli.StringFlag{Name: "field-manager"},
+									&cli.StringFlag{Name: "output"},
+									&cli.BoolFlag{Name: "save-config"},
+									&cli.BoolFlag{Name: "show-managed-fields"},
+									&cli.StringSliceFlag{Name: "tcp"},
+									&cli.StringFlag{Name: "template"},
+									&cli.StringFlag{Name: "validate"},
+								},
+								Action: verb.Wrap(
+									verb.Spec{
+										Name:  "kubectl.create.service.clusterip",
+										Kind:  policy.Mutating,
+										Scope: "kubectl.create:write",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+											args := map[string]string{}
+											var positional []string
+											_ = positional
+											if c.Bool("allow-missing-template-keys") {
+												args["--allow-missing-template-keys"] = "true"
+											}
+											args["--clusterip"] = c.String("clusterip")
+											args["--dry-run"] = c.String("dry-run")
+											args["--field-manager"] = c.String("field-manager")
+											args["--output"] = c.String("output")
+											if c.Bool("save-config") {
+												args["--save-config"] = "true"
+											}
+											if c.Bool("show-managed-fields") {
+												args["--show-managed-fields"] = "true"
+											}
+											for _, v := range c.StringSlice("tcp") {
+												positional = append(positional, v)
+											}
+											args["--template"] = c.String("template")
+											args["--validate"] = c.String("validate")
+											positional = append(positional, c.Args().Slice()...)
+											return args, positional, c.String("token")
+										},
+										Action: func(ctx context.Context, c *cli.Command) error {
+											argv := []string{"create", "service", "clusterip"}
+											if c.IsSet("allow-missing-template-keys") {
+												if c.Bool("allow-missing-template-keys") {
+													argv = append(argv, "--allow-missing-template-keys")
+												}
+											}
+											if c.IsSet("clusterip") {
+												argv = append(argv, "--clusterip", c.String("clusterip"))
+											}
+											if c.IsSet("dry-run") {
+												argv = append(argv, "--dry-run", c.String("dry-run"))
+											}
+											if c.IsSet("field-manager") {
+												argv = append(argv, "--field-manager", c.String("field-manager"))
+											}
+											if c.IsSet("output") {
+												argv = append(argv, "--output", c.String("output"))
+											}
+											if c.IsSet("save-config") {
+												if c.Bool("save-config") {
+													argv = append(argv, "--save-config")
+												}
+											}
+											if c.IsSet("show-managed-fields") {
+												if c.Bool("show-managed-fields") {
+													argv = append(argv, "--show-managed-fields")
+												}
+											}
+											if c.IsSet("tcp") {
+												for _, v := range c.StringSlice("tcp") {
+													argv = append(argv, "--tcp", v)
+												}
+											}
+											if c.IsSet("template") {
+												argv = append(argv, "--template", c.String("template"))
+											}
+											if c.IsSet("validate") {
+												argv = append(argv, "--validate", c.String("validate"))
+											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
+											_ = strconv.Itoa // keep strconv imported even when no flags
+											return r.Exec(ctx, BinaryName, argv...)
+										},
+									},
+									v, w,
+								),
+							},
+							&cli.Command{
+								Name:  "externalname",
+								Usage: "Create an ExternalName service with the specified name.",
+								Flags: []cli.Flag{
+									&cli.BoolFlag{Name: "allow-missing-template-keys"},
+									&cli.StringFlag{Name: "dry-run"},
+									&cli.StringFlag{Name: "external-name"},
+									&cli.StringFlag{Name: "field-manager"},
+									&cli.StringFlag{Name: "output"},
+									&cli.BoolFlag{Name: "save-config"},
+									&cli.BoolFlag{Name: "show-managed-fields"},
+									&cli.StringSliceFlag{Name: "tcp"},
+									&cli.StringFlag{Name: "template"},
+									&cli.StringFlag{Name: "validate"},
+								},
+								Action: verb.Wrap(
+									verb.Spec{
+										Name:  "kubectl.create.service.externalname",
+										Kind:  policy.Mutating,
+										Scope: "kubectl.create:write",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+											args := map[string]string{}
+											var positional []string
+											_ = positional
+											if c.Bool("allow-missing-template-keys") {
+												args["--allow-missing-template-keys"] = "true"
+											}
+											args["--dry-run"] = c.String("dry-run")
+											args["--external-name"] = c.String("external-name")
+											args["--field-manager"] = c.String("field-manager")
+											args["--output"] = c.String("output")
+											if c.Bool("save-config") {
+												args["--save-config"] = "true"
+											}
+											if c.Bool("show-managed-fields") {
+												args["--show-managed-fields"] = "true"
+											}
+											for _, v := range c.StringSlice("tcp") {
+												positional = append(positional, v)
+											}
+											args["--template"] = c.String("template")
+											args["--validate"] = c.String("validate")
+											positional = append(positional, c.Args().Slice()...)
+											return args, positional, c.String("token")
+										},
+										Action: func(ctx context.Context, c *cli.Command) error {
+											argv := []string{"create", "service", "externalname"}
+											if c.IsSet("allow-missing-template-keys") {
+												if c.Bool("allow-missing-template-keys") {
+													argv = append(argv, "--allow-missing-template-keys")
+												}
+											}
+											if c.IsSet("dry-run") {
+												argv = append(argv, "--dry-run", c.String("dry-run"))
+											}
+											if c.IsSet("external-name") {
+												argv = append(argv, "--external-name", c.String("external-name"))
+											}
+											if c.IsSet("field-manager") {
+												argv = append(argv, "--field-manager", c.String("field-manager"))
+											}
+											if c.IsSet("output") {
+												argv = append(argv, "--output", c.String("output"))
+											}
+											if c.IsSet("save-config") {
+												if c.Bool("save-config") {
+													argv = append(argv, "--save-config")
+												}
+											}
+											if c.IsSet("show-managed-fields") {
+												if c.Bool("show-managed-fields") {
+													argv = append(argv, "--show-managed-fields")
+												}
+											}
+											if c.IsSet("tcp") {
+												for _, v := range c.StringSlice("tcp") {
+													argv = append(argv, "--tcp", v)
+												}
+											}
+											if c.IsSet("template") {
+												argv = append(argv, "--template", c.String("template"))
+											}
+											if c.IsSet("validate") {
+												argv = append(argv, "--validate", c.String("validate"))
+											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
+											_ = strconv.Itoa // keep strconv imported even when no flags
+											return r.Exec(ctx, BinaryName, argv...)
+										},
+									},
+									v, w,
+								),
+							},
+							&cli.Command{
+								Name:  "loadbalancer",
+								Usage: "Create a LoadBalancer service with the specified name.",
+								Flags: []cli.Flag{
+									&cli.BoolFlag{Name: "allow-missing-template-keys"},
+									&cli.StringFlag{Name: "dry-run"},
+									&cli.StringFlag{Name: "field-manager"},
+									&cli.StringFlag{Name: "output"},
+									&cli.BoolFlag{Name: "save-config"},
+									&cli.BoolFlag{Name: "show-managed-fields"},
+									&cli.StringSliceFlag{Name: "tcp"},
+									&cli.StringFlag{Name: "template"},
+									&cli.StringFlag{Name: "validate"},
+								},
+								Action: verb.Wrap(
+									verb.Spec{
+										Name:  "kubectl.create.service.loadbalancer",
+										Kind:  policy.Mutating,
+										Scope: "kubectl.create:write",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+											args := map[string]string{}
+											var positional []string
+											_ = positional
+											if c.Bool("allow-missing-template-keys") {
+												args["--allow-missing-template-keys"] = "true"
+											}
+											args["--dry-run"] = c.String("dry-run")
+											args["--field-manager"] = c.String("field-manager")
+											args["--output"] = c.String("output")
+											if c.Bool("save-config") {
+												args["--save-config"] = "true"
+											}
+											if c.Bool("show-managed-fields") {
+												args["--show-managed-fields"] = "true"
+											}
+											for _, v := range c.StringSlice("tcp") {
+												positional = append(positional, v)
+											}
+											args["--template"] = c.String("template")
+											args["--validate"] = c.String("validate")
+											positional = append(positional, c.Args().Slice()...)
+											return args, positional, c.String("token")
+										},
+										Action: func(ctx context.Context, c *cli.Command) error {
+											argv := []string{"create", "service", "loadbalancer"}
+											if c.IsSet("allow-missing-template-keys") {
+												if c.Bool("allow-missing-template-keys") {
+													argv = append(argv, "--allow-missing-template-keys")
+												}
+											}
+											if c.IsSet("dry-run") {
+												argv = append(argv, "--dry-run", c.String("dry-run"))
+											}
+											if c.IsSet("field-manager") {
+												argv = append(argv, "--field-manager", c.String("field-manager"))
+											}
+											if c.IsSet("output") {
+												argv = append(argv, "--output", c.String("output"))
+											}
+											if c.IsSet("save-config") {
+												if c.Bool("save-config") {
+													argv = append(argv, "--save-config")
+												}
+											}
+											if c.IsSet("show-managed-fields") {
+												if c.Bool("show-managed-fields") {
+													argv = append(argv, "--show-managed-fields")
+												}
+											}
+											if c.IsSet("tcp") {
+												for _, v := range c.StringSlice("tcp") {
+													argv = append(argv, "--tcp", v)
+												}
+											}
+											if c.IsSet("template") {
+												argv = append(argv, "--template", c.String("template"))
+											}
+											if c.IsSet("validate") {
+												argv = append(argv, "--validate", c.String("validate"))
+											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
+											_ = strconv.Itoa // keep strconv imported even when no flags
+											return r.Exec(ctx, BinaryName, argv...)
+										},
+									},
+									v, w,
+								),
+							},
+							&cli.Command{
+								Name:  "nodeport",
+								Usage: "Create a NodePort service with the specified name.",
+								Flags: []cli.Flag{
+									&cli.BoolFlag{Name: "allow-missing-template-keys"},
+									&cli.StringFlag{Name: "dry-run"},
+									&cli.StringFlag{Name: "field-manager"},
+									&cli.IntFlag{Name: "node-port"},
+									&cli.StringFlag{Name: "output"},
+									&cli.BoolFlag{Name: "save-config"},
+									&cli.BoolFlag{Name: "show-managed-fields"},
+									&cli.StringSliceFlag{Name: "tcp"},
+									&cli.StringFlag{Name: "template"},
+									&cli.StringFlag{Name: "validate"},
+								},
+								Action: verb.Wrap(
+									verb.Spec{
+										Name:  "kubectl.create.service.nodeport",
+										Kind:  policy.Mutating,
+										Scope: "kubectl.create:write",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+											args := map[string]string{}
+											var positional []string
+											_ = positional
+											if c.Bool("allow-missing-template-keys") {
+												args["--allow-missing-template-keys"] = "true"
+											}
+											args["--dry-run"] = c.String("dry-run")
+											args["--field-manager"] = c.String("field-manager")
+											args["--node-port"] = strconv.Itoa(int(c.Int("node-port")))
+											args["--output"] = c.String("output")
+											if c.Bool("save-config") {
+												args["--save-config"] = "true"
+											}
+											if c.Bool("show-managed-fields") {
+												args["--show-managed-fields"] = "true"
+											}
+											for _, v := range c.StringSlice("tcp") {
+												positional = append(positional, v)
+											}
+											args["--template"] = c.String("template")
+											args["--validate"] = c.String("validate")
+											positional = append(positional, c.Args().Slice()...)
+											return args, positional, c.String("token")
+										},
+										Action: func(ctx context.Context, c *cli.Command) error {
+											argv := []string{"create", "service", "nodeport"}
+											if c.IsSet("allow-missing-template-keys") {
+												if c.Bool("allow-missing-template-keys") {
+													argv = append(argv, "--allow-missing-template-keys")
+												}
+											}
+											if c.IsSet("dry-run") {
+												argv = append(argv, "--dry-run", c.String("dry-run"))
+											}
+											if c.IsSet("field-manager") {
+												argv = append(argv, "--field-manager", c.String("field-manager"))
+											}
+											if c.IsSet("node-port") {
+												argv = append(argv, "--node-port", strconv.Itoa(int(c.Int("node-port"))))
+											}
+											if c.IsSet("output") {
+												argv = append(argv, "--output", c.String("output"))
+											}
+											if c.IsSet("save-config") {
+												if c.Bool("save-config") {
+													argv = append(argv, "--save-config")
+												}
+											}
+											if c.IsSet("show-managed-fields") {
+												if c.Bool("show-managed-fields") {
+													argv = append(argv, "--show-managed-fields")
+												}
+											}
+											if c.IsSet("tcp") {
+												for _, v := range c.StringSlice("tcp") {
+													argv = append(argv, "--tcp", v)
+												}
+											}
+											if c.IsSet("template") {
+												argv = append(argv, "--template", c.String("template"))
+											}
+											if c.IsSet("validate") {
+												argv = append(argv, "--validate", c.String("validate"))
+											}
+											// Forward any trailing positional args after flags so verbs
+											// like "gh api <endpoint>", "kubectl get <resource>", and
+											// "aws s3 cp <src> <dst>" reach the underlying tool.
+											argv = append(argv, c.Args().Slice()...)
+											_ = strconv.Itoa // keep strconv imported even when no flags
+											return r.Exec(ctx, BinaryName, argv...)
+										},
+									},
+									v, w,
+								),
+							},
+						},
+					},
+					&cli.Command{
+						Name:  "serviceaccount",
+						Usage: "Create a service account with the specified name.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "save-config"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringFlag{Name: "validate"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.serviceaccount",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									args["--output"] = c.String("output")
+									if c.Bool("save-config") {
+										args["--save-config"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--validate"] = c.String("validate")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "serviceaccount"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("save-config") {
+										if c.Bool("save-config") {
+											argv = append(argv, "--save-config")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("validate") {
+										argv = append(argv, "--validate", c.String("validate"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "token",
+						Usage: "Request a service account token.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringSliceFlag{Name: "audience"},
+							&cli.StringFlag{Name: "bound-object-kind"},
+							&cli.StringFlag{Name: "bound-object-name"},
+							&cli.StringFlag{Name: "bound-object-uid"},
+							&cli.StringFlag{Name: "duration"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.create.token",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.create:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									for _, v := range c.StringSlice("audience") {
+										positional = append(positional, v)
+									}
+									args["--bound-object-kind"] = c.String("bound-object-kind")
+									args["--bound-object-name"] = c.String("bound-object-name")
+									args["--bound-object-uid"] = c.String("bound-object-uid")
+									args["--duration"] = c.String("duration")
+									args["--output"] = c.String("output")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"create", "token"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("audience") {
+										for _, v := range c.StringSlice("audience") {
+											argv = append(argv, "--audience", v)
+										}
+									}
+									if c.IsSet("bound-object-kind") {
+										argv = append(argv, "--bound-object-kind", c.String("bound-object-kind"))
+									}
+									if c.IsSet("bound-object-name") {
+										argv = append(argv, "--bound-object-name", c.String("bound-object-name"))
+									}
+									if c.IsSet("bound-object-uid") {
+										argv = append(argv, "--bound-object-uid", c.String("bound-object-uid"))
+									}
+									if c.IsSet("duration") {
+										argv = append(argv, "--duration", c.String("duration"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+				},
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "describe",  }
-				if c.IsSet("all-namespaces") {
-					argv = append(argv, "--" + "all-namespaces", c.String("all-namespaces"))
-				}
-				if c.IsSet("chunk-size") {
-					argv = append(argv, "--" + "chunk-size", c.String("chunk-size"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("show-events") {
-					argv = append(argv, "--" + "show-events", c.String("show-events"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "diff",
-	Usage: "Diff configurations specified by file name or stdin between the current online configuration, and the configuration as it would be if applied.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "field-manager"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "force-conflicts"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "prune"},
-		&cli.StringFlag{Name: "prune-allowlist"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "server-side"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.diff",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.diff:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--field-manager"] = c.String("field-manager")
-				args["--filename"] = c.String("filename")
-				args["--force-conflicts"] = c.String("force-conflicts")
-				args["--kustomize"] = c.String("kustomize")
-				args["--prune"] = c.String("prune")
-				args["--prune-allowlist"] = c.String("prune-allowlist")
-				args["--recursive"] = c.String("recursive")
-				args["--selector"] = c.String("selector")
-				args["--server-side"] = c.String("server-side")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				return args, nil, c.String("token")
+				Name:  "delete",
+				Usage: "Delete resources by file names, stdin, resources and names, or by resources and label selector.",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "all"},
+					&cli.BoolFlag{Name: "all-namespaces"},
+					&cli.StringFlag{Name: "cascade"},
+					&cli.StringFlag{Name: "dry-run"},
+					&cli.StringFlag{Name: "field-selector"},
+					&cli.StringSliceFlag{Name: "filename"},
+					&cli.BoolFlag{Name: "force"},
+					&cli.IntFlag{Name: "grace-period"},
+					&cli.BoolFlag{Name: "ignore-not-found"},
+					&cli.StringFlag{Name: "kustomize"},
+					&cli.BoolFlag{Name: "now"},
+					&cli.StringFlag{Name: "output"},
+					&cli.StringFlag{Name: "raw"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.StringFlag{Name: "selector"},
+					&cli.StringFlag{Name: "timeout"},
+					&cli.BoolFlag{Name: "wait"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.delete",
+						Kind:  policy.Mutating,
+						Scope: "kubectl.delete:delete",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							if c.Bool("all") {
+								args["--all"] = "true"
+							}
+							if c.Bool("all-namespaces") {
+								args["--all-namespaces"] = "true"
+							}
+							args["--cascade"] = c.String("cascade")
+							args["--dry-run"] = c.String("dry-run")
+							args["--field-selector"] = c.String("field-selector")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
+							if c.Bool("force") {
+								args["--force"] = "true"
+							}
+							args["--grace-period"] = strconv.Itoa(int(c.Int("grace-period")))
+							if c.Bool("ignore-not-found") {
+								args["--ignore-not-found"] = "true"
+							}
+							args["--kustomize"] = c.String("kustomize")
+							if c.Bool("now") {
+								args["--now"] = "true"
+							}
+							args["--output"] = c.String("output")
+							args["--raw"] = c.String("raw")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							args["--selector"] = c.String("selector")
+							args["--timeout"] = c.String("timeout")
+							if c.Bool("wait") {
+								args["--wait"] = "true"
+							}
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"delete"}
+							if c.IsSet("all") {
+								if c.Bool("all") {
+									argv = append(argv, "--all")
+								}
+							}
+							if c.IsSet("all-namespaces") {
+								if c.Bool("all-namespaces") {
+									argv = append(argv, "--all-namespaces")
+								}
+							}
+							if c.IsSet("cascade") {
+								argv = append(argv, "--cascade", c.String("cascade"))
+							}
+							if c.IsSet("dry-run") {
+								argv = append(argv, "--dry-run", c.String("dry-run"))
+							}
+							if c.IsSet("field-selector") {
+								argv = append(argv, "--field-selector", c.String("field-selector"))
+							}
+							if c.IsSet("filename") {
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
+							}
+							if c.IsSet("force") {
+								if c.Bool("force") {
+									argv = append(argv, "--force")
+								}
+							}
+							if c.IsSet("grace-period") {
+								argv = append(argv, "--grace-period", strconv.Itoa(int(c.Int("grace-period"))))
+							}
+							if c.IsSet("ignore-not-found") {
+								if c.Bool("ignore-not-found") {
+									argv = append(argv, "--ignore-not-found")
+								}
+							}
+							if c.IsSet("kustomize") {
+								argv = append(argv, "--kustomize", c.String("kustomize"))
+							}
+							if c.IsSet("now") {
+								if c.Bool("now") {
+									argv = append(argv, "--now")
+								}
+							}
+							if c.IsSet("output") {
+								argv = append(argv, "--output", c.String("output"))
+							}
+							if c.IsSet("raw") {
+								argv = append(argv, "--raw", c.String("raw"))
+							}
+							if c.IsSet("recursive") {
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("timeout") {
+								argv = append(argv, "--timeout", c.String("timeout"))
+							}
+							if c.IsSet("wait") {
+								if c.Bool("wait") {
+									argv = append(argv, "--wait")
+								}
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "diff",  }
-				if c.IsSet("field-manager") {
-					argv = append(argv, "--" + "field-manager", c.String("field-manager"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("force-conflicts") {
-					argv = append(argv, "--" + "force-conflicts", c.String("force-conflicts"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("prune") {
-					argv = append(argv, "--" + "prune", c.String("prune"))
-				}
-				if c.IsSet("prune-allowlist") {
-					argv = append(argv, "--" + "prune-allowlist", c.String("prune-allowlist"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("server-side") {
-					argv = append(argv, "--" + "server-side", c.String("server-side"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "drain",
-	Usage: "Drain node in preparation for maintenance.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "chunk-size"},
-		&cli.StringFlag{Name: "delete-emptydir-data"},
-		&cli.StringFlag{Name: "disable-eviction"},
-		&cli.StringFlag{Name: "dry-run"},
-		&cli.StringFlag{Name: "force"},
-		&cli.StringFlag{Name: "grace-period"},
-		&cli.StringFlag{Name: "ignore-daemonsets"},
-		&cli.StringFlag{Name: "pod-selector"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "skip-wait-for-delete-timeout"},
-		&cli.StringFlag{Name: "timeout"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.drain",
-			Kind: policy.Mutating,
-			Scope: "kubectl.drain:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--chunk-size"] = c.String("chunk-size")
-				args["--delete-emptydir-data"] = c.String("delete-emptydir-data")
-				args["--disable-eviction"] = c.String("disable-eviction")
-				args["--dry-run"] = c.String("dry-run")
-				args["--force"] = c.String("force")
-				args["--grace-period"] = c.String("grace-period")
-				args["--ignore-daemonsets"] = c.String("ignore-daemonsets")
-				args["--pod-selector"] = c.String("pod-selector")
-				args["--selector"] = c.String("selector")
-				args["--skip-wait-for-delete-timeout"] = c.String("skip-wait-for-delete-timeout")
-				args["--timeout"] = c.String("timeout")
-				return args, nil, c.String("token")
+				Name:  "describe",
+				Usage: "Show details of a specific resource or group of resources.",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "all-namespaces"},
+					&cli.IntFlag{Name: "chunk-size"},
+					&cli.StringSliceFlag{Name: "filename"},
+					&cli.StringFlag{Name: "kustomize"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.StringFlag{Name: "selector"},
+					&cli.BoolFlag{Name: "show-events"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.describe",
+						Kind:  policy.ReadOnly,
+						Scope: "kubectl.describe:read",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							if c.Bool("all-namespaces") {
+								args["--all-namespaces"] = "true"
+							}
+							args["--chunk-size"] = strconv.Itoa(int(c.Int("chunk-size")))
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
+							args["--kustomize"] = c.String("kustomize")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							args["--selector"] = c.String("selector")
+							if c.Bool("show-events") {
+								args["--show-events"] = "true"
+							}
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"describe"}
+							if c.IsSet("all-namespaces") {
+								if c.Bool("all-namespaces") {
+									argv = append(argv, "--all-namespaces")
+								}
+							}
+							if c.IsSet("chunk-size") {
+								argv = append(argv, "--chunk-size", strconv.Itoa(int(c.Int("chunk-size"))))
+							}
+							if c.IsSet("filename") {
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
+							}
+							if c.IsSet("kustomize") {
+								argv = append(argv, "--kustomize", c.String("kustomize"))
+							}
+							if c.IsSet("recursive") {
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("show-events") {
+								if c.Bool("show-events") {
+									argv = append(argv, "--show-events")
+								}
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "drain",  }
-				if c.IsSet("chunk-size") {
-					argv = append(argv, "--" + "chunk-size", c.String("chunk-size"))
-				}
-				if c.IsSet("delete-emptydir-data") {
-					argv = append(argv, "--" + "delete-emptydir-data", c.String("delete-emptydir-data"))
-				}
-				if c.IsSet("disable-eviction") {
-					argv = append(argv, "--" + "disable-eviction", c.String("disable-eviction"))
-				}
-				if c.IsSet("dry-run") {
-					argv = append(argv, "--" + "dry-run", c.String("dry-run"))
-				}
-				if c.IsSet("force") {
-					argv = append(argv, "--" + "force", c.String("force"))
-				}
-				if c.IsSet("grace-period") {
-					argv = append(argv, "--" + "grace-period", c.String("grace-period"))
-				}
-				if c.IsSet("ignore-daemonsets") {
-					argv = append(argv, "--" + "ignore-daemonsets", c.String("ignore-daemonsets"))
-				}
-				if c.IsSet("pod-selector") {
-					argv = append(argv, "--" + "pod-selector", c.String("pod-selector"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("skip-wait-for-delete-timeout") {
-					argv = append(argv, "--" + "skip-wait-for-delete-timeout", c.String("skip-wait-for-delete-timeout"))
-				}
-				if c.IsSet("timeout") {
-					argv = append(argv, "--" + "timeout", c.String("timeout"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "events",
-	Usage: "Display events",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "all-namespaces"},
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "chunk-size"},
-		&cli.StringFlag{Name: "for"},
-		&cli.StringFlag{Name: "no-headers"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-		&cli.StringFlag{Name: "types"},
-		&cli.StringFlag{Name: "watch"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.events",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.events:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--all-namespaces"] = c.String("all-namespaces")
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--chunk-size"] = c.String("chunk-size")
-				args["--for"] = c.String("for")
-				args["--no-headers"] = c.String("no-headers")
-				args["--output"] = c.String("output")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				args["--types"] = c.String("types")
-				args["--watch"] = c.String("watch")
-				return args, nil, c.String("token")
+				Name:  "diff",
+				Usage: "Diff configurations specified by file name or stdin between the current online configuration, and the configuration as it would be if applied.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "field-manager"},
+					&cli.StringSliceFlag{Name: "filename"},
+					&cli.BoolFlag{Name: "force-conflicts"},
+					&cli.StringFlag{Name: "kustomize"},
+					&cli.BoolFlag{Name: "prune"},
+					&cli.StringSliceFlag{Name: "prune-allowlist"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.StringFlag{Name: "selector"},
+					&cli.BoolFlag{Name: "server-side"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.diff",
+						Kind:  policy.ReadOnly,
+						Scope: "kubectl.diff:read",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							args["--field-manager"] = c.String("field-manager")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
+							if c.Bool("force-conflicts") {
+								args["--force-conflicts"] = "true"
+							}
+							args["--kustomize"] = c.String("kustomize")
+							if c.Bool("prune") {
+								args["--prune"] = "true"
+							}
+							for _, v := range c.StringSlice("prune-allowlist") {
+								positional = append(positional, v)
+							}
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							args["--selector"] = c.String("selector")
+							if c.Bool("server-side") {
+								args["--server-side"] = "true"
+							}
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"diff"}
+							if c.IsSet("field-manager") {
+								argv = append(argv, "--field-manager", c.String("field-manager"))
+							}
+							if c.IsSet("filename") {
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
+							}
+							if c.IsSet("force-conflicts") {
+								if c.Bool("force-conflicts") {
+									argv = append(argv, "--force-conflicts")
+								}
+							}
+							if c.IsSet("kustomize") {
+								argv = append(argv, "--kustomize", c.String("kustomize"))
+							}
+							if c.IsSet("prune") {
+								if c.Bool("prune") {
+									argv = append(argv, "--prune")
+								}
+							}
+							if c.IsSet("prune-allowlist") {
+								for _, v := range c.StringSlice("prune-allowlist") {
+									argv = append(argv, "--prune-allowlist", v)
+								}
+							}
+							if c.IsSet("recursive") {
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("server-side") {
+								if c.Bool("server-side") {
+									argv = append(argv, "--server-side")
+								}
+							}
+							if c.IsSet("show-managed-fields") {
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "events",  }
-				if c.IsSet("all-namespaces") {
-					argv = append(argv, "--" + "all-namespaces", c.String("all-namespaces"))
-				}
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("chunk-size") {
-					argv = append(argv, "--" + "chunk-size", c.String("chunk-size"))
-				}
-				if c.IsSet("for") {
-					argv = append(argv, "--" + "for", c.String("for"))
-				}
-				if c.IsSet("no-headers") {
-					argv = append(argv, "--" + "no-headers", c.String("no-headers"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				if c.IsSet("types") {
-					argv = append(argv, "--" + "types", c.String("types"))
-				}
-				if c.IsSet("watch") {
-					argv = append(argv, "--" + "watch", c.String("watch"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "label",
-	Usage: "Update the labels on a resource.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "all"},
-		&cli.StringFlag{Name: "all-namespaces"},
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "dry-run"},
-		&cli.StringFlag{Name: "field-manager"},
-		&cli.StringFlag{Name: "field-selector"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "list"},
-		&cli.StringFlag{Name: "local"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "overwrite"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "resource-version"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.label",
-			Kind: policy.Mutating,
-			Scope: "kubectl.label:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--all"] = c.String("all")
-				args["--all-namespaces"] = c.String("all-namespaces")
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--dry-run"] = c.String("dry-run")
-				args["--field-manager"] = c.String("field-manager")
-				args["--field-selector"] = c.String("field-selector")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--list"] = c.String("list")
-				args["--local"] = c.String("local")
-				args["--output"] = c.String("output")
-				args["--overwrite"] = c.String("overwrite")
-				args["--recursive"] = c.String("recursive")
-				args["--resource-version"] = c.String("resource-version")
-				args["--selector"] = c.String("selector")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
+				Name:  "drain",
+				Usage: "Drain node in preparation for maintenance.",
+				Flags: []cli.Flag{
+					&cli.IntFlag{Name: "chunk-size"},
+					&cli.BoolFlag{Name: "delete-emptydir-data"},
+					&cli.BoolFlag{Name: "disable-eviction"},
+					&cli.StringFlag{Name: "dry-run"},
+					&cli.BoolFlag{Name: "force"},
+					&cli.IntFlag{Name: "grace-period"},
+					&cli.BoolFlag{Name: "ignore-daemonsets"},
+					&cli.StringFlag{Name: "pod-selector"},
+					&cli.StringFlag{Name: "selector"},
+					&cli.IntFlag{Name: "skip-wait-for-delete-timeout"},
+					&cli.StringFlag{Name: "timeout"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.drain",
+						Kind:  policy.Mutating,
+						Scope: "kubectl.drain:write",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							args["--chunk-size"] = strconv.Itoa(int(c.Int("chunk-size")))
+							if c.Bool("delete-emptydir-data") {
+								args["--delete-emptydir-data"] = "true"
+							}
+							if c.Bool("disable-eviction") {
+								args["--disable-eviction"] = "true"
+							}
+							args["--dry-run"] = c.String("dry-run")
+							if c.Bool("force") {
+								args["--force"] = "true"
+							}
+							args["--grace-period"] = strconv.Itoa(int(c.Int("grace-period")))
+							if c.Bool("ignore-daemonsets") {
+								args["--ignore-daemonsets"] = "true"
+							}
+							args["--pod-selector"] = c.String("pod-selector")
+							args["--selector"] = c.String("selector")
+							args["--skip-wait-for-delete-timeout"] = strconv.Itoa(int(c.Int("skip-wait-for-delete-timeout")))
+							args["--timeout"] = c.String("timeout")
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"drain"}
+							if c.IsSet("chunk-size") {
+								argv = append(argv, "--chunk-size", strconv.Itoa(int(c.Int("chunk-size"))))
+							}
+							if c.IsSet("delete-emptydir-data") {
+								if c.Bool("delete-emptydir-data") {
+									argv = append(argv, "--delete-emptydir-data")
+								}
+							}
+							if c.IsSet("disable-eviction") {
+								if c.Bool("disable-eviction") {
+									argv = append(argv, "--disable-eviction")
+								}
+							}
+							if c.IsSet("dry-run") {
+								argv = append(argv, "--dry-run", c.String("dry-run"))
+							}
+							if c.IsSet("force") {
+								if c.Bool("force") {
+									argv = append(argv, "--force")
+								}
+							}
+							if c.IsSet("grace-period") {
+								argv = append(argv, "--grace-period", strconv.Itoa(int(c.Int("grace-period"))))
+							}
+							if c.IsSet("ignore-daemonsets") {
+								if c.Bool("ignore-daemonsets") {
+									argv = append(argv, "--ignore-daemonsets")
+								}
+							}
+							if c.IsSet("pod-selector") {
+								argv = append(argv, "--pod-selector", c.String("pod-selector"))
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("skip-wait-for-delete-timeout") {
+								argv = append(argv, "--skip-wait-for-delete-timeout", strconv.Itoa(int(c.Int("skip-wait-for-delete-timeout"))))
+							}
+							if c.IsSet("timeout") {
+								argv = append(argv, "--timeout", c.String("timeout"))
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "label",  }
-				if c.IsSet("all") {
-					argv = append(argv, "--" + "all", c.String("all"))
-				}
-				if c.IsSet("all-namespaces") {
-					argv = append(argv, "--" + "all-namespaces", c.String("all-namespaces"))
-				}
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("dry-run") {
-					argv = append(argv, "--" + "dry-run", c.String("dry-run"))
-				}
-				if c.IsSet("field-manager") {
-					argv = append(argv, "--" + "field-manager", c.String("field-manager"))
-				}
-				if c.IsSet("field-selector") {
-					argv = append(argv, "--" + "field-selector", c.String("field-selector"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("list") {
-					argv = append(argv, "--" + "list", c.String("list"))
-				}
-				if c.IsSet("local") {
-					argv = append(argv, "--" + "local", c.String("local"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("overwrite") {
-					argv = append(argv, "--" + "overwrite", c.String("overwrite"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("resource-version") {
-					argv = append(argv, "--" + "resource-version", c.String("resource-version"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "logs",
-	Usage: "Print the logs for a container in a pod or specified resource.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "all-containers"},
-		&cli.StringFlag{Name: "container"},
-		&cli.StringFlag{Name: "follow"},
-		&cli.StringFlag{Name: "ignore-errors"},
-		&cli.StringFlag{Name: "insecure-skip-tls-verify-backend"},
-		&cli.StringFlag{Name: "limit-bytes"},
-		&cli.StringFlag{Name: "max-log-requests"},
-		&cli.StringFlag{Name: "pod-running-timeout"},
-		&cli.StringFlag{Name: "prefix"},
-		&cli.StringFlag{Name: "previous"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "since"},
-		&cli.StringFlag{Name: "since-time"},
-		&cli.StringFlag{Name: "tail"},
-		&cli.StringFlag{Name: "timestamps"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.logs",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.logs:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--all-containers"] = c.String("all-containers")
-				args["--container"] = c.String("container")
-				args["--follow"] = c.String("follow")
-				args["--ignore-errors"] = c.String("ignore-errors")
-				args["--insecure-skip-tls-verify-backend"] = c.String("insecure-skip-tls-verify-backend")
-				args["--limit-bytes"] = c.String("limit-bytes")
-				args["--max-log-requests"] = c.String("max-log-requests")
-				args["--pod-running-timeout"] = c.String("pod-running-timeout")
-				args["--prefix"] = c.String("prefix")
-				args["--previous"] = c.String("previous")
-				args["--selector"] = c.String("selector")
-				args["--since"] = c.String("since")
-				args["--since-time"] = c.String("since-time")
-				args["--tail"] = c.String("tail")
-				args["--timestamps"] = c.String("timestamps")
-				return args, nil, c.String("token")
+				Name:  "events",
+				Usage: "Display events",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "all-namespaces"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
+					&cli.IntFlag{Name: "chunk-size"},
+					&cli.StringFlag{Name: "for"},
+					&cli.BoolFlag{Name: "no-headers"},
+					&cli.StringFlag{Name: "output"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
+					&cli.StringFlag{Name: "template"},
+					&cli.StringSliceFlag{Name: "types"},
+					&cli.BoolFlag{Name: "watch"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.events",
+						Kind:  policy.ReadOnly,
+						Scope: "kubectl.events:read",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							if c.Bool("all-namespaces") {
+								args["--all-namespaces"] = "true"
+							}
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
+							args["--chunk-size"] = strconv.Itoa(int(c.Int("chunk-size")))
+							args["--for"] = c.String("for")
+							if c.Bool("no-headers") {
+								args["--no-headers"] = "true"
+							}
+							args["--output"] = c.String("output")
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
+							args["--template"] = c.String("template")
+							for _, v := range c.StringSlice("types") {
+								positional = append(positional, v)
+							}
+							if c.Bool("watch") {
+								args["--watch"] = "true"
+							}
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"events"}
+							if c.IsSet("all-namespaces") {
+								if c.Bool("all-namespaces") {
+									argv = append(argv, "--all-namespaces")
+								}
+							}
+							if c.IsSet("allow-missing-template-keys") {
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
+							}
+							if c.IsSet("chunk-size") {
+								argv = append(argv, "--chunk-size", strconv.Itoa(int(c.Int("chunk-size"))))
+							}
+							if c.IsSet("for") {
+								argv = append(argv, "--for", c.String("for"))
+							}
+							if c.IsSet("no-headers") {
+								if c.Bool("no-headers") {
+									argv = append(argv, "--no-headers")
+								}
+							}
+							if c.IsSet("output") {
+								argv = append(argv, "--output", c.String("output"))
+							}
+							if c.IsSet("show-managed-fields") {
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
+							}
+							if c.IsSet("template") {
+								argv = append(argv, "--template", c.String("template"))
+							}
+							if c.IsSet("types") {
+								for _, v := range c.StringSlice("types") {
+									argv = append(argv, "--types", v)
+								}
+							}
+							if c.IsSet("watch") {
+								if c.Bool("watch") {
+									argv = append(argv, "--watch")
+								}
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "logs",  }
-				if c.IsSet("all-containers") {
-					argv = append(argv, "--" + "all-containers", c.String("all-containers"))
-				}
-				if c.IsSet("container") {
-					argv = append(argv, "--" + "container", c.String("container"))
-				}
-				if c.IsSet("follow") {
-					argv = append(argv, "--" + "follow", c.String("follow"))
-				}
-				if c.IsSet("ignore-errors") {
-					argv = append(argv, "--" + "ignore-errors", c.String("ignore-errors"))
-				}
-				if c.IsSet("insecure-skip-tls-verify-backend") {
-					argv = append(argv, "--" + "insecure-skip-tls-verify-backend", c.String("insecure-skip-tls-verify-backend"))
-				}
-				if c.IsSet("limit-bytes") {
-					argv = append(argv, "--" + "limit-bytes", c.String("limit-bytes"))
-				}
-				if c.IsSet("max-log-requests") {
-					argv = append(argv, "--" + "max-log-requests", c.String("max-log-requests"))
-				}
-				if c.IsSet("pod-running-timeout") {
-					argv = append(argv, "--" + "pod-running-timeout", c.String("pod-running-timeout"))
-				}
-				if c.IsSet("prefix") {
-					argv = append(argv, "--" + "prefix", c.String("prefix"))
-				}
-				if c.IsSet("previous") {
-					argv = append(argv, "--" + "previous", c.String("previous"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("since") {
-					argv = append(argv, "--" + "since", c.String("since"))
-				}
-				if c.IsSet("since-time") {
-					argv = append(argv, "--" + "since-time", c.String("since-time"))
-				}
-				if c.IsSet("tail") {
-					argv = append(argv, "--" + "tail", c.String("tail"))
-				}
-				if c.IsSet("timestamps") {
-					argv = append(argv, "--" + "timestamps", c.String("timestamps"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "patch",
-	Usage: "Update fields of a resource using strategic merge patch, a JSON merge patch, or a JSON patch.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "dry-run"},
-		&cli.StringFlag{Name: "field-manager"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "local"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "patch"},
-		&cli.StringFlag{Name: "patch-file"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "subresource"},
-		&cli.StringFlag{Name: "template"},
-		&cli.StringFlag{Name: "type"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.patch",
-			Kind: policy.Mutating,
-			Scope: "kubectl.patch:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--dry-run"] = c.String("dry-run")
-				args["--field-manager"] = c.String("field-manager")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--local"] = c.String("local")
-				args["--output"] = c.String("output")
-				args["--patch"] = c.String("patch")
-				args["--patch-file"] = c.String("patch-file")
-				args["--recursive"] = c.String("recursive")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--subresource"] = c.String("subresource")
-				args["--template"] = c.String("template")
-				args["--type"] = c.String("type")
-				return args, nil, c.String("token")
+				Name:  "explain",
+				Usage: "List the fields for supported resources.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "api-version"},
+					&cli.StringFlag{Name: "output"},
+					&cli.BoolFlag{Name: "recursive"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.explain",
+						Kind:  policy.ReadOnly,
+						Scope: "kubectl.explain:read",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							args["--api-version"] = c.String("api-version")
+							args["--output"] = c.String("output")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"explain"}
+							if c.IsSet("api-version") {
+								argv = append(argv, "--api-version", c.String("api-version"))
+							}
+							if c.IsSet("output") {
+								argv = append(argv, "--output", c.String("output"))
+							}
+							if c.IsSet("recursive") {
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "patch",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("dry-run") {
-					argv = append(argv, "--" + "dry-run", c.String("dry-run"))
-				}
-				if c.IsSet("field-manager") {
-					argv = append(argv, "--" + "field-manager", c.String("field-manager"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("local") {
-					argv = append(argv, "--" + "local", c.String("local"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("patch") {
-					argv = append(argv, "--" + "patch", c.String("patch"))
-				}
-				if c.IsSet("patch-file") {
-					argv = append(argv, "--" + "patch-file", c.String("patch-file"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("subresource") {
-					argv = append(argv, "--" + "subresource", c.String("subresource"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				if c.IsSet("type") {
-					argv = append(argv, "--" + "type", c.String("type"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "rollout",
-	Usage: "Manage the rollout of one or many resources.",
-	Commands: []*cli.Command{
-		&cli.Command{
-	Name: "history",
-	Usage: "View previous rollout revisions and configurations.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "revision"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.rollout.history",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.rollout:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--output"] = c.String("output")
-				args["--recursive"] = c.String("recursive")
-				args["--revision"] = c.String("revision")
-				args["--selector"] = c.String("selector")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
+				Name:  "expose",
+				Usage: "Expose a resource as a new Kubernetes service.",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
+					&cli.StringFlag{Name: "cluster-ip"},
+					&cli.StringFlag{Name: "dry-run"},
+					&cli.StringFlag{Name: "external-ip"},
+					&cli.StringFlag{Name: "field-manager"},
+					&cli.StringSliceFlag{Name: "filename"},
+					&cli.StringFlag{Name: "kustomize"},
+					&cli.StringFlag{Name: "labels"},
+					&cli.StringFlag{Name: "load-balancer-ip"},
+					&cli.StringFlag{Name: "name"},
+					&cli.StringFlag{Name: "output"},
+					&cli.StringFlag{Name: "override-type"},
+					&cli.StringFlag{Name: "overrides"},
+					&cli.StringFlag{Name: "port"},
+					&cli.StringFlag{Name: "protocol"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.BoolFlag{Name: "save-config"},
+					&cli.StringFlag{Name: "selector"},
+					&cli.StringFlag{Name: "session-affinity"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
+					&cli.StringFlag{Name: "target-port"},
+					&cli.StringFlag{Name: "template"},
+					&cli.StringFlag{Name: "type"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.expose",
+						Kind:  policy.Mutating,
+						Scope: "kubectl.expose:write",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
+							args["--cluster-ip"] = c.String("cluster-ip")
+							args["--dry-run"] = c.String("dry-run")
+							args["--external-ip"] = c.String("external-ip")
+							args["--field-manager"] = c.String("field-manager")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
+							args["--kustomize"] = c.String("kustomize")
+							args["--labels"] = c.String("labels")
+							args["--load-balancer-ip"] = c.String("load-balancer-ip")
+							args["--name"] = c.String("name")
+							args["--output"] = c.String("output")
+							args["--override-type"] = c.String("override-type")
+							args["--overrides"] = c.String("overrides")
+							args["--port"] = c.String("port")
+							args["--protocol"] = c.String("protocol")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							if c.Bool("save-config") {
+								args["--save-config"] = "true"
+							}
+							args["--selector"] = c.String("selector")
+							args["--session-affinity"] = c.String("session-affinity")
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
+							args["--target-port"] = c.String("target-port")
+							args["--template"] = c.String("template")
+							args["--type"] = c.String("type")
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"expose"}
+							if c.IsSet("allow-missing-template-keys") {
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
+							}
+							if c.IsSet("cluster-ip") {
+								argv = append(argv, "--cluster-ip", c.String("cluster-ip"))
+							}
+							if c.IsSet("dry-run") {
+								argv = append(argv, "--dry-run", c.String("dry-run"))
+							}
+							if c.IsSet("external-ip") {
+								argv = append(argv, "--external-ip", c.String("external-ip"))
+							}
+							if c.IsSet("field-manager") {
+								argv = append(argv, "--field-manager", c.String("field-manager"))
+							}
+							if c.IsSet("filename") {
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
+							}
+							if c.IsSet("kustomize") {
+								argv = append(argv, "--kustomize", c.String("kustomize"))
+							}
+							if c.IsSet("labels") {
+								argv = append(argv, "--labels", c.String("labels"))
+							}
+							if c.IsSet("load-balancer-ip") {
+								argv = append(argv, "--load-balancer-ip", c.String("load-balancer-ip"))
+							}
+							if c.IsSet("name") {
+								argv = append(argv, "--name", c.String("name"))
+							}
+							if c.IsSet("output") {
+								argv = append(argv, "--output", c.String("output"))
+							}
+							if c.IsSet("override-type") {
+								argv = append(argv, "--override-type", c.String("override-type"))
+							}
+							if c.IsSet("overrides") {
+								argv = append(argv, "--overrides", c.String("overrides"))
+							}
+							if c.IsSet("port") {
+								argv = append(argv, "--port", c.String("port"))
+							}
+							if c.IsSet("protocol") {
+								argv = append(argv, "--protocol", c.String("protocol"))
+							}
+							if c.IsSet("recursive") {
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
+							}
+							if c.IsSet("save-config") {
+								if c.Bool("save-config") {
+									argv = append(argv, "--save-config")
+								}
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("session-affinity") {
+								argv = append(argv, "--session-affinity", c.String("session-affinity"))
+							}
+							if c.IsSet("show-managed-fields") {
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
+							}
+							if c.IsSet("target-port") {
+								argv = append(argv, "--target-port", c.String("target-port"))
+							}
+							if c.IsSet("template") {
+								argv = append(argv, "--template", c.String("template"))
+							}
+							if c.IsSet("type") {
+								argv = append(argv, "--type", c.String("type"))
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "rollout", "history",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("revision") {
-					argv = append(argv, "--" + "revision", c.String("revision"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "pause",
-	Usage: "Mark the provided resource as paused.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "field-manager"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.rollout.pause",
-			Kind: policy.Mutating,
-			Scope: "kubectl.rollout:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--field-manager"] = c.String("field-manager")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--output"] = c.String("output")
-				args["--recursive"] = c.String("recursive")
-				args["--selector"] = c.String("selector")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "rollout", "pause",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("field-manager") {
-					argv = append(argv, "--" + "field-manager", c.String("field-manager"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "restart",
-	Usage: "Restart a resource.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "field-manager"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.rollout.restart",
-			Kind: policy.Mutating,
-			Scope: "kubectl.rollout:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--field-manager"] = c.String("field-manager")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--output"] = c.String("output")
-				args["--recursive"] = c.String("recursive")
-				args["--selector"] = c.String("selector")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "rollout", "restart",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("field-manager") {
-					argv = append(argv, "--" + "field-manager", c.String("field-manager"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "resume",
-	Usage: "Resume a paused resource.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "field-manager"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.rollout.resume",
-			Kind: policy.Mutating,
-			Scope: "kubectl.rollout:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--field-manager"] = c.String("field-manager")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--output"] = c.String("output")
-				args["--recursive"] = c.String("recursive")
-				args["--selector"] = c.String("selector")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "rollout", "resume",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("field-manager") {
-					argv = append(argv, "--" + "field-manager", c.String("field-manager"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "status",
-	Usage: "Show the status of the rollout.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "revision"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "timeout"},
-		&cli.StringFlag{Name: "watch"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.rollout.status",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.rollout:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--recursive"] = c.String("recursive")
-				args["--revision"] = c.String("revision")
-				args["--selector"] = c.String("selector")
-				args["--timeout"] = c.String("timeout")
-				args["--watch"] = c.String("watch")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "rollout", "status",  }
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("revision") {
-					argv = append(argv, "--" + "revision", c.String("revision"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("timeout") {
-					argv = append(argv, "--" + "timeout", c.String("timeout"))
-				}
-				if c.IsSet("watch") {
-					argv = append(argv, "--" + "watch", c.String("watch"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "undo",
-	Usage: "Roll back to a previous rollout.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "dry-run"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-		&cli.StringFlag{Name: "to-revision"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.rollout.undo",
-			Kind: policy.Mutating,
-			Scope: "kubectl.rollout:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--dry-run"] = c.String("dry-run")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--output"] = c.String("output")
-				args["--recursive"] = c.String("recursive")
-				args["--selector"] = c.String("selector")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				args["--to-revision"] = c.String("to-revision")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "rollout", "undo",  }
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("dry-run") {
-					argv = append(argv, "--" + "dry-run", c.String("dry-run"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				if c.IsSet("to-revision") {
-					argv = append(argv, "--" + "to-revision", c.String("to-revision"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-	},
-},
 			&cli.Command{
-	Name: "scale",
-	Usage: "Set a new size for a deployment, replica set, replication controller, or stateful set.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "all"},
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "current-replicas"},
-		&cli.StringFlag{Name: "dry-run"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "kustomize"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "replicas"},
-		&cli.StringFlag{Name: "resource-version"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-		&cli.StringFlag{Name: "timeout"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.scale",
-			Kind: policy.Mutating,
-			Scope: "kubectl.scale:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--all"] = c.String("all")
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--current-replicas"] = c.String("current-replicas")
-				args["--dry-run"] = c.String("dry-run")
-				args["--filename"] = c.String("filename")
-				args["--kustomize"] = c.String("kustomize")
-				args["--output"] = c.String("output")
-				args["--recursive"] = c.String("recursive")
-				args["--replicas"] = c.String("replicas")
-				args["--resource-version"] = c.String("resource-version")
-				args["--selector"] = c.String("selector")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				args["--timeout"] = c.String("timeout")
-				return args, nil, c.String("token")
+				Name:  "get",
+				Usage: "Display one or many resources.",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "all-namespaces"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
+					&cli.IntFlag{Name: "chunk-size"},
+					&cli.StringFlag{Name: "field-selector"},
+					&cli.StringSliceFlag{Name: "filename"},
+					&cli.BoolFlag{Name: "ignore-not-found"},
+					&cli.StringFlag{Name: "kustomize"},
+					&cli.StringSliceFlag{Name: "label-columns"},
+					&cli.BoolFlag{Name: "no-headers"},
+					&cli.StringFlag{Name: "output"},
+					&cli.BoolFlag{Name: "output-watch-events"},
+					&cli.StringFlag{Name: "raw"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.StringFlag{Name: "selector"},
+					&cli.BoolFlag{Name: "server-print"},
+					&cli.BoolFlag{Name: "show-kind"},
+					&cli.BoolFlag{Name: "show-labels"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
+					&cli.StringFlag{Name: "sort-by"},
+					&cli.StringFlag{Name: "subresource"},
+					&cli.StringFlag{Name: "template"},
+					&cli.BoolFlag{Name: "watch"},
+					&cli.BoolFlag{Name: "watch-only"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.get",
+						Kind:  policy.Mutating,
+						Scope: "kubectl.get:write",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							if c.Bool("all-namespaces") {
+								args["--all-namespaces"] = "true"
+							}
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
+							args["--chunk-size"] = strconv.Itoa(int(c.Int("chunk-size")))
+							args["--field-selector"] = c.String("field-selector")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
+							if c.Bool("ignore-not-found") {
+								args["--ignore-not-found"] = "true"
+							}
+							args["--kustomize"] = c.String("kustomize")
+							for _, v := range c.StringSlice("label-columns") {
+								positional = append(positional, v)
+							}
+							if c.Bool("no-headers") {
+								args["--no-headers"] = "true"
+							}
+							args["--output"] = c.String("output")
+							if c.Bool("output-watch-events") {
+								args["--output-watch-events"] = "true"
+							}
+							args["--raw"] = c.String("raw")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							args["--selector"] = c.String("selector")
+							if c.Bool("server-print") {
+								args["--server-print"] = "true"
+							}
+							if c.Bool("show-kind") {
+								args["--show-kind"] = "true"
+							}
+							if c.Bool("show-labels") {
+								args["--show-labels"] = "true"
+							}
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
+							args["--sort-by"] = c.String("sort-by")
+							args["--subresource"] = c.String("subresource")
+							args["--template"] = c.String("template")
+							if c.Bool("watch") {
+								args["--watch"] = "true"
+							}
+							if c.Bool("watch-only") {
+								args["--watch-only"] = "true"
+							}
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"get"}
+							if c.IsSet("all-namespaces") {
+								if c.Bool("all-namespaces") {
+									argv = append(argv, "--all-namespaces")
+								}
+							}
+							if c.IsSet("allow-missing-template-keys") {
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
+							}
+							if c.IsSet("chunk-size") {
+								argv = append(argv, "--chunk-size", strconv.Itoa(int(c.Int("chunk-size"))))
+							}
+							if c.IsSet("field-selector") {
+								argv = append(argv, "--field-selector", c.String("field-selector"))
+							}
+							if c.IsSet("filename") {
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
+							}
+							if c.IsSet("ignore-not-found") {
+								if c.Bool("ignore-not-found") {
+									argv = append(argv, "--ignore-not-found")
+								}
+							}
+							if c.IsSet("kustomize") {
+								argv = append(argv, "--kustomize", c.String("kustomize"))
+							}
+							if c.IsSet("label-columns") {
+								for _, v := range c.StringSlice("label-columns") {
+									argv = append(argv, "--label-columns", v)
+								}
+							}
+							if c.IsSet("no-headers") {
+								if c.Bool("no-headers") {
+									argv = append(argv, "--no-headers")
+								}
+							}
+							if c.IsSet("output") {
+								argv = append(argv, "--output", c.String("output"))
+							}
+							if c.IsSet("output-watch-events") {
+								if c.Bool("output-watch-events") {
+									argv = append(argv, "--output-watch-events")
+								}
+							}
+							if c.IsSet("raw") {
+								argv = append(argv, "--raw", c.String("raw"))
+							}
+							if c.IsSet("recursive") {
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("server-print") {
+								if c.Bool("server-print") {
+									argv = append(argv, "--server-print")
+								}
+							}
+							if c.IsSet("show-kind") {
+								if c.Bool("show-kind") {
+									argv = append(argv, "--show-kind")
+								}
+							}
+							if c.IsSet("show-labels") {
+								if c.Bool("show-labels") {
+									argv = append(argv, "--show-labels")
+								}
+							}
+							if c.IsSet("show-managed-fields") {
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
+							}
+							if c.IsSet("sort-by") {
+								argv = append(argv, "--sort-by", c.String("sort-by"))
+							}
+							if c.IsSet("subresource") {
+								argv = append(argv, "--subresource", c.String("subresource"))
+							}
+							if c.IsSet("template") {
+								argv = append(argv, "--template", c.String("template"))
+							}
+							if c.IsSet("watch") {
+								if c.Bool("watch") {
+									argv = append(argv, "--watch")
+								}
+							}
+							if c.IsSet("watch-only") {
+								if c.Bool("watch-only") {
+									argv = append(argv, "--watch-only")
+								}
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "scale",  }
-				if c.IsSet("all") {
-					argv = append(argv, "--" + "all", c.String("all"))
-				}
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("current-replicas") {
-					argv = append(argv, "--" + "current-replicas", c.String("current-replicas"))
-				}
-				if c.IsSet("dry-run") {
-					argv = append(argv, "--" + "dry-run", c.String("dry-run"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("kustomize") {
-					argv = append(argv, "--" + "kustomize", c.String("kustomize"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("replicas") {
-					argv = append(argv, "--" + "replicas", c.String("replicas"))
-				}
-				if c.IsSet("resource-version") {
-					argv = append(argv, "--" + "resource-version", c.String("resource-version"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				if c.IsSet("timeout") {
-					argv = append(argv, "--" + "timeout", c.String("timeout"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "taint",
-	Usage: "Update the taints on one or more nodes.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "all"},
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "dry-run"},
-		&cli.StringFlag{Name: "field-manager"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "overwrite"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-		&cli.StringFlag{Name: "validate"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.taint",
-			Kind: policy.Mutating,
-			Scope: "kubectl.taint:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--all"] = c.String("all")
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--dry-run"] = c.String("dry-run")
-				args["--field-manager"] = c.String("field-manager")
-				args["--output"] = c.String("output")
-				args["--overwrite"] = c.String("overwrite")
-				args["--selector"] = c.String("selector")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				args["--validate"] = c.String("validate")
-				return args, nil, c.String("token")
+				Name:  "label",
+				Usage: "Update the labels on a resource.",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "all"},
+					&cli.BoolFlag{Name: "all-namespaces"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
+					&cli.StringFlag{Name: "dry-run"},
+					&cli.StringFlag{Name: "field-manager"},
+					&cli.StringFlag{Name: "field-selector"},
+					&cli.StringSliceFlag{Name: "filename"},
+					&cli.StringFlag{Name: "kustomize"},
+					&cli.BoolFlag{Name: "list"},
+					&cli.BoolFlag{Name: "local"},
+					&cli.StringFlag{Name: "output"},
+					&cli.BoolFlag{Name: "overwrite"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.StringFlag{Name: "resource-version"},
+					&cli.StringFlag{Name: "selector"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
+					&cli.StringFlag{Name: "template"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.label",
+						Kind:  policy.Mutating,
+						Scope: "kubectl.label:write",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							if c.Bool("all") {
+								args["--all"] = "true"
+							}
+							if c.Bool("all-namespaces") {
+								args["--all-namespaces"] = "true"
+							}
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
+							args["--dry-run"] = c.String("dry-run")
+							args["--field-manager"] = c.String("field-manager")
+							args["--field-selector"] = c.String("field-selector")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
+							args["--kustomize"] = c.String("kustomize")
+							if c.Bool("list") {
+								args["--list"] = "true"
+							}
+							if c.Bool("local") {
+								args["--local"] = "true"
+							}
+							args["--output"] = c.String("output")
+							if c.Bool("overwrite") {
+								args["--overwrite"] = "true"
+							}
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							args["--resource-version"] = c.String("resource-version")
+							args["--selector"] = c.String("selector")
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
+							args["--template"] = c.String("template")
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"label"}
+							if c.IsSet("all") {
+								if c.Bool("all") {
+									argv = append(argv, "--all")
+								}
+							}
+							if c.IsSet("all-namespaces") {
+								if c.Bool("all-namespaces") {
+									argv = append(argv, "--all-namespaces")
+								}
+							}
+							if c.IsSet("allow-missing-template-keys") {
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
+							}
+							if c.IsSet("dry-run") {
+								argv = append(argv, "--dry-run", c.String("dry-run"))
+							}
+							if c.IsSet("field-manager") {
+								argv = append(argv, "--field-manager", c.String("field-manager"))
+							}
+							if c.IsSet("field-selector") {
+								argv = append(argv, "--field-selector", c.String("field-selector"))
+							}
+							if c.IsSet("filename") {
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
+							}
+							if c.IsSet("kustomize") {
+								argv = append(argv, "--kustomize", c.String("kustomize"))
+							}
+							if c.IsSet("list") {
+								if c.Bool("list") {
+									argv = append(argv, "--list")
+								}
+							}
+							if c.IsSet("local") {
+								if c.Bool("local") {
+									argv = append(argv, "--local")
+								}
+							}
+							if c.IsSet("output") {
+								argv = append(argv, "--output", c.String("output"))
+							}
+							if c.IsSet("overwrite") {
+								if c.Bool("overwrite") {
+									argv = append(argv, "--overwrite")
+								}
+							}
+							if c.IsSet("recursive") {
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
+							}
+							if c.IsSet("resource-version") {
+								argv = append(argv, "--resource-version", c.String("resource-version"))
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("show-managed-fields") {
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
+							}
+							if c.IsSet("template") {
+								argv = append(argv, "--template", c.String("template"))
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "taint",  }
-				if c.IsSet("all") {
-					argv = append(argv, "--" + "all", c.String("all"))
-				}
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("dry-run") {
-					argv = append(argv, "--" + "dry-run", c.String("dry-run"))
-				}
-				if c.IsSet("field-manager") {
-					argv = append(argv, "--" + "field-manager", c.String("field-manager"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("overwrite") {
-					argv = append(argv, "--" + "overwrite", c.String("overwrite"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				if c.IsSet("validate") {
-					argv = append(argv, "--" + "validate", c.String("validate"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "top",
-	Usage: "Display Resource (CPU/Memory) usage.",
-	Commands: []*cli.Command{
-		&cli.Command{
-	Name: "node",
-	Usage: "Display resource (CPU/memory) usage of nodes.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "no-headers"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "show-capacity"},
-		&cli.StringFlag{Name: "sort-by"},
-		&cli.StringFlag{Name: "use-protocol-buffers"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.top.node",
-			Kind: policy.Mutating,
-			Scope: "kubectl.top:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--no-headers"] = c.String("no-headers")
-				args["--selector"] = c.String("selector")
-				args["--show-capacity"] = c.String("show-capacity")
-				args["--sort-by"] = c.String("sort-by")
-				args["--use-protocol-buffers"] = c.String("use-protocol-buffers")
-				return args, nil, c.String("token")
+				Name:  "logs",
+				Usage: "Print the logs for a container in a pod or specified resource.",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "all-containers"},
+					&cli.StringFlag{Name: "container"},
+					&cli.BoolFlag{Name: "follow"},
+					&cli.BoolFlag{Name: "ignore-errors"},
+					&cli.BoolFlag{Name: "insecure-skip-tls-verify-backend"},
+					&cli.IntFlag{Name: "limit-bytes"},
+					&cli.IntFlag{Name: "max-log-requests"},
+					&cli.StringFlag{Name: "pod-running-timeout"},
+					&cli.BoolFlag{Name: "prefix"},
+					&cli.BoolFlag{Name: "previous"},
+					&cli.StringFlag{Name: "selector"},
+					&cli.StringFlag{Name: "since"},
+					&cli.StringFlag{Name: "since-time"},
+					&cli.IntFlag{Name: "tail"},
+					&cli.BoolFlag{Name: "timestamps"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.logs",
+						Kind:  policy.ReadOnly,
+						Scope: "kubectl.logs:read",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							if c.Bool("all-containers") {
+								args["--all-containers"] = "true"
+							}
+							args["--container"] = c.String("container")
+							if c.Bool("follow") {
+								args["--follow"] = "true"
+							}
+							if c.Bool("ignore-errors") {
+								args["--ignore-errors"] = "true"
+							}
+							if c.Bool("insecure-skip-tls-verify-backend") {
+								args["--insecure-skip-tls-verify-backend"] = "true"
+							}
+							args["--limit-bytes"] = strconv.Itoa(int(c.Int("limit-bytes")))
+							args["--max-log-requests"] = strconv.Itoa(int(c.Int("max-log-requests")))
+							args["--pod-running-timeout"] = c.String("pod-running-timeout")
+							if c.Bool("prefix") {
+								args["--prefix"] = "true"
+							}
+							if c.Bool("previous") {
+								args["--previous"] = "true"
+							}
+							args["--selector"] = c.String("selector")
+							args["--since"] = c.String("since")
+							args["--since-time"] = c.String("since-time")
+							args["--tail"] = strconv.Itoa(int(c.Int("tail")))
+							if c.Bool("timestamps") {
+								args["--timestamps"] = "true"
+							}
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"logs"}
+							if c.IsSet("all-containers") {
+								if c.Bool("all-containers") {
+									argv = append(argv, "--all-containers")
+								}
+							}
+							if c.IsSet("container") {
+								argv = append(argv, "--container", c.String("container"))
+							}
+							if c.IsSet("follow") {
+								if c.Bool("follow") {
+									argv = append(argv, "--follow")
+								}
+							}
+							if c.IsSet("ignore-errors") {
+								if c.Bool("ignore-errors") {
+									argv = append(argv, "--ignore-errors")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify-backend") {
+								if c.Bool("insecure-skip-tls-verify-backend") {
+									argv = append(argv, "--insecure-skip-tls-verify-backend")
+								}
+							}
+							if c.IsSet("limit-bytes") {
+								argv = append(argv, "--limit-bytes", strconv.Itoa(int(c.Int("limit-bytes"))))
+							}
+							if c.IsSet("max-log-requests") {
+								argv = append(argv, "--max-log-requests", strconv.Itoa(int(c.Int("max-log-requests"))))
+							}
+							if c.IsSet("pod-running-timeout") {
+								argv = append(argv, "--pod-running-timeout", c.String("pod-running-timeout"))
+							}
+							if c.IsSet("prefix") {
+								if c.Bool("prefix") {
+									argv = append(argv, "--prefix")
+								}
+							}
+							if c.IsSet("previous") {
+								if c.Bool("previous") {
+									argv = append(argv, "--previous")
+								}
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("since") {
+								argv = append(argv, "--since", c.String("since"))
+							}
+							if c.IsSet("since-time") {
+								argv = append(argv, "--since-time", c.String("since-time"))
+							}
+							if c.IsSet("tail") {
+								argv = append(argv, "--tail", strconv.Itoa(int(c.Int("tail"))))
+							}
+							if c.IsSet("timestamps") {
+								if c.Bool("timestamps") {
+									argv = append(argv, "--timestamps")
+								}
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "top", "node",  }
-				if c.IsSet("no-headers") {
-					argv = append(argv, "--" + "no-headers", c.String("no-headers"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("show-capacity") {
-					argv = append(argv, "--" + "show-capacity", c.String("show-capacity"))
-				}
-				if c.IsSet("sort-by") {
-					argv = append(argv, "--" + "sort-by", c.String("sort-by"))
-				}
-				if c.IsSet("use-protocol-buffers") {
-					argv = append(argv, "--" + "use-protocol-buffers", c.String("use-protocol-buffers"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-		&cli.Command{
-	Name: "pod",
-	Usage: "Display resource (CPU/memory) usage of pods.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "all-namespaces"},
-		&cli.StringFlag{Name: "containers"},
-		&cli.StringFlag{Name: "field-selector"},
-		&cli.StringFlag{Name: "no-headers"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "sort-by"},
-		&cli.StringFlag{Name: "sum"},
-		&cli.StringFlag{Name: "use-protocol-buffers"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.top.pod",
-			Kind: policy.Mutating,
-			Scope: "kubectl.top:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--all-namespaces"] = c.String("all-namespaces")
-				args["--containers"] = c.String("containers")
-				args["--field-selector"] = c.String("field-selector")
-				args["--no-headers"] = c.String("no-headers")
-				args["--selector"] = c.String("selector")
-				args["--sort-by"] = c.String("sort-by")
-				args["--sum"] = c.String("sum")
-				args["--use-protocol-buffers"] = c.String("use-protocol-buffers")
-				return args, nil, c.String("token")
-			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "top", "pod",  }
-				if c.IsSet("all-namespaces") {
-					argv = append(argv, "--" + "all-namespaces", c.String("all-namespaces"))
-				}
-				if c.IsSet("containers") {
-					argv = append(argv, "--" + "containers", c.String("containers"))
-				}
-				if c.IsSet("field-selector") {
-					argv = append(argv, "--" + "field-selector", c.String("field-selector"))
-				}
-				if c.IsSet("no-headers") {
-					argv = append(argv, "--" + "no-headers", c.String("no-headers"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("sort-by") {
-					argv = append(argv, "--" + "sort-by", c.String("sort-by"))
-				}
-				if c.IsSet("sum") {
-					argv = append(argv, "--" + "sum", c.String("sum"))
-				}
-				if c.IsSet("use-protocol-buffers") {
-					argv = append(argv, "--" + "use-protocol-buffers", c.String("use-protocol-buffers"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
-	},
-},
 			&cli.Command{
-	Name: "uncordon",
-	Usage: "Mark node as schedulable.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "dry-run"},
-		&cli.StringFlag{Name: "selector"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.uncordon",
-			Kind: policy.Mutating,
-			Scope: "kubectl.uncordon:write",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--dry-run"] = c.String("dry-run")
-				args["--selector"] = c.String("selector")
-				return args, nil, c.String("token")
+				Name:  "patch",
+				Usage: "Update fields of a resource using strategic merge patch, a JSON merge patch, or a JSON patch.",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
+					&cli.StringFlag{Name: "dry-run"},
+					&cli.StringFlag{Name: "field-manager"},
+					&cli.StringSliceFlag{Name: "filename"},
+					&cli.StringFlag{Name: "kustomize"},
+					&cli.BoolFlag{Name: "local"},
+					&cli.StringFlag{Name: "output"},
+					&cli.StringFlag{Name: "patch"},
+					&cli.StringFlag{Name: "patch-file"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
+					&cli.StringFlag{Name: "subresource"},
+					&cli.StringFlag{Name: "template"},
+					&cli.StringFlag{Name: "type"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.patch",
+						Kind:  policy.Mutating,
+						Scope: "kubectl.patch:write",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
+							args["--dry-run"] = c.String("dry-run")
+							args["--field-manager"] = c.String("field-manager")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
+							args["--kustomize"] = c.String("kustomize")
+							if c.Bool("local") {
+								args["--local"] = "true"
+							}
+							args["--output"] = c.String("output")
+							args["--patch"] = c.String("patch")
+							args["--patch-file"] = c.String("patch-file")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
+							args["--subresource"] = c.String("subresource")
+							args["--template"] = c.String("template")
+							args["--type"] = c.String("type")
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"patch"}
+							if c.IsSet("allow-missing-template-keys") {
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
+							}
+							if c.IsSet("dry-run") {
+								argv = append(argv, "--dry-run", c.String("dry-run"))
+							}
+							if c.IsSet("field-manager") {
+								argv = append(argv, "--field-manager", c.String("field-manager"))
+							}
+							if c.IsSet("filename") {
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
+							}
+							if c.IsSet("kustomize") {
+								argv = append(argv, "--kustomize", c.String("kustomize"))
+							}
+							if c.IsSet("local") {
+								if c.Bool("local") {
+									argv = append(argv, "--local")
+								}
+							}
+							if c.IsSet("output") {
+								argv = append(argv, "--output", c.String("output"))
+							}
+							if c.IsSet("patch") {
+								argv = append(argv, "--patch", c.String("patch"))
+							}
+							if c.IsSet("patch-file") {
+								argv = append(argv, "--patch-file", c.String("patch-file"))
+							}
+							if c.IsSet("recursive") {
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
+							}
+							if c.IsSet("show-managed-fields") {
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
+							}
+							if c.IsSet("subresource") {
+								argv = append(argv, "--subresource", c.String("subresource"))
+							}
+							if c.IsSet("template") {
+								argv = append(argv, "--template", c.String("template"))
+							}
+							if c.IsSet("type") {
+								argv = append(argv, "--type", c.String("type"))
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "uncordon",  }
-				if c.IsSet("dry-run") {
-					argv = append(argv, "--" + "dry-run", c.String("dry-run"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
-			},
-		},
-		v, w,
-	),
-},
 			&cli.Command{
-	Name: "wait",
-	Usage: "Experimental: Wait for a specific condition on one or many resources.",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "all"},
-		&cli.StringFlag{Name: "all-namespaces"},
-		&cli.StringFlag{Name: "allow-missing-template-keys"},
-		&cli.StringFlag{Name: "field-selector"},
-		&cli.StringFlag{Name: "filename"},
-		&cli.StringFlag{Name: "for"},
-		&cli.StringFlag{Name: "local"},
-		&cli.StringFlag{Name: "output"},
-		&cli.StringFlag{Name: "recursive"},
-		&cli.StringFlag{Name: "selector"},
-		&cli.StringFlag{Name: "show-managed-fields"},
-		&cli.StringFlag{Name: "template"},
-		&cli.StringFlag{Name: "timeout"},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "kubectl.wait",
-			Kind: policy.ReadOnly,
-			Scope: "kubectl.wait:read",
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				args := map[string]string{}
-				args["--all"] = c.String("all")
-				args["--all-namespaces"] = c.String("all-namespaces")
-				args["--allow-missing-template-keys"] = c.String("allow-missing-template-keys")
-				args["--field-selector"] = c.String("field-selector")
-				args["--filename"] = c.String("filename")
-				args["--for"] = c.String("for")
-				args["--local"] = c.String("local")
-				args["--output"] = c.String("output")
-				args["--recursive"] = c.String("recursive")
-				args["--selector"] = c.String("selector")
-				args["--show-managed-fields"] = c.String("show-managed-fields")
-				args["--template"] = c.String("template")
-				args["--timeout"] = c.String("timeout")
-				return args, nil, c.String("token")
+				Name:  "rollout",
+				Usage: "Manage the rollout of one or many resources.",
+				Commands: []*cli.Command{
+					&cli.Command{
+						Name:  "history",
+						Usage: "View previous rollout revisions and configurations.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.IntFlag{Name: "revision"},
+							&cli.StringFlag{Name: "selector"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.rollout.history",
+								Kind:  policy.ReadOnly,
+								Scope: "kubectl.rollout:read",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									args["--revision"] = strconv.Itoa(int(c.Int("revision")))
+									args["--selector"] = c.String("selector")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"rollout", "history"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("revision") {
+										argv = append(argv, "--revision", strconv.Itoa(int(c.Int("revision"))))
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "pause",
+						Usage: "Mark the provided resource as paused.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.StringFlag{Name: "selector"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.rollout.pause",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.rollout:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									args["--selector"] = c.String("selector")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"rollout", "pause"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "restart",
+						Usage: "Restart a resource.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.StringFlag{Name: "selector"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.rollout.restart",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.rollout:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									args["--selector"] = c.String("selector")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"rollout", "restart"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "resume",
+						Usage: "Resume a paused resource.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.StringFlag{Name: "selector"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.rollout.resume",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.rollout:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									args["--selector"] = c.String("selector")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"rollout", "resume"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "status",
+						Usage: "Show the status of the rollout.",
+						Flags: []cli.Flag{
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.IntFlag{Name: "revision"},
+							&cli.StringFlag{Name: "selector"},
+							&cli.StringFlag{Name: "timeout"},
+							&cli.BoolFlag{Name: "watch"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.rollout.status",
+								Kind:  policy.ReadOnly,
+								Scope: "kubectl.rollout:read",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									args["--revision"] = strconv.Itoa(int(c.Int("revision")))
+									args["--selector"] = c.String("selector")
+									args["--timeout"] = c.String("timeout")
+									if c.Bool("watch") {
+										args["--watch"] = "true"
+									}
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"rollout", "status"}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("revision") {
+										argv = append(argv, "--revision", strconv.Itoa(int(c.Int("revision"))))
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("timeout") {
+										argv = append(argv, "--timeout", c.String("timeout"))
+									}
+									if c.IsSet("watch") {
+										if c.Bool("watch") {
+											argv = append(argv, "--watch")
+										}
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "undo",
+						Usage: "Roll back to a previous rollout.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.StringFlag{Name: "selector"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.IntFlag{Name: "to-revision"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.rollout.undo",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.rollout:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									args["--selector"] = c.String("selector")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									args["--to-revision"] = strconv.Itoa(int(c.Int("to-revision")))
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"rollout", "undo"}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("to-revision") {
+										argv = append(argv, "--to-revision", strconv.Itoa(int(c.Int("to-revision"))))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+				},
 			},
-			Action: func(ctx context.Context, c *cli.Command) error {
-				argv := []string{ "wait",  }
-				if c.IsSet("all") {
-					argv = append(argv, "--" + "all", c.String("all"))
-				}
-				if c.IsSet("all-namespaces") {
-					argv = append(argv, "--" + "all-namespaces", c.String("all-namespaces"))
-				}
-				if c.IsSet("allow-missing-template-keys") {
-					argv = append(argv, "--" + "allow-missing-template-keys", c.String("allow-missing-template-keys"))
-				}
-				if c.IsSet("field-selector") {
-					argv = append(argv, "--" + "field-selector", c.String("field-selector"))
-				}
-				if c.IsSet("filename") {
-					argv = append(argv, "--" + "filename", c.String("filename"))
-				}
-				if c.IsSet("for") {
-					argv = append(argv, "--" + "for", c.String("for"))
-				}
-				if c.IsSet("local") {
-					argv = append(argv, "--" + "local", c.String("local"))
-				}
-				if c.IsSet("output") {
-					argv = append(argv, "--" + "output", c.String("output"))
-				}
-				if c.IsSet("recursive") {
-					argv = append(argv, "--" + "recursive", c.String("recursive"))
-				}
-				if c.IsSet("selector") {
-					argv = append(argv, "--" + "selector", c.String("selector"))
-				}
-				if c.IsSet("show-managed-fields") {
-					argv = append(argv, "--" + "show-managed-fields", c.String("show-managed-fields"))
-				}
-				if c.IsSet("template") {
-					argv = append(argv, "--" + "template", c.String("template"))
-				}
-				if c.IsSet("timeout") {
-					argv = append(argv, "--" + "timeout", c.String("timeout"))
-				}
-				_ = strconv.Itoa // keep strconv imported even when no flags
-				return r.Exec(ctx, BinaryName, argv...)
+			&cli.Command{
+				Name:  "scale",
+				Usage: "Set a new size for a deployment, replica set, replication controller, or stateful set.",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "all"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
+					&cli.IntFlag{Name: "current-replicas"},
+					&cli.StringFlag{Name: "dry-run"},
+					&cli.StringSliceFlag{Name: "filename"},
+					&cli.StringFlag{Name: "kustomize"},
+					&cli.StringFlag{Name: "output"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.IntFlag{Name: "replicas"},
+					&cli.StringFlag{Name: "resource-version"},
+					&cli.StringFlag{Name: "selector"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
+					&cli.StringFlag{Name: "template"},
+					&cli.StringFlag{Name: "timeout"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.scale",
+						Kind:  policy.Mutating,
+						Scope: "kubectl.scale:write",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							if c.Bool("all") {
+								args["--all"] = "true"
+							}
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
+							args["--current-replicas"] = strconv.Itoa(int(c.Int("current-replicas")))
+							args["--dry-run"] = c.String("dry-run")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
+							args["--kustomize"] = c.String("kustomize")
+							args["--output"] = c.String("output")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							args["--replicas"] = strconv.Itoa(int(c.Int("replicas")))
+							args["--resource-version"] = c.String("resource-version")
+							args["--selector"] = c.String("selector")
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
+							args["--template"] = c.String("template")
+							args["--timeout"] = c.String("timeout")
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"scale"}
+							if c.IsSet("all") {
+								if c.Bool("all") {
+									argv = append(argv, "--all")
+								}
+							}
+							if c.IsSet("allow-missing-template-keys") {
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
+							}
+							if c.IsSet("current-replicas") {
+								argv = append(argv, "--current-replicas", strconv.Itoa(int(c.Int("current-replicas"))))
+							}
+							if c.IsSet("dry-run") {
+								argv = append(argv, "--dry-run", c.String("dry-run"))
+							}
+							if c.IsSet("filename") {
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
+							}
+							if c.IsSet("kustomize") {
+								argv = append(argv, "--kustomize", c.String("kustomize"))
+							}
+							if c.IsSet("output") {
+								argv = append(argv, "--output", c.String("output"))
+							}
+							if c.IsSet("recursive") {
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
+							}
+							if c.IsSet("replicas") {
+								argv = append(argv, "--replicas", strconv.Itoa(int(c.Int("replicas"))))
+							}
+							if c.IsSet("resource-version") {
+								argv = append(argv, "--resource-version", c.String("resource-version"))
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("show-managed-fields") {
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
+							}
+							if c.IsSet("template") {
+								argv = append(argv, "--template", c.String("template"))
+							}
+							if c.IsSet("timeout") {
+								argv = append(argv, "--timeout", c.String("timeout"))
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
 			},
-		},
-		v, w,
-	),
-},
+			&cli.Command{
+				Name:  "set",
+				Usage: "Configure application resources.",
+				Commands: []*cli.Command{
+					&cli.Command{
+						Name:  "env",
+						Usage: "Update environment variables on a pod template.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "all"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "containers"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringSliceFlag{Name: "env"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "from"},
+							&cli.StringSliceFlag{Name: "keys"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.BoolFlag{Name: "list"},
+							&cli.BoolFlag{Name: "local"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "overwrite"},
+							&cli.StringFlag{Name: "prefix"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "resolve"},
+							&cli.StringFlag{Name: "selector"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.set.env",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.set:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("all") {
+										args["--all"] = "true"
+									}
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--containers"] = c.String("containers")
+									args["--dry-run"] = c.String("dry-run")
+									for _, v := range c.StringSlice("env") {
+										positional = append(positional, v)
+									}
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--from"] = c.String("from")
+									for _, v := range c.StringSlice("keys") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									if c.Bool("list") {
+										args["--list"] = "true"
+									}
+									if c.Bool("local") {
+										args["--local"] = "true"
+									}
+									args["--output"] = c.String("output")
+									if c.Bool("overwrite") {
+										args["--overwrite"] = "true"
+									}
+									args["--prefix"] = c.String("prefix")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									if c.Bool("resolve") {
+										args["--resolve"] = "true"
+									}
+									args["--selector"] = c.String("selector")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"set", "env"}
+									if c.IsSet("all") {
+										if c.Bool("all") {
+											argv = append(argv, "--all")
+										}
+									}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("containers") {
+										argv = append(argv, "--containers", c.String("containers"))
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("env") {
+										for _, v := range c.StringSlice("env") {
+											argv = append(argv, "--env", v)
+										}
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("from") {
+										argv = append(argv, "--from", c.String("from"))
+									}
+									if c.IsSet("keys") {
+										for _, v := range c.StringSlice("keys") {
+											argv = append(argv, "--keys", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("list") {
+										if c.Bool("list") {
+											argv = append(argv, "--list")
+										}
+									}
+									if c.IsSet("local") {
+										if c.Bool("local") {
+											argv = append(argv, "--local")
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("overwrite") {
+										if c.Bool("overwrite") {
+											argv = append(argv, "--overwrite")
+										}
+									}
+									if c.IsSet("prefix") {
+										argv = append(argv, "--prefix", c.String("prefix"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("resolve") {
+										if c.Bool("resolve") {
+											argv = append(argv, "--resolve")
+										}
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "image",
+						Usage: "Update existing container image(s) of resources.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "all"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.BoolFlag{Name: "local"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.StringFlag{Name: "selector"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.set.image",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.set:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("all") {
+										args["--all"] = "true"
+									}
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									if c.Bool("local") {
+										args["--local"] = "true"
+									}
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									args["--selector"] = c.String("selector")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"set", "image"}
+									if c.IsSet("all") {
+										if c.Bool("all") {
+											argv = append(argv, "--all")
+										}
+									}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("local") {
+										if c.Bool("local") {
+											argv = append(argv, "--local")
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "resources",
+						Usage: "Specify compute resource requirements (CPU, memory) for any resource that defines a pod template.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "all"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "containers"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.StringFlag{Name: "limits"},
+							&cli.BoolFlag{Name: "local"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.StringFlag{Name: "requests"},
+							&cli.StringFlag{Name: "selector"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.set.resources",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.set:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("all") {
+										args["--all"] = "true"
+									}
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--containers"] = c.String("containers")
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									args["--limits"] = c.String("limits")
+									if c.Bool("local") {
+										args["--local"] = "true"
+									}
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									args["--requests"] = c.String("requests")
+									args["--selector"] = c.String("selector")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"set", "resources"}
+									if c.IsSet("all") {
+										if c.Bool("all") {
+											argv = append(argv, "--all")
+										}
+									}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("containers") {
+										argv = append(argv, "--containers", c.String("containers"))
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("limits") {
+										argv = append(argv, "--limits", c.String("limits"))
+									}
+									if c.IsSet("local") {
+										if c.Bool("local") {
+											argv = append(argv, "--local")
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("requests") {
+										argv = append(argv, "--requests", c.String("requests"))
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "selector",
+						Usage: "Set the selector on a resource.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "all"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.BoolFlag{Name: "local"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.StringFlag{Name: "resource-version"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.set.selector",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.set:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("all") {
+										args["--all"] = "true"
+									}
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									if c.Bool("local") {
+										args["--local"] = "true"
+									}
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									args["--resource-version"] = c.String("resource-version")
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"set", "selector"}
+									if c.IsSet("all") {
+										if c.Bool("all") {
+											argv = append(argv, "--all")
+										}
+									}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("local") {
+										if c.Bool("local") {
+											argv = append(argv, "--local")
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("resource-version") {
+										argv = append(argv, "--resource-version", c.String("resource-version"))
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "serviceaccount",
+						Usage: "Update the service account of pod template resources.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "all"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.BoolFlag{Name: "local"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.set.serviceaccount",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.set:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("all") {
+										args["--all"] = "true"
+									}
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									if c.Bool("local") {
+										args["--local"] = "true"
+									}
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"set", "serviceaccount"}
+									if c.IsSet("all") {
+										if c.Bool("all") {
+											argv = append(argv, "--all")
+										}
+									}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("local") {
+										if c.Bool("local") {
+											argv = append(argv, "--local")
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "subject",
+						Usage: "Update the user, group, or service account in a role binding or cluster role binding.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "all"},
+							&cli.BoolFlag{Name: "allow-missing-template-keys"},
+							&cli.StringFlag{Name: "dry-run"},
+							&cli.StringFlag{Name: "field-manager"},
+							&cli.StringSliceFlag{Name: "filename"},
+							&cli.StringSliceFlag{Name: "group"},
+							&cli.StringFlag{Name: "kustomize"},
+							&cli.BoolFlag{Name: "local"},
+							&cli.StringFlag{Name: "output"},
+							&cli.BoolFlag{Name: "recursive"},
+							&cli.StringFlag{Name: "selector"},
+							&cli.StringSliceFlag{Name: "serviceaccount"},
+							&cli.BoolFlag{Name: "show-managed-fields"},
+							&cli.StringFlag{Name: "template"},
+							&cli.StringSliceFlag{Name: "user"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.set.subject",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.set:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("all") {
+										args["--all"] = "true"
+									}
+									if c.Bool("allow-missing-template-keys") {
+										args["--allow-missing-template-keys"] = "true"
+									}
+									args["--dry-run"] = c.String("dry-run")
+									args["--field-manager"] = c.String("field-manager")
+									for _, v := range c.StringSlice("filename") {
+										positional = append(positional, v)
+									}
+									for _, v := range c.StringSlice("group") {
+										positional = append(positional, v)
+									}
+									args["--kustomize"] = c.String("kustomize")
+									if c.Bool("local") {
+										args["--local"] = "true"
+									}
+									args["--output"] = c.String("output")
+									if c.Bool("recursive") {
+										args["--recursive"] = "true"
+									}
+									args["--selector"] = c.String("selector")
+									for _, v := range c.StringSlice("serviceaccount") {
+										positional = append(positional, v)
+									}
+									if c.Bool("show-managed-fields") {
+										args["--show-managed-fields"] = "true"
+									}
+									args["--template"] = c.String("template")
+									for _, v := range c.StringSlice("user") {
+										positional = append(positional, v)
+									}
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"set", "subject"}
+									if c.IsSet("all") {
+										if c.Bool("all") {
+											argv = append(argv, "--all")
+										}
+									}
+									if c.IsSet("allow-missing-template-keys") {
+										if c.Bool("allow-missing-template-keys") {
+											argv = append(argv, "--allow-missing-template-keys")
+										}
+									}
+									if c.IsSet("dry-run") {
+										argv = append(argv, "--dry-run", c.String("dry-run"))
+									}
+									if c.IsSet("field-manager") {
+										argv = append(argv, "--field-manager", c.String("field-manager"))
+									}
+									if c.IsSet("filename") {
+										for _, v := range c.StringSlice("filename") {
+											argv = append(argv, "--filename", v)
+										}
+									}
+									if c.IsSet("group") {
+										for _, v := range c.StringSlice("group") {
+											argv = append(argv, "--group", v)
+										}
+									}
+									if c.IsSet("kustomize") {
+										argv = append(argv, "--kustomize", c.String("kustomize"))
+									}
+									if c.IsSet("local") {
+										if c.Bool("local") {
+											argv = append(argv, "--local")
+										}
+									}
+									if c.IsSet("output") {
+										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("recursive") {
+										if c.Bool("recursive") {
+											argv = append(argv, "--recursive")
+										}
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("serviceaccount") {
+										for _, v := range c.StringSlice("serviceaccount") {
+											argv = append(argv, "--serviceaccount", v)
+										}
+									}
+									if c.IsSet("show-managed-fields") {
+										if c.Bool("show-managed-fields") {
+											argv = append(argv, "--show-managed-fields")
+										}
+									}
+									if c.IsSet("template") {
+										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("user") {
+										for _, v := range c.StringSlice("user") {
+											argv = append(argv, "--user", v)
+										}
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+				},
+			},
+			&cli.Command{
+				Name:  "taint",
+				Usage: "Update the taints on one or more nodes.",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "all"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
+					&cli.StringFlag{Name: "dry-run"},
+					&cli.StringFlag{Name: "field-manager"},
+					&cli.StringFlag{Name: "output"},
+					&cli.BoolFlag{Name: "overwrite"},
+					&cli.StringFlag{Name: "selector"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
+					&cli.StringFlag{Name: "template"},
+					&cli.StringFlag{Name: "validate"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.taint",
+						Kind:  policy.Mutating,
+						Scope: "kubectl.taint:write",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							if c.Bool("all") {
+								args["--all"] = "true"
+							}
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
+							args["--dry-run"] = c.String("dry-run")
+							args["--field-manager"] = c.String("field-manager")
+							args["--output"] = c.String("output")
+							if c.Bool("overwrite") {
+								args["--overwrite"] = "true"
+							}
+							args["--selector"] = c.String("selector")
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
+							args["--template"] = c.String("template")
+							args["--validate"] = c.String("validate")
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"taint"}
+							if c.IsSet("all") {
+								if c.Bool("all") {
+									argv = append(argv, "--all")
+								}
+							}
+							if c.IsSet("allow-missing-template-keys") {
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
+							}
+							if c.IsSet("dry-run") {
+								argv = append(argv, "--dry-run", c.String("dry-run"))
+							}
+							if c.IsSet("field-manager") {
+								argv = append(argv, "--field-manager", c.String("field-manager"))
+							}
+							if c.IsSet("output") {
+								argv = append(argv, "--output", c.String("output"))
+							}
+							if c.IsSet("overwrite") {
+								if c.Bool("overwrite") {
+									argv = append(argv, "--overwrite")
+								}
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("show-managed-fields") {
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
+							}
+							if c.IsSet("template") {
+								argv = append(argv, "--template", c.String("template"))
+							}
+							if c.IsSet("validate") {
+								argv = append(argv, "--validate", c.String("validate"))
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
+			},
+			&cli.Command{
+				Name:  "top",
+				Usage: "Display Resource (CPU/Memory) usage.",
+				Commands: []*cli.Command{
+					&cli.Command{
+						Name:  "node",
+						Usage: "Display resource (CPU/memory) usage of nodes.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "no-headers"},
+							&cli.StringFlag{Name: "selector"},
+							&cli.BoolFlag{Name: "show-capacity"},
+							&cli.StringFlag{Name: "sort-by"},
+							&cli.BoolFlag{Name: "use-protocol-buffers"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.top.node",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.top:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("no-headers") {
+										args["--no-headers"] = "true"
+									}
+									args["--selector"] = c.String("selector")
+									if c.Bool("show-capacity") {
+										args["--show-capacity"] = "true"
+									}
+									args["--sort-by"] = c.String("sort-by")
+									if c.Bool("use-protocol-buffers") {
+										args["--use-protocol-buffers"] = "true"
+									}
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"top", "node"}
+									if c.IsSet("no-headers") {
+										if c.Bool("no-headers") {
+											argv = append(argv, "--no-headers")
+										}
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("show-capacity") {
+										if c.Bool("show-capacity") {
+											argv = append(argv, "--show-capacity")
+										}
+									}
+									if c.IsSet("sort-by") {
+										argv = append(argv, "--sort-by", c.String("sort-by"))
+									}
+									if c.IsSet("use-protocol-buffers") {
+										if c.Bool("use-protocol-buffers") {
+											argv = append(argv, "--use-protocol-buffers")
+										}
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+					&cli.Command{
+						Name:  "pod",
+						Usage: "Display resource (CPU/memory) usage of pods.",
+						Flags: []cli.Flag{
+							&cli.BoolFlag{Name: "all-namespaces"},
+							&cli.BoolFlag{Name: "containers"},
+							&cli.StringFlag{Name: "field-selector"},
+							&cli.BoolFlag{Name: "no-headers"},
+							&cli.StringFlag{Name: "selector"},
+							&cli.StringFlag{Name: "sort-by"},
+							&cli.BoolFlag{Name: "sum"},
+							&cli.BoolFlag{Name: "use-protocol-buffers"},
+						},
+						Action: verb.Wrap(
+							verb.Spec{
+								Name:  "kubectl.top.pod",
+								Kind:  policy.Mutating,
+								Scope: "kubectl.top:write",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+									args := map[string]string{}
+									var positional []string
+									_ = positional
+									if c.Bool("all-namespaces") {
+										args["--all-namespaces"] = "true"
+									}
+									if c.Bool("containers") {
+										args["--containers"] = "true"
+									}
+									args["--field-selector"] = c.String("field-selector")
+									if c.Bool("no-headers") {
+										args["--no-headers"] = "true"
+									}
+									args["--selector"] = c.String("selector")
+									args["--sort-by"] = c.String("sort-by")
+									if c.Bool("sum") {
+										args["--sum"] = "true"
+									}
+									if c.Bool("use-protocol-buffers") {
+										args["--use-protocol-buffers"] = "true"
+									}
+									positional = append(positional, c.Args().Slice()...)
+									return args, positional, c.String("token")
+								},
+								Action: func(ctx context.Context, c *cli.Command) error {
+									argv := []string{"top", "pod"}
+									if c.IsSet("all-namespaces") {
+										if c.Bool("all-namespaces") {
+											argv = append(argv, "--all-namespaces")
+										}
+									}
+									if c.IsSet("containers") {
+										if c.Bool("containers") {
+											argv = append(argv, "--containers")
+										}
+									}
+									if c.IsSet("field-selector") {
+										argv = append(argv, "--field-selector", c.String("field-selector"))
+									}
+									if c.IsSet("no-headers") {
+										if c.Bool("no-headers") {
+											argv = append(argv, "--no-headers")
+										}
+									}
+									if c.IsSet("selector") {
+										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("sort-by") {
+										argv = append(argv, "--sort-by", c.String("sort-by"))
+									}
+									if c.IsSet("sum") {
+										if c.Bool("sum") {
+											argv = append(argv, "--sum")
+										}
+									}
+									if c.IsSet("use-protocol-buffers") {
+										if c.Bool("use-protocol-buffers") {
+											argv = append(argv, "--use-protocol-buffers")
+										}
+									}
+									// Forward any trailing positional args after flags so verbs
+									// like "gh api <endpoint>", "kubectl get <resource>", and
+									// "aws s3 cp <src> <dst>" reach the underlying tool.
+									argv = append(argv, c.Args().Slice()...)
+									_ = strconv.Itoa // keep strconv imported even when no flags
+									return r.Exec(ctx, BinaryName, argv...)
+								},
+							},
+							v, w,
+						),
+					},
+				},
+			},
+			&cli.Command{
+				Name:  "uncordon",
+				Usage: "Mark node as schedulable.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "dry-run"},
+					&cli.StringFlag{Name: "selector"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.uncordon",
+						Kind:  policy.Mutating,
+						Scope: "kubectl.uncordon:write",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							args["--dry-run"] = c.String("dry-run")
+							args["--selector"] = c.String("selector")
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"uncordon"}
+							if c.IsSet("dry-run") {
+								argv = append(argv, "--dry-run", c.String("dry-run"))
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
+			},
+			&cli.Command{
+				Name:  "wait",
+				Usage: "Experimental: Wait for a specific condition on one or many resources.",
+				Flags: []cli.Flag{
+					&cli.BoolFlag{Name: "all"},
+					&cli.BoolFlag{Name: "all-namespaces"},
+					&cli.BoolFlag{Name: "allow-missing-template-keys"},
+					&cli.StringFlag{Name: "field-selector"},
+					&cli.StringSliceFlag{Name: "filename"},
+					&cli.StringFlag{Name: "for"},
+					&cli.BoolFlag{Name: "local"},
+					&cli.StringFlag{Name: "output"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.StringFlag{Name: "selector"},
+					&cli.BoolFlag{Name: "show-managed-fields"},
+					&cli.StringFlag{Name: "template"},
+					&cli.StringFlag{Name: "timeout"},
+				},
+				Action: verb.Wrap(
+					verb.Spec{
+						Name:  "kubectl.wait",
+						Kind:  policy.ReadOnly,
+						Scope: "kubectl.wait:read",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+							args := map[string]string{}
+							var positional []string
+							_ = positional
+							if c.Bool("all") {
+								args["--all"] = "true"
+							}
+							if c.Bool("all-namespaces") {
+								args["--all-namespaces"] = "true"
+							}
+							if c.Bool("allow-missing-template-keys") {
+								args["--allow-missing-template-keys"] = "true"
+							}
+							args["--field-selector"] = c.String("field-selector")
+							for _, v := range c.StringSlice("filename") {
+								positional = append(positional, v)
+							}
+							args["--for"] = c.String("for")
+							if c.Bool("local") {
+								args["--local"] = "true"
+							}
+							args["--output"] = c.String("output")
+							if c.Bool("recursive") {
+								args["--recursive"] = "true"
+							}
+							args["--selector"] = c.String("selector")
+							if c.Bool("show-managed-fields") {
+								args["--show-managed-fields"] = "true"
+							}
+							args["--template"] = c.String("template")
+							args["--timeout"] = c.String("timeout")
+							positional = append(positional, c.Args().Slice()...)
+							return args, positional, c.String("token")
+						},
+						Action: func(ctx context.Context, c *cli.Command) error {
+							argv := []string{"wait"}
+							if c.IsSet("all") {
+								if c.Bool("all") {
+									argv = append(argv, "--all")
+								}
+							}
+							if c.IsSet("all-namespaces") {
+								if c.Bool("all-namespaces") {
+									argv = append(argv, "--all-namespaces")
+								}
+							}
+							if c.IsSet("allow-missing-template-keys") {
+								if c.Bool("allow-missing-template-keys") {
+									argv = append(argv, "--allow-missing-template-keys")
+								}
+							}
+							if c.IsSet("field-selector") {
+								argv = append(argv, "--field-selector", c.String("field-selector"))
+							}
+							if c.IsSet("filename") {
+								for _, v := range c.StringSlice("filename") {
+									argv = append(argv, "--filename", v)
+								}
+							}
+							if c.IsSet("for") {
+								argv = append(argv, "--for", c.String("for"))
+							}
+							if c.IsSet("local") {
+								if c.Bool("local") {
+									argv = append(argv, "--local")
+								}
+							}
+							if c.IsSet("output") {
+								argv = append(argv, "--output", c.String("output"))
+							}
+							if c.IsSet("recursive") {
+								if c.Bool("recursive") {
+									argv = append(argv, "--recursive")
+								}
+							}
+							if c.IsSet("selector") {
+								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("show-managed-fields") {
+								if c.Bool("show-managed-fields") {
+									argv = append(argv, "--show-managed-fields")
+								}
+							}
+							if c.IsSet("template") {
+								argv = append(argv, "--template", c.String("template"))
+							}
+							if c.IsSet("timeout") {
+								argv = append(argv, "--timeout", c.String("timeout"))
+							}
+							// Forward any trailing positional args after flags so verbs
+							// like "gh api <endpoint>", "kubectl get <resource>", and
+							// "aws s3 cp <src> <dst>" reach the underlying tool.
+							argv = append(argv, c.Args().Slice()...)
+							_ = strconv.Itoa // keep strconv imported even when no flags
+							return r.Exec(ctx, BinaryName, argv...)
+						},
+					},
+					v, w,
+				),
+			},
 		},
 	}
 }
