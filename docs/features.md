@@ -46,4 +46,4 @@ effectively zero.
 - Adversarial review loop: out of scope for v1.
 - Embedded sub-binaries (aws/kubectl/gh inside the coily binary): planned but not built. pkg/shell resolves via PATH currently.
 - SDK-native ssh/tailscale: planned. Currently ssh shells out.
-- Layer 3 end-to-end tests against kind cluster or sandbox AWS: deliberately unbuilt. See docs/unresolved.md.
+- Layer 3 end-to-end tests against kind cluster or sandbox AWS: deliberately unbuilt. Scrubbed; not on the roadmap.
