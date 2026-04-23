@@ -1,5 +1,11 @@
 # Agent instructions
 
+See `../AGENTS.md` for workspace-level conventions (git workflow, test/lint autonomy, readonly ops, writing voice, deploy knowledge). This file covers only what's specific to this repo.
+
+**Exception:** auto-push to main only when this repo is the session's primary cwd (check env block, not live cwd). If a session started in a sibling and cd'd in, do not auto-push.
+
+---
+
 ## Auto-commit policy
 
 When this repo is your primary working directory, `git add`, `git commit`, and `git push` to `main` automatically after each successful change. No confirmation needed.
@@ -10,22 +16,4 @@ When this repo is your primary working directory, `git add`, `git commit`, and `
 
 - Only when the session's primary working directory is `/Users/kai/projects/coilysiren/coily` (check the env block at session start). If you were started in a sibling repo and later `cd`'d into coily, do not auto-push - defer to the parent repo's policy.
 - Group related edits into one commit. Don't push half-finished work.
-- Run the project's checks (build, test, lint) before pushing. If they fail, fix and re-stage rather than pushing red.
-- Never `--no-verify`, never force-push.
 - Skip the auto-push if the change touches release workflows, secrets, or anything Kai flagged as needing review.
-
-## Prose style
-
-Kai's writing voice guide applies to all prose (commit messages, PR bodies, READMEs, docs):
-
-- `/Users/kai/projects/coilysiren/coilyco-vault/Obsidian Vault/Self/writing-voice.md`
-
-High-frequency rules:
-
-- No em-dashes. Use a period, comma, parens, or ` - ` (hyphen with spaces).
-- No italics, ever.
-- No semicolons in prose. (Code is fine.)
-- Bold only for structural anchors, not mid-sentence emphasis.
-- Decision or answer in sentence one.
-- One emoji per message max.
-- Fragments are complete sentences.
