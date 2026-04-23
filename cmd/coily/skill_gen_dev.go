@@ -15,7 +15,9 @@ import (
 // skill files. Per docs/threat-model.md, dev-only conveniences are compiled
 // out of the prod binary so an agent that lands on /usr/local/bin/coily
 // cannot call them.
-func init() { registerDevOnlyCommand(skillGenCmd) }
+func init() {
+	registerDevCommandBuilder(func(_ *Runner) *cli.Command { return skillGenCmd })
+}
 
 var skillGenCmd = &cli.Command{
 	Name:  "skill-gen",

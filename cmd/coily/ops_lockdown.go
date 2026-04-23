@@ -13,9 +13,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-func init() { registerCommand(lockdownCmd) }
-
-// lockdown is tiered by blast radius (resolves docs/unresolved/13-lockdown-token.md):
+// lockdownCommand is tiered by blast radius (resolves docs/unresolved/13-lockdown-token.md):
 //
 //   - bare `coily lockdown` -> ReadOnly, prints plan, no token.
 //   - `coily lockdown --apply` -> ReadOnly, writes only if .claude/settings.json
@@ -26,10 +24,11 @@ func init() { registerCommand(lockdownCmd) }
 //
 // The previous silent-merge behavior is gone. There is no middle ground
 // between "bootstrap fresh" and "clobber".
-var lockdownCmd = &cli.Command{
-	Name:  "lockdown",
-	Usage: "Write per-repo Claude Code permissions that force all ops through coily.",
-	Description: `lockdown renders a .claude/settings.json (or settings.local.json) for the
+func (r *Runner) lockdownCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "lockdown",
+		Usage: "Write per-repo Claude Code permissions that force all ops through coily.",
+		Description: `lockdown renders a .claude/settings.json (or settings.local.json) for the
 target directory with the canonical allow/deny lists baked into coily.
 
 Three modes, by blast radius:
@@ -37,52 +36,53 @@ Three modes, by blast radius:
   coily lockdown                    Print the plan and exit. No write.
   coily lockdown --apply            Write a fresh file. Refuses if one exists.
   coily lockdown --apply --replace  Overwrite an existing file. Requires a token.`,
-	Flags: []cli.Flag{
-		&cli.StringFlag{
-			Name:  "path",
-			Usage: "directory whose .claude/ subdir to target",
-			Value: ".",
-		},
-		&cli.BoolFlag{
-			Name:  "local",
-			Usage: "write to .claude/settings.local.json instead of settings.json",
-		},
-		&cli.BoolFlag{
-			Name:  "apply",
-			Usage: "actually write the file (default: dry-run)",
-		},
-		&cli.BoolFlag{
-			Name:  "replace",
-			Usage: "overwrite an existing settings file (requires --apply, requires a token)",
-		},
-		&cli.StringFlag{
-			Name:  "token",
-			Usage: "confirmation token scoped to lockdown (only consulted with --apply --replace)",
-		},
-	},
-	Action: verb.Wrap(
-		verb.Spec{
-			Name: "lockdown",
-			// Dynamic classification: only --apply --replace is mutating.
-			// Bare invocations and fresh-bootstrap (--apply alone) stay
-			// ReadOnly so the safety boundary can be turned on without a
-			// token round-trip.
-			KindFunc: func(c *cli.Command) policy.Kind {
-				if c.Bool("apply") && c.Bool("replace") {
-					return policy.Mutating
-				}
-				return policy.ReadOnly
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "path",
+				Usage: "directory whose .claude/ subdir to target",
+				Value: ".",
 			},
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-				return map[string]string{
-					"--path": c.String("path"),
-				}, nil, c.String("token")
+			&cli.BoolFlag{
+				Name:  "local",
+				Usage: "write to .claude/settings.local.json instead of settings.json",
 			},
-			Action: lockdownAction,
+			&cli.BoolFlag{
+				Name:  "apply",
+				Usage: "actually write the file (default: dry-run)",
+			},
+			&cli.BoolFlag{
+				Name:  "replace",
+				Usage: "overwrite an existing settings file (requires --apply, requires a token)",
+			},
+			&cli.StringFlag{
+				Name:  "token",
+				Usage: "confirmation token scoped to lockdown (only consulted with --apply --replace)",
+			},
 		},
-		getRuntime().issuer,
-		getRuntime().audit,
-	),
+		Action: verb.Wrap(
+			verb.Spec{
+				Name: "lockdown",
+				// Dynamic classification: only --apply --replace is mutating.
+				// Bare invocations and fresh-bootstrap (--apply alone) stay
+				// ReadOnly so the safety boundary can be turned on without a
+				// token round-trip.
+				KindFunc: func(c *cli.Command) policy.Kind {
+					if c.Bool("apply") && c.Bool("replace") {
+						return policy.Mutating
+					}
+					return policy.ReadOnly
+				},
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+					return map[string]string{
+						"--path": c.String("path"),
+					}, nil, c.String("token")
+				},
+				Action: lockdownAction,
+			},
+			r.Verifier,
+			r.Audit,
+		),
+	}
 }
 
 func lockdownAction(_ context.Context, c *cli.Command) error {

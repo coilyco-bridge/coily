@@ -5,11 +5,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 
 	"github.com/coilysiren/coily/pkg/audit"
 	"github.com/coilysiren/coily/pkg/auth"
 	"github.com/coilysiren/coily/pkg/config"
+	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/shell"
 )
 
@@ -42,55 +42,52 @@ func defaultStatePath(name string) string {
 	return filepath.Join(home, ".local", "state", "coily", name)
 }
 
-// runtime is the package-wide carrier for audit writer, token verifier, and
-// shell runner. Verbs obtain it via getRuntime(). Constructed lazily on first
-// use from embedded config. Singleton.
-type runtime struct {
-	cfg    *config.Config
-	audit  *audit.Writer
-	issuer *auth.Issuer
-	runner *shell.Runner
+// Runner owns the audit writer, token verifier, shell runner, and embedded
+// config. Constructed once in main() and threaded into every cli.Command
+// action via methods on this struct. Tests construct a Runner directly with
+// fakes for Audit and Verifier.
+//
+// The fields are interfaces (or interface-shaped) where they need to be
+// swappable. Cfg is the loaded *config.Config. Runner is the shell exec
+// gateway. Audit is the JSONL writer. Verifier is what policy.Enforce calls
+// to validate confirmation tokens for mutating verbs.
+type Runner struct {
+	Cfg      *config.Config
+	Runner   *shell.Runner
+	Audit    *audit.Writer
+	Verifier policy.TokenVerifier
 }
 
-var (
-	rtOnce sync.Once
-	rtInst *runtime
-)
+// NewRunner builds the production Runner from embedded config. Exits the
+// process if the config does not parse, since nothing else can work without
+// it. Equivalent to the old getRuntime() singleton, but called explicitly
+// from main() exactly once.
+func NewRunner() *Runner {
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "coily: fatal: cannot load embedded config: %v\n", err)
+		os.Exit(2)
+	}
 
-func getRuntime() *runtime {
-	rtOnce.Do(func() {
-		cfg, err := config.Load()
-		if err != nil {
-			// Runtime is required. If config won't parse, nothing else can work.
-			fmt.Fprintf(os.Stderr, "coily: fatal: cannot load embedded config: %v\n", err)
-			os.Exit(2)
-		}
+	auditPath := expandHome(cfg.Audit.LogPath)
+	if auditPath == "" {
+		auditPath = defaultStatePath("audit.jsonl")
+	}
+	issuerKey := expandHome(cfg.Tokens.IssuerKeyPath)
+	if issuerKey == "" {
+		issuerKey = defaultStatePath("token-issuer.key")
+	}
 
-		auditPath := expandHome(cfg.Audit.LogPath)
-		if auditPath == "" {
-			auditPath = defaultStatePath("audit.jsonl")
-		}
-		issuerKey := expandHome(cfg.Tokens.IssuerKeyPath)
-		if issuerKey == "" {
-			issuerKey = defaultStatePath("token-issuer.key")
-		}
+	aw := audit.NewWriter(auditPath)
+	aw.MaxSizeMB = cfg.Audit.MaxSizeMB
+	aw.MaxBackups = cfg.Audit.MaxBackups
+	aw.MaxAgeDays = cfg.Audit.MaxAgeDays
+	aw.Compress = cfg.Audit.Compress
 
-		aw := audit.NewWriter(auditPath)
-		aw.MaxSizeMB = cfg.Audit.MaxSizeMB
-		aw.MaxBackups = cfg.Audit.MaxBackups
-		aw.MaxAgeDays = cfg.Audit.MaxAgeDays
-		aw.Compress = cfg.Audit.Compress
-
-		rtInst = &runtime{
-			cfg:    cfg,
-			audit:  aw,
-			issuer: auth.NewIssuer(issuerKey),
-			runner: &shell.Runner{
-				Stdout: os.Stdout,
-				Stderr: os.Stderr,
-				Stdin:  os.Stdin,
-			},
-		}
-	})
-	return rtInst
+	return &Runner{
+		Cfg:      cfg,
+		Runner:   &shell.Runner{Stdout: os.Stdout, Stderr: os.Stderr, Stdin: os.Stdin},
+		Audit:    aw,
+		Verifier: auth.NewIssuer(issuerKey),
+	}
 }

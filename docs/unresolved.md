@@ -11,7 +11,6 @@ out one agent per item, each touching a single file.
 2. [Mutating-verb classifier is prefix-based and will misclassify](unresolved/02-classifier-prefixes.md)
 4. [gh api's --method flag clashes with coily's structure](unresolved/04-gh-api-method.md)
 6. [Audit log perms are 0600 but the default path is ~/.local/state](unresolved/06-audit-log-perms.md)
-7. [`runtime` is init-time. Test isolation is awkward](unresolved/07-runtime-singleton.md)
 
 ## Incomplete features
 
@@ -29,8 +28,7 @@ out one agent per item, each touching a single file.
 1. Fix flag types in gen-passthrough (bug #1 above). Highest-utility fix.
 2. Add a docs/audit.md explaining the log format and a `coily audit tail`
    verb so Kai can review it easily.
-3. Pass runtime into verbs explicitly so cmd/coily/ becomes testable (#7).
-4. Then: embedded binaries (#8). Big lift but closes the threat model.
+3. Then: embedded binaries (#8). Big lift but closes the threat model.
 
 ## Things that are done but deserve skepticism
 

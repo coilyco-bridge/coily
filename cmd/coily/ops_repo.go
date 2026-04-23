@@ -13,25 +13,21 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// repoConfig is the loaded per-repo config, or nil when no coily.yaml was
-// found. loadRepoCommands populates it exactly once via initialization.
-var repoConfig *repocfg.Config
-
 // loadRepoCommands discovers coily.yaml relative to cwd and returns a
-// *cli.Command for each non-shadowing entry. Reserved names (those already
-// registered as built-in verbs) are skipped with a stderr warning so an
-// accidentally-named repo command cannot silently replace a privileged op.
-// A missing config is not an error; returns (nil, nil).
-func loadRepoCommands(reserved map[string]bool) []*cli.Command {
+// *cli.Command for each non-shadowing entry along with the loaded
+// *repocfg.Config (or nil when no config was found). Reserved names (those
+// already registered as built-in verbs) are skipped with a stderr warning so
+// an accidentally-named repo command cannot silently replace a privileged
+// op. A missing config is not an error; returns (nil, nil).
+func (r *Runner) loadRepoCommands(reserved map[string]bool) (*repocfg.Config, []*cli.Command) {
 	cfg, err := repocfg.LoadDefault()
 	if err != nil {
 		if errors.Is(err, repocfg.ErrNoConfig) {
-			return nil
+			return nil, nil
 		}
 		fmt.Fprintf(os.Stderr, "coily: repo config error: %v\n", err)
-		return nil
+		return nil, nil
 	}
-	repoConfig = cfg
 	out := make([]*cli.Command, 0, len(cfg.Commands))
 	for _, rc := range cfg.Commands {
 		if reserved[rc.Name] {
@@ -40,15 +36,15 @@ func loadRepoCommands(reserved map[string]bool) []*cli.Command {
 				cfg.Path, rc.Name)
 			continue
 		}
-		out = append(out, buildRepoCommand(rc))
+		out = append(out, r.buildRepoCommand(cfg, rc))
 	}
-	return out
+	return cfg, out
 }
 
 // buildRepoCommand turns one repocfg.Command into a cli.Command whose Action
 // exec's the declared argv plus any user-supplied positional args. Everything
 // runs through verb.Wrap so policy validation and audit logging apply.
-func buildRepoCommand(rc repocfg.Command) *cli.Command {
+func (r *Runner) buildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) *cli.Command {
 	usage := rc.Description
 	if usage == "" {
 		usage = "Repo command: " + strings.Join(rc.Argv, " ")
@@ -61,7 +57,7 @@ func buildRepoCommand(rc repocfg.Command) *cli.Command {
 		Description: fmt.Sprintf(
 			"Per-repo command loaded from %s.\nExpands to: %s\n\nExtra positional args are appended and validated against the same "+
 				"shell-metacharacter rules as privileged verbs.",
-			currentRepoPath(), strings.Join(rc.Argv, " "),
+			cfg.Path, strings.Join(rc.Argv, " "),
 		),
 		Action: verb.Wrap(
 			verb.Spec{
@@ -78,34 +74,27 @@ func buildRepoCommand(rc repocfg.Command) *cli.Command {
 				Action: func(ctx context.Context, c *cli.Command) error {
 					argv := append([]string{}, rc.Argv[1:]...)
 					argv = append(argv, c.Args().Slice()...)
-					return getRuntime().runner.Exec(ctx, rc.Argv[0], argv...)
+					return r.Runner.Exec(ctx, rc.Argv[0], argv...)
 				},
 			},
-			getRuntime().issuer,
-			getRuntime().audit,
+			r.Verifier,
+			r.Audit,
 		),
 	}
 }
 
-func currentRepoPath() string {
-	if repoConfig == nil {
-		return "coily.yaml"
-	}
-	return repoConfig.Path
-}
-
 // listCommand renders the built-in and repo command inventory in one shot.
 // Same output for --list on the root command; see main.go.
-func listCommand(builtIns, repo []*cli.Command) {
+func listCommand(builtIns, repo []*cli.Command, repoCfg *repocfg.Config) {
 	fmt.Println("Built-in commands:")
 	printCmdGroup(builtIns)
 	fmt.Println()
-	if repoConfig == nil {
+	if repoCfg == nil {
 		fmt.Println("Repo commands:")
 		fmt.Println("  (no coily.yaml found in the current directory or any parent)")
 		return
 	}
-	fmt.Printf("Repo commands (from %s):\n", repoConfig.Path)
+	fmt.Printf("Repo commands (from %s):\n", repoCfg.Path)
 	if len(repo) == 0 {
 		fmt.Println("  (none; every entry shadowed a built-in)")
 		return

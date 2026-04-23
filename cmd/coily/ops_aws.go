@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/coilysiren/coily/pkg/ops/aws"
+	"github.com/urfave/cli/v3"
 )
 
-func init() {
-	rt := getRuntime()
-	registerCommand(aws.Command(rt.runner, rt.issuer, rt.audit))
+func (r *Runner) awsCommand() *cli.Command {
+	return aws.Command(r.Runner, r.Verifier, r.Audit)
 }
