@@ -11,6 +11,7 @@ import (
 	"github.com/coilysiren/coily/pkg/auth"
 	"github.com/coilysiren/coily/pkg/config"
 	"github.com/coilysiren/coily/pkg/shell"
+	coilyssh "github.com/coilysiren/coily/pkg/ssh"
 )
 
 // expandHome turns a leading "~/" or "~" into the user's home directory.
@@ -50,6 +51,7 @@ type runtime struct {
 	audit  *audit.Writer
 	issuer *auth.Issuer
 	runner *shell.Runner
+	ssh    *coilyssh.Client
 }
 
 var (
@@ -90,6 +92,10 @@ func getRuntime() *runtime {
 				Stderr: os.Stderr,
 				Stdin:  os.Stdin,
 			},
+			// ssh wraps golang.org/x/crypto/ssh. Auth uses ssh-agent (KeyPath
+			// empty), host keys verified against ~/.ssh/known_hosts. See
+			// pkg/ssh/ssh.go.
+			ssh: &coilyssh.Client{},
 		}
 	})
 	return rtInst
