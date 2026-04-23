@@ -31,9 +31,9 @@ make dev               # builds ./bin/coily-dev (different binary name, not on P
 
 The agent's allowlist only trusts `coily`, never `coily-dev`. Dev builds have `-tags dev` with extra diagnostics. Production builds use `-tags prod` which strips dev code paths.
 
-## Per-repo commands (`coily.yaml`)
+## Per-repo commands (`.coily/coily.yaml`)
 
-Each repo can drop a `coily.yaml` at its root to declare the dev commands an operator (human or agent) should run from that tree. `coily test`, `coily lint`, `coily build`. This replaces per-repo Makefiles and `pyinvoke` tasks without widening the security boundary.
+Each repo can drop a `coily.yaml` inside a `.coily/` overlay directory at its root to declare the dev commands an operator (human or agent) should run from that tree. `coily test`, `coily lint`, `coily build`. This replaces per-repo Makefiles and `pyinvoke` tasks without widening the security boundary.
 
 ```yaml
 commands:
@@ -43,7 +43,7 @@ commands:
     description: Lint with golangci-lint.
 ```
 
-- `coily` walks up from the cwd to discover `coily.yaml`. Run from a subdirectory and it still finds the root. `$COILY_REPO_CONFIG` overrides the walk.
+- `coily` walks up from the cwd to discover `.coily/coily.yaml`. Run from a subdirectory and it still finds the root. `$COILY_REPO_CONFIG` overrides the walk. A pre-overlay `coily.yaml` at the repo root errors with a pointer at the new path.
 - `coily --list` prints built-ins and repo commands, grouped. `coily <cmd> --help` shows what a repo command expands to.
 - Every declared token plus any user-supplied extras pass through `policy.ValidateArg`. Shell metacharacters are rejected at load time and at invocation. No carve-outs.
 - Audit records use verb `repo.<cmd>`. Same log file as privileged ops.

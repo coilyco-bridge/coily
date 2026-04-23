@@ -12,7 +12,6 @@ out one agent per item, each touching a single file.
 3. [aws s3api help field is groff garbage](unresolved/03-s3api-groff.md)
 4. [gh api's --method flag clashes with coily's structure](unresolved/04-gh-api-method.md)
 5. [kubectl context "help" is real](unresolved/05-kubectl-help-context.md)
-6. [Audit log perms are 0600 but the default path is ~/.local/state](unresolved/06-audit-log-perms.md)
 7. [`runtime` is init-time. Test isolation is awkward](unresolved/07-runtime-singleton.md)
 
 ## Incomplete features
@@ -27,7 +26,6 @@ out one agent per item, each touching a single file.
 
 13. [Should `coily lockdown` require a token?](unresolved/13-lockdown-token.md)
 14. [Token scoping granularity](unresolved/14-token-scoping.md)
-15. [Where does the coily config actually live?](unresolved/15-config-location.md)
 16. [Subagent ID propagation](unresolved/16-subagent-id.md)
 17. [The generated pass-through surface is opinionated by scope](unresolved/17-passthrough-scope.md)
 

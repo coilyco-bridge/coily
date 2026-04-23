@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/coilysiren/coily/pkg/audit"
@@ -13,38 +12,10 @@ import (
 	"github.com/coilysiren/coily/pkg/shell"
 )
 
-// expandHome turns a leading "~/" or "~" into the user's home directory.
-// Returns the input unchanged if it doesn't start with "~".
-func expandHome(p string) string {
-	if p == "" || !strings.HasPrefix(p, "~") {
-		return p
-	}
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return p
-	}
-	if p == "~" {
-		return home
-	}
-	if strings.HasPrefix(p, "~/") {
-		return filepath.Join(home, p[2:])
-	}
-	return p
-}
-
-// defaultStatePath returns ~/.local/state/coily/<name>. Used when config is
-// empty so coily always has somewhere to write state.
-func defaultStatePath(name string) string {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return ""
-	}
-	return filepath.Join(home, ".local", "state", "coily", name)
-}
-
 // runtime is the package-wide carrier for audit writer, token verifier, and
 // shell runner. Verbs obtain it via getRuntime(). Constructed lazily on first
-// use from embedded config. Singleton.
+// use from layered config (embedded + ~/.coily/config.yaml + ./.coily/
+// config.yaml). Singleton.
 type runtime struct {
 	cfg    *config.Config
 	audit  *audit.Writer
@@ -62,29 +33,37 @@ func getRuntime() *runtime {
 		cfg, err := config.Load()
 		if err != nil {
 			// Runtime is required. If config won't parse, nothing else can work.
-			fmt.Fprintf(os.Stderr, "coily: fatal: cannot load embedded config: %v\n", err)
+			fmt.Fprintf(os.Stderr, "coily: fatal: cannot load config: %v\n", err)
 			os.Exit(2)
 		}
 
-		auditPath := expandHome(cfg.Audit.LogPath)
-		if auditPath == "" {
-			auditPath = defaultStatePath("audit.jsonl")
-		}
-		issuerKey := expandHome(cfg.Tokens.IssuerKeyPath)
-		if issuerKey == "" {
-			issuerKey = defaultStatePath("token-issuer.key")
-		}
-
-		aw := audit.NewWriter(auditPath)
+		aw := audit.NewWriter(cfg.Audit.LogPath)
 		aw.MaxSizeMB = cfg.Audit.MaxSizeMB
 		aw.MaxBackups = cfg.Audit.MaxBackups
 		aw.MaxAgeDays = cfg.Audit.MaxAgeDays
 		aw.Compress = cfg.Audit.Compress
+		// Loud-fail if the configured audit directory is not writable. Better
+		// than silently dropping records over the lifetime of the process.
+		if err := aw.Preflight(); err != nil {
+			fmt.Fprintf(os.Stderr, "coily: fatal: %v\n", err)
+			os.Exit(2)
+		}
+
+		// Make sure the issuer key parent dir exists with 0700 before any
+		// auth verb tries to read or write the key. The auth package does
+		// the same mkdir on demand, but doing it here keeps the failure mode
+		// uniform with the audit dir above.
+		if dir := filepath.Dir(cfg.Tokens.IssuerKeyPath); dir != "" && dir != "." {
+			if err := os.MkdirAll(dir, 0o700); err != nil {
+				fmt.Fprintf(os.Stderr, "coily: fatal: token issuer dir %s: %v\n", dir, err)
+				os.Exit(2)
+			}
+		}
 
 		rtInst = &runtime{
 			cfg:    cfg,
 			audit:  aw,
-			issuer: auth.NewIssuer(issuerKey),
+			issuer: auth.NewIssuer(cfg.Tokens.IssuerKeyPath),
 			runner: &shell.Runner{
 				Stdout: os.Stdout,
 				Stderr: os.Stderr,

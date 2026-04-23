@@ -31,6 +31,8 @@ help:
 _sync-config:
 	@# //go:embed can only reach files in the same package; mirror the canonical
 	@# repo-root config.yaml into pkg/config/ before build. Both are gitignored.
+	@# Per-user / per-repo overrides live at ~/.coily/config.yaml and
+	@# ./.coily/config.yaml respectively, layered on top of this embedded base.
 	@if [ ! -f config.yaml ]; then cp config.example.yaml config.yaml; fi
 	@cp config.yaml pkg/config/config.yaml
 

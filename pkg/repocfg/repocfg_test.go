@@ -113,9 +113,15 @@ commands:
 	}
 }
 
-func TestDiscover_FindsInParent(t *testing.T) {
+func TestDiscover_FindsInParentOverlay(t *testing.T) {
+	// Discover prefers ./.coily/coily.yaml. Place the file under the overlay
+	// directory at root and walk from a deep child.
 	root := t.TempDir()
-	writeConfig(t, root, "commands: {test: go test ./...}\n")
+	overlay := filepath.Join(root, repocfg.LocalDirName)
+	if err := os.MkdirAll(overlay, 0o700); err != nil {
+		t.Fatalf("mkdir overlay: %v", err)
+	}
+	writeConfig(t, overlay, "commands: {test: go test ./...}\n")
 	deep := filepath.Join(root, "a", "b", "c")
 	if err := os.MkdirAll(deep, 0o700); err != nil {
 		t.Fatalf("mkdir: %v", err)
@@ -124,9 +130,42 @@ func TestDiscover_FindsInParent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Discover: %v", err)
 	}
-	want := filepath.Join(root, repocfg.Filename)
+	want := filepath.Join(overlay, repocfg.Filename)
 	// Compare against evaluated symlinks because macOS TempDir returns /var,
 	// which resolves to /private/var.
+	gotR, _ := filepath.EvalSymlinks(path)
+	wantR, _ := filepath.EvalSymlinks(want)
+	if gotR != wantR {
+		t.Errorf("Discover = %q, want %q", path, want)
+	}
+}
+
+func TestDiscover_RejectsLegacyRootLocation(t *testing.T) {
+	// A coily.yaml at the repo root (no .coily/ overlay) used to be the
+	// canonical location. Now it's an error pointing at the new home.
+	root := t.TempDir()
+	writeConfig(t, root, "commands: {test: go test ./...}\n")
+	_, err := repocfg.Discover(root)
+	if !errors.Is(err, repocfg.ErrLegacyLocation) {
+		t.Errorf("err = %v, want ErrLegacyLocation", err)
+	}
+}
+
+func TestDiscover_OverlayWinsOverLegacy(t *testing.T) {
+	// If both exist (during a partial migration), the overlay takes
+	// precedence and the legacy file is ignored.
+	root := t.TempDir()
+	overlay := filepath.Join(root, repocfg.LocalDirName)
+	if err := os.MkdirAll(overlay, 0o700); err != nil {
+		t.Fatalf("mkdir overlay: %v", err)
+	}
+	writeConfig(t, overlay, "commands: {modern: go version}\n")
+	writeConfig(t, root, "commands: {legacy: echo nope}\n")
+	path, err := repocfg.Discover(root)
+	if err != nil {
+		t.Fatalf("Discover: %v", err)
+	}
+	want := filepath.Join(overlay, repocfg.Filename)
 	gotR, _ := filepath.EvalSymlinks(path)
 	wantR, _ := filepath.EvalSymlinks(want)
 	if gotR != wantR {

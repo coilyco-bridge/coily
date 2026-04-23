@@ -1,6 +1,6 @@
-# 20. Per-repo command allowlist (`coily.yaml`)
+# 20. Per-repo command allowlist (`.coily/coily.yaml`)
 
-**What it is**: A `coily.yaml` at the root of any repo declares a map of dev commands (`test`, `lint`, `build`, etc.) that become top-level coily verbs. Discovered by walking up from the cwd. Every token (declared and user-supplied) runs through the same `policy.ValidateArg` shell-metacharacter check as privileged ops. Verb name in the audit log is `repo.<cmd>`.
+**What it is**: A `.coily/coily.yaml` overlay at the root of any repo declares a map of dev commands (`test`, `lint`, `build`, etc.) that become top-level coily verbs. Discovered by walking up from the cwd. Every token (declared and user-supplied) runs through the same `policy.ValidateArg` shell-metacharacter check as privileged ops. Verb name in the audit log is `repo.<cmd>`. A legacy `coily.yaml` at the repo root is rejected with a pointer at the new home.
 
 **How to invoke**: `coily --list` to see what's available. `coily <cmd>` to run. Extra args after the verb are appended to the declared argv.
 
