@@ -7,7 +7,7 @@ out one agent per item, each touching a single file.
 
 ## Known bugs and rough edges
 
-6. [Audit log perms are 0600 but the default path is ~/.local/state](unresolved/06-audit-log-perms.md)
+(none open)
 
 ## Incomplete features
 
@@ -17,7 +17,6 @@ out one agent per item, each touching a single file.
 ## Open questions
 
 14. [Token scoping granularity](unresolved/14-token-scoping.md)
-15. [Where does the coily config actually live?](unresolved/15-config-location.md)
 
 ## What I would build next, in order
 

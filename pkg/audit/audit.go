@@ -8,6 +8,10 @@
 // backups past MaxBackups or MaxAgeDays are pruned. All files are written
 // with 0600 perms. If the target directory does not exist it is created
 // with 0700.
+//
+// Failure mode: per-call Append errors propagate up. The runtime is expected
+// to call Preflight at startup so an unwritable audit dir fails loudly there
+// instead of being swallowed across hundreds of invocations.
 package audit
 
 import (
@@ -53,9 +57,8 @@ type Writer struct {
 	// Compress gzips rotated files.
 	Compress bool
 
-	mu        sync.Mutex
-	log       *lumberjack.Logger
-	warnedErr bool // true after the first write/mkdir failure has been reported to stderr
+	mu  sync.Mutex
+	log *lumberjack.Logger
 }
 
 // NewWriter returns a Writer with Now set to time.Now. Rotation fields
@@ -124,8 +127,8 @@ func (w *Writer) Close() error {
 // Wrap records an invocation by running fn and logging the result. If fn
 // returns an error, Record.Error is set. ExitCode is 0 on success, 1 on
 // error. DurationMS is measured around fn. The returned error is whatever
-// fn returned, unmodified. Audit failures are written to stderr but do not
-// mask fn's error.
+// fn returned, unmodified. Audit append failures are written to stderr so
+// the operator notices, but they do not mask fn's error.
 func (w *Writer) Wrap(_ context.Context, verb string, argv []string, fn func() error) error {
 	start := w.now()
 	err := fn()
@@ -140,25 +143,29 @@ func (w *Writer) Wrap(_ context.Context, verb string, argv []string, fn func() e
 		rec.Error = err.Error()
 	}
 	if aerr := w.Append(rec); aerr != nil {
-		w.warnOnce(aerr)
+		fmt.Fprintf(os.Stderr, "audit: %v\n", aerr)
 	}
 	return err
 }
 
-// warnOnce prints aerr to stderr the first time it is called on this Writer
-// and suppresses subsequent calls. The message identifies the configured path
-// and the underlying error (errno when the OS surfaces one). Subsequent
-// Append attempts still happen - we just do not spam stderr per invocation.
-// If permissions are fixed mid-session, logging resumes silently.
-func (w *Writer) warnOnce(aerr error) {
-	w.mu.Lock()
-	warned := w.warnedErr
-	w.warnedErr = true
-	w.mu.Unlock()
-	if warned {
-		return
+// Preflight ensures the audit directory exists with 0700 perms and that the
+// target path is writable. Call at startup so a broken config blows up
+// immediately instead of dropping records silently across the session.
+func (w *Writer) Preflight() error {
+	if w.Path == "" {
+		return ErrPathUnset
 	}
-	fmt.Fprintf(os.Stderr, "audit: cannot write %s: %v (subsequent audit failures this session will be silent)\n", w.Path, aerr)
+	dir := filepath.Dir(w.Path)
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return fmt.Errorf("audit: mkdir %s: %w", dir, err)
+	}
+	// Open in append+create mode to verify the path is writable. Don't write
+	// anything; just touch the file so a permission failure surfaces here.
+	f, err := os.OpenFile(w.Path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600) // #nosec G304 -- caller-controlled audit path
+	if err != nil {
+		return fmt.Errorf("audit: open %s: %w", w.Path, err)
+	}
+	return f.Close()
 }
 
 func (w *Writer) now() time.Time {

@@ -247,13 +247,57 @@ func TestAppend_FailsWhenParentDirUnwritable(t *testing.T) {
 	}
 }
 
-func TestWrap_StderrWarningLatchesAfterFirstFailure(t *testing.T) {
+func TestPreflight_FailsLoudlyOnUnwritableDir(t *testing.T) {
 	if os.Geteuid() == 0 {
 		t.Skip("running as root; permission checks are bypassed")
 	}
-	// Point Path at an unwritable directory so every Append fails. Capture
-	// stderr across several Wrap calls; we should see exactly one warning
-	// line even though Append itself is attempted every time.
+	// Audit Preflight is the loud-fail path. Point Path inside a 0500 parent
+	// and assert Preflight returns a wrapped error naming the path.
+	dir := t.TempDir()
+	locked := filepath.Join(dir, "locked")
+	if err := os.Mkdir(locked, 0o500); err != nil {
+		t.Fatalf("mkdir locked: %v", err)
+	}
+	t.Cleanup(func() { _ = os.Chmod(locked, 0o700) })
+
+	w := &audit.Writer{
+		Path: filepath.Join(locked, "subdir", "audit.jsonl"),
+		Now:  func() time.Time { return time.Date(2026, 4, 22, 12, 0, 0, 0, time.UTC) },
+	}
+	err := w.Preflight()
+	if err == nil {
+		t.Fatal("Preflight on unwritable dir: got nil err, want permission error")
+	}
+	if !strings.Contains(err.Error(), "audit:") {
+		t.Errorf("err = %q, want wrapped audit error", err)
+	}
+}
+
+func TestPreflight_CreatesDirAndFile(t *testing.T) {
+	dir := t.TempDir()
+	w := &audit.Writer{
+		Path: filepath.Join(dir, "deep", "audit.jsonl"),
+		Now:  func() time.Time { return time.Date(2026, 4, 22, 12, 0, 0, 0, time.UTC) },
+	}
+	if err := w.Preflight(); err != nil {
+		t.Fatalf("Preflight: %v", err)
+	}
+	info, err := os.Stat(filepath.Dir(w.Path))
+	if err != nil {
+		t.Fatalf("stat dir: %v", err)
+	}
+	if perm := info.Mode().Perm(); perm != 0o700 {
+		t.Errorf("dir perm = %o, want 0700", perm)
+	}
+}
+
+func TestWrap_PrintsStderrOnAppendFailure(t *testing.T) {
+	if os.Geteuid() == 0 {
+		t.Skip("running as root; permission checks are bypassed")
+	}
+	// Point Path at an unwritable directory so Append fails. Capture stderr
+	// across several Wrap calls; every failure prints a line so the operator
+	// notices something is wrong.
 	dir := t.TempDir()
 	locked := filepath.Join(dir, "locked")
 	if err := os.Mkdir(locked, 0o500); err != nil {
@@ -284,9 +328,9 @@ func TestWrap_StderrWarningLatchesAfterFirstFailure(t *testing.T) {
 		t.Fatalf("read stderr: %v", err)
 	}
 	got := captured.String()
-	count := strings.Count(got, "audit: cannot write")
-	if count != 1 {
-		t.Errorf("got %d stderr warnings, want exactly 1. captured:\n%s", count, got)
+	count := strings.Count(got, "audit:")
+	if count < 1 {
+		t.Errorf("got %d stderr warnings, want >=1. captured:\n%s", count, got)
 	}
 	if !strings.Contains(got, w.Path) {
 		t.Errorf("warning does not name the path %q. captured:\n%s", w.Path, got)

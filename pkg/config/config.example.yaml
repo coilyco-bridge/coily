@@ -1,14 +1,19 @@
-# coily embedded config — mirror of /config.example.yaml.
+# coily embedded config - mirror of /config.example.yaml.
 # The Makefile copies /config.yaml into pkg/config/config.yaml before build so
 # //go:embed can reach it. This file exists as a committed placeholder; the
 # gitignored pkg/config/config.yaml is what actually gets embedded.
+#
+# Path fields left blank fall back to homedir-based defaults computed at load
+# time. log_path defaults to ~/.coily/audit/<owner>-<repo>.jsonl, derived
+# from `git remote get-url origin`. issuer_key_path defaults to
+# ~/.coily/token-issuer.key. See pkg/config/paths.go.
 
 kai_server:
   tailscale_host: kai-server
   ssh_user: kai
 
 audit:
-  log_path: /var/log/coily/audit.jsonl
+  # log_path: ""   # blank picks the per-repo default under ~/.coily/audit/
   # Rotation. 10MB per file, keep 10 backups or 30 days (whichever hits first).
   max_size_mb: 10
   max_backups: 10
@@ -19,5 +24,5 @@ aws:
   profile: default
 
 tokens:
-  issuer_key_path: /usr/local/etc/coily/token-issuer.key
+  # issuer_key_path: ""   # blank picks ~/.coily/token-issuer.key
   default_ttl: 5m

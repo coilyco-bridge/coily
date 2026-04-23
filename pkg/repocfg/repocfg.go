@@ -32,9 +32,23 @@ import (
 // Filename is the name repocfg looks for during discovery.
 const Filename = "coily.yaml"
 
+// LocalDirName is the per-repo overlay directory the loader prefers. The
+// canonical home for the repo allowlist is ./.coily/coily.yaml.
+const LocalDirName = ".coily"
+
+// LegacyFilename is the pre-overlay name (./coily.yaml) that we reject with
+// a pointer at the new location. Kept around so the error message can be
+// specific.
+const LegacyFilename = "coily.yaml"
+
 // EnvOverride, when set, is treated as the absolute path to the repo config
 // and skips directory walking. Primarily for tests and advanced users.
 const EnvOverride = "COILY_REPO_CONFIG"
+
+// ErrLegacyLocation is wrapped by Discover when a coily.yaml is found at the
+// repo root rather than under ./.coily/. The new convention is to put it
+// inside the .coily/ overlay so locals (config + allowlist) sit together.
+var ErrLegacyLocation = errors.New("repocfg: coily.yaml at repo root is no longer supported, move it to .coily/coily.yaml")
 
 // Command is one parsed and validated entry from the commands: map.
 type Command struct {
@@ -60,21 +74,23 @@ type Config struct {
 // cwd ancestry. Callers treat this as "no repo commands to register."
 var ErrNoConfig = errors.New("repocfg: no coily.yaml found")
 
-// Discover walks up from start looking for Filename. Returns the absolute
-// path on success, "" and ErrNoConfig when no file exists in the ancestry.
+// Discover walks up from start looking for the repo config. Prefers
+// ./.coily/coily.yaml at each level. If no overlay file is found but a
+// legacy ./coily.yaml exists at the same level, returns ErrLegacyLocation
+// pointing at the new home. Returns "" and ErrNoConfig when neither exists
+// anywhere in the ancestry.
 func Discover(start string) (string, error) {
 	dir, err := filepath.Abs(start)
 	if err != nil {
 		return "", fmt.Errorf("repocfg: abs %s: %w", start, err)
 	}
 	for {
-		candidate := filepath.Join(dir, Filename)
-		info, err := os.Stat(candidate)
-		if err == nil && !info.IsDir() {
-			return candidate, nil
+		path, err := discoverAtLevel(dir)
+		if err != nil {
+			return "", err
 		}
-		if err != nil && !errors.Is(err, fs.ErrNotExist) {
-			return "", fmt.Errorf("repocfg: stat %s: %w", candidate, err)
+		if path != "" {
+			return path, nil
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {
@@ -82,6 +98,38 @@ func Discover(start string) (string, error) {
 		}
 		dir = parent
 	}
+}
+
+// discoverAtLevel checks one directory for a repo config. Returns the path if
+// the preferred overlay exists, an ErrLegacyLocation-wrapped error if only
+// the legacy root form exists, ("", nil) if neither exists.
+func discoverAtLevel(dir string) (string, error) {
+	preferred := filepath.Join(dir, LocalDirName, Filename)
+	if ok, err := isFile(preferred); err != nil {
+		return "", err
+	} else if ok {
+		return preferred, nil
+	}
+	legacy := filepath.Join(dir, LegacyFilename)
+	if ok, err := isFile(legacy); err != nil {
+		return "", err
+	} else if ok {
+		return "", fmt.Errorf("%w (found %s)", ErrLegacyLocation, legacy)
+	}
+	return "", nil
+}
+
+// isFile returns true when path exists and is a regular file. Missing path
+// is not an error.
+func isFile(path string) (bool, error) {
+	info, err := os.Stat(path)
+	if err == nil {
+		return !info.IsDir(), nil
+	}
+	if errors.Is(err, fs.ErrNotExist) {
+		return false, nil
+	}
+	return false, fmt.Errorf("repocfg: stat %s: %w", path, err)
 }
 
 // LoadDefault resolves the config path from $COILY_REPO_CONFIG or by walking
