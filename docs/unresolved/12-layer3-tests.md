@@ -11,3 +11,7 @@ Layer 2 (whoami smoke) are built. Layer 3 needs:
 
 Punted. Not urgent because the pass-through layer is thin and unit tests
 on pkg/* cover the interesting logic.
+
+# Decision
+
+Not valuable enough. Scrub this idea.

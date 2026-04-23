@@ -7,3 +7,9 @@ to exercise `cmd/coily/ops_*.go` can't easily swap in a fake audit writer
 or verifier. Consequence: there are no tests in `cmd/coily/`. Fix: pass
 the runtime in explicitly rather than globally, probably as a Runner
 struct method or a context value. Not urgent, but a real gap.
+
+# Decision
+
+> pass the runtime in explicitly rather than globally
+
+Yes

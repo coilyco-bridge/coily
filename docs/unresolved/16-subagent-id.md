@@ -10,3 +10,9 @@ actually set this env var today (as far as I know). Consequence:
 - Give up on session correlation and use invocation timestamps instead.
 - Use a different env var that Claude Code does set (TERM_PROGRAM?
   process ancestry check?).
+
+# Decision
+
+I don't care to attach IDS
+
+Also, make the times unix timestamps.

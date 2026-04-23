@@ -11,3 +11,9 @@ when `c.IsSet("foo")` is true, but the UX is off. Fix: extend the
 subcli-scope manifest with flag types (parse from help text shape like
 "`--foo` (boolean)" or "`--foo` <value>") and have gen-passthrough emit the
 right flag kind.
+
+# Decision
+
+> extend the subcli-scope manifest with flag types
+
+Yes do this

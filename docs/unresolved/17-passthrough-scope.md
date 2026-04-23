@@ -8,3 +8,7 @@ yaml, `make update-fixtures`, `make install`. That's a multi-minute
 flow for a one-off query. Maybe a `coily aws raw ...` escape hatch? But
 that defeats the whole design. Maybe a "bring your own aws" allowlist in
 config where the user can add services without rebuilding.
+
+# decision
+
+no escape hatches is literally the entire design

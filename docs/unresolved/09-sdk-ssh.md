@@ -11,3 +11,7 @@ design. Implementation:
 - ssh/scp: `golang.org/x/crypto/ssh` + `github.com/bramvdbogaerde/go-scp` or similar.
 - tailscale: `tailscale.com/client/tailscale`. Currently unused - no coily
   verb consumes it yet.
+
+# Decision
+
+Use SDKs for all of these

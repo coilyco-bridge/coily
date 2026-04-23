@@ -9,3 +9,7 @@ don't forward. That's fine. But certain flags like `--field key=value` may
 pass through incorrectly with a single c.String value because they're
 repeatable and we only capture the last one. Same fix as #1 (flag types,
 including StringSliceFlag).
+
+# Decision
+
+Yes, same fix

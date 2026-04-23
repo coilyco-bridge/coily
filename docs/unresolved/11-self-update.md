@@ -14,3 +14,9 @@ decisions:
 - How does `coily self-update` know the correct URL?
 
 Kai explicitly deferred this on 2026-04-21.
+
+# Decision
+
+codex - via means of github actions. they probably have one
+
+leave it commented out for now, though.

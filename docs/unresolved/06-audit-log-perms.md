@@ -9,3 +9,13 @@ Consider: either make the fallback loud, or default the config to
 `~/.local/state/coily/audit.jsonl`. Right now `config.yaml` uses
 `~/.local/state/coily/audit.jsonl` which is correct for personal laptop
 use but not for a multi-user deploy.
+
+# Decision
+
+audit log should be per-repo and be like so:
+
+```
+~/.coily/audit/coilysiren-backend.jsonl
+```
+
+Where `coilysiren-backend` is the github repo name (eg. coilysiren/backend), with special characters turned into `-`
