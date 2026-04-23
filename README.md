@@ -59,3 +59,11 @@ commands:
 - **Config is embedded, not loaded from disk.** Changes require rebuild + sudo install.
 - **No self-update** in v1. Updates push from the laptop via `make deploy-server`. The binary cannot rewrite itself. (See docs/threat-model.md for the v2 plan around adversarial-reviewed CI installs.)
 - **No `coily shell` / `coily run` escape hatch**, ever.
+
+## Prior art
+
+coily is a personal-scale remix of three existing ideas.
+
+- **[Teleport](https://github.com/gravitational/teleport)** - access broker for SSH, k8s, and cloud APIs with per-session audit. coily keeps the scoped-invocation and JSONL-audit slice, drops the cluster and the web UI.
+- **[mise](https://github.com/jdx/mise)** - one CLI multiplexing runtimes, env, and tasks behind consistent verbs. coily applies the same "thin wrapper over N underlying tools" instinct to ops (`aws`, `kubectl`, `gh`, `ssh`) instead of dev envs.
+- **[Dagger](https://github.com/dagger/dagger)** - typed, programmable wrapper over container and CI primitives instead of shelled-out pipeline scripts. coily takes the same "validate structured arguments in a real language, don't just shell out" instinct and applies it to `aws`/`kubectl`/`gh`.
