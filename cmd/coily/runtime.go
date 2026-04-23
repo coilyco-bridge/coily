@@ -64,9 +64,25 @@ func NewRunner() *Runner {
 		}
 	}
 
+	// FetchingResolver replaces PathResolver: tools (aws, gh, kubectl) come
+	// from the in-tree manifest + cached downloads in ~/.cache/coily/bin,
+	// never from $PATH. An agent who swapped /usr/local/bin/aws is now
+	// ignored. If the embedded manifest fails to parse the build is broken,
+	// fail fast.
+	fr, err := shell.NewFetchingResolver()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "coily: fatal: cannot load embedded tools manifest: %v\n", err)
+		os.Exit(2)
+	}
+
 	return &Runner{
-		Cfg:      cfg,
-		Runner:   &shell.Runner{Stdout: os.Stdout, Stderr: os.Stderr, Stdin: os.Stdin},
+		Cfg: cfg,
+		Runner: &shell.Runner{
+			Stdout:  os.Stdout,
+			Stderr:  os.Stderr,
+			Stdin:   os.Stdin,
+			Resolve: fr.AsResolverFunc(),
+		},
 		Audit:    aw,
 		Verifier: auth.NewIssuer(cfg.Tokens.IssuerKeyPath),
 		// SSH wraps golang.org/x/crypto/ssh. Auth uses ssh-agent (KeyPath

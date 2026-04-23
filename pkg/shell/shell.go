@@ -4,9 +4,11 @@
 // the argv slice explicitly and the argv is guarded by policy.ValidateArg at
 // the verb layer.
 //
-// In v1 this resolves binaries on $PATH. Follow-up: embedded-binary
-// extraction via //go:embed, per docs/threat-model.md. Callers do not
-// change when that swap happens. Resolver is pluggable via Runner.Resolve.
+// Production runs use FetchingResolver (see tools.go). It consults an
+// in-tree manifest (tools.json) and a per-user download cache instead of
+// $PATH. PATH is intentionally not trusted - an agent who swaps
+// /usr/local/bin/aws is ignored. PathResolver is kept for tests and for
+// any caller that genuinely wants $PATH.
 package shell
 
 import (

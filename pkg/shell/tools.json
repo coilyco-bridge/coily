@@ -1,0 +1,84 @@
+{
+  "release_tag": "tools-latest",
+  "release_url_base": "https://github.com/coilysiren/coily/releases/download/tools-latest",
+  "tools": {
+    "aws": {
+      "darwin/arm64": {
+        "version": "2.17.0",
+        "url": "https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-arm64",
+        "upstream_url": "https://awscli.amazonaws.com/AWSCLIV2.pkg",
+        "sha256": "PLACEHOLDER_AWS_DARWIN_ARM64"
+      },
+      "darwin/amd64": {
+        "version": "2.17.0",
+        "url": "https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-amd64",
+        "upstream_url": "https://awscli.amazonaws.com/AWSCLIV2.pkg",
+        "sha256": "PLACEHOLDER_AWS_DARWIN_AMD64"
+      },
+      "linux/amd64": {
+        "version": "2.17.0",
+        "url": "https://github.com/coilysiren/coily/releases/download/tools-latest/aws-linux-amd64",
+        "upstream_url": "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip",
+        "sha256": "PLACEHOLDER_AWS_LINUX_AMD64"
+      },
+      "linux/arm64": {
+        "version": "2.17.0",
+        "url": "https://github.com/coilysiren/coily/releases/download/tools-latest/aws-linux-arm64",
+        "upstream_url": "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip",
+        "sha256": "PLACEHOLDER_AWS_LINUX_ARM64"
+      }
+    },
+    "kubectl": {
+      "darwin/arm64": {
+        "version": "1.31.0",
+        "url": "https://github.com/coilysiren/coily/releases/download/tools-latest/kubectl-darwin-arm64",
+        "upstream_url": "https://dl.k8s.io/release/v1.31.0/bin/darwin/arm64/kubectl",
+        "sha256": "PLACEHOLDER_KUBECTL_DARWIN_ARM64"
+      },
+      "darwin/amd64": {
+        "version": "1.31.0",
+        "url": "https://github.com/coilysiren/coily/releases/download/tools-latest/kubectl-darwin-amd64",
+        "upstream_url": "https://dl.k8s.io/release/v1.31.0/bin/darwin/amd64/kubectl",
+        "sha256": "PLACEHOLDER_KUBECTL_DARWIN_AMD64"
+      },
+      "linux/amd64": {
+        "version": "1.31.0",
+        "url": "https://github.com/coilysiren/coily/releases/download/tools-latest/kubectl-linux-amd64",
+        "upstream_url": "https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kubectl",
+        "sha256": "PLACEHOLDER_KUBECTL_LINUX_AMD64"
+      },
+      "linux/arm64": {
+        "version": "1.31.0",
+        "url": "https://github.com/coilysiren/coily/releases/download/tools-latest/kubectl-linux-arm64",
+        "upstream_url": "https://dl.k8s.io/release/v1.31.0/bin/linux/arm64/kubectl",
+        "sha256": "PLACEHOLDER_KUBECTL_LINUX_ARM64"
+      }
+    },
+    "gh": {
+      "darwin/arm64": {
+        "version": "2.55.0",
+        "url": "https://github.com/coilysiren/coily/releases/download/tools-latest/gh-darwin-arm64",
+        "upstream_url": "https://github.com/cli/cli/releases/download/v2.55.0/gh_2.55.0_macOS_arm64.zip",
+        "sha256": "PLACEHOLDER_GH_DARWIN_ARM64"
+      },
+      "darwin/amd64": {
+        "version": "2.55.0",
+        "url": "https://github.com/coilysiren/coily/releases/download/tools-latest/gh-darwin-amd64",
+        "upstream_url": "https://github.com/cli/cli/releases/download/v2.55.0/gh_2.55.0_macOS_amd64.zip",
+        "sha256": "PLACEHOLDER_GH_DARWIN_AMD64"
+      },
+      "linux/amd64": {
+        "version": "2.55.0",
+        "url": "https://github.com/coilysiren/coily/releases/download/tools-latest/gh-linux-amd64",
+        "upstream_url": "https://github.com/cli/cli/releases/download/v2.55.0/gh_2.55.0_linux_amd64.tar.gz",
+        "sha256": "PLACEHOLDER_GH_LINUX_AMD64"
+      },
+      "linux/arm64": {
+        "version": "2.55.0",
+        "url": "https://github.com/coilysiren/coily/releases/download/tools-latest/gh-linux-arm64",
+        "upstream_url": "https://github.com/cli/cli/releases/download/v2.55.0/gh_2.55.0_linux_arm64.tar.gz",
+        "sha256": "PLACEHOLDER_GH_LINUX_ARM64"
+      }
+    }
+  }
+}

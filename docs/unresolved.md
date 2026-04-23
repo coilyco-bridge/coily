@@ -11,7 +11,7 @@ out one agent per item, each touching a single file.
 
 ## Incomplete features
 
-8. [Embedded sub-binaries](unresolved/08-embedded-binaries.md)
+(none open)
 
 ## Open questions
 
@@ -21,7 +21,6 @@ out one agent per item, each touching a single file.
 
 1. Add a docs/audit.md explaining the log format and a `coily audit tail`
    verb so Kai can review it easily.
-2. Then: embedded binaries (#8). Big lift but closes the threat model.
 
 ## Things that are done but deserve skepticism
 

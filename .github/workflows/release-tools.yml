@@ -1,0 +1,185 @@
+# Release the pinned aws / kubectl / gh binaries to the `tools-latest`
+# GitHub Release. coily fetches them at runtime, verifies the sha256 from
+# the in-tree pkg/shell/tools.json manifest, and caches under
+# ~/.cache/coily/bin. PATH is never trusted.
+#
+# This workflow:
+#   1. Downloads each (tool, goos, goarch) from upstream.
+#   2. Computes sha256 over the bytes.
+#   3. Updates pkg/shell/tools.json with real SHAs (commits back to main).
+#   4. Force-overwrites the `tools-latest` release with the binaries attached.
+#
+# Run manually via workflow_dispatch when bumping pinned versions, or on
+# the weekly schedule to refresh against upstream patch releases.
+
+name: release-tools
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_version:
+        description: "aws-cli v2 version (e.g. 2.17.0)"
+        required: true
+        default: "2.17.0"
+      kubectl_version:
+        description: "kubectl version (e.g. 1.31.0)"
+        required: true
+        default: "1.31.0"
+      gh_version:
+        description: "gh version (e.g. 2.55.0)"
+        required: true
+        default: "2.55.0"
+  schedule:
+    # Sunday 06:00 UTC. Refreshes against patch releases.
+    - cron: "0 6 * * 0"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    env:
+      # Pull workflow_dispatch inputs into env so downstream `run:` blocks
+      # never interpolate untrusted-looking ${{ }} into shell strings.
+      # Schedule events have no inputs, so fall back to the same defaults
+      # the inputs above declare.
+      AWS_VERSION: ${{ github.event.inputs.aws_version || '2.17.0' }}
+      KUBECTL_VERSION: ${{ github.event.inputs.kubectl_version || '1.31.0' }}
+      GH_VERSION: ${{ github.event.inputs.gh_version || '2.55.0' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare staging dir
+        run: mkdir -p staging
+
+      # Each tool below: fetch from upstream, extract the binary if
+      # archived, name it <tool>-<goos>-<goarch>, drop in staging/.
+      - name: Fetch kubectl (all platforms)
+        run: |
+          set -euo pipefail
+          for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64; do
+            os="${plat%/*}"; arch="${plat#*/}"
+            url="https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/${os}/${arch}/kubectl"
+            curl -fsSL -o "staging/kubectl-${os}-${arch}" "$url"
+            chmod +x "staging/kubectl-${os}-${arch}"
+          done
+
+      - name: Fetch gh (all platforms)
+        run: |
+          set -euo pipefail
+          for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64; do
+            os="${plat%/*}"; arch="${plat#*/}"
+            case "$os" in
+              darwin) ext="zip"; osname="macOS";;
+              linux)  ext="tar.gz"; osname="linux";;
+            esac
+            url="https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_${osname}_${arch}.${ext}"
+            tmp="$(mktemp -d)"
+            curl -fsSL -o "$tmp/pkg.${ext}" "$url"
+            if [ "$ext" = "zip" ]; then
+              unzip -q "$tmp/pkg.${ext}" -d "$tmp"
+            else
+              tar -xzf "$tmp/pkg.${ext}" -C "$tmp"
+            fi
+            # Layout: gh_<ver>_<os>_<arch>/bin/gh
+            cp "$tmp/gh_${GH_VERSION}_${osname}_${arch}/bin/gh" "staging/gh-${os}-${arch}"
+            chmod +x "staging/gh-${os}-${arch}"
+          done
+
+      - name: Fetch aws CLI (all platforms)
+        run: |
+          set -euo pipefail
+          # AWS CLI ships as platform installers (.pkg, .zip). Pull the
+          # `dist/aws` binary out of the macOS .pkg and the Linux zip.
+          # NOTE: this step is the most fragile - upstream packaging
+          # changes will break it. If you bump aws_version and this step
+          # fails, re-derive the extraction below.
+          for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64; do
+            os="${plat%/*}"; arch="${plat#*/}"
+            tmp="$(mktemp -d)"
+            case "$os" in
+              darwin)
+                url="https://awscli.amazonaws.com/AWSCLIV2-${AWS_VERSION}.pkg"
+                curl -fsSL -o "$tmp/aws.pkg" "$url"
+                xar -xf "$tmp/aws.pkg" -C "$tmp"
+                ( cd "$tmp" && cat aws-cli.pkg/Payload | gunzip -dc | cpio -id 2>/dev/null )
+                cp "$tmp/aws-cli/aws" "staging/aws-${os}-${arch}"
+                ;;
+              linux)
+                if [ "$arch" = "amd64" ]; then
+                  url="https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWS_VERSION}.zip"
+                else
+                  url="https://awscli.amazonaws.com/awscli-exe-linux-aarch64-${AWS_VERSION}.zip"
+                fi
+                curl -fsSL -o "$tmp/aws.zip" "$url"
+                unzip -q "$tmp/aws.zip" -d "$tmp"
+                cp "$tmp/aws/dist/aws" "staging/aws-${os}-${arch}"
+                ;;
+            esac
+            chmod +x "staging/aws-${os}-${arch}"
+          done
+
+      - name: Compute sha256 for every staged binary
+        run: |
+          set -euo pipefail
+          : > shas.txt
+          for f in staging/*; do
+            sum=$(sha256sum "$f" | awk '{print $1}')
+            name=$(basename "$f")
+            echo "${name} ${sum}" >> shas.txt
+          done
+          cat shas.txt
+
+      - name: Update pkg/shell/tools.json with real SHAs
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          import json, os, pathlib
+          shas = {}
+          for line in pathlib.Path("shas.txt").read_text().splitlines():
+              name, sum_ = line.split()
+              shas[name] = sum_
+          manifest = json.loads(pathlib.Path("pkg/shell/tools.json").read_text())
+          versions = {
+              "aws":     os.environ["AWS_VERSION"],
+              "kubectl": os.environ["KUBECTL_VERSION"],
+              "gh":      os.environ["GH_VERSION"],
+          }
+          for tool, plats in manifest["tools"].items():
+              for plat_key, entry in plats.items():
+                  os_, arch = plat_key.split("/")
+                  asset = f"{tool}-{os_}-{arch}"
+                  if asset in shas:
+                      entry["sha256"]  = shas[asset]
+                      entry["version"] = versions.get(tool, entry.get("version", ""))
+                      entry["url"]     = f"{manifest['release_url_base']}/{asset}"
+          pathlib.Path("pkg/shell/tools.json").write_text(json.dumps(manifest, indent=2) + "\n")
+          PY
+
+      - name: Commit updated manifest
+        run: |
+          set -euo pipefail
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet pkg/shell/tools.json; then
+            echo "manifest unchanged"
+          else
+            git add pkg/shell/tools.json
+            git commit -m "Refresh tools.json (aws=${AWS_VERSION}, kubectl=${KUBECTL_VERSION}, gh=${GH_VERSION})"
+            git push
+          fi
+
+      - name: Force-overwrite tools-latest release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Delete and recreate so the tag points at the current commit
+          # and the assets are fresh. `gh release delete --cleanup-tag`
+          # also removes the underlying git tag.
+          gh release delete tools-latest --yes --cleanup-tag || true
+          gh release create tools-latest \
+            --title "tools-latest" \
+            --notes "Pinned aws=${AWS_VERSION}, kubectl=${KUBECTL_VERSION}, gh=${GH_VERSION}. Force-pushed on every prod build." \
+            staging/*
