@@ -1,6 +1,6 @@
 # 15. Audit log
 
-**What it is**: Every verb invocation is appended as one JSONL line to `~/.local/state/coily/audit.jsonl` with timestamp, verb, argv, exit code, duration, and session id.
+**What it is**: Every verb invocation is appended as one JSONL line to `~/.local/state/coily/audit.jsonl` with timestamp (unix seconds), verb, argv, exit code, and duration.
 
 **How to invoke**: implicit. Check the log file after running anything.
 
