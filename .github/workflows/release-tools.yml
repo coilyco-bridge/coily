@@ -185,14 +185,29 @@ jobs:
               "kubectl": os.environ["KUBECTL_VERSION"],
               "gh":      os.environ["GH_VERSION"],
           }
+          def upstream_url(tool: str, goos: str, goarch: str, version: str) -> str:
+              if tool == "kubectl":
+                  return f"https://dl.k8s.io/release/v{version}/bin/{goos}/{goarch}/kubectl"
+              if tool == "gh":
+                  osname = {"darwin": "macOS", "linux": "linux"}[goos]
+                  ext    = {"darwin": "zip", "linux": "tar.gz"}[goos]
+                  return f"https://github.com/cli/cli/releases/download/v{version}/gh_{version}_{osname}_{goarch}.{ext}"
+              if tool == "aws":
+                  if goos == "darwin":
+                      return "https://awscli.amazonaws.com/AWSCLIV2.pkg"
+                  arch = "x86_64" if goarch == "amd64" else "aarch64"
+                  return f"https://awscli.amazonaws.com/awscli-exe-linux-{arch}.zip"
+              raise KeyError(tool)
           for tool, plats in manifest["tools"].items():
               for plat_key, entry in plats.items():
-                  os_, arch = plat_key.split("/")
-                  asset = f"{tool}-{os_}-{arch}"
+                  goos, goarch = plat_key.split("/")
+                  asset = f"{tool}-{goos}-{goarch}"
                   if asset in shas:
-                      entry["sha256"]  = shas[asset]
-                      entry["version"] = versions.get(tool, entry.get("version", ""))
-                      entry["url"]     = f"{manifest['release_url_base']}/{asset}"
+                      version = versions.get(tool, entry.get("version", ""))
+                      entry["sha256"]       = shas[asset]
+                      entry["version"]      = version
+                      entry["url"]          = f"{manifest['release_url_base']}/{asset}"
+                      entry["upstream_url"] = upstream_url(tool, goos, goarch, version)
           pathlib.Path("pkg/shell/tools.json").write_text(json.dumps(manifest, indent=2) + "\n")
           PY
 
