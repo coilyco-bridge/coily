@@ -123,9 +123,6 @@ jobs:
             chmod +x "staging/gh-${os}-${arch}"
           done
 
-      - name: Install xar (needed to extract the macOS aws-cli .pkg on Linux)
-        run: sudo apt-get update && sudo apt-get install -y xar
-
       - name: Fetch aws CLI (all platforms)
         run: |
           set -euo pipefail
@@ -134,6 +131,8 @@ jobs:
           # NOTE: this step is the most fragile - upstream packaging
           # changes will break it. If you bump aws_version and this step
           # fails, re-derive the extraction below.
+          # `xar` is no longer packaged for Ubuntu, but `7z` (preinstalled
+          # on ubuntu-latest) reads xar archives.
           for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64; do
             os="${plat%/*}"; arch="${plat#*/}"
             tmp="$(mktemp -d)"
@@ -141,7 +140,7 @@ jobs:
               darwin)
                 url="https://awscli.amazonaws.com/AWSCLIV2-${AWS_VERSION}.pkg"
                 curl -fsSL -o "$tmp/aws.pkg" "$url"
-                xar -xf "$tmp/aws.pkg" -C "$tmp"
+                ( cd "$tmp" && 7z x -y aws.pkg >/dev/null )
                 ( cd "$tmp" && cat aws-cli.pkg/Payload | gunzip -dc | cpio -id 2>/dev/null )
                 cp "$tmp/aws-cli/aws" "staging/aws-${os}-${arch}"
                 ;;
