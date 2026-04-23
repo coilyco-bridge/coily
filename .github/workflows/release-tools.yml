@@ -73,9 +73,11 @@ jobs:
           else
             GH_VERSION="$GH_VERSION_INPUT"
           fi
-          # aws-cli v2: tags on aws/aws-cli are already bare "2.17.0".
+          # aws-cli v2: no GitHub "latest release" (only prereleases exist),
+          # so resolve via the tags API. Tags on aws/aws-cli are bare "2.17.0"
+          # strings; filter to v2.x and take the newest.
           if [ -z "$AWS_VERSION_INPUT" ]; then
-            AWS_VERSION="$(gh release view --repo aws/aws-cli --json tagName -q '.tagName')"
+            AWS_VERSION="$(gh api /repos/aws/aws-cli/tags --jq '[.[] | select(.name | test("^2\\."))][0].name')"
           else
             AWS_VERSION="$AWS_VERSION_INPUT"
           fi
