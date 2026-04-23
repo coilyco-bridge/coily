@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/coilysiren/coily/pkg/ops/eco"
 	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
@@ -22,19 +24,28 @@ const ecoMutatingScope = "coily.eco:write"
 // command on kai-server through pkg/ssh, which wraps
 // golang.org/x/crypto/ssh. No ssh subprocess is spawned. The ssh target is
 // taken from embedded config (kai_server.tailscale_host and ssh_user).
+//
+// `coily eco world` is a sub-tree of local-side helpers ported from
+// eco-cycle-prep/worldgen.py. Those verbs operate on a local checkout of
+// the eco-configs repo, not on kai-server.
 func (r *Runner) ecoCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "eco",
 		Usage: "Operate the eco game server (systemd unit on kai-server).",
 		Description: `eco wraps systemctl/journalctl calls against the eco-server unit that runs
 on kai-server. Destructive verbs (restart, stop) require a confirmation
-token. Reads (status, tail) do not.`,
+token. Reads (status, tail) do not.
+
+The 'world' sub-tree wraps the local-side helpers from
+eco-cycle-prep/worldgen.py for editing the eco-configs WorldGenerator.eco
+file. Those do not touch kai-server.`,
 		Commands: []*cli.Command{
 			r.ecoStatusCommand(),
 			r.ecoTailCommand(),
 			r.ecoRestartCommand(),
 			r.ecoStopCommand(),
 			r.ecoStartCommand(),
+			r.ecoWorldCommand(),
 		},
 	}
 }
@@ -153,6 +164,222 @@ func (r *Runner) ecoStartCommand() *cli.Command {
 					return nil, nil, c.String("token")
 				},
 				Action: r.ecoRemote([]string{"sudo", "systemctl", "start", "eco-server"}),
+			},
+			r.Verifier,
+			r.Audit,
+		),
+	}
+}
+
+// ecoWorldCommand ports the local-side helpers from
+// https://github.com/coilysiren/eco-cycle-prep/blob/main/eco_cycle_prep/worldgen.py
+// into coily. These verbs operate on a local checkout of the eco-configs
+// repo (Configs/WorldGenerator.eco), not on kai-server.
+//
+// The remote teardown/restart half of a full world cycle (stop server,
+// swap files, start server) is handled by the existing
+// `coily eco {stop,start,restart}` verbs. Composing those into a single
+// `coily eco world rotate` is deliberately deferred until Kai runs the
+// cycle manually and decides how to chain the swap step.
+func (r *Runner) ecoWorldCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "world",
+		Usage: "Read and modify the local eco-configs WorldGenerator.eco file.",
+		Description: `world wraps the helpers from eco-cycle-prep/worldgen.py:
+get-seed, set-seed, randomize, snapshot. All four are local file ops on
+a checkout of the eco-configs repo. None of them touch kai-server. To
+restart the eco-server after rotating the world file, use
+'coily eco restart' separately.
+
+The eco-configs checkout is located via --configs-dir, falling back to
+config.eco.configs_dir from the embedded config.`,
+		Commands: []*cli.Command{
+			r.ecoWorldGetSeedCommand(),
+			r.ecoWorldSetSeedCommand(),
+			r.ecoWorldRandomizeCommand(),
+			r.ecoWorldSnapshotCommand(),
+		},
+	}
+}
+
+func configsDirFlag() *cli.StringFlag {
+	return &cli.StringFlag{
+		Name:  "configs-dir",
+		Usage: "path to the eco-configs checkout. Defaults to config.eco.configs_dir",
+	}
+}
+
+// expandTilde turns a leading "~/" into the user's home dir. Returns the
+// input unchanged on any failure or when no leading "~" is present.
+func expandTilde(p string) string {
+	if p == "" || !strings.HasPrefix(p, "~") {
+		return p
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return p
+	}
+	if p == "~" {
+		return home
+	}
+	if strings.HasPrefix(p, "~/") {
+		return filepath.Join(home, p[2:])
+	}
+	return p
+}
+
+// resolveConfigsDir picks --configs-dir when set, otherwise the embedded
+// config value. Returns an error if both are empty.
+func (r *Runner) resolveConfigsDir(c *cli.Command) (string, error) {
+	if v := c.String("configs-dir"); v != "" {
+		return expandTilde(v), nil
+	}
+	if v := r.Cfg.Eco.ConfigsDir; v != "" {
+		return expandTilde(v), nil
+	}
+	return "", fmt.Errorf("eco world: pass --configs-dir or set eco.configs_dir in the embedded config")
+}
+
+func (r *Runner) ecoWorldGetSeedCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "get-seed",
+		Usage: "Print the current Seed from Configs/WorldGenerator.eco.",
+		Flags: []cli.Flag{configsDirFlag()},
+		Action: verb.Wrap(
+			verb.Spec{
+				Name:  "eco.world.get-seed",
+				Kind:  policy.ReadOnly,
+				Scope: "coily.eco:read",
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+					return map[string]string{"--configs-dir": c.String("configs-dir")}, nil, ""
+				},
+				Action: func(_ context.Context, c *cli.Command) error {
+					dir, err := r.resolveConfigsDir(c)
+					if err != nil {
+						return err
+					}
+					seed, err := eco.GetSeed(dir)
+					if err != nil {
+						return err
+					}
+					fmt.Println(seed)
+					return nil
+				},
+			},
+			r.Verifier,
+			r.Audit,
+		),
+	}
+}
+
+func (r *Runner) ecoWorldSetSeedCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "set-seed",
+		Usage: "Write a specific Seed into Configs/WorldGenerator.eco. Requires a confirmation token.",
+		Flags: []cli.Flag{
+			configsDirFlag(),
+			&cli.IntFlag{Name: "seed", Usage: "seed value (1..2,000,000,000)", Required: true},
+			&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to coily.eco:write"},
+		},
+		Action: verb.Wrap(
+			verb.Spec{
+				Name:  "eco.world.set-seed",
+				Kind:  policy.Mutating,
+				Scope: ecoMutatingScope,
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+					return map[string]string{
+						"--configs-dir": c.String("configs-dir"),
+						"--seed":        fmt.Sprint(c.Int("seed")),
+					}, nil, c.String("token")
+				},
+				Action: func(_ context.Context, c *cli.Command) error {
+					dir, err := r.resolveConfigsDir(c)
+					if err != nil {
+						return err
+					}
+					if err := eco.SetSeed(dir, int64(c.Int("seed"))); err != nil {
+						return err
+					}
+					fmt.Fprintf(os.Stderr, "wrote seed=%d to %s\n", c.Int("seed"), eco.WorldGenPath(dir))
+					return nil
+				},
+			},
+			r.Verifier,
+			r.Audit,
+		),
+	}
+}
+
+func (r *Runner) ecoWorldRandomizeCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "randomize",
+		Usage: "Generate a random seed and write it to Configs/WorldGenerator.eco. Requires a confirmation token.",
+		Flags: []cli.Flag{
+			configsDirFlag(),
+			&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to coily.eco:write"},
+		},
+		Action: verb.Wrap(
+			verb.Spec{
+				Name:  "eco.world.randomize",
+				Kind:  policy.Mutating,
+				Scope: ecoMutatingScope,
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+					return map[string]string{"--configs-dir": c.String("configs-dir")}, nil, c.String("token")
+				},
+				Action: func(_ context.Context, c *cli.Command) error {
+					dir, err := r.resolveConfigsDir(c)
+					if err != nil {
+						return err
+					}
+					seed, err := eco.RandomSeed()
+					if err != nil {
+						return err
+					}
+					if err := eco.SetSeed(dir, seed); err != nil {
+						return err
+					}
+					fmt.Fprintf(os.Stderr, "wrote seed=%d to %s\n", seed, eco.WorldGenPath(dir))
+					return nil
+				},
+			},
+			r.Verifier,
+			r.Audit,
+		),
+	}
+}
+
+func (r *Runner) ecoWorldSnapshotCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "snapshot",
+		Usage: "Copy Configs/WorldGenerator.eco to --target. Requires a confirmation token.",
+		Flags: []cli.Flag{
+			configsDirFlag(),
+			&cli.StringFlag{Name: "target", Usage: "destination file path", Required: true},
+			&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to coily.eco:write"},
+		},
+		Action: verb.Wrap(
+			verb.Spec{
+				Name:  "eco.world.snapshot",
+				Kind:  policy.Mutating,
+				Scope: ecoMutatingScope,
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+					return map[string]string{
+						"--configs-dir": c.String("configs-dir"),
+						"--target":      c.String("target"),
+					}, nil, c.String("token")
+				},
+				Action: func(_ context.Context, c *cli.Command) error {
+					dir, err := r.resolveConfigsDir(c)
+					if err != nil {
+						return err
+					}
+					target := expandTilde(c.String("target"))
+					if err := eco.Snapshot(dir, target); err != nil {
+						return err
+					}
+					fmt.Fprintf(os.Stderr, "wrote snapshot to %s\n", target)
+					return nil
+				},
 			},
 			r.Verifier,
 			r.Audit,

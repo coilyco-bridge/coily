@@ -26,3 +26,8 @@ aws:
 tokens:
   # issuer_key_path: ""   # blank picks ~/.coily/token-issuer.key
   default_ttl: 5m
+
+eco:
+  # Local checkout of eco-configs. Used by `coily eco world` verbs. Empty
+  # means --configs-dir is required on every invocation.
+  configs_dir: ""

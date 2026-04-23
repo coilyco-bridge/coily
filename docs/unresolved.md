@@ -12,7 +12,6 @@ out one agent per item, each touching a single file.
 ## Incomplete features
 
 8. [Embedded sub-binaries](unresolved/08-embedded-binaries.md)
-10. [`coily eco world`](unresolved/10-eco-world.md)
 
 ## Open questions
 
