@@ -147,8 +147,11 @@ jobs:
                 curl -fsSL -o "$tmp/aws.pkg" "$url"
                 python3 scripts/extract-xar.py "$tmp/aws.pkg" "$tmp"
                 ( cd "$tmp" && cat aws-cli.pkg/Payload | gunzip -dc | cpio -id 2>/dev/null )
-                # Layout: $tmp/aws-cli/dist/{aws, Python, ...}
-                tar -C "$tmp/aws-cli" -czf "staging/aws-${os}-${arch}.tar.gz" dist
+                # macOS .pkg drops the onedir bundle directly under
+                # aws-cli/ (no dist/ subdir unlike Linux). Rename so the
+                # tarball entry path matches across platforms.
+                mv "$tmp/aws-cli" "$tmp/dist"
+                tar -C "$tmp" -czf "staging/aws-${os}-${arch}.tar.gz" dist
                 ;;
               linux)
                 if [ "$arch" = "amd64" ]; then
