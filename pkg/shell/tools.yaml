@@ -6,14 +6,14 @@ tools:
       version: 2.34.36
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-arm64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.pkg
-      sha256: 067e88b5056d26d0abbd4acd872e901788a2cf2b7a18a74c765f5bd704a83bc1
+      sha256: 556f3de4c79307978e4d74ed4e035b3361b7d0c3b0c323a3e06218f3413c8dc3
       archive: tar.gz
       entry: dist/aws
     darwin/amd64:
       version: 2.34.36
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-amd64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.pkg
-      sha256: ccc9e9dc30b6b7ad3af676cab38806fb22ac0174d28bcd2b0db42c735ba3c034
+      sha256: 7a5151bd8d9f06767b4c1af6ca86bb976db6128609589c8417cd58d7ceddf73f
       archive: tar.gz
       entry: dist/aws
     linux/amd64:
