@@ -6,14 +6,14 @@ tools:
       version: 2.34.36
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-arm64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.pkg
-      sha256: e051cbcf002f064c71250a4660bf1cbbcf8bb6a6a8ade091279e02139f48f0f3
+      sha256: fd08594b70ecf805a5006d38faace89ad8a1674d155b3d2b93ecb0a4b4e0285c
       archive: tar.gz
       entry: dist/aws
     darwin/amd64:
       version: 2.34.36
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-amd64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.pkg
-      sha256: 7096db0e37cd4f8ad03ecf6219b1561a44345bc572c450d27bc161c7ac7b3d10
+      sha256: 5e6b49efe4b98d0b02bc3076809dd677076a7052dbb881f921b061f82fbf7ee8
       archive: tar.gz
       entry: dist/aws
     linux/amd64:
@@ -55,7 +55,7 @@ tools:
       version: 1.36.0
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/kubectl-windows-amd64
       upstream_url: https://dl.k8s.io/release/v1.36.0/bin/windows/amd64/kubectl.exe
-      sha256: PLACEHOLDER_RELEASE_TOOLS_WILL_FILL
+      sha256: 9abf2164fe79d9d80185ff5085f6154eda9d21793ee18fa8dff34dfffffed36d
   gh:
     darwin/arm64:
       version: 2.91.0
@@ -81,4 +81,4 @@ tools:
       version: 2.91.0
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/gh-windows-amd64
       upstream_url: https://github.com/cli/cli/releases/download/v2.91.0/gh_2.91.0_windows_amd64.zip
-      sha256: PLACEHOLDER_RELEASE_TOOLS_WILL_FILL
+      sha256: 619787d8ee760105ccf8a554d164c6e67196d1ec77a5fd31c39afe32cff640a9
