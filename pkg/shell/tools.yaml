@@ -30,6 +30,13 @@ tools:
       sha256: cb42713352f4b2ee9ae09cf30325dbb8c46b782bb36f3303695a53de55f4bcd4
       archive: tar.gz
       entry: dist/aws
+    windows/amd64:
+      version: 2.34.36
+      url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-windows-amd64.tar.gz
+      upstream_url: https://awscli.amazonaws.com/AWSCLIV2.msi
+      sha256: PLACEHOLDER_RELEASE_TOOLS_WILL_FILL
+      archive: tar.gz
+      entry: dist/aws.exe
   kubectl:
     darwin/arm64:
       version: 1.36.0

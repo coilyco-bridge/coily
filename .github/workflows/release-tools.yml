@@ -146,22 +146,33 @@ jobs:
             chmod +x "staging/gh-${os}-${arch}"
           done
 
+      - name: Install msitools for Windows aws-cli extraction
+        run: |
+          set -euo pipefail
+          # aws-cli v2 on Windows ships exclusively as an MSI installer.
+          # msiextract (from the msitools package) cracks the MSI open on
+          # Linux so we can pull out the PyInstaller onedir without
+          # running the installer. Not in the default ubuntu-latest image.
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends msitools
+
       - name: Fetch aws CLI (all platforms)
         run: |
           set -euo pipefail
           # AWS CLI v2 ships as a PyInstaller onedir bundle inside
-          # platform installers (.pkg for macOS, .zip for Linux). The
-          # `aws` launcher alone cannot boot: it dlopens `Python`
-          # (bundled shared lib) from its own directory and resolves
-          # site-packages there too. So we tar up the whole `dist/`
-          # tree per platform. coily's FetchingResolver handles
+          # platform installers (.pkg for macOS, .zip for Linux, .msi
+          # for Windows). The launcher alone cannot boot: it dlopens
+          # `Python` (bundled shared lib) from its own directory and
+          # resolves site-packages there too. So we tar up the whole
+          # `dist/` tree per platform. coily's FetchingResolver handles
           # archive entries by extracting into
-          # ~/.cache/coily/bin/<sha>/ and running dist/aws.
+          # ~/.cache/coily/bin/<sha>/ and running dist/aws (or aws.exe
+          # on Windows).
           #
           # NOTE: Ubuntu dropped `xar` from apt and bsdtar's xar
           # support mangles output paths, so macOS .pkg cracking goes
           # through the pure-Python reader in scripts/extract-xar.py.
-          for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64; do
+          for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64; do
             os="${plat%/*}"; arch="${plat#*/}"
             tmp="$(mktemp -d)"
             case "$os" in
@@ -186,6 +197,28 @@ jobs:
                 unzip -q "$tmp/aws.zip" -d "$tmp"
                 # Layout: $tmp/aws/dist/{aws, Python, ...}
                 tar -C "$tmp/aws" -czf "staging/aws-${os}-${arch}.tar.gz" dist
+                ;;
+              windows)
+                # AWS only publishes one Windows MSI (x86_64). If arch
+                # ever expands, re-evaluate.
+                url="https://awscli.amazonaws.com/AWSCLIV2-${AWS_VERSION}.msi"
+                curl -fsSL -o "$tmp/aws.msi" "$url"
+                mkdir -p "$tmp/extracted"
+                ( cd "$tmp/extracted" && msiextract "$tmp/aws.msi" )
+                # msiextract reproduces the Program Files tree. The
+                # onedir bundle lands at:
+                #   <extracted>/PFiles/Amazon/AWSCLIV2/
+                # Normalize to dist/ so the tarball shape matches
+                # darwin/linux and the manifest's entry: dist/aws.exe
+                # path stays uniform.
+                bundle="$(find "$tmp/extracted" -type d -name AWSCLIV2 | head -1)"
+                if [ -z "$bundle" ] || [ ! -f "$bundle/aws.exe" ]; then
+                  echo "aws windows: did not find AWSCLIV2/aws.exe under $tmp/extracted" >&2
+                  find "$tmp/extracted" -maxdepth 4 -type d >&2
+                  exit 1
+                fi
+                mv "$bundle" "$tmp/dist"
+                tar -C "$tmp" -czf "staging/aws-${os}-${arch}.tar.gz" dist
                 ;;
             esac
           done
@@ -225,9 +258,10 @@ jobs:
               if tool == "aws":
                   return f"{base}.tar.gz"
               return base
-          def archive_fields(tool: str):
+          def archive_fields(tool: str, goos: str):
               if tool == "aws":
-                  return {"archive": "tar.gz", "entry": "dist/aws"}
+                  entry = "dist/aws.exe" if goos == "windows" else "dist/aws"
+                  return {"archive": "tar.gz", "entry": entry}
               return None
           def upstream_url(tool: str, goos: str, goarch: str, version: str) -> str:
               if tool == "kubectl":
@@ -238,10 +272,10 @@ jobs:
                   ext    = {"darwin": "zip", "linux": "tar.gz", "windows": "zip"}[goos]
                   return f"https://github.com/cli/cli/releases/download/v{version}/gh_{version}_{osname}_{goarch}.{ext}"
               if tool == "aws":
-                  # aws on windows ships as an .msi installer; not wired in
-                  # the Fetch step either, so we should never hit this here.
                   if goos == "darwin":
                       return "https://awscli.amazonaws.com/AWSCLIV2.pkg"
+                  if goos == "windows":
+                      return "https://awscli.amazonaws.com/AWSCLIV2.msi"
                   arch = "x86_64" if goarch == "amd64" else "aarch64"
                   return f"https://awscli.amazonaws.com/awscli-exe-linux-{arch}.zip"
               raise KeyError(tool)
@@ -255,7 +289,7 @@ jobs:
                       entry["version"]      = version
                       entry["url"]          = f"{manifest['release_url_base']}/{asset}"
                       entry["upstream_url"] = upstream_url(tool, goos, goarch, version)
-                      extras = archive_fields(tool)
+                      extras = archive_fields(tool, goos)
                       if extras is not None:
                           entry.update(extras)
                       else:
