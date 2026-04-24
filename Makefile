@@ -30,6 +30,8 @@ help:
 	@echo "  make scope-aws        run subcli-scope against aws"
 	@echo "  make scope-gh         run subcli-scope against gh"
 	@echo "  make scope-kubectl    run subcli-scope against kubectl"
+	@echo "  make scope-tailscale  run subcli-scope against tailscale"
+	@echo "  make scope-docker     run subcli-scope against docker"
 	@echo "  make scope-all        run subcli-scope against all scoped CLIs"
 	@echo "  make test             go test ./..."
 	@echo "  make vet              go vet ./..."
@@ -103,8 +105,16 @@ scope-gh:
 scope-kubectl:
 	$(GO) run ./cmd/subcli-scope kubectl
 
+.PHONY: scope-tailscale
+scope-tailscale:
+	$(GO) run ./cmd/subcli-scope tailscale
+
+.PHONY: scope-docker
+scope-docker:
+	$(GO) run ./cmd/subcli-scope docker
+
 .PHONY: scope-all
-scope-all: scope-aws scope-gh scope-kubectl
+scope-all: scope-aws scope-gh scope-kubectl scope-tailscale scope-docker
 
 .PHONY: gen-passthrough
 gen-passthrough:
@@ -124,6 +134,8 @@ update-fixtures:
 	$(GO) run ./cmd/subcli-scope -capture cmd/subcli-scope/testdata/fixtures gh
 	$(GO) run ./cmd/subcli-scope -capture cmd/subcli-scope/testdata/fixtures kubectl
 	$(GO) run ./cmd/subcli-scope -capture cmd/subcli-scope/testdata/fixtures aws
+	$(GO) run ./cmd/subcli-scope -capture cmd/subcli-scope/testdata/fixtures tailscale
+	$(GO) run ./cmd/subcli-scope -capture cmd/subcli-scope/testdata/fixtures docker
 	$(GO) test ./cmd/subcli-scope -update
 	$(MAKE) gen-passthrough
 	$(MAKE) skill

@@ -1,0 +1,174 @@
+docker attach MUTATING
+docker build MUTATING
+docker builder bake MUTATING
+docker builder build MUTATING
+docker builder create MUTATING
+docker builder dial-stdio MUTATING
+docker builder du MUTATING
+docker builder history inspect attachment MUTATING
+docker builder history logs READONLY
+docker builder history ls READONLY
+docker builder history open MUTATING
+docker builder history rm MUTATING
+docker builder history trace MUTATING
+docker builder imagetools create MUTATING
+docker builder imagetools inspect MUTATING
+docker builder inspect MUTATING
+docker builder ls READONLY
+docker builder prune MUTATING
+docker builder rm MUTATING
+docker builder stop MUTATING
+docker builder use MUTATING
+docker checkpoint create MUTATING
+docker checkpoint ls READONLY
+docker checkpoint rm MUTATING
+docker commit MUTATING
+docker config create MUTATING
+docker config inspect MUTATING
+docker config ls READONLY
+docker config rm MUTATING
+docker container attach MUTATING
+docker container commit MUTATING
+docker container cp MUTATING
+docker container create MUTATING
+docker container diff READONLY
+docker container exec MUTATING
+docker container export MUTATING
+docker container inspect MUTATING
+docker container kill MUTATING
+docker container logs READONLY
+docker container ls READONLY
+docker container pause MUTATING
+docker container port MUTATING
+docker container prune MUTATING
+docker container rename MUTATING
+docker container restart MUTATING
+docker container rm MUTATING
+docker container run MUTATING
+docker container start MUTATING
+docker container stats MUTATING
+docker container stop MUTATING
+docker container top READONLY
+docker container unpause MUTATING
+docker container update MUTATING
+docker container wait READONLY
+docker context create MUTATING
+docker context export MUTATING
+docker context import MUTATING
+docker context inspect MUTATING
+docker context ls READONLY
+docker context rm MUTATING
+docker context show READONLY
+docker context update MUTATING
+docker context use MUTATING
+docker cp MUTATING
+docker create MUTATING
+docker diff READONLY
+docker events READONLY
+docker exec MUTATING
+docker export MUTATING
+docker history READONLY
+docker image build MUTATING
+docker image history READONLY
+docker image import MUTATING
+docker image inspect MUTATING
+docker image load MUTATING
+docker image ls READONLY
+docker image prune MUTATING
+docker image pull MUTATING
+docker image push MUTATING
+docker image rm MUTATING
+docker image save MUTATING
+docker image tag MUTATING
+docker images MUTATING
+docker import MUTATING
+docker info MUTATING
+docker inspect MUTATING
+docker kill MUTATING
+docker load MUTATING
+docker login MUTATING
+docker logout MUTATING
+docker logs READONLY
+docker manifest annotate MUTATING
+docker manifest create MUTATING
+docker manifest inspect MUTATING
+docker manifest push MUTATING
+docker manifest rm MUTATING
+docker network connect MUTATING
+docker network create MUTATING
+docker network disconnect MUTATING
+docker network inspect MUTATING
+docker network ls READONLY
+docker network prune MUTATING
+docker network rm MUTATING
+docker node demote MUTATING
+docker node inspect MUTATING
+docker node ls READONLY
+docker node promote MUTATING
+docker node ps MUTATING
+docker node rm MUTATING
+docker node update MUTATING
+docker pause MUTATING
+docker plugin create MUTATING
+docker plugin disable MUTATING
+docker plugin enable MUTATING
+docker plugin inspect MUTATING
+docker plugin install MUTATING
+docker plugin ls READONLY
+docker plugin push MUTATING
+docker plugin rm MUTATING
+docker plugin set MUTATING
+docker plugin upgrade MUTATING
+docker port MUTATING
+docker ps MUTATING
+docker pull MUTATING
+docker push MUTATING
+docker rename MUTATING
+docker restart MUTATING
+docker rm MUTATING
+docker rmi MUTATING
+docker run MUTATING
+docker save MUTATING
+docker search READONLY
+docker secret create MUTATING
+docker secret inspect MUTATING
+docker secret ls READONLY
+docker secret rm MUTATING
+docker stack config READONLY
+docker stack deploy MUTATING
+docker stack ls READONLY
+docker stack ps MUTATING
+docker stack rm MUTATING
+docker stack services MUTATING
+docker start MUTATING
+docker stats MUTATING
+docker stop MUTATING
+docker swarm ca MUTATING
+docker swarm join MUTATING
+docker swarm join-token MUTATING
+docker swarm leave MUTATING
+docker swarm unlock MUTATING
+docker swarm unlock-key MUTATING
+docker swarm update MUTATING
+docker system df MUTATING
+docker system events READONLY
+docker system info MUTATING
+docker system prune MUTATING
+docker tag MUTATING
+docker top READONLY
+docker trust inspect MUTATING
+docker trust key generate MUTATING
+docker trust key load MUTATING
+docker trust revoke MUTATING
+docker trust sign MUTATING
+docker trust signer add MUTATING
+docker trust signer remove MUTATING
+docker unpause MUTATING
+docker update MUTATING
+docker volume create MUTATING
+docker volume inspect MUTATING
+docker volume ls READONLY
+docker volume prune MUTATING
+docker volume rm MUTATING
+docker volume update MUTATING
+docker wait READONLY

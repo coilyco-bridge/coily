@@ -1,0 +1,229 @@
+binary: tailscale
+bin_version: 1.96.3
+scanned_at: "2026-04-24T12:01:51Z"
+commands:
+    - path:
+        - up
+      help: Connect to Tailscale, logging in if needed
+      flags:
+        - name: --accept-risk
+          type: string
+        - name: --advertise-routes
+          type: string
+        - name: --advertise-tags
+          type: string
+        - name: --audience
+          type: string
+        - name: --auth-key
+          type: string
+        - name: --client-id
+          type: string
+        - name: --client-secret
+          type: string
+        - name: --exit-node
+          type: string
+        - name: --hostname
+          type: string
+        - name: --id-token
+          type: string
+        - name: --login-server
+          type: string
+        - name: --qr-format
+          type: string
+        - name: --timeout
+          type: string
+    - path:
+        - down
+      help: Disconnect from Tailscale
+      flags:
+        - name: --accept-risk
+          type: string
+        - name: --reason
+          type: string
+    - path:
+        - set
+      help: Change specified preferences
+      flags:
+        - name: --accept-risk
+          type: string
+        - name: --advertise-routes
+          type: string
+        - name: --exit-node
+          type: string
+        - name: --hostname
+          type: string
+        - name: --nickname
+          type: string
+        - name: --relay-server-port
+          type: string
+        - name: --relay-server-static-endpoints
+          type: string
+    - path:
+        - login
+      help: Log in to a Tailscale account
+      flags:
+        - name: --advertise-routes
+          type: string
+        - name: --advertise-tags
+          type: string
+        - name: --audience
+          type: string
+        - name: --auth-key
+          type: string
+        - name: --client-id
+          type: string
+        - name: --client-secret
+          type: string
+        - name: --exit-node
+          type: string
+        - name: --hostname
+          type: string
+        - name: --id-token
+          type: string
+        - name: --login-server
+          type: string
+        - name: --nickname
+          type: string
+        - name: --qr-format
+          type: string
+        - name: --timeout
+          type: string
+    - path:
+        - logout
+      help: Disconnect from Tailscale and expire current node key
+      flags:
+        - name: --reason
+          type: string
+    - path:
+        - switch
+      help: Switch to a different Tailscale account
+      children:
+        - remove
+    - path:
+        - switch
+        - remove
+      help: Remove a Tailscale account
+    - path:
+        - netcheck
+      help: Print an analysis of local network conditions
+      flags:
+        - name: --bind-address
+          type: string
+        - name: --bind-port
+          type: string
+        - name: --every
+          type: string
+        - name: --format
+          type: string
+    - path:
+        - ip
+      help: Show Tailscale IP addresses
+      flags:
+        - name: --assert
+          type: string
+    - path:
+        - status
+      help: Show state of tailscaled and its connections
+      flags:
+        - name: --listen
+          type: string
+    - path:
+        - ping
+      help: Ping a host at the Tailscale layer, see how it routed
+      flags:
+        - name: --c
+          type: string
+        - name: --size
+          type: string
+        - name: --timeout
+          type: string
+    - path:
+        - ssh
+      help: SSH to a Tailscale machine
+    - path:
+        - funnel
+      help: Serve content and local servers on the internet
+      children:
+        - status
+        - reset
+    - path:
+        - funnel
+        - status
+      help: View current funnel configuration
+      flags:
+        - name: --json
+    - path:
+        - funnel
+        - reset
+      help: Reset current funnel config
+    - path:
+        - serve
+      help: Serve content and local servers on your tailnet
+      children:
+        - status
+        - reset
+        - drain
+        - clear
+        - advertise
+        - get-config
+        - set-config
+    - path:
+        - serve
+        - status
+      help: View current serve configuration
+      flags:
+        - name: --json
+    - path:
+        - serve
+        - reset
+      help: Reset current serve config
+    - path:
+        - serve
+        - drain
+      help: Drain a service from the current node
+    - path:
+        - serve
+        - clear
+      help: Remove all config for a service
+    - path:
+        - serve
+        - advertise
+      help: Advertise this node as a service proxy to the tailnet
+    - path:
+        - serve
+        - get-config
+      help: Get service configuration to save to a file
+      flags:
+        - name: --service
+          type: string
+    - path:
+        - serve
+        - set-config
+      help: Define service configuration from a file
+      flags:
+        - name: --service
+          type: string
+    - path:
+        - cert
+      help: Get TLS certs
+      flags:
+        - name: --cert-file
+          type: string
+        - name: --key-file
+          type: string
+        - name: --min-validity
+          type: string
+    - path:
+        - update
+      help: Update Tailscale to the latest/different version
+      flags:
+        - name: --track
+          type: string
+        - name: --version
+          type: string
+    - path:
+        - whois
+      help: Show the machine and user associated with a Tailscale IP (v4 or v6)
+      flags:
+        - name: --proto
+          type: string

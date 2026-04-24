@@ -79,9 +79,13 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.lockdownCommand(),
 		r.installCompletionCommand(),
 		r.ecoCommand(),
+		r.coreKeeperCommand(),
+		r.icarusCommand(),
 		r.sshCommand(),
 		r.awsCommand(),
+		r.dockerCommand(),
 		r.ghCommand(),
 		r.kubectlCommand(),
+		r.tailscaleCommand(),
 	}
 }

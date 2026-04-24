@@ -1,0 +1,54 @@
+tailscale appc-routes MUTATING
+tailscale bugreport MUTATING
+tailscale cert MUTATING
+tailscale configure kubeconfig MUTATING
+tailscale dns query MUTATING
+tailscale dns status READONLY
+tailscale down MUTATING
+tailscale drive list MUTATING
+tailscale drive rename MUTATING
+tailscale drive share MUTATING
+tailscale drive unshare MUTATING
+tailscale exit-node list MUTATING
+tailscale exit-node suggest MUTATING
+tailscale file cp MUTATING
+tailscale file get MUTATING
+tailscale funnel reset MUTATING
+tailscale funnel status READONLY
+tailscale ip MUTATING
+tailscale licenses MUTATING
+tailscale lock add MUTATING
+tailscale lock disable MUTATING
+tailscale lock disablement-kdf MUTATING
+tailscale lock init MUTATING
+tailscale lock local-disable MUTATING
+tailscale lock log MUTATING
+tailscale lock remove MUTATING
+tailscale lock revoke-keys MUTATING
+tailscale lock sign MUTATING
+tailscale lock status READONLY
+tailscale login MUTATING
+tailscale logout MUTATING
+tailscale metrics print MUTATING
+tailscale metrics write MUTATING
+tailscale nc MUTATING
+tailscale netcheck MUTATING
+tailscale ping MUTATING
+tailscale serve advertise MUTATING
+tailscale serve clear MUTATING
+tailscale serve drain MUTATING
+tailscale serve get-config READONLY
+tailscale serve reset MUTATING
+tailscale serve set-config MUTATING
+tailscale serve status READONLY
+tailscale set MUTATING
+tailscale ssh MUTATING
+tailscale status READONLY
+tailscale switch remove MUTATING
+tailscale syspolicy list MUTATING
+tailscale syspolicy reload MUTATING
+tailscale up MUTATING
+tailscale update MUTATING
+tailscale wait READONLY
+tailscale web MUTATING
+tailscale whois MUTATING

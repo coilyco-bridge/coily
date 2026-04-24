@@ -47,7 +47,7 @@ func main() {
 	}
 	arg := os.Args[1]
 	if arg == "all" {
-		for _, bin := range []string{"aws", "gh", "kubectl"} {
+		for _, bin := range []string{"aws", "docker", "gh", "kubectl", "tailscale"} {
 			runOne(bin)
 		}
 		return

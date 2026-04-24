@@ -1,0 +1,1717 @@
+binary: docker
+bin_version: Docker version 28.0.1, build 068a01e
+scanned_at: "2026-04-24T12:02:03Z"
+commands:
+    - path:
+        - run
+      help: 'Usage:  docker run [OPTIONS] IMAGE [COMMAND] [ARG...]'
+      flags:
+        - name: --add-host
+          type: string
+        - name: --annotation
+          type: string
+        - name: --attach
+          type: string
+        - name: --blkio-weight
+          type: string
+        - name: --blkio-weight-device
+          type: string
+        - name: --cap-add
+          type: string
+        - name: --cap-drop
+          type: string
+        - name: --cgroup-parent
+          type: string
+        - name: --cgroupns
+          type: string
+        - name: --cidfile
+          type: string
+        - name: --cpu-count
+          type: int
+        - name: --cpu-percent
+          type: int
+        - name: --cpu-period
+          type: int
+        - name: --cpu-quota
+          type: int
+        - name: --cpu-rt-period
+          type: int
+        - name: --cpu-rt-runtime
+          type: int
+        - name: --cpu-shares
+          type: int
+        - name: --cpus
+          type: string
+        - name: --cpuset-cpus
+          type: string
+        - name: --cpuset-mems
+          type: string
+        - name: --detach
+          type: bool
+        - name: --detach-keys
+          type: string
+        - name: --device
+          type: string
+        - name: --device-cgroup-rule
+          type: string
+        - name: --device-read-bps
+          type: string
+        - name: --device-read-iops
+          type: string
+        - name: --device-write-bps
+          type: string
+        - name: --device-write-iops
+          type: string
+        - name: --disable-content-trust
+          type: bool
+        - name: --dns
+          type: string
+        - name: --dns-option
+          type: string
+        - name: --dns-search
+          type: string
+        - name: --domainname
+          type: string
+        - name: --entrypoint
+          type: string
+        - name: --env
+          type: string
+        - name: --env-file
+          type: string
+        - name: --expose
+          type: string
+        - name: --gpus
+          type: string
+        - name: --group-add
+          type: string
+        - name: --health-cmd
+          type: string
+        - name: --health-interval
+          type: string
+        - name: --health-retries
+          type: int
+        - name: --health-start-interval
+          type: string
+        - name: --health-start-period
+          type: string
+        - name: --health-timeout
+          type: string
+        - name: --help
+          type: bool
+        - name: --hostname
+          type: string
+        - name: --init
+          type: bool
+        - name: --interactive
+          type: bool
+        - name: --io-maxbandwidth
+          type: string
+        - name: --io-maxiops
+          type: string
+        - name: --ip
+          type: string
+        - name: --ip6
+          type: string
+        - name: --ipc
+          type: string
+        - name: --isolation
+          type: string
+        - name: --kernel-memory
+          type: string
+        - name: --label
+          type: string
+        - name: --label-file
+          type: string
+        - name: --link
+          type: string
+        - name: --link-local-ip
+          type: string
+        - name: --log-driver
+          type: string
+        - name: --log-opt
+          type: string
+        - name: --mac-address
+          type: string
+        - name: --memory
+          type: string
+        - name: --memory-reservation
+          type: string
+        - name: --memory-swap
+          type: string
+        - name: --memory-swappiness
+          type: int
+        - name: --mount
+          type: string
+        - name: --name
+          type: string
+        - name: --network
+          type: string
+        - name: --network-alias
+          type: string
+        - name: --no-healthcheck
+          type: bool
+        - name: --oom-kill-disable
+          type: bool
+        - name: --oom-score-adj
+          type: int
+        - name: --pid
+          type: string
+        - name: --pids-limit
+          type: int
+        - name: --platform
+          type: string
+        - name: --privileged
+          type: bool
+        - name: --publish
+          type: string
+        - name: --publish-all
+          type: bool
+        - name: --pull
+          type: string
+        - name: --quiet
+          type: bool
+        - name: --read-only
+          type: bool
+        - name: --restart
+          type: string
+        - name: --rm
+          type: bool
+        - name: --runtime
+          type: string
+        - name: --security-opt
+          type: string
+        - name: --shm-size
+          type: string
+        - name: --sig-proxy
+          type: bool
+        - name: --stop-signal
+          type: string
+        - name: --stop-timeout
+          type: int
+        - name: --storage-opt
+          type: string
+        - name: --sysctl
+          type: string
+        - name: --tmpfs
+          type: string
+        - name: --tty
+          type: bool
+        - name: --ulimit
+          type: string
+        - name: --user
+          type: string
+        - name: --userns
+          type: string
+        - name: --uts
+          type: string
+        - name: --volume
+          type: string
+        - name: --volume-driver
+          type: string
+        - name: --volumes-from
+          type: string
+        - name: --workdir
+          type: string
+    - path:
+        - exec
+      help: 'Usage:  docker exec [OPTIONS] CONTAINER COMMAND [ARG...]'
+      flags:
+        - name: --detach
+          type: bool
+        - name: --detach-keys
+          type: string
+        - name: --env
+          type: string
+        - name: --env-file
+          type: string
+        - name: --interactive
+          type: bool
+        - name: --privileged
+          type: bool
+        - name: --tty
+          type: bool
+        - name: --user
+          type: string
+        - name: --workdir
+          type: string
+    - path:
+        - ps
+      help: 'Usage:  docker ps [OPTIONS]'
+      flags:
+        - name: --all
+          type: bool
+        - name: --filter
+          type: string
+        - name: --format
+          type: string
+        - name: --last
+          type: int
+        - name: --latest
+          type: bool
+        - name: --no-trunc
+          type: bool
+        - name: --quiet
+          type: bool
+        - name: --size
+          type: bool
+    - path:
+        - build
+      help: Start a build
+      flags:
+        - name: --add-host
+          type: string
+        - name: --allow
+          type: string
+        - name: --annotation
+          type: string
+        - name: --attest
+          type: string
+        - name: --build-arg
+          type: string
+        - name: --build-context
+          type: string
+        - name: --builder
+          type: string
+        - name: --cache-from
+          type: string
+        - name: --cache-to
+          type: string
+        - name: --call
+          type: string
+        - name: --cgroup-parent
+          type: string
+        - name: --check
+          type: bool
+        - name: --debug
+          type: bool
+        - name: --file
+          type: string
+        - name: --iidfile
+          type: string
+        - name: --label
+          type: string
+        - name: --load
+          type: bool
+        - name: --metadata-file
+          type: string
+        - name: --network
+          type: string
+        - name: --no-cache
+          type: bool
+        - name: --no-cache-filter
+          type: string
+        - name: --output
+          type: string
+        - name: --platform
+          type: string
+        - name: --progress
+          type: string
+        - name: --provenance
+          type: string
+        - name: --pull
+          type: bool
+        - name: --push
+          type: bool
+        - name: --quiet
+          type: bool
+        - name: --sbom
+          type: string
+        - name: --secret
+          type: string
+        - name: --shm-size
+          type: string
+        - name: --ssh
+          type: string
+        - name: --tag
+          type: string
+        - name: --target
+          type: string
+        - name: --ulimit
+          type: string
+    - path:
+        - pull
+      help: 'Usage:  docker pull [OPTIONS] NAME[:TAG|@DIGEST]'
+      flags:
+        - name: --all-tags
+          type: bool
+        - name: --disable-content-trust
+          type: bool
+        - name: --platform
+          type: string
+        - name: --quiet
+          type: bool
+    - path:
+        - push
+      help: 'Usage:  docker push [OPTIONS] NAME[:TAG]'
+      flags:
+        - name: --all-tags
+          type: bool
+        - name: --disable-content-trust
+          type: bool
+        - name: --platform
+          type: string
+        - name: --quiet
+          type: bool
+    - path:
+        - images
+      help: 'Usage:  docker images [OPTIONS] [REPOSITORY[:TAG]]'
+      flags:
+        - name: --all
+          type: bool
+        - name: --digests
+          type: bool
+        - name: --filter
+          type: string
+        - name: --format
+          type: string
+        - name: --no-trunc
+          type: bool
+        - name: --quiet
+          type: bool
+        - name: --tree
+          type: bool
+    - path:
+        - login
+      help: 'Usage:  docker login [OPTIONS] [SERVER]'
+      flags:
+        - name: --password
+          type: string
+        - name: --password-stdin
+          type: bool
+        - name: --username
+          type: string
+    - path:
+        - logout
+      help: 'Usage:  docker logout [SERVER]'
+    - path:
+        - search
+      help: 'Usage:  docker search [OPTIONS] TERM'
+      flags:
+        - name: --filter
+          type: string
+        - name: --format
+          type: string
+        - name: --limit
+          type: int
+        - name: --no-trunc
+          type: bool
+    - path:
+        - info
+      help: 'Usage:  docker info [OPTIONS]'
+      flags:
+        - name: --format
+          type: string
+    - path:
+        - container
+      help: 'Usage:  docker container COMMAND'
+      children:
+        - attach
+        - commit
+        - cp
+        - create
+        - diff
+        - exec
+        - export
+        - inspect
+        - kill
+        - logs
+        - ls
+        - pause
+        - port
+        - prune
+        - rename
+        - restart
+        - rm
+        - run
+        - start
+        - stats
+        - stop
+        - top
+        - unpause
+        - update
+        - wait
+    - path:
+        - container
+        - attach
+      help: 'Usage:  docker container attach [OPTIONS] CONTAINER'
+      flags:
+        - name: --detach-keys
+          type: string
+        - name: --no-stdin
+          type: bool
+        - name: --sig-proxy
+          type: bool
+    - path:
+        - container
+        - commit
+      help: 'Usage:  docker container commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]'
+      flags:
+        - name: --author
+          type: string
+        - name: --change
+          type: string
+        - name: --message
+          type: string
+        - name: --pause
+          type: bool
+    - path:
+        - container
+        - cp
+      help: 'Usage:  docker container cp [OPTIONS] CONTAINER:SRC_PATH DEST_PATH|-'
+      flags:
+        - name: --archive
+          type: bool
+        - name: --follow-link
+          type: bool
+        - name: --quiet
+          type: bool
+    - path:
+        - container
+        - create
+      help: 'Usage:  docker container create [OPTIONS] IMAGE [COMMAND] [ARG...]'
+      flags:
+        - name: --add-host
+          type: string
+        - name: --annotation
+          type: string
+        - name: --attach
+          type: string
+        - name: --blkio-weight
+          type: string
+        - name: --blkio-weight-device
+          type: string
+        - name: --cap-add
+          type: string
+        - name: --cap-drop
+          type: string
+        - name: --cgroup-parent
+          type: string
+        - name: --cgroupns
+          type: string
+        - name: --cidfile
+          type: string
+        - name: --cpu-count
+          type: int
+        - name: --cpu-percent
+          type: int
+        - name: --cpu-period
+          type: int
+        - name: --cpu-quota
+          type: int
+        - name: --cpu-rt-period
+          type: int
+        - name: --cpu-rt-runtime
+          type: int
+        - name: --cpu-shares
+          type: int
+        - name: --cpus
+          type: string
+        - name: --cpuset-cpus
+          type: string
+        - name: --cpuset-mems
+          type: string
+        - name: --device
+          type: string
+        - name: --device-cgroup-rule
+          type: string
+        - name: --device-read-bps
+          type: string
+        - name: --device-read-iops
+          type: string
+        - name: --device-write-bps
+          type: string
+        - name: --device-write-iops
+          type: string
+        - name: --disable-content-trust
+          type: bool
+        - name: --dns
+          type: string
+        - name: --dns-option
+          type: string
+        - name: --dns-search
+          type: string
+        - name: --domainname
+          type: string
+        - name: --entrypoint
+          type: string
+        - name: --env
+          type: string
+        - name: --env-file
+          type: string
+        - name: --expose
+          type: string
+        - name: --gpus
+          type: string
+        - name: --group-add
+          type: string
+        - name: --health-cmd
+          type: string
+        - name: --health-interval
+          type: string
+        - name: --health-retries
+          type: int
+        - name: --health-start-interval
+          type: string
+        - name: --health-start-period
+          type: string
+        - name: --health-timeout
+          type: string
+        - name: --help
+          type: bool
+        - name: --hostname
+          type: string
+        - name: --init
+          type: bool
+        - name: --interactive
+          type: bool
+        - name: --io-maxbandwidth
+          type: string
+        - name: --io-maxiops
+          type: string
+        - name: --ip
+          type: string
+        - name: --ip6
+          type: string
+        - name: --ipc
+          type: string
+        - name: --isolation
+          type: string
+        - name: --kernel-memory
+          type: string
+        - name: --label
+          type: string
+        - name: --label-file
+          type: string
+        - name: --link
+          type: string
+        - name: --link-local-ip
+          type: string
+        - name: --log-driver
+          type: string
+        - name: --log-opt
+          type: string
+        - name: --mac-address
+          type: string
+        - name: --memory
+          type: string
+        - name: --memory-reservation
+          type: string
+        - name: --memory-swap
+          type: string
+        - name: --memory-swappiness
+          type: int
+        - name: --mount
+          type: string
+        - name: --name
+          type: string
+        - name: --network
+          type: string
+        - name: --network-alias
+          type: string
+        - name: --no-healthcheck
+          type: bool
+        - name: --oom-kill-disable
+          type: bool
+        - name: --oom-score-adj
+          type: int
+        - name: --pid
+          type: string
+        - name: --pids-limit
+          type: int
+        - name: --platform
+          type: string
+        - name: --privileged
+          type: bool
+        - name: --publish
+          type: string
+        - name: --publish-all
+          type: bool
+        - name: --pull
+          type: string
+        - name: --quiet
+          type: bool
+        - name: --read-only
+          type: bool
+        - name: --restart
+          type: string
+        - name: --rm
+          type: bool
+        - name: --runtime
+          type: string
+        - name: --security-opt
+          type: string
+        - name: --shm-size
+          type: string
+        - name: --stop-signal
+          type: string
+        - name: --stop-timeout
+          type: int
+        - name: --storage-opt
+          type: string
+        - name: --sysctl
+          type: string
+        - name: --tmpfs
+          type: string
+        - name: --tty
+          type: bool
+        - name: --ulimit
+          type: string
+        - name: --user
+          type: string
+        - name: --userns
+          type: string
+        - name: --uts
+          type: string
+        - name: --volume
+          type: string
+        - name: --volume-driver
+          type: string
+        - name: --volumes-from
+          type: string
+        - name: --workdir
+          type: string
+    - path:
+        - container
+        - diff
+      help: 'Usage:  docker container diff CONTAINER'
+    - path:
+        - container
+        - exec
+      help: 'Usage:  docker container exec [OPTIONS] CONTAINER COMMAND [ARG...]'
+      flags:
+        - name: --detach
+          type: bool
+        - name: --detach-keys
+          type: string
+        - name: --env
+          type: string
+        - name: --env-file
+          type: string
+        - name: --interactive
+          type: bool
+        - name: --privileged
+          type: bool
+        - name: --tty
+          type: bool
+        - name: --user
+          type: string
+        - name: --workdir
+          type: string
+    - path:
+        - container
+        - export
+      help: 'Usage:  docker container export [OPTIONS] CONTAINER'
+      flags:
+        - name: --output
+          type: string
+    - path:
+        - container
+        - inspect
+      help: 'Usage:  docker container inspect [OPTIONS] CONTAINER [CONTAINER...]'
+      flags:
+        - name: --format
+          type: string
+        - name: --size
+          type: bool
+    - path:
+        - container
+        - kill
+      help: 'Usage:  docker container kill [OPTIONS] CONTAINER [CONTAINER...]'
+      flags:
+        - name: --signal
+          type: string
+    - path:
+        - container
+        - logs
+      help: 'Usage:  docker container logs [OPTIONS] CONTAINER'
+      flags:
+        - name: --details
+          type: bool
+        - name: --follow
+          type: bool
+        - name: --since
+          type: string
+        - name: --tail
+          type: string
+        - name: --timestamps
+          type: bool
+        - name: --until
+          type: string
+    - path:
+        - container
+        - ls
+      help: 'Usage:  docker container ls [OPTIONS]'
+      flags:
+        - name: --all
+          type: bool
+        - name: --filter
+          type: string
+        - name: --format
+          type: string
+        - name: --last
+          type: int
+        - name: --latest
+          type: bool
+        - name: --no-trunc
+          type: bool
+        - name: --quiet
+          type: bool
+        - name: --size
+          type: bool
+    - path:
+        - container
+        - pause
+      help: 'Usage:  docker container pause CONTAINER [CONTAINER...]'
+    - path:
+        - container
+        - port
+      help: 'Usage:  docker container port CONTAINER [PRIVATE_PORT[/PROTO]]'
+    - path:
+        - container
+        - prune
+      help: 'Usage:  docker container prune [OPTIONS]'
+      flags:
+        - name: --filter
+          type: string
+        - name: --force
+          type: bool
+    - path:
+        - container
+        - rename
+      help: 'Usage:  docker container rename CONTAINER NEW_NAME'
+    - path:
+        - container
+        - restart
+      help: 'Usage:  docker container restart [OPTIONS] CONTAINER [CONTAINER...]'
+      flags:
+        - name: --signal
+          type: string
+        - name: --timeout
+          type: int
+    - path:
+        - container
+        - rm
+      help: 'Usage:  docker container rm [OPTIONS] CONTAINER [CONTAINER...]'
+      flags:
+        - name: --force
+          type: bool
+        - name: --link
+          type: bool
+        - name: --volumes
+          type: bool
+    - path:
+        - container
+        - run
+      help: 'Usage:  docker container run [OPTIONS] IMAGE [COMMAND] [ARG...]'
+      flags:
+        - name: --add-host
+          type: string
+        - name: --annotation
+          type: string
+        - name: --attach
+          type: string
+        - name: --blkio-weight
+          type: string
+        - name: --blkio-weight-device
+          type: string
+        - name: --cap-add
+          type: string
+        - name: --cap-drop
+          type: string
+        - name: --cgroup-parent
+          type: string
+        - name: --cgroupns
+          type: string
+        - name: --cidfile
+          type: string
+        - name: --cpu-count
+          type: int
+        - name: --cpu-percent
+          type: int
+        - name: --cpu-period
+          type: int
+        - name: --cpu-quota
+          type: int
+        - name: --cpu-rt-period
+          type: int
+        - name: --cpu-rt-runtime
+          type: int
+        - name: --cpu-shares
+          type: int
+        - name: --cpus
+          type: string
+        - name: --cpuset-cpus
+          type: string
+        - name: --cpuset-mems
+          type: string
+        - name: --detach
+          type: bool
+        - name: --detach-keys
+          type: string
+        - name: --device
+          type: string
+        - name: --device-cgroup-rule
+          type: string
+        - name: --device-read-bps
+          type: string
+        - name: --device-read-iops
+          type: string
+        - name: --device-write-bps
+          type: string
+        - name: --device-write-iops
+          type: string
+        - name: --disable-content-trust
+          type: bool
+        - name: --dns
+          type: string
+        - name: --dns-option
+          type: string
+        - name: --dns-search
+          type: string
+        - name: --domainname
+          type: string
+        - name: --entrypoint
+          type: string
+        - name: --env
+          type: string
+        - name: --env-file
+          type: string
+        - name: --expose
+          type: string
+        - name: --gpus
+          type: string
+        - name: --group-add
+          type: string
+        - name: --health-cmd
+          type: string
+        - name: --health-interval
+          type: string
+        - name: --health-retries
+          type: int
+        - name: --health-start-interval
+          type: string
+        - name: --health-start-period
+          type: string
+        - name: --health-timeout
+          type: string
+        - name: --help
+          type: bool
+        - name: --hostname
+          type: string
+        - name: --init
+          type: bool
+        - name: --interactive
+          type: bool
+        - name: --io-maxbandwidth
+          type: string
+        - name: --io-maxiops
+          type: string
+        - name: --ip
+          type: string
+        - name: --ip6
+          type: string
+        - name: --ipc
+          type: string
+        - name: --isolation
+          type: string
+        - name: --kernel-memory
+          type: string
+        - name: --label
+          type: string
+        - name: --label-file
+          type: string
+        - name: --link
+          type: string
+        - name: --link-local-ip
+          type: string
+        - name: --log-driver
+          type: string
+        - name: --log-opt
+          type: string
+        - name: --mac-address
+          type: string
+        - name: --memory
+          type: string
+        - name: --memory-reservation
+          type: string
+        - name: --memory-swap
+          type: string
+        - name: --memory-swappiness
+          type: int
+        - name: --mount
+          type: string
+        - name: --name
+          type: string
+        - name: --network
+          type: string
+        - name: --network-alias
+          type: string
+        - name: --no-healthcheck
+          type: bool
+        - name: --oom-kill-disable
+          type: bool
+        - name: --oom-score-adj
+          type: int
+        - name: --pid
+          type: string
+        - name: --pids-limit
+          type: int
+        - name: --platform
+          type: string
+        - name: --privileged
+          type: bool
+        - name: --publish
+          type: string
+        - name: --publish-all
+          type: bool
+        - name: --pull
+          type: string
+        - name: --quiet
+          type: bool
+        - name: --read-only
+          type: bool
+        - name: --restart
+          type: string
+        - name: --rm
+          type: bool
+        - name: --runtime
+          type: string
+        - name: --security-opt
+          type: string
+        - name: --shm-size
+          type: string
+        - name: --sig-proxy
+          type: bool
+        - name: --stop-signal
+          type: string
+        - name: --stop-timeout
+          type: int
+        - name: --storage-opt
+          type: string
+        - name: --sysctl
+          type: string
+        - name: --tmpfs
+          type: string
+        - name: --tty
+          type: bool
+        - name: --ulimit
+          type: string
+        - name: --user
+          type: string
+        - name: --userns
+          type: string
+        - name: --uts
+          type: string
+        - name: --volume
+          type: string
+        - name: --volume-driver
+          type: string
+        - name: --volumes-from
+          type: string
+        - name: --workdir
+          type: string
+    - path:
+        - container
+        - start
+      help: 'Usage:  docker container start [OPTIONS] CONTAINER [CONTAINER...]'
+      flags:
+        - name: --attach
+          type: bool
+        - name: --checkpoint
+          type: string
+        - name: --checkpoint-dir
+          type: string
+        - name: --detach-keys
+          type: string
+        - name: --interactive
+          type: bool
+    - path:
+        - container
+        - stats
+      help: 'Usage:  docker container stats [OPTIONS] [CONTAINER...]'
+      flags:
+        - name: --all
+          type: bool
+        - name: --format
+          type: string
+        - name: --no-stream
+          type: bool
+        - name: --no-trunc
+          type: bool
+    - path:
+        - container
+        - stop
+      help: 'Usage:  docker container stop [OPTIONS] CONTAINER [CONTAINER...]'
+      flags:
+        - name: --signal
+          type: string
+        - name: --timeout
+          type: int
+    - path:
+        - container
+        - top
+      help: 'Usage:  docker container top CONTAINER [ps OPTIONS]'
+    - path:
+        - container
+        - unpause
+      help: 'Usage:  docker container unpause CONTAINER [CONTAINER...]'
+    - path:
+        - container
+        - update
+      help: 'Usage:  docker container update [OPTIONS] CONTAINER [CONTAINER...]'
+      flags:
+        - name: --blkio-weight
+          type: string
+        - name: --cpu-period
+          type: int
+        - name: --cpu-quota
+          type: int
+        - name: --cpu-rt-period
+          type: int
+        - name: --cpu-rt-runtime
+          type: int
+        - name: --cpu-shares
+          type: int
+        - name: --cpus
+          type: string
+        - name: --cpuset-cpus
+          type: string
+        - name: --cpuset-mems
+          type: string
+        - name: --memory
+          type: string
+        - name: --memory-reservation
+          type: string
+        - name: --memory-swap
+          type: string
+        - name: --pids-limit
+          type: int
+        - name: --restart
+          type: string
+    - path:
+        - container
+        - wait
+      help: 'Usage:  docker container wait CONTAINER [CONTAINER...]'
+    - path:
+        - image
+      help: 'Usage:  docker image COMMAND'
+      children:
+        - build
+        - history
+        - import
+        - inspect
+        - load
+        - ls
+        - prune
+        - pull
+        - push
+        - rm
+        - save
+        - tag
+    - path:
+        - image
+        - build
+      help: Start a build
+      flags:
+        - name: --add-host
+          type: string
+        - name: --allow
+          type: string
+        - name: --annotation
+          type: string
+        - name: --attest
+          type: string
+        - name: --build-arg
+          type: string
+        - name: --build-context
+          type: string
+        - name: --builder
+          type: string
+        - name: --cache-from
+          type: string
+        - name: --cache-to
+          type: string
+        - name: --call
+          type: string
+        - name: --cgroup-parent
+          type: string
+        - name: --check
+          type: bool
+        - name: --debug
+          type: bool
+        - name: --file
+          type: string
+        - name: --iidfile
+          type: string
+        - name: --label
+          type: string
+        - name: --load
+          type: bool
+        - name: --metadata-file
+          type: string
+        - name: --network
+          type: string
+        - name: --no-cache
+          type: bool
+        - name: --no-cache-filter
+          type: string
+        - name: --output
+          type: string
+        - name: --platform
+          type: string
+        - name: --progress
+          type: string
+        - name: --provenance
+          type: string
+        - name: --pull
+          type: bool
+        - name: --push
+          type: bool
+        - name: --quiet
+          type: bool
+        - name: --sbom
+          type: string
+        - name: --secret
+          type: string
+        - name: --shm-size
+          type: string
+        - name: --ssh
+          type: string
+        - name: --tag
+          type: string
+        - name: --target
+          type: string
+        - name: --ulimit
+          type: string
+    - path:
+        - image
+        - history
+      help: 'Usage:  docker image history [OPTIONS] IMAGE'
+      flags:
+        - name: --format
+          type: string
+        - name: --human
+          type: bool
+        - name: --no-trunc
+          type: bool
+        - name: --platform
+          type: string
+        - name: --quiet
+          type: bool
+    - path:
+        - image
+        - import
+      help: 'Usage:  docker image import [OPTIONS] file|URL|- [REPOSITORY[:TAG]]'
+      flags:
+        - name: --change
+          type: string
+        - name: --message
+          type: string
+        - name: --platform
+          type: string
+    - path:
+        - image
+        - inspect
+      help: 'Usage:  docker image inspect [OPTIONS] IMAGE [IMAGE...]'
+      flags:
+        - name: --format
+          type: string
+    - path:
+        - image
+        - load
+      help: 'Usage:  docker image load [OPTIONS]'
+      flags:
+        - name: --input
+          type: string
+        - name: --platform
+          type: string
+        - name: --quiet
+          type: bool
+    - path:
+        - image
+        - ls
+      help: 'Usage:  docker image ls [OPTIONS] [REPOSITORY[:TAG]]'
+      flags:
+        - name: --all
+          type: bool
+        - name: --digests
+          type: bool
+        - name: --filter
+          type: string
+        - name: --format
+          type: string
+        - name: --no-trunc
+          type: bool
+        - name: --quiet
+          type: bool
+        - name: --tree
+          type: bool
+    - path:
+        - image
+        - prune
+      help: 'Usage:  docker image prune [OPTIONS]'
+      flags:
+        - name: --all
+          type: bool
+        - name: --filter
+          type: string
+        - name: --force
+          type: bool
+    - path:
+        - image
+        - pull
+      help: 'Usage:  docker image pull [OPTIONS] NAME[:TAG|@DIGEST]'
+      flags:
+        - name: --all-tags
+          type: bool
+        - name: --disable-content-trust
+          type: bool
+        - name: --platform
+          type: string
+        - name: --quiet
+          type: bool
+    - path:
+        - image
+        - push
+      help: 'Usage:  docker image push [OPTIONS] NAME[:TAG]'
+      flags:
+        - name: --all-tags
+          type: bool
+        - name: --disable-content-trust
+          type: bool
+        - name: --platform
+          type: string
+        - name: --quiet
+          type: bool
+    - path:
+        - image
+        - rm
+      help: 'Usage:  docker image rm [OPTIONS] IMAGE [IMAGE...]'
+      flags:
+        - name: --force
+          type: bool
+        - name: --no-prune
+          type: bool
+    - path:
+        - image
+        - save
+      help: 'Usage:  docker image save [OPTIONS] IMAGE [IMAGE...]'
+      flags:
+        - name: --output
+          type: string
+        - name: --platform
+          type: string
+    - path:
+        - image
+        - tag
+      help: 'Usage:  docker image tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]'
+    - path:
+        - manifest
+      help: 'Usage:  docker manifest COMMAND'
+      children:
+        - annotate
+        - create
+        - inspect
+        - push
+        - rm
+    - path:
+        - manifest
+        - annotate
+      help: 'Usage:  docker manifest annotate [OPTIONS] MANIFEST_LIST MANIFEST'
+      flags:
+        - name: --arch
+          type: string
+        - name: --os
+          type: string
+        - name: --os-features
+          type: string
+        - name: --os-version
+          type: string
+        - name: --variant
+          type: string
+    - path:
+        - manifest
+        - create
+      help: 'Usage:  docker manifest create MANIFEST_LIST MANIFEST [MANIFEST...]'
+      flags:
+        - name: --amend
+          type: bool
+        - name: --insecure
+          type: bool
+    - path:
+        - manifest
+        - inspect
+      help: 'Usage:  docker manifest inspect [OPTIONS] [MANIFEST_LIST] MANIFEST'
+      flags:
+        - name: --insecure
+          type: bool
+        - name: --verbose
+          type: bool
+    - path:
+        - manifest
+        - push
+      help: 'Usage:  docker manifest push [OPTIONS] MANIFEST_LIST'
+      flags:
+        - name: --insecure
+          type: bool
+        - name: --purge
+          type: bool
+    - path:
+        - manifest
+        - rm
+      help: 'Usage:  docker manifest rm MANIFEST_LIST [MANIFEST_LIST...]'
+    - path:
+        - network
+      help: 'Usage:  docker network COMMAND'
+      children:
+        - connect
+        - create
+        - disconnect
+        - inspect
+        - ls
+        - prune
+        - rm
+    - path:
+        - network
+        - connect
+      help: 'Usage:  docker network connect [OPTIONS] NETWORK CONTAINER'
+      flags:
+        - name: --alias
+          type: string
+        - name: --driver-opt
+          type: string
+        - name: --gw-priority
+          type: int
+        - name: --ip
+          type: string
+        - name: --ip6
+          type: string
+        - name: --link
+          type: string
+        - name: --link-local-ip
+          type: string
+    - path:
+        - network
+        - create
+      help: 'Usage:  docker network create [OPTIONS] NETWORK'
+      flags:
+        - name: --attachable
+          type: bool
+        - name: --aux-address
+          type: string
+        - name: --config-from
+          type: string
+        - name: --config-only
+          type: bool
+        - name: --driver
+          type: string
+        - name: --gateway
+          type: string
+        - name: --ingress
+          type: bool
+        - name: --internal
+          type: bool
+        - name: --ip-range
+          type: string
+        - name: --ipam-driver
+          type: string
+        - name: --ipam-opt
+          type: string
+        - name: --ipv4
+          type: bool
+        - name: --ipv6
+          type: bool
+        - name: --label
+          type: string
+        - name: --opt
+          type: string
+        - name: --scope
+          type: string
+        - name: --subnet
+          type: string
+    - path:
+        - network
+        - disconnect
+      help: 'Usage:  docker network disconnect [OPTIONS] NETWORK CONTAINER'
+      flags:
+        - name: --force
+          type: bool
+    - path:
+        - network
+        - inspect
+      help: 'Usage:  docker network inspect [OPTIONS] NETWORK [NETWORK...]'
+      flags:
+        - name: --format
+          type: string
+        - name: --verbose
+          type: bool
+    - path:
+        - network
+        - ls
+      help: 'Usage:  docker network ls [OPTIONS]'
+      flags:
+        - name: --filter
+          type: string
+        - name: --format
+          type: string
+        - name: --no-trunc
+          type: bool
+        - name: --quiet
+          type: bool
+    - path:
+        - network
+        - prune
+      help: 'Usage:  docker network prune [OPTIONS]'
+      flags:
+        - name: --filter
+          type: string
+        - name: --force
+          type: bool
+    - path:
+        - network
+        - rm
+      help: 'Usage:  docker network rm NETWORK [NETWORK...]'
+      flags:
+        - name: --force
+          type: bool
+    - path:
+        - system
+      help: 'Usage:  docker system COMMAND'
+      children:
+        - df
+        - events
+        - info
+        - prune
+    - path:
+        - system
+        - df
+      help: 'Usage:  docker system df [OPTIONS]'
+      flags:
+        - name: --format
+          type: string
+        - name: --verbose
+          type: bool
+    - path:
+        - system
+        - events
+      help: 'Usage:  docker system events [OPTIONS]'
+      flags:
+        - name: --filter
+          type: string
+        - name: --format
+          type: string
+        - name: --since
+          type: string
+        - name: --until
+          type: string
+    - path:
+        - system
+        - info
+      help: 'Usage:  docker system info [OPTIONS]'
+      flags:
+        - name: --format
+          type: string
+    - path:
+        - system
+        - prune
+      help: 'Usage:  docker system prune [OPTIONS]'
+      flags:
+        - name: --all
+          type: bool
+        - name: --filter
+          type: string
+        - name: --force
+          type: bool
+        - name: --volumes
+          type: bool
+    - path:
+        - volume
+      help: 'Usage:  docker volume COMMAND'
+      children:
+        - create
+        - inspect
+        - ls
+        - prune
+        - rm
+        - update
+    - path:
+        - volume
+        - create
+      help: 'Usage:  docker volume create [OPTIONS] [VOLUME]'
+      flags:
+        - name: --availability
+          type: string
+        - name: --driver
+          type: string
+        - name: --group
+          type: string
+        - name: --label
+          type: string
+        - name: --limit-bytes
+          type: string
+        - name: --opt
+          type: string
+        - name: --required-bytes
+          type: string
+        - name: --scope
+          type: string
+        - name: --secret
+          type: string
+        - name: --sharing
+          type: string
+        - name: --topology-preferred
+          type: string
+        - name: --topology-required
+          type: string
+        - name: --type
+          type: string
+    - path:
+        - volume
+        - inspect
+      help: 'Usage:  docker volume inspect [OPTIONS] VOLUME [VOLUME...]'
+      flags:
+        - name: --format
+          type: string
+    - path:
+        - volume
+        - ls
+      help: 'Usage:  docker volume ls [OPTIONS]'
+      flags:
+        - name: --cluster
+          type: bool
+        - name: --filter
+          type: string
+        - name: --format
+          type: string
+        - name: --quiet
+          type: bool
+    - path:
+        - volume
+        - prune
+      help: 'Usage:  docker volume prune [OPTIONS]'
+      flags:
+        - name: --all
+          type: bool
+        - name: --filter
+          type: string
+        - name: --force
+          type: bool
+    - path:
+        - volume
+        - rm
+      help: 'Usage:  docker volume rm [OPTIONS] VOLUME [VOLUME...]'
+      flags:
+        - name: --force
+          type: bool
+    - path:
+        - volume
+        - update
+      help: 'Usage:  docker volume update [OPTIONS] [VOLUME]'
+      flags:
+        - name: --availability
+          type: string
+    - path:
+        - commit
+      help: 'Usage:  docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]'
+      flags:
+        - name: --author
+          type: string
+        - name: --change
+          type: string
+        - name: --message
+          type: string
+        - name: --pause
+          type: bool
+    - path:
+        - cp
+      help: 'Usage:  docker cp [OPTIONS] CONTAINER:SRC_PATH DEST_PATH|-'
+      flags:
+        - name: --archive
+          type: bool
+        - name: --follow-link
+          type: bool
+        - name: --quiet
+          type: bool
+    - path:
+        - inspect
+      help: 'Usage:  docker inspect [OPTIONS] NAME|ID [NAME|ID...]'
+      flags:
+        - name: --format
+          type: string
+        - name: --size
+          type: bool
+        - name: --type
+          type: string
+    - path:
+        - kill
+      help: 'Usage:  docker kill [OPTIONS] CONTAINER [CONTAINER...]'
+      flags:
+        - name: --signal
+          type: string
+    - path:
+        - logs
+      help: 'Usage:  docker logs [OPTIONS] CONTAINER'
+      flags:
+        - name: --details
+          type: bool
+        - name: --follow
+          type: bool
+        - name: --since
+          type: string
+        - name: --tail
+          type: string
+        - name: --timestamps
+          type: bool
+        - name: --until
+          type: string
+    - path:
+        - restart
+      help: 'Usage:  docker restart [OPTIONS] CONTAINER [CONTAINER...]'
+      flags:
+        - name: --signal
+          type: string
+        - name: --timeout
+          type: int
+    - path:
+        - rm
+      help: 'Usage:  docker rm [OPTIONS] CONTAINER [CONTAINER...]'
+      flags:
+        - name: --force
+          type: bool
+        - name: --link
+          type: bool
+        - name: --volumes
+          type: bool
+    - path:
+        - rmi
+      help: 'Usage:  docker rmi [OPTIONS] IMAGE [IMAGE...]'
+      flags:
+        - name: --force
+          type: bool
+        - name: --no-prune
+          type: bool
+    - path:
+        - start
+      help: 'Usage:  docker start [OPTIONS] CONTAINER [CONTAINER...]'
+      flags:
+        - name: --attach
+          type: bool
+        - name: --checkpoint
+          type: string
+        - name: --checkpoint-dir
+          type: string
+        - name: --detach-keys
+          type: string
+        - name: --interactive
+          type: bool
+    - path:
+        - stop
+      help: 'Usage:  docker stop [OPTIONS] CONTAINER [CONTAINER...]'
+      flags:
+        - name: --signal
+          type: string
+        - name: --timeout
+          type: int
+    - path:
+        - tag
+      help: 'Usage:  docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]'

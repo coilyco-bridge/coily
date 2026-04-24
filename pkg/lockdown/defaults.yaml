@@ -156,6 +156,9 @@ deny:
   # docker. No image builds or container execs from the agent layer.
   - Bash(docker:*)
 
+  # tailscale. All ops go through coily tailscale.
+  - Bash(tailscale:*)
+
   # ssh/scp/rsync broad. Named-host access goes through coily (eco, k8s).
   - Bash(ssh:*)
   - Bash(scp:*)
