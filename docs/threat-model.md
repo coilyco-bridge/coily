@@ -69,7 +69,7 @@ Denylist rules still bound the damage at the Bash layer, but the agent has more 
 
 The structural fix is to invert the list. Instead of enumerating every way to run a dangerous primitive (impossible), enumerate the small set of safe operations and block everything else.
 
-- **Deny broadly.** Every execution-family CLI. The scripting interpreters (python, ruby, perl, deno, node), `go run`, the shells (sh, bash, zsh), build runners (`make`, package manager scripts), and the direct write verbs on `kubectl`, `helm`, `terraform`, `aws`, `gcloud`, `docker run`. Also deny broad `ssh` except to named hosts.
+- **Deny broadly.** Every execution-family CLI. The scripting interpreters (python, ruby, perl, deno, node), `go run`, the shells (sh, bash, zsh, plus Windows cmd / powershell / pwsh), Windows scripting hosts and LOLBAS binaries (wscript, cscript, mshta, rundll32, regsvr32), build runners (`make`, package manager scripts), and the direct write verbs on `kubectl`, `helm`, `terraform`, `aws`, `gcloud`, `docker run`. Also deny broad `ssh` except to named hosts. The non-Bash `PowerShell` tool that Claude Code exposes on Windows is denied wholesale, the same way MCP tools are, since it bypasses the Bash prefix matcher entirely.
 - **Allow narrowly.** `coily *`, plus read-only tools (ls, grep, cat, git log/diff/status, `kubectl get/describe/logs`), plus editing within explicit directories.
 
 Then `coily` becomes the kernel boundary. Because it's a Go binary the agent cannot edit at runtime (installed from a separate build, not run from source), and because it takes structured flag arguments rather than raw strings, it can:

@@ -76,6 +76,34 @@ deny:
   - Bash(exec:*)
   - Bash(xargs:*)
 
+  # Windows shells. Same problem. Kai's primary host is Windows and Git Bash
+  # can shell out to cmd/PowerShell, which gives arbitrary execution.
+  - Bash(cmd:*)
+  - Bash(cmd.exe:*)
+  - Bash(powershell:*)
+  - Bash(powershell.exe:*)
+  - Bash(pwsh:*)
+  - Bash(pwsh.exe:*)
+
+  # Windows scripting hosts and LOLBAS execution vectors. Each can run
+  # arbitrary scripts or load arbitrary DLLs, defeating prefix allowlisting.
+  - Bash(wscript:*)
+  - Bash(wscript.exe:*)
+  - Bash(cscript:*)
+  - Bash(cscript.exe:*)
+  - Bash(mshta:*)
+  - Bash(mshta.exe:*)
+  - Bash(rundll32:*)
+  - Bash(rundll32.exe:*)
+  - Bash(regsvr32:*)
+  - Bash(regsvr32.exe:*)
+
+  # The PowerShell tool itself (distinct from Bash). On Windows hosts Claude
+  # Code exposes this as a first-class tool that bypasses Bash entirely, the
+  # same way MCP tools do. Block wholesale.
+  - PowerShell
+  - PowerShell(*)
+
   # Build runners that dispatch to arbitrary targets.
   - Bash(make:*)
   - Bash(npm:*)

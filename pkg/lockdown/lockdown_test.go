@@ -46,6 +46,26 @@ func TestLoadDefaults_DeniesDangerousBase(t *testing.T) {
 	}
 }
 
+func TestLoadDefaults_DeniesWindowsExecution(t *testing.T) {
+	d, _ := lockdown.LoadDefaults()
+	mustDeny := []string{
+		// Windows shells via Bash.
+		"Bash(cmd:*)", "Bash(cmd.exe:*)",
+		"Bash(powershell:*)", "Bash(powershell.exe:*)",
+		"Bash(pwsh:*)", "Bash(pwsh.exe:*)",
+		// Scripting hosts and LOLBAS binaries via Bash.
+		"Bash(wscript:*)", "Bash(cscript:*)", "Bash(mshta:*)",
+		"Bash(rundll32:*)", "Bash(regsvr32:*)",
+		// The PowerShell tool itself (separate from Bash).
+		"PowerShell", "PowerShell(*)",
+	}
+	for _, rule := range mustDeny {
+		if !contains(d.Deny, rule) {
+			t.Errorf("deny list missing required Windows rule %q", rule)
+		}
+	}
+}
+
 func TestLoadDefaults_DeniesAwsEksMcp(t *testing.T) {
 	d, _ := lockdown.LoadDefaults()
 	if !contains(d.DeniedMcpServers, "aws-eks") {
