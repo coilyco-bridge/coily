@@ -18,6 +18,14 @@ coily itself is never published as a prebuilt binary. Every install is a local b
 make install           # builds and sudo-installs /usr/local/bin/coily
 ```
 
+### Laptop (windows-amd64)
+
+```
+make install-windows   # builds and installs C:\Program Files\coily\coily.exe
+```
+
+Must be run from an elevated shell (Git Bash launched via Ctrl+Shift+Enter, or a PowerShell / cmd "Run as Administrator"). `C:\Program Files\coily\` is admin-write-only by ACL, which is the Windows analog of a root-owned `/usr/local/bin/` on unix - the agent can't overwrite the binary without UAC elevation. Add `C:\Program Files\coily` to `PATH` once after the first install.
+
 ### kai-server (linux-arm64 or linux-amd64)
 
 ```
