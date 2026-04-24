@@ -111,10 +111,16 @@ jobs:
       - name: Fetch gh (all platforms)
         run: |
           set -euo pipefail
-          # darwin ships .zip, linux .tar.gz, windows .zip - each archive
-          # extracts to gh_<ver>_<os>_<arch>/bin/gh[.exe]. Strip any .exe
-          # so the staged asset name is flat per the verify rule; coily
-          # adds .exe on cache write for windows platforms.
+          # Per-platform archive format. `bin` is the filename inside the
+          # archive; the staged asset drops the .exe so the flat
+          # `<tool>-<goos>-<goarch>` name satisfies
+          # verify-tools-manifest.py. coily appends .exe at cache-write
+          # time on Windows.
+          #
+          # Archive internal layout varies: darwin/linux wrap everything
+          # under gh_<ver>_<os>_<arch>/, while windows puts bin/gh.exe at
+          # the top level. Use `find` to locate the binary rather than
+          # hard-coding a path that breaks when upstream reshuffles.
           for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64; do
             os="${plat%/*}"; arch="${plat#*/}"
             case "$os" in
@@ -130,7 +136,13 @@ jobs:
             else
               tar -xzf "$tmp/pkg.${ext}" -C "$tmp"
             fi
-            cp "$tmp/gh_${GH_VERSION}_${osname}_${arch}/bin/${bin}" "staging/gh-${os}-${arch}"
+            src="$(find "$tmp" -type f -name "$bin" | head -1)"
+            if [ -z "$src" ]; then
+              echo "gh archive for $plat: did not find $bin under $tmp" >&2
+              find "$tmp" -maxdepth 3 -type f >&2
+              exit 1
+            fi
+            cp "$src" "staging/gh-${os}-${arch}"
             chmod +x "staging/gh-${os}-${arch}"
           done
 
