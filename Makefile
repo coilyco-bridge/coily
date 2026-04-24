@@ -56,7 +56,17 @@ build: _sync-config
 	$(GO) build -tags prod -ldflags "$(LDFLAGS)" -o bin/$(BIN_NAME) ./cmd/coily
 
 .PHONY: install
-install: build
+install:
+	@# Block on Windows (Git Bash reports MINGW*/MSYS*/CYGWIN*). The unix
+	@# install path needs `sudo install` + /usr/local/bin, which silently
+	@# no-ops or lands somewhere unreachable on Windows. The Windows-native
+	@# target writes to C:\Program Files\coily and updates User PATH.
+	@case "$$(uname -s)" in \
+		MINGW*|MSYS*|CYGWIN*) \
+			echo "ERROR: 'make install' is the macOS/Linux path. On Windows use 'make install-windows' (run from an elevated Git Bash)."; \
+			exit 1 ;; \
+	esac
+	@$(MAKE) build
 	sudo install -o root -g wheel -m 0755 bin/$(BIN_NAME) $(INSTALL_PREFIX)/bin/$(BIN_NAME)
 	@echo "installed $(INSTALL_PREFIX)/bin/$(BIN_NAME) (version $(VERSION))"
 

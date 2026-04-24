@@ -79,6 +79,7 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.lockdownCommand(),
 		r.installCompletionCommand(),
 		r.ecoCommand(),
+		r.sshCommand(),
 		r.awsCommand(),
 		r.ghCommand(),
 		r.kubectlCommand(),
