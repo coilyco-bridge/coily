@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/coilysiren/coily/pkg/audit"
 	"github.com/coilysiren/coily/pkg/config"
 	"github.com/coilysiren/coily/pkg/shell"
 	coilyssh "github.com/coilysiren/coily/pkg/ssh"
+	"github.com/coilysiren/coily/pkg/telemetry"
 )
 
 // Runner owns the audit writer, shell runner, ssh client, and loaded config.
@@ -42,6 +44,15 @@ func NewRunner() *Runner {
 	aw.MaxBackups = cfg.Audit.MaxBackups
 	aw.MaxAgeDays = cfg.Audit.MaxAgeDays
 	aw.Compress = cfg.Audit.Compress
+	aw.OnRecord = func(r audit.Record) {
+		telemetry.LogInvocation(
+			r.Verb,
+			len(r.Argv),
+			r.ExitCode,
+			time.Duration(r.DurationMS)*time.Millisecond,
+			r.Error,
+		)
+	}
 	// Loud-fail if the configured audit directory is not writable. Better
 	// than silently dropping records over the lifetime of the process.
 	if err := aw.Preflight(); err != nil {

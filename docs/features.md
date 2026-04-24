@@ -37,6 +37,7 @@ effectively zero.
 17. [Lint + test + coverage pipeline](features/19-lint-test-coverage.md)
 18. [Per-repo command allowlist (`coily.yaml`)](features/20-repo-commands.md)
 19. [Skill install chain](features/21-skill-install-chain.md)
+20. [Sentry error + log ingest](features/22-sentry.md)
 
 ## Non-features: do not test
 

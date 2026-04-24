@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
+	"github.com/coilysiren/coily/pkg/telemetry"
 	"github.com/urfave/cli/v3"
 )
 
@@ -22,8 +24,16 @@ func registerDevCommandBuilder(b func(*Runner) *cli.Command) {
 }
 
 func main() {
+	if err := telemetry.Init(Version); err != nil {
+		fmt.Fprintln(os.Stderr, "coily:", err)
+	}
 	r := NewRunner()
-	if err := run(r, os.Args); err != nil {
+	err := run(r, os.Args)
+	if err != nil {
+		telemetry.CaptureError(err)
+	}
+	telemetry.Flush(2 * time.Second)
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
