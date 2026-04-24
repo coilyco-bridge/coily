@@ -45,6 +45,12 @@ type Eco struct {
 type KaiServer struct {
 	TailscaleHost string `yaml:"tailscale_host"`
 	SSHUser       string `yaml:"ssh_user"`
+	// SSHKeyPath is an optional path to a PEM private key used for
+	// ssh/sftp auth against kai-server. ~ is expanded. When empty,
+	// coily falls back to ssh-agent (SSH_AUTH_SOCK). On Windows the
+	// MSYS/cygwin agent is not reachable from the Windows-native
+	// binary, so an explicit key path is the working path there.
+	SSHKeyPath string `yaml:"ssh_key_path"`
 }
 
 type Audit struct {

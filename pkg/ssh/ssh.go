@@ -17,6 +17,8 @@ package ssh
 import (
 	"bytes"
 	"context"
+	"bufio"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -228,6 +230,13 @@ func (c *Client) dial(ctx context.Context, host, user string) (*ssh.Client, erro
 		Auth:            auth,
 		HostKeyCallback: hkCallback,
 		Timeout:         c.dialTimeout(ctx),
+		// Restrict the client's host-key-algorithm list to what is actually
+		// recorded in known_hosts for this host. Without this, crypto/ssh
+		// requests any server-preferred algo, and when the server offers
+		// ecdsa/rsa first we hit "key mismatch" even though an ed25519
+		// entry exists. knownhosts.New does not do this automatically in
+		// x/crypto v0.50 (no HostKeyDB/HostKeyAlgorithms helper yet).
+		HostKeyAlgorithms: c.knownHostAlgos(host),
 	}
 
 	addr := withDefaultPort(host)
@@ -309,6 +318,75 @@ func (c *Client) hostKeyCallback() (ssh.HostKeyCallback, error) {
 		return nil, fmt.Errorf("%w: %w", ErrNoKnownHosts, err)
 	}
 	return cb, nil
+}
+
+// knownHostAlgos parses known_hosts and returns the set of host-key
+// algorithms recorded for host. Returns nil on any error or empty match
+// so crypto/ssh falls back to its default list (which reproduces the
+// original "key mismatch" behavior; no worse than today). host may have
+// an optional ":port" suffix, which is stripped for the lookup since
+// known_hosts bracket-ports only for non-22.
+func (c *Client) knownHostAlgos(host string) []string {
+	path := c.KnownHostsPath
+	if path == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return nil
+		}
+		path = filepath.Join(home, ".ssh", "known_hosts")
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return nil
+	}
+	defer func() { _ = f.Close() }()
+
+	// Strip :port if present. knownhosts hashes also start with "|1|"; we
+	// don't resolve those here, so hashed entries won't contribute. Kai's
+	// known_hosts uses plain hostname entries.
+	bare := host
+	if i := strings.LastIndex(host, ":"); i >= 0 && !strings.Contains(host, "]") {
+		bare = host[:i]
+	}
+
+	seen := map[string]struct{}{}
+	var algos []string
+	s := bufio.NewScanner(f)
+	for s.Scan() {
+		line := strings.TrimSpace(s.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		fields := strings.Fields(line)
+		if len(fields) < 3 {
+			continue
+		}
+		// fields[0] is hostlist, fields[1] is algo, fields[2] is base64 key.
+		// hostlist may be a comma-separated set. We match exactly; hashed
+		// entries (|1|…) are skipped (no hostname match).
+		hosts := strings.Split(fields[0], ",")
+		match := false
+		for _, h := range hosts {
+			if h == bare {
+				match = true
+				break
+			}
+		}
+		if !match {
+			continue
+		}
+		// Sanity-check the base64 blob so a malformed line can't inject
+		// an algo name that isn't actually backed by a recorded key.
+		if _, err := base64.StdEncoding.DecodeString(fields[2]); err != nil {
+			continue
+		}
+		if _, dup := seen[fields[1]]; dup {
+			continue
+		}
+		seen[fields[1]] = struct{}{}
+		algos = append(algos, fields[1])
+	}
+	return algos
 }
 
 func loadSigner(path string) (ssh.Signer, error) {

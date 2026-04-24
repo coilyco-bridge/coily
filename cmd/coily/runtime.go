@@ -69,9 +69,11 @@ func NewRunner() *Runner {
 			Resolve: fr.AsResolverFunc(),
 		},
 		Audit: aw,
-		// SSH wraps golang.org/x/crypto/ssh. Auth uses ssh-agent (KeyPath
-		// empty), host keys verified against ~/.ssh/known_hosts. See
-		// pkg/ssh/ssh.go.
-		SSH: &coilyssh.Client{},
+		// SSH wraps golang.org/x/crypto/ssh. When kai_server.ssh_key_path is
+		// set (e.g. on Windows where the MSYS agent is unreachable from the
+		// native Windows binary), auth uses that key. Otherwise it falls back
+		// to ssh-agent (SSH_AUTH_SOCK). Host keys verified against
+		// ~/.ssh/known_hosts either way. See pkg/ssh/ssh.go.
+		SSH: &coilyssh.Client{KeyPath: expandTilde(cfg.KaiServer.SSHKeyPath)},
 	}
 }
