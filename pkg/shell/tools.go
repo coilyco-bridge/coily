@@ -216,9 +216,17 @@ func (f *FetchingResolver) Resolve(bin string) (string, error) {
 }
 
 // resolveSingleFile is the legacy single-binary cache path. Kubectl and
-// gh use this.
+// gh use this. On Windows the cached file is named `<bin>.exe` because
+// the OS loader demands the extension to exec; the tool-manifest asset
+// names stay flat (verify-tools-manifest.py enforces `<tool>-<goos>-
+// <goarch>` without a suffix) and the release workflow strips `.exe`
+// from upstream Windows downloads for the same reason.
 func (f *FetchingResolver) resolveSingleFile(bin string, entry PlatformEntry, dir string) (string, error) {
-	path := filepath.Join(dir, bin)
+	filename := bin
+	if f.goos() == "windows" && !strings.HasSuffix(filename, ".exe") {
+		filename += ".exe"
+	}
+	path := filepath.Join(dir, filename)
 
 	// Cache hit: file exists and checksum still matches. We re-verify on
 	// every Resolve so a tampered cache file is detected before exec.

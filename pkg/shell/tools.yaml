@@ -51,6 +51,11 @@ tools:
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/kubectl-linux-arm64
       upstream_url: https://dl.k8s.io/release/v1.36.0/bin/linux/arm64/kubectl
       sha256: 9f9d9c44a7b5264515ac9da5991584e2395bd50662e651132337e7b4d0c56f8f
+    windows/amd64:
+      version: 1.36.0
+      url: https://github.com/coilysiren/coily/releases/download/tools-latest/kubectl-windows-amd64
+      upstream_url: https://dl.k8s.io/release/v1.36.0/bin/windows/amd64/kubectl.exe
+      sha256: PLACEHOLDER_RELEASE_TOOLS_WILL_FILL
   gh:
     darwin/arm64:
       version: 2.91.0
@@ -72,3 +77,8 @@ tools:
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/gh-linux-arm64
       upstream_url: https://github.com/cli/cli/releases/download/v2.91.0/gh_2.91.0_linux_arm64.tar.gz
       sha256: fe2b6f795ec43a8d6471d30a6e37a710d0f7edaf087380767e1f5a2f4c738f93
+    windows/amd64:
+      version: 2.91.0
+      url: https://github.com/coilysiren/coily/releases/download/tools-latest/gh-windows-amd64
+      upstream_url: https://github.com/cli/cli/releases/download/v2.91.0/gh_2.91.0_windows_amd64.zip
+      sha256: PLACEHOLDER_RELEASE_TOOLS_WILL_FILL

@@ -72,6 +72,50 @@ func TestFetchingResolver_CacheMissThenFetch(t *testing.T) {
 	}
 }
 
+// TestFetchingResolver_WindowsAppendsExeSuffix pins the rule that the
+// cached filename gets `.exe` on windows/amd64 so os/exec can launch it.
+// The manifest asset name is flat (`gh-windows-amd64`) per the verify
+// script; the suffix is applied at cache-write time, not stored in the
+// manifest.
+func TestFetchingResolver_WindowsAppendsExeSuffix(t *testing.T) {
+	body := []byte("stub-gh-exe-bytes")
+	want := sha256Hex(body)
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Write(body)
+	}))
+	defer srv.Close()
+
+	m := &shell.ToolManifest{
+		ReleaseTag: "tools-latest",
+		Tools: map[string]map[string]shell.PlatformEntry{
+			"gh": {
+				"windows/amd64": {
+					Version: "test-1.0",
+					URL:     srv.URL + "/gh",
+					SHA256:  want,
+				},
+			},
+		},
+	}
+	cache := t.TempDir()
+	r := &shell.FetchingResolver{
+		Manifest: m,
+		CacheDir: cache,
+		GOOS:     "windows",
+		GOARCH:   "amd64",
+	}
+	path, err := r.Resolve("gh")
+	if err != nil {
+		t.Fatalf("Resolve: %v", err)
+	}
+	if filepath.Base(path) != "gh.exe" {
+		t.Errorf("cached basename = %q, want gh.exe", filepath.Base(path))
+	}
+	if !strings.HasPrefix(path, cache) {
+		t.Errorf("path %q not under cache %q", path, cache)
+	}
+}
+
 func TestFetchingResolver_CacheHitNoFetch(t *testing.T) {
 	body := []byte("cached-content")
 	want := sha256Hex(body)

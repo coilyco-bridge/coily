@@ -94,9 +94,16 @@ jobs:
       - name: Fetch kubectl (all platforms)
         run: |
           set -euo pipefail
-          for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64; do
+          # Windows upstream URL ends in .exe; the other platforms are
+          # extensionless. We strip the suffix on disk so every staged
+          # asset is named `kubectl-<goos>-<goarch>` flat, matching the
+          # verify-tools-manifest.py basename rule. coily appends `.exe`
+          # at cache-write time on Windows (see pkg/shell/tools.go).
+          for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64; do
             os="${plat%/*}"; arch="${plat#*/}"
-            url="https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/${os}/${arch}/kubectl"
+            upstream="kubectl"
+            [ "$os" = "windows" ] && upstream="kubectl.exe"
+            url="https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/${os}/${arch}/${upstream}"
             curl -fsSL -o "staging/kubectl-${os}-${arch}" "$url"
             chmod +x "staging/kubectl-${os}-${arch}"
           done
@@ -104,11 +111,16 @@ jobs:
       - name: Fetch gh (all platforms)
         run: |
           set -euo pipefail
-          for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64; do
+          # darwin ships .zip, linux .tar.gz, windows .zip - each archive
+          # extracts to gh_<ver>_<os>_<arch>/bin/gh[.exe]. Strip any .exe
+          # so the staged asset name is flat per the verify rule; coily
+          # adds .exe on cache write for windows platforms.
+          for plat in darwin/arm64 darwin/amd64 linux/amd64 linux/arm64 windows/amd64; do
             os="${plat%/*}"; arch="${plat#*/}"
             case "$os" in
-              darwin) ext="zip"; osname="macOS";;
-              linux)  ext="tar.gz"; osname="linux";;
+              darwin)  ext="zip";    osname="macOS";   bin="gh";;
+              linux)   ext="tar.gz"; osname="linux";   bin="gh";;
+              windows) ext="zip";    osname="windows"; bin="gh.exe";;
             esac
             url="https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_${osname}_${arch}.${ext}"
             tmp="$(mktemp -d)"
@@ -118,8 +130,7 @@ jobs:
             else
               tar -xzf "$tmp/pkg.${ext}" -C "$tmp"
             fi
-            # Layout: gh_<ver>_<os>_<arch>/bin/gh
-            cp "$tmp/gh_${GH_VERSION}_${osname}_${arch}/bin/gh" "staging/gh-${os}-${arch}"
+            cp "$tmp/gh_${GH_VERSION}_${osname}_${arch}/bin/${bin}" "staging/gh-${os}-${arch}"
             chmod +x "staging/gh-${os}-${arch}"
           done
 
