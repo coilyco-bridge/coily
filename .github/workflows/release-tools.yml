@@ -231,12 +231,15 @@ jobs:
               return None
           def upstream_url(tool: str, goos: str, goarch: str, version: str) -> str:
               if tool == "kubectl":
-                  return f"https://dl.k8s.io/release/v{version}/bin/{goos}/{goarch}/kubectl"
+                  leaf = "kubectl.exe" if goos == "windows" else "kubectl"
+                  return f"https://dl.k8s.io/release/v{version}/bin/{goos}/{goarch}/{leaf}"
               if tool == "gh":
-                  osname = {"darwin": "macOS", "linux": "linux"}[goos]
-                  ext    = {"darwin": "zip", "linux": "tar.gz"}[goos]
+                  osname = {"darwin": "macOS", "linux": "linux", "windows": "windows"}[goos]
+                  ext    = {"darwin": "zip", "linux": "tar.gz", "windows": "zip"}[goos]
                   return f"https://github.com/cli/cli/releases/download/v{version}/gh_{version}_{osname}_{goarch}.{ext}"
               if tool == "aws":
+                  # aws on windows ships as an .msi installer; not wired in
+                  # the Fetch step either, so we should never hit this here.
                   if goos == "darwin":
                       return "https://awscli.amazonaws.com/AWSCLIV2.pkg"
                   arch = "x86_64" if goarch == "amd64" else "aarch64"
