@@ -82,6 +82,8 @@ for Eco's ModKitPlugin to pick them up.`,
 
 // ecoModPushAction is the real work behind `coily eco mod push`. It is a
 // method on Runner so tests can swap r.SSH for a fake client.
+//
+//nolint:gocyclo,cyclop // sequential flag validation, dry-run branches, and SSH+SFTP steps are linear and more readable inline than split across helpers.
 func (r *Runner) ecoModPushAction(ctx context.Context, c *cli.Command) error {
 	src := expandTilde(c.String("src"))
 	if !strings.HasSuffix(strings.ToLower(src), ".zip") {

@@ -141,6 +141,9 @@ var parentedTable = []parentedEntry{
 	{"issue", "pin", Write},
 	{"issue", "unpin", Write},
 	{"issue", "transfer", Write},
+	{"issue", "list", Read},
+	{"issue", "view", Read},
+	{"issue", "status", Read},
 }
 
 func classifyParented(path []string) (Bucket, bool) {

@@ -15,9 +15,9 @@
 package ssh
 
 import (
+	"bufio"
 	"bytes"
 	"context"
-	"bufio"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -326,6 +326,8 @@ func (c *Client) hostKeyCallback() (ssh.HostKeyCallback, error) {
 // original "key mismatch" behavior; no worse than today). host may have
 // an optional ":port" suffix, which is stripped for the lookup since
 // known_hosts bracket-ports only for non-22.
+//
+//nolint:gocognit,gocyclo,cyclop // known_hosts parsing inherently branches on comment/blank/hashed/hostlist/base64 sanity; splitting the loop body obscures the parse flow.
 func (c *Client) knownHostAlgos(host string) []string {
 	path := c.KnownHostsPath
 	if path == "" {
