@@ -98,13 +98,34 @@ func TestKeyPath_BadKey(t *testing.T) {
 	}
 }
 
-// TestCopyTo_NotImplemented pins the current behaviour. When a caller
-// finally needs scp, this test should be replaced with real coverage.
-func TestCopyTo_NotImplemented(t *testing.T) {
-	c := &coilyssh.Client{}
-	err := c.CopyTo(context.Background(), "h", "u", "/tmp/a", "/tmp/b")
-	if err == nil || !strings.Contains(err.Error(), "not implemented") {
-		t.Fatalf("got %v, want not-implemented error", err)
+// TestCopyTo_MissingLocalFile covers the open-local failure path without
+// hitting the wire. The dial still has to succeed to reach the file open,
+// so we feed a canceled ctx; ctx plumbing reaches dial() first and fails
+// there. That's enough to exercise the CopyTo entry point; live SFTP
+// coverage needs an integration harness and is out of scope here.
+func TestCopyTo_CancelsBeforeDial(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	c := &coilyssh.Client{
+		KeyPath:        writeValidKey(t),
+		KnownHostsPath: writeEmptyKnownHosts(t),
+	}
+	err := c.CopyTo(ctx, "127.0.0.1:1", "kai", "/tmp/a", "/tmp/b")
+	if err == nil {
+		t.Fatal("expected error from canceled ctx")
+	}
+	if !errors.Is(err, context.Canceled) && !strings.Contains(err.Error(), "canceled") {
+		t.Fatalf("err = %v, want context.Canceled", err)
+	}
+}
+
+// TestCopyTo_EmptyHostUser pins the input-validation through dial().
+func TestCopyTo_EmptyHost(t *testing.T) {
+	c := &coilyssh.Client{KnownHostsPath: writeEmptyKnownHosts(t)}
+	err := c.CopyTo(context.Background(), "", "kai", "/tmp/a", "/tmp/b")
+	if err == nil || !strings.Contains(err.Error(), "host is empty") {
+		t.Fatalf("got %v, want host-empty error", err)
 	}
 }
 

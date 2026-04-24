@@ -19,12 +19,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 	"golang.org/x/crypto/ssh/knownhosts"
@@ -146,15 +148,60 @@ type writer interface {
 	Write(p []byte) (int, error)
 }
 
-// CopyTo is the scp upload path. Not implemented yet because no caller
-// needs it. Wired as a stub so the eventual implementation lands behind
-// the same boundary as Run rather than re-introducing a shell-out.
+// CopyTo uploads localPath to remotePath on host as user, using SFTP over
+// the same ssh transport as Run / Stream. Host-key verification and auth
+// go through the same dial() path; ssh.InsecureIgnoreHostKey is still
+// forbidden. The remote file is created with mode 0644 and truncated if
+// it already exists. Intermediate remote directories are NOT created -
+// callers that need them should Run `mkdir -p` first.
 //
-// TODO: implement using github.com/bramvdbogaerde/go-scp when an eco
-// verb (or another verb) needs to push a file to kai-server. Until then,
-// adding the dep would be unused weight.
-func (c *Client) CopyTo(_ context.Context, _, _, _, _ string) error {
-	return errors.New("ssh: CopyTo not implemented (no caller yet); see pkg/ssh/ssh.go TODO")
+// remotePath is passed to the remote's SFTP server as-is. Callers must
+// build it from compile-time constants or values that have passed
+// policy.ValidateArg, same discipline as Run.
+func (c *Client) CopyTo(ctx context.Context, host, user, localPath, remotePath string) error {
+	conn, err := c.dial(ctx, host, user)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = conn.Close() }()
+
+	client, err := sftp.NewClient(conn)
+	if err != nil {
+		return fmt.Errorf("ssh: sftp client: %w", err)
+	}
+	defer func() { _ = client.Close() }()
+
+	src, err := os.Open(localPath) // #nosec G304 -- caller-supplied source path is the point of the API
+	if err != nil {
+		return fmt.Errorf("ssh: open local %s: %w", localPath, err)
+	}
+	defer func() { _ = src.Close() }()
+
+	dst, err := client.Create(remotePath)
+	if err != nil {
+		return fmt.Errorf("ssh: create remote %s: %w", remotePath, err)
+	}
+
+	done := make(chan error, 1)
+	go func() {
+		_, cerr := io.Copy(dst, src)
+		if closeErr := dst.Close(); cerr == nil {
+			cerr = closeErr
+		}
+		done <- cerr
+	}()
+
+	select {
+	case err := <-done:
+		if err != nil {
+			return fmt.Errorf("ssh: copy to %s: %w", remotePath, err)
+		}
+		return nil
+	case <-ctx.Done():
+		_ = dst.Close()
+		<-done
+		return ctx.Err()
+	}
 }
 
 // dial resolves auth + host-key verification and opens a connection.
