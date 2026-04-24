@@ -75,7 +75,7 @@ Three modes, by blast radius:
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
 					return map[string]string{
 						"--path": c.String("path"),
-					}, nil, c.String("token")
+					}, nil, verb.Token(c)
 				},
 				Action: lockdownAction,
 			},

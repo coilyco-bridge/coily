@@ -104,3 +104,28 @@ func extractArgs(spec Spec, cmd *cli.Command) (args map[string]string, positiona
 	}
 	return spec.ArgsFunc(cmd)
 }
+
+// TokenEnvVar is the name of the environment variable that holds a coily
+// confirmation token when `--token` is not passed explicitly. Documented in
+// cmd/coily/ops_auth.go ("paste it into the mutating invocation as --token
+// or $COILY_TOKEN").
+const TokenEnvVar = "COILY_TOKEN"
+
+// Token resolves the coily confirmation token for the current invocation,
+// preferring an explicit --token flag over the $COILY_TOKEN environment
+// variable. Used by every mutating verb's ArgsFunc so the flag and env
+// sources stay in sync. Returns "" when neither is set.
+func Token(c *cli.Command) string {
+	if t := c.String("token"); t != "" {
+		return t
+	}
+	return TokenFromEnv()
+}
+
+// TokenFromEnv reads only the $COILY_TOKEN environment variable. Used by
+// generated leaves whose underlying CLI already defines a native --token
+// flag (e.g. kubectl config set-credentials), where c.String("token") would
+// return the native value rather than a coily confirmation token.
+func TokenFromEnv() string {
+	return os.Getenv(TokenEnvVar)
+}

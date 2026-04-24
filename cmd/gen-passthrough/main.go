@@ -118,6 +118,13 @@ type tree struct {
 	// (`<binary>.<service>:<bucket>`). Empty for read-only leaves and
 	// for group nodes.
 	Scope string
+	// HasNativeToken is true when the underlying binary already defines
+	// a `--token` flag on this leaf (e.g. `kubectl config set-credentials
+	// --token`, `aws s3api put-bucket-replication --token`). In that case
+	// we do NOT register coily's confirmation-token flag (would duplicate
+	// and shadow the native one), and the ArgsFunc sources the coily
+	// token strictly from $COILY_TOKEN instead of c.String("token").
+	HasNativeToken bool
 }
 
 func buildTree(m Manifest) *tree {
@@ -140,7 +147,11 @@ func buildTree(m Manifest) *tree {
 			Help: sanitize(c.Help),
 		}
 		for _, f := range c.Flags {
-			node.Flags = append(node.Flags, makeFlagSpec(f))
+			spec := makeFlagSpec(f)
+			if spec.Bare == "token" {
+				node.HasNativeToken = true
+			}
+			node.Flags = append(node.Flags, spec)
 		}
 		key := strings.Join(c.Path, "/")
 		byPath[key] = node
@@ -292,10 +303,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 &cli.Command{
 	Name: {{$node.Name | goString}},
 	Usage: {{$node.Help | goString}},
-{{- if $node.Flags}}
+{{- if or $node.Flags (not $node.Children)}}
 	Flags: []cli.Flag{
 	{{- range $node.Flags}}
 		&cli.{{.FlagKind}}{Name: {{.Bare | goString}}},
+	{{- end}}
+	{{- if and (not $node.Children) (not $node.HasNativeToken)}}
+		&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 	{{- end}}
 	},
 {{- end}}
@@ -331,7 +345,13 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				{{- end}}
 				{{- end}}
 				positional = append(positional, c.Args().Slice()...)
-				return args, positional, c.String("token")
+				{{- if $node.HasNativeToken}}
+				// Native --token flag collides with coily's confirmation
+				// token; source the coily token from $COILY_TOKEN only.
+				return args, positional, verb.TokenFromEnv()
+				{{- else}}
+				return args, positional, verb.Token(c)
+				{{- end}}
 			},
 			Action: func(ctx context.Context, c *cli.Command) error {
 				argv := []string{ {{range $node.Path}}{{. | goString}}, {{end}} }

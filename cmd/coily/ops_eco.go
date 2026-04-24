@@ -115,7 +115,7 @@ func (r *Runner) ecoRestartCommand() *cli.Command {
 				Kind:  policy.Mutating,
 				Scope: ecoMutatingScope,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-					return nil, nil, c.String("token")
+					return nil, nil, verb.Token(c)
 				},
 				Action: r.ecoRemote([]string{"sudo", "systemctl", "restart", "eco-server"}),
 			},
@@ -138,7 +138,7 @@ func (r *Runner) ecoStopCommand() *cli.Command {
 				Kind:  policy.Mutating,
 				Scope: ecoMutatingScope,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-					return nil, nil, c.String("token")
+					return nil, nil, verb.Token(c)
 				},
 				Action: r.ecoRemote([]string{"sudo", "systemctl", "stop", "eco-server"}),
 			},
@@ -161,7 +161,7 @@ func (r *Runner) ecoStartCommand() *cli.Command {
 				Kind:  policy.Mutating,
 				Scope: ecoMutatingScope,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-					return nil, nil, c.String("token")
+					return nil, nil, verb.Token(c)
 				},
 				Action: r.ecoRemote([]string{"sudo", "systemctl", "start", "eco-server"}),
 			},
@@ -290,7 +290,7 @@ func (r *Runner) ecoWorldSetSeedCommand() *cli.Command {
 					return map[string]string{
 						"--configs-dir": c.String("configs-dir"),
 						"--seed":        fmt.Sprint(c.Int("seed")),
-					}, nil, c.String("token")
+					}, nil, verb.Token(c)
 				},
 				Action: func(_ context.Context, c *cli.Command) error {
 					dir, err := r.resolveConfigsDir(c)
@@ -324,7 +324,7 @@ func (r *Runner) ecoWorldRandomizeCommand() *cli.Command {
 				Kind:  policy.Mutating,
 				Scope: ecoMutatingScope,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-					return map[string]string{"--configs-dir": c.String("configs-dir")}, nil, c.String("token")
+					return map[string]string{"--configs-dir": c.String("configs-dir")}, nil, verb.Token(c)
 				},
 				Action: func(_ context.Context, c *cli.Command) error {
 					dir, err := r.resolveConfigsDir(c)
@@ -366,7 +366,7 @@ func (r *Runner) ecoWorldSnapshotCommand() *cli.Command {
 					return map[string]string{
 						"--configs-dir": c.String("configs-dir"),
 						"--target":      c.String("target"),
-					}, nil, c.String("token")
+					}, nil, verb.Token(c)
 				},
 				Action: func(_ context.Context, c *cli.Command) error {
 					dir, err := r.resolveConfigsDir(c)

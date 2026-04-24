@@ -72,11 +72,79 @@ func TestRenderForwardsPositionalArgs(t *testing.T) {
 		`argv = append(argv, c.Args().Slice()...)`,
 		// ArgsFunc folds positionals into the slice handed to policy.
 		`positional = append(positional, c.Args().Slice()...)`,
-		`return args, positional, c.String("token")`,
+		`return args, positional, verb.Token(c)`,
+		// Non-collision leaves register coily's --token flag inline.
+		`&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"}`,
 	}
 	for _, w := range wants {
 		if !strings.Contains(code, w) {
 			t.Errorf("rendered code missing %q\n--- code ---\n%s", w, code)
+		}
+	}
+}
+
+// TestRenderTokenFlagCollision locks in the behavior for leaves whose
+// underlying binary already defines a native --token flag (e.g.
+// `kubectl config set-credentials --token`, `aws s3api
+// put-bucket-replication --token`). The generator must NOT append a second
+// --token flag (would shadow the native one) and must source the coily
+// confirmation token from $COILY_TOKEN only, not from c.String("token")
+// which now carries the native value.
+func TestRenderTokenFlagCollision(t *testing.T) {
+	m := Manifest{
+		Binary: "aws",
+		Commands: []ManifestCommand{
+			{Path: []string{"s3api"}, Children: []string{"put-bucket-replication"}},
+			{
+				Path: []string{"s3api", "put-bucket-replication"},
+				Flags: []ManifestFlag{
+					{Name: "--bucket", Type: "string"},
+					{Name: "--token", Type: "string"},
+				},
+			},
+		},
+	}
+	code, err := render(m)
+	if err != nil {
+		t.Fatalf("render: %v", err)
+	}
+	// Must not register a second token flag.
+	if strings.Count(code, `StringFlag{Name: "token"`) != 1 {
+		t.Errorf("expected exactly one token flag registration, got %d\n%s",
+			strings.Count(code, `StringFlag{Name: "token"`), code)
+	}
+	// Collision path sources the confirmation token from env only.
+	if !strings.Contains(code, "verb.TokenFromEnv()") {
+		t.Errorf("collision leaf should use verb.TokenFromEnv()\n%s", code)
+	}
+	if strings.Contains(code, "verb.Token(c)") {
+		t.Errorf("collision leaf must not call verb.Token(c) (would read native --token value)\n%s", code)
+	}
+}
+
+// TestRenderAddsTokenFlag asserts every non-colliding leaf gets coily's
+// --token flag registered and its Usage string mentions $COILY_TOKEN. This
+// is the direct regression test for issue #1: before the fix, generated
+// leaves declared no --token flag at all, so c.String("token") was always
+// empty and every mutating verb failed policy with no way to satisfy it.
+func TestRenderAddsTokenFlag(t *testing.T) {
+	m := Manifest{
+		Binary: "gh",
+		Commands: []ManifestCommand{
+			{Path: []string{"api"}, Flags: []ManifestFlag{{Name: "--method", Type: "string"}}},
+		},
+	}
+	code, err := render(m)
+	if err != nil {
+		t.Fatalf("render: %v", err)
+	}
+	wants := []string{
+		`&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"}`,
+		`verb.Token(c)`,
+	}
+	for _, w := range wants {
+		if !strings.Contains(code, w) {
+			t.Errorf("generated code missing %q\n%s", w, code)
 		}
 	}
 }

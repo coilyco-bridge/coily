@@ -35,6 +35,61 @@ func newTestWriter(t *testing.T) *audit.Writer {
 	}
 }
 
+// TestToken_PrefersFlagOverEnv covers the two-source token resolution used
+// by every mutating verb's ArgsFunc. The --token flag wins when set;
+// otherwise the $COILY_TOKEN env var is consulted. Regression for issue #1,
+// where generated verbs dropped the flag entirely and the docstring-promised
+// env fallback had no Getenv call behind it.
+func TestToken_PrefersFlagOverEnv(t *testing.T) {
+	t.Setenv(verb.TokenEnvVar, "env-tok")
+
+	var captured string
+	app := &cli.Command{
+		Flags: []cli.Flag{&cli.StringFlag{Name: "token"}},
+		Action: func(_ context.Context, c *cli.Command) error {
+			captured = verb.Token(c)
+			return nil
+		},
+	}
+	if err := app.Run(context.Background(), []string{"app", "--token", "flag-tok"}); err != nil {
+		t.Fatal(err)
+	}
+	if captured != "flag-tok" {
+		t.Errorf("Token() = %q, want %q (flag should beat env)", captured, "flag-tok")
+	}
+
+	captured = ""
+	app2 := &cli.Command{
+		Flags: []cli.Flag{&cli.StringFlag{Name: "token"}},
+		Action: func(_ context.Context, c *cli.Command) error {
+			captured = verb.Token(c)
+			return nil
+		},
+	}
+	if err := app2.Run(context.Background(), []string{"app"}); err != nil {
+		t.Fatal(err)
+	}
+	if captured != "env-tok" {
+		t.Errorf("Token() with unset flag = %q, want %q (env fallback)", captured, "env-tok")
+	}
+}
+
+// TestTokenFromEnv covers the collision path: generated leaves whose
+// underlying binary already owns --token (e.g. kubectl config
+// set-credentials) read the coily confirmation token strictly from
+// $COILY_TOKEN, never from the cli.Command flag (which would carry the
+// native value).
+func TestTokenFromEnv(t *testing.T) {
+	t.Setenv(verb.TokenEnvVar, "only-env")
+	if got := verb.TokenFromEnv(); got != "only-env" {
+		t.Errorf("TokenFromEnv() = %q, want %q", got, "only-env")
+	}
+	t.Setenv(verb.TokenEnvVar, "")
+	if got := verb.TokenFromEnv(); got != "" {
+		t.Errorf("TokenFromEnv() with unset env = %q, want empty", got)
+	}
+}
+
 func TestWrap_ReadOnlyRunsAction(t *testing.T) {
 	called := false
 	spec := verb.Spec{

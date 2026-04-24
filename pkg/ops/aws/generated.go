@@ -57,6 +57,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -104,7 +105,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "activate-key-signing-key"}
@@ -226,6 +227,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -274,7 +276,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "associate-vpc-with-hosted-zone"}
@@ -399,6 +401,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -449,7 +452,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "change-cidr-collection"}
@@ -575,6 +578,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -622,7 +626,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "change-resource-record-sets"}
@@ -745,6 +749,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -798,7 +803,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "change-tags-for-resource"}
@@ -929,6 +934,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -976,7 +982,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-cidr-collection"}
@@ -1097,6 +1103,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1144,7 +1151,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-health-check"}
@@ -1268,6 +1275,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1318,7 +1326,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-hosted-zone"}
@@ -1451,6 +1459,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1501,7 +1510,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-key-signing-key"}
@@ -1631,6 +1640,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1678,7 +1688,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-query-logging-config"}
@@ -1799,6 +1809,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1846,7 +1857,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-reusable-delegation-set"}
@@ -1968,6 +1979,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2016,7 +2028,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-traffic-policy"}
@@ -2143,6 +2155,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2193,7 +2206,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-traffic-policy-instance"}
@@ -2324,6 +2337,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2372,7 +2386,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-traffic-policy-version"}
@@ -2496,6 +2510,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2543,7 +2558,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "create-vpc-association-authorization"}
@@ -2664,6 +2679,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2711,7 +2727,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "deactivate-key-signing-key"}
@@ -2831,6 +2847,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2877,7 +2894,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-cidr-collection"}
@@ -2994,6 +3011,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3040,7 +3058,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-health-check"}
@@ -3157,6 +3175,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3203,7 +3222,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-hosted-zone"}
@@ -3321,6 +3340,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3368,7 +3388,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-key-signing-key"}
@@ -3488,6 +3508,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3534,7 +3555,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-query-logging-config"}
@@ -3651,6 +3672,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3697,7 +3719,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-reusable-delegation-set"}
@@ -3815,6 +3837,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -3862,7 +3885,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-traffic-policy"}
@@ -3982,6 +4005,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4028,7 +4052,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-traffic-policy-instance"}
@@ -4146,6 +4170,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4193,7 +4218,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "delete-vpc-association-authorization"}
@@ -4313,6 +4338,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4359,7 +4385,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "disable-hosted-zone-dnssec"}
@@ -4478,6 +4504,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4526,7 +4553,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "disassociate-vpc-from-hosted-zone"}
@@ -4649,6 +4676,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4695,7 +4723,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "enable-hosted-zone-dnssec"}
@@ -4812,6 +4840,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4858,7 +4887,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-account-limit"}
@@ -4975,6 +5004,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5021,7 +5051,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-change"}
@@ -5137,6 +5167,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5182,7 +5213,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-checker-ip-ranges"}
@@ -5296,6 +5327,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5342,7 +5374,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-dnssec"}
@@ -5461,6 +5493,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5509,7 +5542,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-geo-location"}
@@ -5632,6 +5665,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5678,7 +5712,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-health-check"}
@@ -5794,6 +5828,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5839,7 +5874,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-health-check-count"}
@@ -5953,6 +5988,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5999,7 +6035,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-health-check-last-failure-reason"}
@@ -6116,6 +6152,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -6162,7 +6199,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-health-check-status"}
@@ -6279,6 +6316,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -6325,7 +6363,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-hosted-zone"}
@@ -6441,6 +6479,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -6486,7 +6525,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-hosted-zone-count"}
@@ -6601,6 +6640,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -6648,7 +6688,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-hosted-zone-limit"}
@@ -6768,6 +6808,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -6814,7 +6855,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-query-logging-config"}
@@ -6931,6 +6972,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -6977,7 +7019,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-reusable-delegation-set"}
@@ -7095,6 +7137,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -7142,7 +7185,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-reusable-delegation-set-limit"}
@@ -7263,6 +7306,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -7310,7 +7354,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-traffic-policy"}
@@ -7430,6 +7474,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -7476,7 +7521,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-traffic-policy-instance"}
@@ -7592,6 +7637,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -7637,7 +7683,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "get-traffic-policy-instance-count"}
@@ -7755,6 +7801,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -7805,7 +7852,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-cidr-blocks"}
@@ -7936,6 +7983,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -7984,7 +8032,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-cidr-collections"}
@@ -8110,6 +8158,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -8159,7 +8208,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-cidr-locations"}
@@ -8288,6 +8337,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -8337,7 +8387,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-geo-locations"}
@@ -8465,6 +8515,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -8513,7 +8564,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-health-checks"}
@@ -8640,6 +8691,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -8690,7 +8742,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-hosted-zones"}
@@ -8821,6 +8873,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -8869,7 +8922,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-hosted-zones-by-name"}
@@ -8995,6 +9048,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -9044,7 +9098,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-hosted-zones-by-vpc"}
@@ -9173,6 +9227,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -9222,7 +9277,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-query-logging-configs"}
@@ -9351,6 +9406,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -9400,7 +9456,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-resource-record-sets"}
@@ -9527,6 +9583,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -9574,7 +9631,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-reusable-delegation-sets"}
@@ -9695,6 +9752,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -9742,7 +9800,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-tags-for-resource"}
@@ -9863,6 +9921,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -9912,7 +9971,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-tags-for-resources"}
@@ -10035,6 +10094,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -10082,7 +10142,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-traffic-policies"}
@@ -10205,6 +10265,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -10254,7 +10315,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-traffic-policy-instances"}
@@ -10385,6 +10446,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -10436,7 +10498,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-traffic-policy-instances-by-policy"}
@@ -10570,6 +10632,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -10618,7 +10681,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-traffic-policy-versions"}
@@ -10744,6 +10807,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -10793,7 +10857,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "list-vpc-association-authorizations"}
@@ -10924,6 +10988,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -10975,7 +11040,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "test-dns-answer"}
@@ -11123,6 +11188,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -11197,7 +11263,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "update-health-check"}
@@ -11375,6 +11441,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -11422,7 +11489,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "update-hosted-zone-comment"}
@@ -11544,6 +11611,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -11592,7 +11660,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "update-traffic-policy-comment"}
@@ -11718,6 +11786,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -11767,7 +11836,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"route53", "update-traffic-policy-instance"}
@@ -11897,6 +11966,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.BoolFlag{Name: "no-cli-pager"},
 									&cli.BoolFlag{Name: "cli-auto-prompt"},
 									&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -11943,7 +12013,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--no-cli-auto-prompt"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, c.String("token")
+											return args, positional, verb.Token(c)
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"route53", "wait", "resource-record-sets-changed"}
@@ -12101,6 +12171,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -12198,7 +12269,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "cp"}
@@ -12436,6 +12507,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -12492,7 +12564,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "ls"}
@@ -12624,6 +12696,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -12667,7 +12740,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "mb"}
@@ -12808,6 +12881,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -12907,7 +12981,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "mv"}
@@ -13141,6 +13215,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -13185,7 +13260,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "presign"}
@@ -13294,6 +13369,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -13340,7 +13416,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "rb"}
@@ -13458,6 +13534,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -13517,7 +13594,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "rm"}
@@ -13691,6 +13768,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -13793,7 +13871,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "sync"}
@@ -14033,6 +14111,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -14078,7 +14157,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3", "website"}
@@ -14203,6 +14282,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -14254,7 +14334,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "abort-multipart-upload"}
@@ -14403,6 +14483,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -14466,7 +14547,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "complete-multipart-upload"}
@@ -14674,6 +14755,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -14762,7 +14844,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "copy-object"}
@@ -15009,6 +15091,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -15063,7 +15146,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "create-bucket"}
@@ -15234,6 +15317,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -15312,7 +15396,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "create-multipart-upload"}
@@ -15526,6 +15610,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -15579,7 +15664,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "create-session"}
@@ -15714,6 +15799,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -15761,7 +15847,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket"}
@@ -15883,6 +15969,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -15931,7 +16018,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-analytics-configuration"}
@@ -16055,6 +16142,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -16102,7 +16190,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-cors"}
@@ -16223,6 +16311,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -16270,7 +16359,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-encryption"}
@@ -16392,6 +16481,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -16440,7 +16530,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-inventory-configuration"}
@@ -16564,6 +16654,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -16611,7 +16702,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-lifecycle"}
@@ -16733,6 +16824,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -16781,7 +16873,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-metrics-configuration"}
@@ -16905,6 +16997,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -16952,7 +17045,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-ownership-controls"}
@@ -17073,6 +17166,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -17120,7 +17214,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-policy"}
@@ -17241,6 +17335,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -17288,7 +17383,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-replication"}
@@ -17409,6 +17504,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -17456,7 +17552,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-tagging"}
@@ -17577,6 +17673,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -17624,7 +17721,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-bucket-website"}
@@ -17752,6 +17849,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -17806,7 +17904,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-object"}
@@ -17950,6 +18048,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -17999,7 +18098,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-object-tagging"}
@@ -18130,6 +18229,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -18181,7 +18281,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-objects"}
@@ -18314,6 +18414,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -18361,7 +18462,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "delete-public-access-block"}
@@ -18483,6 +18584,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -18531,7 +18633,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-accelerate-configuration"}
@@ -18655,6 +18757,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -18702,7 +18805,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-acl"}
@@ -18824,6 +18927,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -18872,7 +18976,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-analytics-configuration"}
@@ -18996,6 +19100,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -19043,7 +19148,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-cors"}
@@ -19164,6 +19269,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -19211,7 +19317,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-encryption"}
@@ -19333,6 +19439,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -19381,7 +19488,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-inventory-configuration"}
@@ -19505,6 +19612,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -19552,7 +19660,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-lifecycle-configuration"}
@@ -19673,6 +19781,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -19720,7 +19829,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-location"}
@@ -19841,6 +19950,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -19888,7 +19998,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-logging"}
@@ -20009,6 +20119,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -20056,7 +20167,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-metadata-table-configuration"}
@@ -20178,6 +20289,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -20226,7 +20338,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-metrics-configuration"}
@@ -20350,6 +20462,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -20397,7 +20510,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-notification-configuration"}
@@ -20518,6 +20631,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -20565,7 +20679,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-ownership-controls"}
@@ -20686,6 +20800,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -20733,7 +20848,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-policy"}
@@ -20854,6 +20969,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -20901,7 +21017,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-policy-status"}
@@ -21022,6 +21138,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -21069,7 +21186,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-replication"}
@@ -21190,6 +21307,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -21237,7 +21355,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-request-payment"}
@@ -21358,6 +21476,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -21405,7 +21524,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-tagging"}
@@ -21526,6 +21645,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -21573,7 +21693,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-versioning"}
@@ -21694,6 +21814,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -21741,7 +21862,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-bucket-website"}
@@ -21879,6 +22000,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -21943,7 +22065,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object"}
@@ -22118,6 +22240,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -22168,7 +22291,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-acl"}
@@ -22307,6 +22430,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -22365,7 +22489,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-attributes"}
@@ -22518,6 +22642,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -22568,7 +22693,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-legal-hold"}
@@ -22698,6 +22823,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -22745,7 +22871,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-lock-configuration"}
@@ -22869,6 +22995,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -22919,7 +23046,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-retention"}
@@ -23052,6 +23179,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -23102,7 +23230,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-tagging"}
@@ -23232,6 +23360,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -23279,7 +23408,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-object-torrent"}
@@ -23400,6 +23529,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -23447,7 +23577,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "get-public-access-block"}
@@ -23568,6 +23698,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -23615,7 +23746,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "head-bucket"}
@@ -23755,6 +23886,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -23821,7 +23953,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "head-object"}
@@ -24000,6 +24132,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -24048,7 +24181,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-bucket-analytics-configurations"}
@@ -24173,6 +24306,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -24221,7 +24355,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-bucket-inventory-configurations"}
@@ -24346,6 +24480,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -24394,7 +24529,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-bucket-metrics-configurations"}
@@ -24521,6 +24656,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -24571,7 +24707,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-buckets"}
@@ -24702,6 +24838,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -24750,7 +24887,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-directory-buckets"}
@@ -24881,6 +25018,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -24935,7 +25073,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-multipart-uploads"}
@@ -25085,6 +25223,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -25142,7 +25281,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-object-versions"}
@@ -25297,6 +25436,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -25354,7 +25494,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-objects"}
@@ -25511,6 +25651,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -25572,7 +25713,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-objects-v2"}
@@ -25736,6 +25877,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -25792,7 +25934,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "list-parts"}
@@ -25942,6 +26084,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -25991,7 +26134,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-accelerate-configuration"}
@@ -26127,6 +26270,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -26183,7 +26327,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-acl"}
@@ -26333,6 +26477,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -26382,7 +26527,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-analytics-configuration"}
@@ -26512,6 +26657,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -26562,7 +26708,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-cors"}
@@ -26695,6 +26841,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -26745,7 +26892,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-encryption"}
@@ -26877,6 +27024,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -26926,7 +27074,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-inventory-configuration"}
@@ -27056,6 +27204,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -27106,7 +27255,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-lifecycle-configuration"}
@@ -27239,6 +27388,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -27289,7 +27439,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-logging"}
@@ -27421,6 +27571,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -27470,7 +27621,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-metrics-configuration"}
@@ -27598,6 +27749,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -27646,7 +27798,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-notification-configuration"}
@@ -27772,6 +27924,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -27821,7 +27974,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-ownership-controls"}
@@ -27952,6 +28105,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -28005,7 +28159,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-policy"}
@@ -28195,7 +28349,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									// Native --token flag collides with coily's confirmation
+									// token; source the coily token from $COILY_TOKEN only.
+									return args, positional, verb.TokenFromEnv()
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-replication"}
@@ -28331,6 +28487,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -28381,7 +28538,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-request-payment"}
@@ -28514,6 +28671,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -28564,7 +28722,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-tagging"}
@@ -28698,6 +28856,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -28749,7 +28908,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-versioning"}
@@ -28885,6 +29044,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -28935,7 +29095,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-bucket-website"}
@@ -29103,6 +29263,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -29190,7 +29351,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-object"}
@@ -29439,6 +29600,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -29498,7 +29660,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-object-acl"}
@@ -29661,6 +29823,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -29714,7 +29877,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-object-legal-hold"}
@@ -29910,7 +30073,9 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									// Native --token flag collides with coily's confirmation
+									// token; source the coily token from $COILY_TOKEN only.
+									return args, positional, verb.TokenFromEnv()
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-object-lock-configuration"}
@@ -30052,6 +30217,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -30105,7 +30271,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-object-retention"}
@@ -30250,6 +30416,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -30303,7 +30470,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-object-tagging"}
@@ -30445,6 +30612,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -30495,7 +30663,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "put-public-access-block"}
@@ -30630,6 +30798,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -30682,7 +30851,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "restore-object"}
@@ -30826,6 +30995,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -30881,7 +31051,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "select-object-content"}
@@ -31041,6 +31211,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -31103,7 +31274,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "upload-part"}
@@ -31286,6 +31457,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -31350,7 +31522,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "upload-part-copy"}
@@ -31526,6 +31698,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.BoolFlag{Name: "no-cli-pager"},
 									&cli.BoolFlag{Name: "cli-auto-prompt"},
 									&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -31573,7 +31746,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--no-cli-auto-prompt"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, c.String("token")
+											return args, positional, verb.Token(c)
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"s3api", "wait", "bucket-exists"}
@@ -31694,6 +31867,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.BoolFlag{Name: "no-cli-pager"},
 									&cli.BoolFlag{Name: "cli-auto-prompt"},
 									&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -31741,7 +31915,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--no-cli-auto-prompt"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, c.String("token")
+											return args, positional, verb.Token(c)
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"s3api", "wait", "bucket-not-exists"}
@@ -31881,6 +32055,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.BoolFlag{Name: "no-cli-pager"},
 									&cli.BoolFlag{Name: "cli-auto-prompt"},
 									&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -31947,7 +32122,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--no-cli-auto-prompt"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, c.String("token")
+											return args, positional, verb.Token(c)
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"s3api", "wait", "object-exists"}
@@ -32144,6 +32319,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.BoolFlag{Name: "no-cli-pager"},
 									&cli.BoolFlag{Name: "cli-auto-prompt"},
 									&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -32210,7 +32386,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--no-cli-auto-prompt"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, c.String("token")
+											return args, positional, verb.Token(c)
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"s3api", "wait", "object-not-exists"}
@@ -32428,6 +32604,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -32517,7 +32694,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"s3api", "write-get-object-response"}
@@ -32763,6 +32940,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -32813,7 +32991,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "add-tags-to-resource"}
@@ -32941,6 +33119,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -32990,7 +33169,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "associate-ops-item-related-item"}
@@ -33117,6 +33296,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -33166,7 +33346,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "cancel-command"}
@@ -33288,6 +33468,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -33334,7 +33515,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "cancel-maintenance-window-execution"}
@@ -33457,6 +33638,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -33513,7 +33695,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-activation"}
@@ -33671,6 +33853,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -33746,7 +33929,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-association"}
@@ -33930,6 +34113,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -33978,7 +34162,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-association-batch"}
@@ -34106,6 +34290,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -34167,7 +34352,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-document"}
@@ -34327,6 +34512,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -34385,7 +34571,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-maintenance-window"}
@@ -34549,6 +34735,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -34616,7 +34803,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-ops-item"}
@@ -34786,6 +34973,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -34836,7 +35024,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-ops-metadata"}
@@ -34967,6 +35155,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -35025,7 +35214,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-patch-baseline"}
@@ -35169,6 +35358,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -35218,7 +35408,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "create-resource-data-sync"}
@@ -35344,6 +35534,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -35390,7 +35581,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-activation"}
@@ -35509,6 +35700,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -35557,7 +35749,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-association"}
@@ -35683,6 +35875,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -35734,7 +35927,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-document"}
@@ -35865,6 +36058,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -35916,7 +36110,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-inventory"}
@@ -36044,6 +36238,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -36090,7 +36285,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-maintenance-window"}
@@ -36207,6 +36402,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -36253,7 +36449,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-ops-item"}
@@ -36370,6 +36566,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -36416,7 +36613,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-ops-metadata"}
@@ -36533,6 +36730,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -36579,7 +36777,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-parameter"}
@@ -36696,6 +36894,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -36744,7 +36943,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-parameters"}
@@ -36863,6 +37062,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -36909,7 +37109,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-patch-baseline"}
@@ -37027,6 +37227,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -37074,7 +37275,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-resource-data-sync"}
@@ -37196,6 +37397,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -37244,7 +37446,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "delete-resource-policy"}
@@ -37367,6 +37569,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -37413,7 +37616,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "deregister-managed-instance"}
@@ -37531,6 +37734,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -37578,7 +37782,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "deregister-patch-baseline-for-patch-group"}
@@ -37700,6 +37904,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -37750,7 +37955,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "deregister-target-from-maintenance-window"}
@@ -37876,6 +38081,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -37923,7 +38129,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "deregister-task-from-maintenance-window"}
@@ -38046,6 +38252,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -38097,7 +38304,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-activations"}
@@ -38228,6 +38435,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -38277,7 +38485,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-association"}
@@ -38408,6 +38616,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -38461,7 +38670,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-association-execution-targets"}
@@ -38599,6 +38808,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -38651,7 +38861,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-association-executions"}
@@ -38785,6 +38995,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -38836,7 +39047,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-automation-executions"}
@@ -38969,6 +39180,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -39024,7 +39236,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-automation-step-executions"}
@@ -39163,6 +39375,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -39214,7 +39427,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-available-patches"}
@@ -39344,6 +39557,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -39392,7 +39606,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-document"}
@@ -39518,6 +39732,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -39567,7 +39782,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-document-permission"}
@@ -39696,6 +39911,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -39745,7 +39961,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-effective-instance-associations"}
@@ -39874,6 +40090,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -39923,7 +40140,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-instance-associations-status"}
@@ -40053,6 +40270,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -40107,7 +40325,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-instance-information"}
@@ -40243,6 +40461,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -40294,7 +40513,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-instance-patch-states"}
@@ -40426,6 +40645,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -40478,7 +40698,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-instance-patches"}
@@ -40613,6 +40833,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -40667,7 +40888,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-instance-properties"}
@@ -40803,6 +41024,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -40852,7 +41074,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-inventory-deletions"}
@@ -40982,6 +41204,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -41034,7 +41257,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-maintenance-window-executions"}
@@ -41171,6 +41394,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -41227,7 +41451,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-maintenance-window-schedule"}
@@ -41370,6 +41594,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -41422,7 +41647,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-maintenance-window-targets"}
@@ -41557,6 +41782,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -41609,7 +41835,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-maintenance-window-tasks"}
@@ -41743,6 +41969,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -41794,7 +42021,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-maintenance-windows"}
@@ -41926,6 +42153,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -41978,7 +42206,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-maintenance-windows-for-target"}
@@ -42112,6 +42340,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -42163,7 +42392,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-ops-items"}
@@ -42296,6 +42525,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -42353,7 +42583,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-parameters"}
@@ -42494,6 +42724,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -42545,7 +42776,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-patch-baselines"}
@@ -42673,6 +42904,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -42719,7 +42951,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-patch-group-state"}
@@ -42839,6 +43071,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -42890,7 +43123,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-patch-groups"}
@@ -43023,6 +43256,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -43074,7 +43308,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-patch-properties"}
@@ -43210,6 +43444,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -43262,7 +43497,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "describe-sessions"}
@@ -43394,6 +43629,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -43441,7 +43677,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "disassociate-ops-item-related-item"}
@@ -43561,6 +43797,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -43607,7 +43844,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-automation-execution"}
@@ -43725,6 +43962,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -43774,7 +44012,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-calendar-state"}
@@ -43898,6 +44136,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -43946,7 +44185,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-command-invocation"}
@@ -44069,6 +44308,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -44115,7 +44355,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-connection-status"}
@@ -44232,6 +44472,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -44278,7 +44519,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-default-patch-baseline"}
@@ -44398,6 +44639,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -44447,7 +44689,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-document"}
@@ -44573,6 +44815,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -44619,7 +44862,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-execution-preview"}
@@ -44741,6 +44984,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -44798,7 +45042,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-inventory"}
@@ -44941,6 +45185,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -44996,7 +45241,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-inventory-schema"}
@@ -45132,6 +45377,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -45178,7 +45424,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-maintenance-window"}
@@ -45295,6 +45541,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -45341,7 +45588,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-maintenance-window-execution"}
@@ -45459,6 +45706,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -45506,7 +45754,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-maintenance-window-execution-task"}
@@ -45627,6 +45875,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -45674,7 +45923,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-maintenance-window-task"}
@@ -45795,6 +46044,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -45842,7 +46092,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-ops-item"}
@@ -45964,6 +46214,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -46012,7 +46263,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-ops-metadata"}
@@ -46141,6 +46392,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -46199,7 +46451,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-ops-summary"}
@@ -46341,6 +46593,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -46390,7 +46643,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-parameter"}
@@ -46516,6 +46769,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -46568,7 +46822,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-parameter-history"}
@@ -46700,6 +46954,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -46751,7 +47006,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-parameters"}
@@ -46881,6 +47136,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -46939,7 +47195,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-parameters-by-path"}
@@ -47080,6 +47336,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -47126,7 +47383,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-patch-baseline"}
@@ -47244,6 +47501,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -47291,7 +47549,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-patch-baseline-for-patch-group"}
@@ -47414,6 +47672,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -47463,7 +47722,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-resource-policies"}
@@ -47589,6 +47848,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -47635,7 +47895,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "get-service-setting"}
@@ -47754,6 +48014,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -47804,7 +48065,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "label-parameter-version"}
@@ -47932,6 +48193,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -47981,7 +48243,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-association-versions"}
@@ -48110,6 +48372,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -48161,7 +48424,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-associations"}
@@ -48295,6 +48558,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -48351,7 +48615,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-command-invocations"}
@@ -48495,6 +48759,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -48548,7 +48813,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-commands"}
@@ -48687,6 +48952,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -48744,7 +49010,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-compliance-items"}
@@ -48885,6 +49151,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -48936,7 +49203,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-compliance-summaries"}
@@ -49068,6 +49335,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -49118,7 +49386,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-document-metadata-history"}
@@ -49250,6 +49518,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -49299,7 +49568,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-document-versions"}
@@ -49429,6 +49698,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -49483,7 +49753,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-documents"}
@@ -49620,6 +49890,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -49672,7 +49943,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-inventory-entries"}
@@ -49807,6 +50078,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -49859,7 +50131,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-nodes"}
@@ -49995,6 +50267,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -50050,7 +50323,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-nodes-summary"}
@@ -50189,6 +50462,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -50240,7 +50514,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-ops-item-events"}
@@ -50372,6 +50646,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -50424,7 +50699,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-ops-item-related-items"}
@@ -50558,6 +50833,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -50609,7 +50885,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-ops-metadata"}
@@ -50740,6 +51016,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -50791,7 +51068,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-resource-compliance-summaries"}
@@ -50922,6 +51199,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -50971,7 +51249,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-resource-data-sync"}
@@ -51098,6 +51376,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -51145,7 +51424,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "list-tags-for-resource"}
@@ -51269,6 +51548,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -51323,7 +51603,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "modify-document-permission"}
@@ -51462,6 +51742,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -51516,7 +51797,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "put-compliance-items"}
@@ -51654,6 +51935,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -51703,7 +51985,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "put-inventory"}
@@ -51835,6 +52117,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -51895,7 +52178,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "put-parameter"}
@@ -52049,6 +52332,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -52098,7 +52382,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "put-resource-policy"}
@@ -52224,6 +52508,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -52270,7 +52555,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "register-default-patch-baseline"}
@@ -52388,6 +52673,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -52435,7 +52721,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "register-patch-baseline-for-patch-group"}
@@ -52561,6 +52847,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -52615,7 +52902,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "register-target-with-maintenance-window"}
@@ -52767,6 +53054,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -52830,7 +53118,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "register-task-with-maintenance-window"}
@@ -52996,6 +53284,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -53046,7 +53335,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "remove-tags-from-resource"}
@@ -53171,6 +53460,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -53217,7 +53507,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "reset-service-setting"}
@@ -53334,6 +53624,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -53380,7 +53671,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "resume-session"}
@@ -53499,6 +53790,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -53547,7 +53839,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "send-automation-signal"}
@@ -53687,6 +53979,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -53754,7 +54047,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "send-command"}
@@ -53926,6 +54219,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -53974,7 +54268,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "start-associations-once"}
@@ -54106,6 +54400,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -54173,7 +54468,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "start-automation-execution"}
@@ -54347,6 +54642,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -54409,7 +54705,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "start-change-request-execution"}
@@ -54563,6 +54859,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -54610,7 +54907,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "start-execution-preview"}
@@ -54733,6 +55030,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -54782,7 +55080,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "start-session"}
@@ -54909,6 +55207,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -54956,7 +55255,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "stop-automation-execution"}
@@ -55076,6 +55375,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -55122,7 +55422,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "terminate-session"}
@@ -55241,6 +55541,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -55291,7 +55592,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "unlabel-parameter-version"}
@@ -55435,6 +55736,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -55508,7 +55810,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-association"}
@@ -55692,6 +55994,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -55740,7 +56043,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-association-status"}
@@ -55870,6 +56173,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -55925,7 +56229,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-document"}
@@ -56066,6 +56370,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -56113,7 +56418,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-document-default-version"}
@@ -56235,6 +56540,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -56283,7 +56589,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-document-metadata"}
@@ -56417,6 +56723,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -56478,7 +56785,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-maintenance-window"}
@@ -56638,6 +56945,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -56694,7 +57002,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-maintenance-window-target"}
@@ -56848,6 +57156,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -56913,7 +57222,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-maintenance-window-task"}
@@ -57080,6 +57389,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -57127,7 +57437,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-managed-instance-role"}
@@ -57262,6 +57572,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -57329,7 +57640,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-ops-item"}
@@ -57499,6 +57810,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -57549,7 +57861,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-ops-metadata"}
@@ -57680,6 +57992,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -57738,7 +58051,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-patch-baseline"}
@@ -57881,6 +58194,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -57929,7 +58243,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-resource-data-sync"}
@@ -58053,6 +58367,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -58100,7 +58415,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"ssm", "update-service-setting"}
@@ -58226,6 +58541,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.BoolFlag{Name: "no-cli-pager"},
 									&cli.BoolFlag{Name: "cli-auto-prompt"},
 									&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -58274,7 +58590,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--no-cli-auto-prompt"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, c.String("token")
+											return args, positional, verb.Token(c)
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"ssm", "wait", "command-executed"}
@@ -58416,6 +58732,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -58481,7 +58798,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "assume-role"}
@@ -58644,6 +58961,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -58697,7 +59015,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "assume-role-with-saml"}
@@ -58837,6 +59155,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -58891,7 +59210,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "assume-role-with-web-identity"}
@@ -59030,6 +59349,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -59078,7 +59398,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "assume-root"}
@@ -59201,6 +59521,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -59247,7 +59568,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "decode-authorization-message"}
@@ -59364,6 +59685,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -59410,7 +59732,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "get-access-key-info"}
@@ -59526,6 +59848,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -59571,7 +59894,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "get-caller-identity"}
@@ -59689,6 +60012,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -59743,7 +60067,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "get-federation-token"}
@@ -59878,6 +60202,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-cli-pager"},
 							&cli.BoolFlag{Name: "cli-auto-prompt"},
 							&cli.BoolFlag{Name: "no-cli-auto-prompt"},
+							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -59926,7 +60251,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--no-cli-auto-prompt"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, c.String("token")
+									return args, positional, verb.Token(c)
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"sts", "get-session-token"}
