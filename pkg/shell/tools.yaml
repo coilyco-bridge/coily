@@ -3,31 +3,31 @@ release_url_base: https://github.com/coilysiren/coily/releases/download/tools-la
 tools:
   aws:
     darwin/arm64:
-      version: 2.34.35
+      version: 2.34.36
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-arm64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.pkg
-      sha256: adc402487f3b723a9c32b24e6342b17cf339aa4f27d89e14df60322f59b30b6f
+      sha256: af40e2696ebc773839c9560c02b08baf856a62140f38edc0e48a25b140ee5ef7
       archive: tar.gz
       entry: dist/aws
     darwin/amd64:
-      version: 2.34.35
+      version: 2.34.36
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-amd64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.pkg
-      sha256: da6208b71666b5b252f6c18afdc212c5a42ee2d598830732c98277af29013b22
+      sha256: e669aedf2e6c7f25cc4f2510cad5cafc0e276f3559f430ad96085c046b27023d
       archive: tar.gz
       entry: dist/aws
     linux/amd64:
-      version: 2.34.35
+      version: 2.34.36
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-linux-amd64.tar.gz
       upstream_url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
-      sha256: e9bfe8a387f6877cee107926c72a4f6d6ac7379c16194b2c864376f10151725b
+      sha256: 5bc2c366cc9ecd154c115f21064831edfc5f5755d2c56d742f3ab0275f5314eb
       archive: tar.gz
       entry: dist/aws
     linux/arm64:
-      version: 2.34.35
+      version: 2.34.36
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-linux-arm64.tar.gz
       upstream_url: https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
-      sha256: 4499d3a2b8362a1a43bd648c56bcfd11f40d4751ba9903c385da181c32950a36
+      sha256: cb42713352f4b2ee9ae09cf30325dbb8c46b782bb36f3303695a53de55f4bcd4
       archive: tar.gz
       entry: dist/aws
   kubectl:
