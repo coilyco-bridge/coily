@@ -76,7 +76,6 @@ func (r *Runner) builtInCommands() []*cli.Command {
 	return []*cli.Command{
 		r.versionCommand(),
 		r.whoamiCommand(),
-		r.authCommand(),
 		r.lockdownCommand(),
 		r.installCompletionCommand(),
 		r.ecoCommand(),

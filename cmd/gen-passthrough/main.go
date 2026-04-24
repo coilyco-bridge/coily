@@ -1,20 +1,13 @@
 // gen-passthrough reads a configs/commands/<binary>.yaml manifest and emits
 // pkg/ops/<binary>/generated.go. The generated file registers a single
 // Command() function that returns the full *cli.Command tree mirroring the
-// underlying CLI, with every leaf wrapped through verb.Wrap so policy and
-// audit are applied uniformly.
+// underlying CLI, with every leaf wrapped through verb.Wrap so argv
+// validation and audit logging apply uniformly.
 //
 // Usage:
 //
 //	go run ./cmd/gen-passthrough <binary>   # e.g. aws, gh, kubectl
 //	go run ./cmd/gen-passthrough all        # regenerate every manifest
-//
-// Classification of leaves into one of three buckets (Read / Write /
-// Delete) is delegated to pkg/verbclass and shared with cmd/subcli-scope so
-// the snapshot diff and the codegen agree on labels. The bucket determines
-// the verb's Kind (ReadOnly vs Mutating) and the required token scope
-// (`<binary>.<service>:<bucket>`). Wrong classification is a bug worth
-// flagging - a mutator labelled Read silently drops token-gating.
 package main
 
 import (
@@ -25,13 +18,12 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/coilysiren/coily/pkg/verbclass"
 	"gopkg.in/yaml.v3"
 )
 
 // Manifest + ManifestCommand + ManifestFlag mirror pkg/skillgen (and thus
 // subcli-scope's output). Kept local so this tool has no coily-internal
-// dependencies beyond the yaml + verbclass packages.
+// dependencies beyond yaml.
 type Manifest struct {
 	Binary   string            `yaml:"binary"`
 	Commands []ManifestCommand `yaml:"commands"`
@@ -112,19 +104,6 @@ type tree struct {
 	Help     string
 	Flags    []flagSpec
 	Children []*tree
-	// Mutating is true when Bucket is Write or Delete. Set on leaves only.
-	Mutating bool
-	// Scope is the full required scope string for mutating leaves
-	// (`<binary>.<service>:<bucket>`). Empty for read-only leaves and
-	// for group nodes.
-	Scope string
-	// HasNativeToken is true when the underlying binary already defines
-	// a `--token` flag on this leaf (e.g. `kubectl config set-credentials
-	// --token`, `aws s3api put-bucket-replication --token`). In that case
-	// we do NOT register coily's confirmation-token flag (would duplicate
-	// and shadow the native one), and the ArgsFunc sources the coily
-	// token strictly from $COILY_TOKEN instead of c.String("token").
-	HasNativeToken bool
 }
 
 func buildTree(m Manifest) *tree {
@@ -147,11 +126,7 @@ func buildTree(m Manifest) *tree {
 			Help: sanitize(c.Help),
 		}
 		for _, f := range c.Flags {
-			spec := makeFlagSpec(f)
-			if spec.Bare == "token" {
-				node.HasNativeToken = true
-			}
-			node.Flags = append(node.Flags, spec)
+			node.Flags = append(node.Flags, makeFlagSpec(f))
 		}
 		key := strings.Join(c.Path, "/")
 		byPath[key] = node
@@ -162,16 +137,12 @@ func buildTree(m Manifest) *tree {
 		}
 		parent.Children = append(parent.Children, node)
 	}
-
-	// Pass two: classify leaves only. Group nodes inherit Mutating=false
-	// and Scope="" because their Action is never invoked.
-	classifyLeaves(m.Binary, root)
 	return root
 }
 
 // Flag type vocabulary. Mirrors cmd/subcli-scope's flagType* constants. Kept
 // duplicated rather than imported to keep this codegen tool free of
-// coily-internal deps beyond yaml + verbclass.
+// coily-internal deps beyond yaml.
 const (
 	flagTypeString      = "string"
 	flagTypeBool        = "bool"
@@ -199,20 +170,6 @@ func makeFlagSpec(f ManifestFlag) flagSpec {
 		Long:     "--" + bare,
 		Type:     t,
 		FlagKind: kind,
-	}
-}
-
-// classifyLeaves walks the tree and stamps Mutating + Scope on every leaf
-// (no children, non-empty path). Group nodes inherit Mutating=false and
-// Scope="" because their Action is never invoked.
-func classifyLeaves(binary string, node *tree) {
-	if len(node.Children) == 0 && len(node.Path) > 0 {
-		bucket := verbclass.Classify(node.Path)
-		node.Mutating = bucket != verbclass.Read
-		node.Scope = fmt.Sprintf("%s.%s:%s", binary, verbclass.Service(node.Path), bucket)
-	}
-	for _, c := range node.Children {
-		classifyLeaves(binary, c)
 	}
 }
 
@@ -272,7 +229,6 @@ import (
 	"strconv"
 
 	"github.com/coilysiren/coily/pkg/audit"
-	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/shell"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
@@ -282,9 +238,9 @@ import (
 const BinaryName = {{.Binary | goString}}
 
 // Command returns the *cli.Command tree that mirrors the upstream CLI.
-// Every leaf is wrapped through verb.Wrap so policy enforcement and audit
+// Every leaf is wrapped through verb.Wrap so argv validation and audit
 // logging apply uniformly.
-func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Command {
+func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
 		Name:     BinaryName,
 		Usage:    "Pass-through to " + BinaryName + ".",
@@ -303,13 +259,10 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 &cli.Command{
 	Name: {{$node.Name | goString}},
 	Usage: {{$node.Help | goString}},
-{{- if or $node.Flags (not $node.Children)}}
+{{- if $node.Flags}}
 	Flags: []cli.Flag{
 	{{- range $node.Flags}}
 		&cli.{{.FlagKind}}{Name: {{.Bare | goString}}},
-	{{- end}}
-	{{- if and (not $node.Children) (not $node.HasNativeToken)}}
-		&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 	{{- end}}
 	},
 {{- end}}
@@ -323,9 +276,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 	Action: verb.Wrap(
 		verb.Spec{
 			Name: {{dottedPath $binary $node.Path | goString}},
-			Kind: policy.{{if $node.Mutating}}Mutating{{else}}ReadOnly{{end}},
-			Scope: {{$node.Scope | goString}},
-			ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+			ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 				args := map[string]string{}
 				var positional []string
 				_ = positional
@@ -345,13 +296,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				{{- end}}
 				{{- end}}
 				positional = append(positional, c.Args().Slice()...)
-				{{- if $node.HasNativeToken}}
-				// Native --token flag collides with coily's confirmation
-				// token; source the coily token from $COILY_TOKEN only.
-				return args, positional, verb.TokenFromEnv()
-				{{- else}}
-				return args, positional, verb.Token(c)
-				{{- end}}
+				return args, positional
 			},
 			Action: func(ctx context.Context, c *cli.Command) error {
 				argv := []string{ {{range $node.Path}}{{. | goString}}, {{end}} }
@@ -380,7 +325,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				return r.Exec(ctx, BinaryName, argv...)
 			},
 		},
-		v, w,
+		w,
 	),
 {{- end}}
 }

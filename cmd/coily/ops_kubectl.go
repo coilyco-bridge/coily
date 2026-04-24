@@ -6,5 +6,5 @@ import (
 )
 
 func (r *Runner) kubectlCommand() *cli.Command {
-	return kubectl.Command(r.Runner, r.Verifier, r.Audit)
+	return kubectl.Command(r.Runner, r.Audit)
 }

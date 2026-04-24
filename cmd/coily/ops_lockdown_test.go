@@ -12,9 +12,8 @@ import (
 
 // runLockdown invokes lockdownAction via a stand-in cli.Command that mirrors
 // the real lockdownCmd's flag schema. We don't call into the live verb.Wrap
-// pipeline here because that wires up runtime audit + issuer state. Token
-// gating (the Mutating classification of --apply --replace) is exercised
-// separately in pkg/verb's tests via KindFunc.
+// pipeline here because that wires up runtime audit state we do not need
+// for these action-level tests.
 func runLockdown(t *testing.T, dir string, apply, replace bool) error {
 	t.Helper()
 	root := &cli.Command{
@@ -100,10 +99,6 @@ func TestLockdown_ReplaceWithoutApplyErrors(t *testing.T) {
 }
 
 func TestLockdown_ApplyReplaceOverwrites(t *testing.T) {
-	// Note: lockdownAction itself is not gated by the token here. Token
-	// gating happens in verb.Wrap via the KindFunc, which is exercised in
-	// pkg/verb's tests. This test just confirms that the action overwrites
-	// when both flags are set.
 	dir := t.TempDir()
 	target := filepath.Join(dir, ".claude", "settings.json")
 	if err := os.MkdirAll(filepath.Dir(target), 0o750); err != nil {

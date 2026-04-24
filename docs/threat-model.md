@@ -78,9 +78,20 @@ Then `coily` becomes the kernel boundary. Because it's a Go binary the agent can
 - Reject shell metacharacters (`$`, backticks, `;`, `&&`, `||`, `|`, `>`, `<`, `$(`, `${`, `\`) in any string argument that might reach a shell
 - Append every invocation to an audit log (append-only, outside the working tree)
 - Re-check permissions against its own config file, loaded from a root-owned path the agent cannot modify
-- Prompt for out-of-band confirmation on destructive operations even when the agent's permission check passed
 
 This isn't bulletproof. A dedicated attacker with shell access still has shell access. A bug in `coily` itself could widen the boundary. But it raises the cost of a successful prompt-injection attack from "know that `kubectl delete` is dangerous" to "know Kai's specific coily command surface and find a path through it." That's a meaningful shift in attacker capability required.
+
+## What about confirmation tokens?
+
+An earlier draft of coily required a short-lived HMAC token (issued via `coily auth issue`, consumed by destructive verbs) on every mutating op. The idea was to force a human-initiated issuance step before any destructive work. That design was removed on 2026-04-24 because it added ritual without adding security:
+
+- The HMAC key lived under `~/.coily/`, readable by the coily process user. An agent could forge tokens directly, never mind calling `auth issue`.
+- `coily auth issue` itself was on the allowlist (it had to be, so Kai could invoke it). An agent could call it and consume the output in the same session.
+- The token scope check ran inside the same binary the agent was invoking. No out-of-band signer, no separate process.
+
+So the token was a fourth fence made of paper, sitting behind three real ones: the Claude Code deny list, the coily allowlist, and the audit log. Agents could self-authorize trivially, so what the token actually gated was "Kai remembers to type a command first", which is not a security property.
+
+If a genuinely out-of-band confirmation gate is needed later - a yubikey touch, a phone push, a signer running on kai-server that the laptop-agent can't reach - that would have teeth. The previous HMAC design did not, and the ritual was friction without benefit. The allowlist, argv validation, audit log, and Claude Code deny rules are the real fences.
 
 ## Design guardrails for coily
 
@@ -93,15 +104,15 @@ Principles to preserve as features get added.
 - **Structured args only**. No subcommand takes a free-form string that is later passed to a shell. If a shell-out is absolutely necessary, the Go code uses an explicit argv list, never a composed shell string.
 - **Allowlist at the verb level**. `coily k8s restart <deployment>` exists. `coily k8s exec` does not. If a new verb is needed, it's a code change in `coily`, reviewed, committed, built, installed. That review step is the human gate.
 - **Append-only audit log** outside the working tree (e.g. `/var/log/coily/audit.jsonl`), writable by the coily process user only. Every invocation logged with timestamp, argv, effective verb, exit code.
-- **Destructive verbs require a confirmation token**. Not a TTY prompt. Agents can't use those anyway, and silent auto-confirm is the opposite of what we want. Something like a short-lived token Kai generates with `coily auth issue --ttl 5m --scope k8s-delete` and pastes into the agent's invocation. If the token is missing or expired, the verb refuses.
 - **No `coily shell` / `coily run` escape hatch**, ever. The moment one exists, the whole boundary collapses.
 
 ## Open questions
 
-- How does `coily` distinguish "Kai at the keyboard" from "Claude in auto mode"? Probably it doesn't need to. The confirmation-token model handles both, and log review happens after the fact regardless.
+- How does `coily` distinguish "Kai at the keyboard" from "Claude in auto mode"? Probably it doesn't need to. Log review happens after the fact regardless, and the allowlist already bounds what either can do.
 - How do we handle the `aws-eks` MCP server and other direct-API MCP tools? Resolved 2026-04-21. Kai doesn't use `aws-eks` and is removing it from `~/.claude.json`. A removal script is checked in at `scripts/remove-aws-eks-mcp.sh`. Long-term, expose the operations Kai actually needs through `coily` and keep the MCP removed.
 - Interaction with subagents. If `coily` logs include the session ID, we can at least correlate destructive invocations back to specific agent runs for forensics.
 - The `Agent` permission rule is currently in allow. That's fine. Subagents inherit the same deny list, so allowing the tool itself doesn't widen the attack surface. Worth revisiting if specific subagents turn out to bypass rules.
+- An out-of-band confirmation gate for destructive ops (yubikey, phone push, remote signer on kai-server) would be a real fence rather than the ritual the old HMAC design provided. Not built; revisit if the allowlist surface grows beyond what's comfortable.
 
 ## TODO: adversarially-reviewed CI self-update (v2)
 

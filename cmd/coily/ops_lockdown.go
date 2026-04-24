@@ -8,22 +8,20 @@ import (
 	"os"
 
 	"github.com/coilysiren/coily/pkg/lockdown"
-	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
 )
 
-// lockdownCommand is tiered by blast radius (resolves docs/unresolved/13-lockdown-token.md):
+// lockdownCommand is tiered by blast radius:
 //
-//   - bare `coily lockdown` -> ReadOnly, prints plan, no token.
-//   - `coily lockdown --apply` -> ReadOnly, writes only if .claude/settings.json
-//     is absent. Refuses an existing file. No token. Frictionless bootstrap.
-//   - `coily lockdown --apply --replace` -> Mutating, overwrites an existing
-//     file. Token required. This is the path that can clobber custom allow/deny
-//     entries the user added by hand.
+//   - bare `coily lockdown` prints the plan, no write.
+//   - `coily lockdown --apply` writes only if .claude/settings.json is absent.
+//     Refuses an existing file. Frictionless bootstrap.
+//   - `coily lockdown --apply --replace` overwrites an existing file. This is
+//     the path that can clobber custom allow/deny entries the user added by
+//     hand.
 //
-// The previous silent-merge behavior is gone. There is no middle ground
-// between "bootstrap fresh" and "clobber".
+// There is no middle ground between "bootstrap fresh" and "clobber".
 func (r *Runner) lockdownCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "lockdown",
@@ -35,7 +33,7 @@ Three modes, by blast radius:
 
   coily lockdown                    Print the plan and exit. No write.
   coily lockdown --apply            Write a fresh file. Refuses if one exists.
-  coily lockdown --apply --replace  Overwrite an existing file. Requires a token.`,
+  coily lockdown --apply --replace  Overwrite an existing settings file.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "path",
@@ -52,34 +50,19 @@ Three modes, by blast radius:
 			},
 			&cli.BoolFlag{
 				Name:  "replace",
-				Usage: "overwrite an existing settings file (requires --apply, requires a token)",
-			},
-			&cli.StringFlag{
-				Name:  "token",
-				Usage: "confirmation token scoped to lockdown (only consulted with --apply --replace)",
+				Usage: "overwrite an existing settings file (requires --apply)",
 			},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
 				Name: "lockdown",
-				// Dynamic classification: only --apply --replace is mutating.
-				// Bare invocations and fresh-bootstrap (--apply alone) stay
-				// ReadOnly so the safety boundary can be turned on without a
-				// token round-trip.
-				KindFunc: func(c *cli.Command) policy.Kind {
-					if c.Bool("apply") && c.Bool("replace") {
-						return policy.Mutating
-					}
-					return policy.ReadOnly
-				},
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
 						"--path": c.String("path"),
-					}, nil, verb.Token(c)
+					}, nil
 				},
 				Action: lockdownAction,
 			},
-			r.Verifier,
 			r.Audit,
 		),
 	}
@@ -121,7 +104,7 @@ func lockdownAction(_ context.Context, c *cli.Command) error {
 	}
 
 	if plan.Existed && !replace {
-		return fmt.Errorf("lockdown: %s already exists. Use `coily lockdown --apply --replace` to overwrite (requires a token)", plan.TargetPath)
+		return fmt.Errorf("lockdown: %s already exists. Use `coily lockdown --apply --replace` to overwrite", plan.TargetPath)
 	}
 
 	if err := lockdown.Write(plan); err != nil {

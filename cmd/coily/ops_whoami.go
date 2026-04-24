@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/shell"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
@@ -27,10 +26,8 @@ reports the error but the other tools still run.`,
 		Action: verb.Wrap(
 			verb.Spec{
 				Name:   "whoami",
-				Kind:   policy.ReadOnly,
 				Action: r.whoamiAction,
 			},
-			r.Verifier,
 			r.Audit,
 		),
 	}

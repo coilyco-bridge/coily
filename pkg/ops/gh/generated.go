@@ -10,7 +10,6 @@ import (
 	"strconv"
 
 	"github.com/coilysiren/coily/pkg/audit"
-	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/shell"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
@@ -20,9 +19,9 @@ import (
 const BinaryName = "gh"
 
 // Command returns the *cli.Command tree that mirrors the upstream CLI.
-// Every leaf is wrapped through verb.Wrap so policy enforcement and audit
+// Every leaf is wrapped through verb.Wrap so argv validation and audit
 // logging apply uniformly.
-func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Command {
+func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  BinaryName,
 		Usage: "Pass-through to " + BinaryName + ".",
@@ -47,14 +46,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.StringFlag{Name: "template"},
 					&cli.BoolFlag{Name: "verbose"},
 					&cli.BoolFlag{Name: "help"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "gh.api",
-						Kind:  policy.Mutating,
-						Scope: "gh.api:write",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "gh.api",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -93,7 +89,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								args["--help"] = "true"
 							}
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"api"}
@@ -171,7 +167,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -185,14 +181,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "comment"},
 							&cli.StringFlag{Name: "reason"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.close",
-								Kind:  policy.Mutating,
-								Scope: "gh.issue:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.close",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -202,7 +195,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "close"}
@@ -225,7 +218,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -238,14 +231,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "editor"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.comment",
-								Kind:  policy.Mutating,
-								Scope: "gh.issue:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.comment",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -264,7 +254,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "comment"}
@@ -302,7 +292,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -321,14 +311,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "title"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.create",
-								Kind:  policy.Mutating,
-								Scope: "gh.issue:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.create",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -351,7 +338,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "create"}
@@ -405,7 +392,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -414,14 +401,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "yes"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.delete",
-								Kind:  policy.Mutating,
-								Scope: "gh.issue:delete",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.delete",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -432,7 +416,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "delete"}
@@ -454,7 +438,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -467,14 +451,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "list"},
 							&cli.StringFlag{Name: "name"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.develop",
-								Kind:  policy.Mutating,
-								Scope: "gh.issue:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.develop",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -491,7 +472,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "develop"}
@@ -527,7 +508,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -546,14 +527,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "remove-project"},
 							&cli.StringFlag{Name: "title"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.edit",
-								Kind:  policy.Mutating,
-								Scope: "gh.issue:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.edit",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -574,7 +552,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "edit"}
@@ -626,7 +604,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -647,14 +625,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.list",
-								Kind:  policy.Mutating,
-								Scope: "gh.issue:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.list",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -677,7 +652,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "list"}
@@ -735,7 +710,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -744,14 +719,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "reason"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.lock",
-								Kind:  policy.Mutating,
-								Scope: "gh.issue:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.lock",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -760,7 +732,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "lock"}
@@ -780,7 +752,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -788,14 +760,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Pin an issue to a repository.",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.pin",
-								Kind:  policy.Mutating,
-								Scope: "gh.issue:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.pin",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -803,7 +772,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "pin"}
@@ -820,7 +789,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -829,14 +798,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "comment"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.reopen",
-								Kind:  policy.Mutating,
-								Scope: "gh.issue:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.reopen",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -845,7 +811,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "reopen"}
@@ -865,7 +831,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -876,14 +842,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.status",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.issue:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.status",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -894,7 +857,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "status"}
@@ -920,7 +883,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -928,14 +891,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Transfer issue to another repository",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.transfer",
-								Kind:  policy.Mutating,
-								Scope: "gh.issue:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.transfer",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -943,7 +903,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "transfer"}
@@ -960,7 +920,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -968,14 +928,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Unlock issue conversation",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.unlock",
-								Kind:  policy.Mutating,
-								Scope: "gh.issue:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.unlock",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -983,7 +940,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "unlock"}
@@ -1000,7 +957,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1008,14 +965,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Unpin an issue from a repository.",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.unpin",
-								Kind:  policy.Mutating,
-								Scope: "gh.issue:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.unpin",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1023,7 +977,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "unpin"}
@@ -1040,7 +994,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1053,14 +1007,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.issue.view",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.issue:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.issue.view",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1077,7 +1028,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"issue", "view"}
@@ -1113,7 +1064,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -1131,14 +1082,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "force"},
 							&cli.BoolFlag{Name: "recurse-submodules"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.checkout",
-								Kind:  policy.Mutating,
-								Scope: "gh.pr:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.checkout",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1156,7 +1104,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "checkout"}
@@ -1191,7 +1139,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1206,14 +1154,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "watch"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.checks",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.pr:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.checks",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1236,7 +1181,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "checks"}
@@ -1282,7 +1227,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1292,14 +1237,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "comment"},
 							&cli.BoolFlag{Name: "delete-branch"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.close",
-								Kind:  policy.Mutating,
-								Scope: "gh.pr:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.close",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1311,7 +1253,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "close"}
@@ -1336,7 +1278,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1349,14 +1291,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "editor"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.comment",
-								Kind:  policy.Mutating,
-								Scope: "gh.pr:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.comment",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1375,7 +1314,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "comment"}
@@ -1413,7 +1352,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1441,14 +1380,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "title"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.create",
-								Kind:  policy.Mutating,
-								Scope: "gh.pr:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.create",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1492,7 +1428,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "create"}
@@ -1585,7 +1521,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1597,14 +1533,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "patch"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.diff",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.pr:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.diff",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1622,7 +1555,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "diff"}
@@ -1657,7 +1590,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1679,14 +1612,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "remove-reviewer"},
 							&cli.StringFlag{Name: "title"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.edit",
-								Kind:  policy.Mutating,
-								Scope: "gh.pr:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.edit",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1710,7 +1640,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "edit"}
@@ -1771,7 +1701,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1793,14 +1723,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.list",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.pr:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.list",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1826,7 +1753,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "list"}
@@ -1889,7 +1816,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1898,14 +1825,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "reason"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.lock",
-								Kind:  policy.Mutating,
-								Scope: "gh.pr:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.lock",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1914,7 +1838,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "lock"}
@@ -1934,7 +1858,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1954,14 +1878,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "squash"},
 							&cli.StringFlag{Name: "subject"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.merge",
-								Kind:  policy.Mutating,
-								Scope: "gh.pr:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.merge",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1995,7 +1916,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "merge"}
@@ -2062,7 +1983,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2071,14 +1992,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "undo"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.ready",
-								Kind:  policy.Mutating,
-								Scope: "gh.pr:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.ready",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2089,7 +2007,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "ready"}
@@ -2111,7 +2029,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2120,14 +2038,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "comment"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.reopen",
-								Kind:  policy.Mutating,
-								Scope: "gh.pr:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.reopen",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2136,7 +2051,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "reopen"}
@@ -2156,7 +2071,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2169,14 +2084,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "comment"},
 							&cli.BoolFlag{Name: "request-changes"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.review",
-								Kind:  policy.Mutating,
-								Scope: "gh.pr:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.review",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2195,7 +2107,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "review"}
@@ -2233,7 +2145,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2245,14 +2157,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.status",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.pr:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.status",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2266,7 +2175,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "status"}
@@ -2297,7 +2206,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2305,14 +2214,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Unlock pull request conversation",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.unlock",
-								Kind:  policy.Mutating,
-								Scope: "gh.pr:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.unlock",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2320,7 +2226,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "unlock"}
@@ -2337,7 +2243,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2350,14 +2256,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.pr.view",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.pr:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.pr.view",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2374,7 +2277,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"pr", "view"}
@@ -2410,7 +2313,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -2436,14 +2339,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "title"},
 							&cli.BoolFlag{Name: "verify-tag"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.release.create",
-								Kind:  policy.Mutating,
-								Scope: "gh.release:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.release.create",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2475,7 +2375,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "create"}
@@ -2540,7 +2440,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2550,14 +2450,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "cleanup-tag"},
 							&cli.BoolFlag{Name: "yes"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.release.delete",
-								Kind:  policy.Mutating,
-								Scope: "gh.release:delete",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.release.delete",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2571,7 +2468,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "delete"}
@@ -2598,7 +2495,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2612,14 +2509,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "pattern"},
 							&cli.BoolFlag{Name: "skip-existing"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.release.download",
-								Kind:  policy.Mutating,
-								Scope: "gh.release:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.release.download",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2637,7 +2531,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "download"}
@@ -2676,7 +2570,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2694,14 +2588,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "title"},
 							&cli.BoolFlag{Name: "verify-tag"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.release.edit",
-								Kind:  policy.Mutating,
-								Scope: "gh.release:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.release.edit",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2727,7 +2618,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "edit"}
@@ -2782,7 +2673,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2797,14 +2688,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "order"},
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.release.list",
-								Kind:  policy.Mutating,
-								Scope: "gh.release:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.release.list",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2823,7 +2711,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "list"}
@@ -2865,7 +2753,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2874,14 +2762,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "clobber"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.release.upload",
-								Kind:  policy.Mutating,
-								Scope: "gh.release:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.release.upload",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2892,7 +2777,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "upload"}
@@ -2914,7 +2799,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2926,14 +2811,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.release.view",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.release:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.release.view",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2947,7 +2829,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"release", "view"}
@@ -2978,7 +2860,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -2993,14 +2875,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "yes"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.repo.archive",
-								Kind:  policy.Mutating,
-								Scope: "gh.repo:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.repo.archive",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -3011,7 +2890,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "archive"}
@@ -3033,7 +2912,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -3046,14 +2925,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Flags: []cli.Flag{
 									&cli.BoolFlag{Name: "numeric"},
 									&cli.BoolFlag{Name: "help"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "gh.repo.autolink.create",
-										Kind:  policy.Mutating,
-										Scope: "gh.repo:write",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "gh.repo.autolink.create",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3064,7 +2940,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--help"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "autolink", "create"}
@@ -3086,7 +2962,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 							&cli.Command{
@@ -3098,14 +2974,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.StringFlag{Name: "template"},
 									&cli.BoolFlag{Name: "web"},
 									&cli.BoolFlag{Name: "help"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "gh.repo.autolink.list",
-										Kind:  policy.Mutating,
-										Scope: "gh.repo:write",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "gh.repo.autolink.list",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3119,7 +2992,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--help"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "autolink", "list"}
@@ -3150,7 +3023,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 							&cli.Command{
@@ -3161,14 +3034,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.StringFlag{Name: "json"},
 									&cli.StringFlag{Name: "template"},
 									&cli.BoolFlag{Name: "help"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "gh.repo.autolink.view",
-										Kind:  policy.ReadOnly,
-										Scope: "gh.repo:read",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "gh.repo.autolink.view",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3179,7 +3049,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--help"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "autolink", "view"}
@@ -3205,7 +3075,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 						},
@@ -3216,14 +3086,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "upstream-remote-name"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.repo.clone",
-								Kind:  policy.Mutating,
-								Scope: "gh.repo:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.repo.clone",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -3232,7 +3099,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "clone"}
@@ -3252,7 +3119,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -3277,14 +3144,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "team"},
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.repo.create",
-								Kind:  policy.Mutating,
-								Scope: "gh.repo:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.repo.create",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -3327,7 +3191,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "create"}
@@ -3413,7 +3277,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -3422,14 +3286,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "yes"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.repo.delete",
-								Kind:  policy.Mutating,
-								Scope: "gh.repo:delete",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.repo.delete",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -3440,7 +3301,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "delete"}
@@ -3462,7 +3323,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -3476,14 +3337,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.BoolFlag{Name: "allow-write"},
 									&cli.StringFlag{Name: "title"},
 									&cli.BoolFlag{Name: "help"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "gh.repo.deploy-key.add",
-										Kind:  policy.Mutating,
-										Scope: "gh.repo:write",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "gh.repo.deploy-key.add",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3495,7 +3353,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--help"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "deploy-key", "add"}
@@ -3520,7 +3378,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 							&cli.Command{
@@ -3528,14 +3386,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Usage: "Delete a deploy key from a GitHub repository",
 								Flags: []cli.Flag{
 									&cli.BoolFlag{Name: "help"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "gh.repo.deploy-key.delete",
-										Kind:  policy.Mutating,
-										Scope: "gh.repo:delete",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "gh.repo.deploy-key.delete",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3543,7 +3398,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--help"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "deploy-key", "delete"}
@@ -3560,7 +3415,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 							&cli.Command{
@@ -3571,14 +3426,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.StringFlag{Name: "json"},
 									&cli.StringFlag{Name: "template"},
 									&cli.BoolFlag{Name: "help"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "gh.repo.deploy-key.list",
-										Kind:  policy.Mutating,
-										Scope: "gh.repo:write",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "gh.repo.deploy-key.list",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3589,7 +3441,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--help"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "deploy-key", "list"}
@@ -3615,7 +3467,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 						},
@@ -3647,14 +3499,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "template"},
 							&cli.StringFlag{Name: "visibility"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.repo.edit",
-								Kind:  policy.Mutating,
-								Scope: "gh.repo:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.repo.edit",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -3716,7 +3565,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "edit"}
@@ -3831,7 +3680,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -3845,14 +3694,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "remote"},
 							&cli.StringFlag{Name: "remote-name"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.repo.fork",
-								Kind:  policy.Mutating,
-								Scope: "gh.repo:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.repo.fork",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -3872,7 +3718,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "fork"}
@@ -3913,7 +3759,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -3925,14 +3771,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Usage: "List available repository gitignore templates",
 								Flags: []cli.Flag{
 									&cli.BoolFlag{Name: "help"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "gh.repo.gitignore.list",
-										Kind:  policy.Mutating,
-										Scope: "gh.repo:write",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "gh.repo.gitignore.list",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3940,7 +3783,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--help"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "gitignore", "list"}
@@ -3957,7 +3800,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 							&cli.Command{
@@ -3965,14 +3808,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Usage: "View an available repository '.gitignore' template.",
 								Flags: []cli.Flag{
 									&cli.BoolFlag{Name: "help"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "gh.repo.gitignore.view",
-										Kind:  policy.ReadOnly,
-										Scope: "gh.repo:read",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "gh.repo.gitignore.view",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3980,7 +3820,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--help"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "gitignore", "view"}
@@ -3997,7 +3837,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 						},
@@ -4011,14 +3851,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Usage: "List common repository licenses.",
 								Flags: []cli.Flag{
 									&cli.BoolFlag{Name: "help"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "gh.repo.license.list",
-										Kind:  policy.Mutating,
-										Scope: "gh.repo:write",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "gh.repo.license.list",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -4026,7 +3863,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--help"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "license", "list"}
@@ -4043,7 +3880,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 							&cli.Command{
@@ -4052,14 +3889,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								Flags: []cli.Flag{
 									&cli.BoolFlag{Name: "web"},
 									&cli.BoolFlag{Name: "help"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "gh.repo.license.view",
-										Kind:  policy.ReadOnly,
-										Scope: "gh.repo:read",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "gh.repo.license.view",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -4070,7 +3904,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 												args["--help"] = "true"
 											}
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"repo", "license", "view"}
@@ -4092,7 +3926,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 						},
@@ -4113,14 +3947,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "topic"},
 							&cli.StringFlag{Name: "visibility"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.repo.list",
-								Kind:  policy.Mutating,
-								Scope: "gh.repo:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.repo.list",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4147,7 +3978,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "list"}
@@ -4205,7 +4036,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -4214,14 +4045,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "yes"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.repo.rename",
-								Kind:  policy.Mutating,
-								Scope: "gh.repo:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.repo.rename",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4232,7 +4060,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "rename"}
@@ -4254,7 +4082,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -4265,14 +4093,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "force"},
 							&cli.StringFlag{Name: "source"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.repo.sync",
-								Kind:  policy.Mutating,
-								Scope: "gh.repo:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.repo.sync",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4285,7 +4110,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "sync"}
@@ -4313,7 +4138,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -4322,14 +4147,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "yes"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.repo.unarchive",
-								Kind:  policy.Mutating,
-								Scope: "gh.repo:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.repo.unarchive",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4340,7 +4162,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "unarchive"}
@@ -4362,7 +4184,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -4375,14 +4197,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.repo.view",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.repo:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.repo.view",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4397,7 +4216,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "view"}
@@ -4431,7 +4250,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -4445,14 +4264,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Cancel a workflow run",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.run.cancel",
-								Kind:  policy.Mutating,
-								Scope: "gh.run:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.run.cancel",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4460,7 +4276,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "cancel"}
@@ -4477,7 +4293,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -4485,14 +4301,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Delete a workflow run",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.run.delete",
-								Kind:  policy.Mutating,
-								Scope: "gh.run:delete",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.run.delete",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4500,7 +4313,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "delete"}
@@ -4517,7 +4330,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -4528,14 +4341,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "name"},
 							&cli.StringFlag{Name: "pattern"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.run.download",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.run:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.run.download",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4546,7 +4356,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "download"}
@@ -4572,7 +4382,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -4592,14 +4402,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "user"},
 							&cli.StringFlag{Name: "workflow"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.run.list",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.run:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.run.list",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4621,7 +4428,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "list"}
@@ -4676,7 +4483,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -4687,14 +4494,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "failed"},
 							&cli.StringFlag{Name: "job"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.run.rerun",
-								Kind:  policy.Mutating,
-								Scope: "gh.run:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.run.rerun",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4709,7 +4513,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "rerun"}
@@ -4739,7 +4543,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -4757,14 +4561,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "verbose"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.run.view",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.run:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.run.view",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4792,7 +4593,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "view"}
@@ -4849,7 +4650,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -4859,14 +4660,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "exit-status"},
 							&cli.IntFlag{Name: "interval"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.run.watch",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.run:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.run.watch",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4878,7 +4676,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"run", "watch"}
@@ -4903,7 +4701,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -4929,14 +4727,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.search.code",
-								Kind:  policy.Mutating,
-								Scope: "gh.search:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.search.code",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4958,7 +4753,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "code"}
@@ -5013,7 +4808,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -5043,14 +4838,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "visibility"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.search.commits",
-								Kind:  policy.Mutating,
-								Scope: "gh.search:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.search.commits",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -5084,7 +4876,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "commits"}
@@ -5171,7 +4963,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -5215,14 +5007,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "visibility"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.search.issues",
-								Kind:  policy.Mutating,
-								Scope: "gh.search:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.search.issues",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -5282,7 +5071,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "issues"}
@@ -5423,7 +5212,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -5475,14 +5264,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "visibility"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.search.prs",
-								Kind:  policy.Mutating,
-								Scope: "gh.search:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.search.prs",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -5552,7 +5338,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "prs"}
@@ -5719,7 +5505,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -5751,14 +5537,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "visibility"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.search.repos",
-								Kind:  policy.Mutating,
-								Scope: "gh.search:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.search.repos",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -5794,7 +5577,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"search", "repos"}
@@ -5887,7 +5670,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -5905,14 +5688,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "org"},
 							&cli.BoolFlag{Name: "user"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.secret.delete",
-								Kind:  policy.Mutating,
-								Scope: "gh.secret:delete",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.secret.delete",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -5926,7 +5706,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"secret", "delete"}
@@ -5957,7 +5737,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -5972,14 +5752,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "user"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.secret.list",
-								Kind:  policy.Mutating,
-								Scope: "gh.secret:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.secret.list",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -5996,7 +5773,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"secret", "list"}
@@ -6036,7 +5813,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -6053,14 +5830,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "user"},
 							&cli.StringFlag{Name: "visibility"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.secret.set",
-								Kind:  policy.Mutating,
-								Scope: "gh.secret:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.secret.set",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6081,7 +5855,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"secret", "set"}
@@ -6129,7 +5903,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -6143,14 +5917,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Disable a workflow, preventing it from running or showing up when listing workflows.",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.workflow.disable",
-								Kind:  policy.Mutating,
-								Scope: "gh.workflow:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.workflow.disable",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6158,7 +5929,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "disable"}
@@ -6175,7 +5946,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -6183,14 +5954,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Enable a workflow, allowing it to be run and show up when listing workflows.",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.workflow.enable",
-								Kind:  policy.Mutating,
-								Scope: "gh.workflow:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.workflow.enable",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6198,7 +5966,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "enable"}
@@ -6215,7 +5983,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -6228,14 +5996,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.IntFlag{Name: "limit"},
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.workflow.list",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.workflow:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.workflow.list",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6250,7 +6015,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "list"}
@@ -6284,7 +6049,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -6296,14 +6061,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringSliceFlag{Name: "raw-field"},
 							&cli.StringFlag{Name: "ref"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.workflow.run",
-								Kind:  policy.Mutating,
-								Scope: "gh.workflow:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.workflow.run",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6321,7 +6083,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "run"}
@@ -6356,7 +6118,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -6367,14 +6129,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "yaml"},
 							&cli.BoolFlag{Name: "help"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "gh.workflow.view",
-								Kind:  policy.ReadOnly,
-								Scope: "gh.workflow:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "gh.workflow.view",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6389,7 +6148,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--help"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"workflow", "view"}
@@ -6419,7 +6178,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},

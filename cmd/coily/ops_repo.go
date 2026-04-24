@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/repocfg"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
@@ -62,14 +61,13 @@ func (r *Runner) buildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) *cli.
 		Action: verb.Wrap(
 			verb.Spec{
 				Name: "repo." + rc.Name,
-				Kind: policy.ReadOnly,
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					// Every token, declared and appended, is validated. argv
 					// tokens were already checked at load time but re-checking
 					// is cheap and keeps the security boundary uniform.
 					positional := append([]string{}, rc.Argv...)
 					positional = append(positional, c.Args().Slice()...)
-					return nil, positional, ""
+					return nil, positional
 				},
 				Action: func(ctx context.Context, c *cli.Command) error {
 					argv := append([]string{}, rc.Argv[1:]...)
@@ -77,7 +75,6 @@ func (r *Runner) buildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) *cli.
 					return r.Runner.Exec(ctx, rc.Argv[0], argv...)
 				},
 			},
-			r.Verifier,
 			r.Audit,
 		),
 	}

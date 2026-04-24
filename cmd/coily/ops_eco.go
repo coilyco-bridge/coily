@@ -8,16 +8,9 @@ import (
 	"strings"
 
 	"github.com/coilysiren/coily/pkg/ops/eco"
-	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
 )
-
-// ecoMutatingScope is the required scope for any eco systemd state change.
-// restart/stop/start are all writes, not deletes - no eco state is being
-// destroyed, just re-cycled. coily-native verbs follow the same scope shape
-// as pass-throughs (`<binary>.<service>:<bucket>`) with binary "coily".
-const ecoMutatingScope = "coily.eco:write"
 
 // ecoCommand wraps the eco game server which runs as a systemd unit on
 // kai-server. All verbs run a `sudo <systemctl|journalctl> ... eco-server`
@@ -33,8 +26,7 @@ func (r *Runner) ecoCommand() *cli.Command {
 		Name:  "eco",
 		Usage: "Operate the eco game server (systemd unit on kai-server).",
 		Description: `eco wraps systemctl/journalctl calls against the eco-server unit that runs
-on kai-server. Destructive verbs (restart, stop) require a confirmation
-token. Reads (status, tail) do not.
+on kai-server.
 
 The 'world' sub-tree wraps the local-side helpers from
 eco-cycle-prep/worldgen.py for editing the eco-configs WorldGenerator.eco
@@ -46,6 +38,7 @@ file. Those do not touch kai-server.`,
 			r.ecoStopCommand(),
 			r.ecoStartCommand(),
 			r.ecoWorldCommand(),
+			r.ecoModCommand(),
 		},
 	}
 }
@@ -57,11 +50,8 @@ func (r *Runner) ecoStatusCommand() *cli.Command {
 		Action: verb.Wrap(
 			verb.Spec{
 				Name:   "eco.status",
-				Kind:   policy.ReadOnly,
-				Scope:  "coily.eco:read",
 				Action: r.ecoRemote([]string{"sudo", "systemctl", "status", "eco-server", "--no-pager"}),
 			},
-			r.Verifier,
 			r.Audit,
 		),
 	}
@@ -85,9 +75,7 @@ func (r *Runner) ecoTailCommand() *cli.Command {
 		},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name:  "eco.tail",
-				Kind:  policy.ReadOnly,
-				Scope: "coily.eco:read",
+				Name: "eco.tail",
 				Action: func(ctx context.Context, c *cli.Command) error {
 					args := []string{"sudo", "journalctl", "-u", "eco-server", "-n", fmt.Sprint(c.Int("lines"))}
 					if c.Bool("follow") {
@@ -96,7 +84,6 @@ func (r *Runner) ecoTailCommand() *cli.Command {
 					return r.ecoRemote(args)(ctx, c)
 				},
 			},
-			r.Verifier,
 			r.Audit,
 		),
 	}
@@ -105,21 +92,12 @@ func (r *Runner) ecoTailCommand() *cli.Command {
 func (r *Runner) ecoRestartCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "restart",
-		Usage: "Restart the eco-server systemd unit. Requires a confirmation token.",
-		Flags: []cli.Flag{
-			&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to coily.eco:write"},
-		},
+		Usage: "Restart the eco-server systemd unit.",
 		Action: verb.Wrap(
 			verb.Spec{
-				Name:  "eco.restart",
-				Kind:  policy.Mutating,
-				Scope: ecoMutatingScope,
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-					return nil, nil, verb.Token(c)
-				},
+				Name:   "eco.restart",
 				Action: r.ecoRemote([]string{"sudo", "systemctl", "restart", "eco-server"}),
 			},
-			r.Verifier,
 			r.Audit,
 		),
 	}
@@ -128,21 +106,12 @@ func (r *Runner) ecoRestartCommand() *cli.Command {
 func (r *Runner) ecoStopCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "stop",
-		Usage: "Stop the eco-server systemd unit. Requires a confirmation token.",
-		Flags: []cli.Flag{
-			&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to coily.eco:write"},
-		},
+		Usage: "Stop the eco-server systemd unit.",
 		Action: verb.Wrap(
 			verb.Spec{
-				Name:  "eco.stop",
-				Kind:  policy.Mutating,
-				Scope: ecoMutatingScope,
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-					return nil, nil, verb.Token(c)
-				},
+				Name:   "eco.stop",
 				Action: r.ecoRemote([]string{"sudo", "systemctl", "stop", "eco-server"}),
 			},
-			r.Verifier,
 			r.Audit,
 		),
 	}
@@ -151,21 +120,12 @@ func (r *Runner) ecoStopCommand() *cli.Command {
 func (r *Runner) ecoStartCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "start",
-		Usage: "Start the eco-server systemd unit. Requires a confirmation token.",
-		Flags: []cli.Flag{
-			&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to coily.eco:write"},
-		},
+		Usage: "Start the eco-server systemd unit.",
 		Action: verb.Wrap(
 			verb.Spec{
-				Name:  "eco.start",
-				Kind:  policy.Mutating,
-				Scope: ecoMutatingScope,
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-					return nil, nil, verb.Token(c)
-				},
+				Name:   "eco.start",
 				Action: r.ecoRemote([]string{"sudo", "systemctl", "start", "eco-server"}),
 			},
-			r.Verifier,
 			r.Audit,
 		),
 	}
@@ -175,12 +135,6 @@ func (r *Runner) ecoStartCommand() *cli.Command {
 // https://github.com/coilysiren/eco-cycle-prep/blob/main/eco_cycle_prep/worldgen.py
 // into coily. These verbs operate on a local checkout of the eco-configs
 // repo (Configs/WorldGenerator.eco), not on kai-server.
-//
-// The remote teardown/restart half of a full world cycle (stop server,
-// swap files, start server) is handled by the existing
-// `coily eco {stop,start,restart}` verbs. Composing those into a single
-// `coily eco world rotate` is deliberately deferred until Kai runs the
-// cycle manually and decides how to chain the swap step.
 func (r *Runner) ecoWorldCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "world",
@@ -247,11 +201,9 @@ func (r *Runner) ecoWorldGetSeedCommand() *cli.Command {
 		Flags: []cli.Flag{configsDirFlag()},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name:  "eco.world.get-seed",
-				Kind:  policy.ReadOnly,
-				Scope: "coily.eco:read",
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-					return map[string]string{"--configs-dir": c.String("configs-dir")}, nil, ""
+				Name: "eco.world.get-seed",
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					return map[string]string{"--configs-dir": c.String("configs-dir")}, nil
 				},
 				Action: func(_ context.Context, c *cli.Command) error {
 					dir, err := r.resolveConfigsDir(c)
@@ -266,7 +218,6 @@ func (r *Runner) ecoWorldGetSeedCommand() *cli.Command {
 					return nil
 				},
 			},
-			r.Verifier,
 			r.Audit,
 		),
 	}
@@ -275,22 +226,19 @@ func (r *Runner) ecoWorldGetSeedCommand() *cli.Command {
 func (r *Runner) ecoWorldSetSeedCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "set-seed",
-		Usage: "Write a specific Seed into Configs/WorldGenerator.eco. Requires a confirmation token.",
+		Usage: "Write a specific Seed into Configs/WorldGenerator.eco.",
 		Flags: []cli.Flag{
 			configsDirFlag(),
 			&cli.IntFlag{Name: "seed", Usage: "seed value (1..2,000,000,000)", Required: true},
-			&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to coily.eco:write"},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name:  "eco.world.set-seed",
-				Kind:  policy.Mutating,
-				Scope: ecoMutatingScope,
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+				Name: "eco.world.set-seed",
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
 						"--configs-dir": c.String("configs-dir"),
 						"--seed":        fmt.Sprint(c.Int("seed")),
-					}, nil, verb.Token(c)
+					}, nil
 				},
 				Action: func(_ context.Context, c *cli.Command) error {
 					dir, err := r.resolveConfigsDir(c)
@@ -304,7 +252,6 @@ func (r *Runner) ecoWorldSetSeedCommand() *cli.Command {
 					return nil
 				},
 			},
-			r.Verifier,
 			r.Audit,
 		),
 	}
@@ -313,18 +260,13 @@ func (r *Runner) ecoWorldSetSeedCommand() *cli.Command {
 func (r *Runner) ecoWorldRandomizeCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "randomize",
-		Usage: "Generate a random seed and write it to Configs/WorldGenerator.eco. Requires a confirmation token.",
-		Flags: []cli.Flag{
-			configsDirFlag(),
-			&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to coily.eco:write"},
-		},
+		Usage: "Generate a random seed and write it to Configs/WorldGenerator.eco.",
+		Flags: []cli.Flag{configsDirFlag()},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name:  "eco.world.randomize",
-				Kind:  policy.Mutating,
-				Scope: ecoMutatingScope,
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-					return map[string]string{"--configs-dir": c.String("configs-dir")}, nil, verb.Token(c)
+				Name: "eco.world.randomize",
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					return map[string]string{"--configs-dir": c.String("configs-dir")}, nil
 				},
 				Action: func(_ context.Context, c *cli.Command) error {
 					dir, err := r.resolveConfigsDir(c)
@@ -342,7 +284,6 @@ func (r *Runner) ecoWorldRandomizeCommand() *cli.Command {
 					return nil
 				},
 			},
-			r.Verifier,
 			r.Audit,
 		),
 	}
@@ -351,22 +292,19 @@ func (r *Runner) ecoWorldRandomizeCommand() *cli.Command {
 func (r *Runner) ecoWorldSnapshotCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "snapshot",
-		Usage: "Copy Configs/WorldGenerator.eco to --target. Requires a confirmation token.",
+		Usage: "Copy Configs/WorldGenerator.eco to --target.",
 		Flags: []cli.Flag{
 			configsDirFlag(),
 			&cli.StringFlag{Name: "target", Usage: "destination file path", Required: true},
-			&cli.StringFlag{Name: "token", Usage: "confirmation token scoped to coily.eco:write"},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name:  "eco.world.snapshot",
-				Kind:  policy.Mutating,
-				Scope: ecoMutatingScope,
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+				Name: "eco.world.snapshot",
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
 						"--configs-dir": c.String("configs-dir"),
 						"--target":      c.String("target"),
-					}, nil, verb.Token(c)
+					}, nil
 				},
 				Action: func(_ context.Context, c *cli.Command) error {
 					dir, err := r.resolveConfigsDir(c)
@@ -381,7 +319,6 @@ func (r *Runner) ecoWorldSnapshotCommand() *cli.Command {
 					return nil
 				},
 			},
-			r.Verifier,
 			r.Audit,
 		),
 	}

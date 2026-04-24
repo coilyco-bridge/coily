@@ -6,5 +6,5 @@ import (
 )
 
 func (r *Runner) ghCommand() *cli.Command {
-	return gh.Command(r.Runner, r.Verifier, r.Audit)
+	return gh.Command(r.Runner, r.Audit)
 }

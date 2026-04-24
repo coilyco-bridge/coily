@@ -10,7 +10,6 @@ import (
 	"strconv"
 
 	"github.com/coilysiren/coily/pkg/audit"
-	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/shell"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
@@ -20,9 +19,9 @@ import (
 const BinaryName = "kubectl"
 
 // Command returns the *cli.Command tree that mirrors the upstream CLI.
-// Every leaf is wrapped through verb.Wrap so policy enforcement and audit
+// Every leaf is wrapped through verb.Wrap so argv validation and audit
 // logging apply uniformly.
-func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Command {
+func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  BinaryName,
 		Usage: "Pass-through to " + BinaryName + ".",
@@ -48,14 +47,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.StringFlag{Name: "selector"},
 					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "template"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.annotate",
-						Kind:  policy.Mutating,
-						Scope: "kubectl.annotate:write",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.annotate",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -95,7 +91,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							}
 							args["--template"] = c.String("template")
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"annotate"}
@@ -176,7 +172,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -191,14 +187,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.StringFlag{Name: "output"},
 					&cli.StringFlag{Name: "sort-by"},
 					&cli.StringSliceFlag{Name: "verbs"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.api-resources",
-						Kind:  policy.ReadOnly,
-						Scope: "kubectl.api-resources:read",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.api-resources",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -221,7 +214,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								positional = append(positional, v)
 							}
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"api-resources"}
@@ -267,26 +260,21 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
 				Name:  "api-versions",
 				Usage: "Print the supported API versions on the server, in the form of 'group/version'.",
-				Flags: []cli.Flag{
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
-				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.api-versions",
-						Kind:  policy.ReadOnly,
-						Scope: "kubectl.api-versions:read",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.api-versions",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"api-versions"}
@@ -298,7 +286,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -319,14 +307,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
 							&cli.BoolFlag{Name: "windows-line-endings"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.apply.edit-last-applied",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.apply:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.apply.edit-last-applied",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -351,7 +336,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--windows-line-endings"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"apply", "edit-last-applied"}
@@ -403,7 +388,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -417,14 +402,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "output"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.apply.set-last-applied",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.apply:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.apply.set-last-applied",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -444,7 +426,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"apply", "set-last-applied"}
@@ -485,7 +467,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -498,14 +480,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "output"},
 							&cli.BoolFlag{Name: "recursive"},
 							&cli.StringFlag{Name: "selector"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.apply.view-last-applied",
-								Kind:  policy.ReadOnly,
-								Scope: "kubectl.apply:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.apply.view-last-applied",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -522,7 +501,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--selector"] = c.String("selector")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"apply", "view-last-applied"}
@@ -558,7 +537,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -576,14 +555,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "no-headers"},
 							&cli.BoolFlag{Name: "quiet"},
 							&cli.StringFlag{Name: "subresource"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.auth.can-i",
-								Kind:  policy.ReadOnly,
-								Scope: "kubectl.auth:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.auth.can-i",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -601,7 +577,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--subresource"] = c.String("subresource")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"auth", "can-i"}
@@ -636,7 +612,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -653,14 +629,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "remove-extra-subjects"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.auth.reconcile",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.auth:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.auth.reconcile",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -687,7 +660,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"auth", "reconcile"}
@@ -741,7 +714,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -752,14 +725,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "output"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.auth.whoami",
-								Kind:  policy.ReadOnly,
-								Scope: "kubectl.auth:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.auth.whoami",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -772,7 +742,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"auth", "whoami"}
@@ -800,7 +770,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -823,14 +793,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.BoolFlag{Name: "save-config"},
 					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "template"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.autoscale",
-						Kind:  policy.Mutating,
-						Scope: "kubectl.autoscale:write",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.autoscale",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -859,7 +826,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							}
 							args["--template"] = c.String("template")
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"autoscale"}
@@ -923,7 +890,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -942,14 +909,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "recursive"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.certificate.approve",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.certificate:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.certificate.approve",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -972,7 +936,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"certificate", "approve"}
@@ -1018,7 +982,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1033,14 +997,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "recursive"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.certificate.deny",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.certificate:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.certificate.deny",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1063,7 +1024,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"certificate", "deny"}
@@ -1109,7 +1070,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -1130,14 +1091,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "pod-running-timeout"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.cluster-info.dump",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.cluster-info:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.cluster-info.dump",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1158,7 +1116,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"cluster-info", "dump"}
@@ -1202,7 +1160,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -1214,20 +1172,15 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.Command{
 						Name:  "current-context",
 						Usage: "Display the current-context.",
-						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
-						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.current-context",
-								Kind:  policy.ReadOnly,
-								Scope: "kubectl.config:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.current-context",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "current-context"}
@@ -1239,26 +1192,21 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
 						Name:  "delete-cluster",
 						Usage: "Delete the specified cluster from the kubeconfig.",
-						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
-						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.delete-cluster",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.config:delete",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.delete-cluster",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "delete-cluster"}
@@ -1270,26 +1218,21 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
 						Name:  "delete-context",
 						Usage: "Delete the specified context from the kubeconfig.",
-						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
-						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.delete-context",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.config:delete",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.delete-context",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "delete-context"}
@@ -1301,26 +1244,21 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
 						Name:  "delete-user",
 						Usage: "Delete the specified user from the kubeconfig.",
-						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
-						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.delete-user",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.config:delete",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.delete-user",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "delete-user"}
@@ -1332,26 +1270,21 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
 						Name:  "get-clusters",
 						Usage: "Display clusters defined in the kubeconfig.",
-						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
-						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.get-clusters",
-								Kind:  policy.ReadOnly,
-								Scope: "kubectl.config:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.get-clusters",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "get-clusters"}
@@ -1363,7 +1296,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1372,14 +1305,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "no-headers"},
 							&cli.StringFlag{Name: "output"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.get-contexts",
-								Kind:  policy.ReadOnly,
-								Scope: "kubectl.config:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.get-contexts",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1388,7 +1318,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--output"] = c.String("output")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "get-contexts"}
@@ -1408,26 +1338,21 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
 						Name:  "get-users",
 						Usage: "Display users defined in the kubeconfig.",
-						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
-						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.get-users",
-								Kind:  policy.ReadOnly,
-								Scope: "kubectl.config:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.get-users",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "get-users"}
@@ -1439,26 +1364,21 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
 						Name:  "rename-context",
 						Usage: "Renames a context from the kubeconfig file.",
-						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
-						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.rename-context",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.config:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.rename-context",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "rename-context"}
@@ -1470,7 +1390,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1478,14 +1398,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						Usage: "Set an individual value in a kubeconfig file.",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "set-raw-bytes"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.set",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.config:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.set",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1493,7 +1410,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--set-raw-bytes"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "set"}
@@ -1510,7 +1427,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1523,14 +1440,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "proxy-url"},
 							&cli.StringFlag{Name: "server"},
 							&cli.StringFlag{Name: "tls-server-name"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.set-cluster",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.config:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.set-cluster",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1545,7 +1459,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--server"] = c.String("server")
 									args["--tls-server-name"] = c.String("tls-server-name")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "set-cluster"}
@@ -1579,7 +1493,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1590,14 +1504,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "current"},
 							&cli.StringFlag{Name: "namespace"},
 							&cli.StringFlag{Name: "user"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.set-context",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.config:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.set-context",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1608,7 +1519,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--namespace"] = c.String("namespace")
 									args["--user"] = c.String("user")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "set-context"}
@@ -1634,7 +1545,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1656,10 +1567,8 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.set-credentials",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.config:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.set-credentials",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1684,9 +1593,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--token"] = c.String("token")
 									args["--username"] = c.String("username")
 									positional = append(positional, c.Args().Slice()...)
-									// Native --token flag collides with coily's confirmation
-									// token; source the coily token from $COILY_TOKEN only.
-									return args, positional, verb.TokenFromEnv()
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "set-credentials"}
@@ -1742,26 +1649,21 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
 						Name:  "unset",
 						Usage: "Unset an individual value in a kubeconfig file.",
-						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
-						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.unset",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.config:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.unset",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "unset"}
@@ -1773,26 +1675,21 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
 						Name:  "use-context",
 						Usage: "Set the current-context in a kubeconfig file.",
-						Flags: []cli.Flag{
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
-						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.use-context",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.config:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.use-context",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "use-context"}
@@ -1804,7 +1701,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -1819,14 +1716,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "raw"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.config.view",
-								Kind:  policy.ReadOnly,
-								Scope: "kubectl.config:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.config.view",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -1851,7 +1745,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "view"}
@@ -1899,7 +1793,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -1910,21 +1804,18 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Flags: []cli.Flag{
 					&cli.StringFlag{Name: "dry-run"},
 					&cli.StringFlag{Name: "selector"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.cordon",
-						Kind:  policy.Mutating,
-						Scope: "kubectl.cordon:write",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.cordon",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
 							args["--dry-run"] = c.String("dry-run")
 							args["--selector"] = c.String("selector")
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"cordon"}
@@ -1942,7 +1833,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -1966,14 +1857,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
 							&cli.StringSliceFlag{Name: "verb"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.clusterrole",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.clusterrole",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2005,7 +1893,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										positional = append(positional, v)
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "clusterrole"}
@@ -2070,7 +1958,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2089,14 +1977,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.StringSliceFlag{Name: "user"},
 							&cli.StringFlag{Name: "validate"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.clusterrolebinding",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.clusterrolebinding",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2125,7 +2010,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--validate"] = c.String("validate")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "clusterrolebinding"}
@@ -2185,7 +2070,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2204,14 +2089,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.configmap",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.configmap",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2242,7 +2124,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "configmap"}
@@ -2304,7 +2186,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2322,14 +2204,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.cronjob",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.cronjob",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2351,7 +2230,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "cronjob"}
@@ -2402,7 +2281,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2420,14 +2299,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.deployment",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.deployment",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2451,7 +2327,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "deployment"}
@@ -2504,7 +2380,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2523,14 +2399,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.ingress",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.ingress",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2557,7 +2430,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "ingress"}
@@ -2615,7 +2488,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2632,14 +2505,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.job",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.job",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2660,7 +2530,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "job"}
@@ -2708,7 +2578,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2723,14 +2593,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.namespace",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.namespace",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2749,7 +2616,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "namespace"}
@@ -2791,7 +2658,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2809,14 +2676,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.poddisruptionbudget",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.poddisruptionbudget",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2838,7 +2702,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "poddisruptionbudget"}
@@ -2889,7 +2753,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -2908,14 +2772,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
 							&cli.IntFlag{Name: "value"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.priorityclass",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.priorityclass",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -2940,7 +2801,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--validate"] = c.String("validate")
 									args["--value"] = strconv.Itoa(int(c.Int("value")))
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "priorityclass"}
@@ -2996,7 +2857,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -3013,14 +2874,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.quota",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.quota",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -3041,7 +2899,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "quota"}
@@ -3089,7 +2947,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -3107,14 +2965,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
 							&cli.StringSliceFlag{Name: "verb"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.role",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.role",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -3142,7 +2997,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										positional = append(positional, v)
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "role"}
@@ -3199,7 +3054,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -3219,14 +3074,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "template"},
 							&cli.StringSliceFlag{Name: "user"},
 							&cli.StringFlag{Name: "validate"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.rolebinding",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.rolebinding",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -3256,7 +3108,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--validate"] = c.String("validate")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "rolebinding"}
@@ -3319,7 +3171,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -3344,14 +3196,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.BoolFlag{Name: "show-managed-fields"},
 									&cli.StringFlag{Name: "template"},
 									&cli.StringFlag{Name: "validate"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "kubectl.create.secret.docker-registry",
-										Kind:  policy.Mutating,
-										Scope: "kubectl.create:write",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "kubectl.create.secret.docker-registry",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3380,7 +3229,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											args["--template"] = c.String("template")
 											args["--validate"] = c.String("validate")
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"create", "secret", "docker-registry"}
@@ -3444,7 +3293,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 							&cli.Command{
@@ -3464,14 +3313,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.StringFlag{Name: "template"},
 									&cli.StringFlag{Name: "type"},
 									&cli.StringFlag{Name: "validate"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "kubectl.create.secret.generic",
-										Kind:  policy.Mutating,
-										Scope: "kubectl.create:write",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "kubectl.create.secret.generic",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3503,7 +3349,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											args["--type"] = c.String("type")
 											args["--validate"] = c.String("validate")
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"create", "secret", "generic"}
@@ -3568,7 +3414,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 							&cli.Command{
@@ -3586,14 +3432,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.BoolFlag{Name: "show-managed-fields"},
 									&cli.StringFlag{Name: "template"},
 									&cli.StringFlag{Name: "validate"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "kubectl.create.secret.tls",
-										Kind:  policy.Mutating,
-										Scope: "kubectl.create:write",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "kubectl.create.secret.tls",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3617,7 +3460,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											args["--template"] = c.String("template")
 											args["--validate"] = c.String("validate")
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"create", "secret", "tls"}
@@ -3670,7 +3513,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 						},
@@ -3693,14 +3536,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.StringSliceFlag{Name: "tcp"},
 									&cli.StringFlag{Name: "template"},
 									&cli.StringFlag{Name: "validate"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "kubectl.create.service.clusterip",
-										Kind:  policy.Mutating,
-										Scope: "kubectl.create:write",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "kubectl.create.service.clusterip",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3723,7 +3563,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											args["--template"] = c.String("template")
 											args["--validate"] = c.String("validate")
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"create", "service", "clusterip"}
@@ -3773,7 +3613,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 							&cli.Command{
@@ -3790,14 +3630,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.StringSliceFlag{Name: "tcp"},
 									&cli.StringFlag{Name: "template"},
 									&cli.StringFlag{Name: "validate"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "kubectl.create.service.externalname",
-										Kind:  policy.Mutating,
-										Scope: "kubectl.create:write",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "kubectl.create.service.externalname",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3820,7 +3657,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											args["--template"] = c.String("template")
 											args["--validate"] = c.String("validate")
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"create", "service", "externalname"}
@@ -3870,7 +3707,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 							&cli.Command{
@@ -3886,14 +3723,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.StringSliceFlag{Name: "tcp"},
 									&cli.StringFlag{Name: "template"},
 									&cli.StringFlag{Name: "validate"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "kubectl.create.service.loadbalancer",
-										Kind:  policy.Mutating,
-										Scope: "kubectl.create:write",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "kubectl.create.service.loadbalancer",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -3915,7 +3749,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											args["--template"] = c.String("template")
 											args["--validate"] = c.String("validate")
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"create", "service", "loadbalancer"}
@@ -3962,7 +3796,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 							&cli.Command{
@@ -3979,14 +3813,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									&cli.StringSliceFlag{Name: "tcp"},
 									&cli.StringFlag{Name: "template"},
 									&cli.StringFlag{Name: "validate"},
-									&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
-										Name:  "kubectl.create.service.nodeport",
-										Kind:  policy.Mutating,
-										Scope: "kubectl.create:write",
-										ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+										Name: "kubectl.create.service.nodeport",
+										ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 											args := map[string]string{}
 											var positional []string
 											_ = positional
@@ -4009,7 +3840,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											args["--template"] = c.String("template")
 											args["--validate"] = c.String("validate")
 											positional = append(positional, c.Args().Slice()...)
-											return args, positional, verb.Token(c)
+											return args, positional
 										},
 										Action: func(ctx context.Context, c *cli.Command) error {
 											argv := []string{"create", "service", "nodeport"}
@@ -4059,7 +3890,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 											return r.Exec(ctx, BinaryName, argv...)
 										},
 									},
-									v, w,
+									w,
 								),
 							},
 						},
@@ -4076,14 +3907,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringFlag{Name: "validate"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.serviceaccount",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.serviceaccount",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4102,7 +3930,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "serviceaccount"}
@@ -4144,7 +3972,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -4160,14 +3988,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "output"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.create.token",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.create:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.create.token",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -4187,7 +4012,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"create", "token"}
@@ -4232,7 +4057,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -4258,14 +4083,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.StringFlag{Name: "selector"},
 					&cli.StringFlag{Name: "timeout"},
 					&cli.BoolFlag{Name: "wait"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.delete",
-						Kind:  policy.Mutating,
-						Scope: "kubectl.delete:delete",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.delete",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -4303,7 +4125,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								args["--wait"] = "true"
 							}
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"delete"}
@@ -4382,7 +4204,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -4396,14 +4218,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.BoolFlag{Name: "recursive"},
 					&cli.StringFlag{Name: "selector"},
 					&cli.BoolFlag{Name: "show-events"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.describe",
-						Kind:  policy.ReadOnly,
-						Scope: "kubectl.describe:read",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.describe",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -4423,7 +4242,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								args["--show-events"] = "true"
 							}
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"describe"}
@@ -4464,7 +4283,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -4481,14 +4300,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.StringFlag{Name: "selector"},
 					&cli.BoolFlag{Name: "server-side"},
 					&cli.BoolFlag{Name: "show-managed-fields"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.diff",
-						Kind:  policy.ReadOnly,
-						Scope: "kubectl.diff:read",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.diff",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -4517,7 +4333,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								args["--show-managed-fields"] = "true"
 							}
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"diff"}
@@ -4573,7 +4389,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -4591,14 +4407,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.StringFlag{Name: "selector"},
 					&cli.IntFlag{Name: "skip-wait-for-delete-timeout"},
 					&cli.StringFlag{Name: "timeout"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.drain",
-						Kind:  policy.Mutating,
-						Scope: "kubectl.drain:write",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.drain",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -4622,7 +4435,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							args["--skip-wait-for-delete-timeout"] = strconv.Itoa(int(c.Int("skip-wait-for-delete-timeout")))
 							args["--timeout"] = c.String("timeout")
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"drain"}
@@ -4675,7 +4488,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -4692,14 +4505,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.StringFlag{Name: "template"},
 					&cli.StringSliceFlag{Name: "types"},
 					&cli.BoolFlag{Name: "watch"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.events",
-						Kind:  policy.ReadOnly,
-						Scope: "kubectl.events:read",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.events",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -4726,7 +4536,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								args["--watch"] = "true"
 							}
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"events"}
@@ -4780,7 +4590,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -4790,14 +4600,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.StringFlag{Name: "api-version"},
 					&cli.StringFlag{Name: "output"},
 					&cli.BoolFlag{Name: "recursive"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.explain",
-						Kind:  policy.ReadOnly,
-						Scope: "kubectl.explain:read",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.explain",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -4807,7 +4614,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								args["--recursive"] = "true"
 							}
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"explain"}
@@ -4830,7 +4637,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -4860,14 +4667,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.StringFlag{Name: "target-port"},
 					&cli.StringFlag{Name: "template"},
 					&cli.StringFlag{Name: "type"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.expose",
-						Kind:  policy.Mutating,
-						Scope: "kubectl.expose:write",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.expose",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -4905,7 +4709,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							args["--template"] = c.String("template")
 							args["--type"] = c.String("type")
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"expose"}
@@ -4996,7 +4800,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -5026,14 +4830,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.StringFlag{Name: "template"},
 					&cli.BoolFlag{Name: "watch"},
 					&cli.BoolFlag{Name: "watch-only"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.get",
-						Kind:  policy.Mutating,
-						Scope: "kubectl.get:write",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.get",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -5089,7 +4890,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								args["--watch-only"] = "true"
 							}
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"get"}
@@ -5198,7 +4999,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -5222,14 +5023,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.StringFlag{Name: "selector"},
 					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "template"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.label",
-						Kind:  policy.Mutating,
-						Scope: "kubectl.label:write",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.label",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -5269,7 +5067,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							}
 							args["--template"] = c.String("template")
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"label"}
@@ -5350,7 +5148,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -5372,14 +5170,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.StringFlag{Name: "since-time"},
 					&cli.IntFlag{Name: "tail"},
 					&cli.BoolFlag{Name: "timestamps"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.logs",
-						Kind:  policy.ReadOnly,
-						Scope: "kubectl.logs:read",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.logs",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -5413,7 +5208,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 								args["--timestamps"] = "true"
 							}
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"logs"}
@@ -5484,7 +5279,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -5505,14 +5300,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.StringFlag{Name: "subresource"},
 					&cli.StringFlag{Name: "template"},
 					&cli.StringFlag{Name: "type"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.patch",
-						Kind:  policy.Mutating,
-						Scope: "kubectl.patch:write",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.patch",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -5541,7 +5333,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							args["--template"] = c.String("template")
 							args["--type"] = c.String("type")
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"patch"}
@@ -5605,7 +5397,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -5625,14 +5417,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "selector"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.rollout.history",
-								Kind:  policy.ReadOnly,
-								Scope: "kubectl.rollout:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.rollout.history",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -5654,7 +5443,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"rollout", "history"}
@@ -5701,7 +5490,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -5717,14 +5506,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "selector"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.rollout.pause",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.rollout:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.rollout.pause",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -5746,7 +5532,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"rollout", "pause"}
@@ -5793,7 +5579,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -5809,14 +5595,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "selector"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.rollout.restart",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.rollout:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.rollout.restart",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -5838,7 +5621,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"rollout", "restart"}
@@ -5885,7 +5668,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -5901,14 +5684,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "selector"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.rollout.resume",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.rollout:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.rollout.resume",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -5930,7 +5710,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"rollout", "resume"}
@@ -5977,7 +5757,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -5991,14 +5771,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "selector"},
 							&cli.StringFlag{Name: "timeout"},
 							&cli.BoolFlag{Name: "watch"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.rollout.status",
-								Kind:  policy.ReadOnly,
-								Scope: "kubectl.rollout:read",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.rollout.status",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6016,7 +5793,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--watch"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"rollout", "status"}
@@ -6055,7 +5832,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -6072,14 +5849,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 							&cli.IntFlag{Name: "to-revision"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.rollout.undo",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.rollout:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.rollout.undo",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6102,7 +5876,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									args["--template"] = c.String("template")
 									args["--to-revision"] = strconv.Itoa(int(c.Int("to-revision")))
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"rollout", "undo"}
@@ -6152,7 +5926,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -6175,14 +5949,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "template"},
 					&cli.StringFlag{Name: "timeout"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.scale",
-						Kind:  policy.Mutating,
-						Scope: "kubectl.scale:write",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.scale",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -6211,7 +5982,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							args["--template"] = c.String("template")
 							args["--timeout"] = c.String("timeout")
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"scale"}
@@ -6275,7 +6046,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -6306,14 +6077,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "selector"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.set.env",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.set:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.set.env",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6360,7 +6128,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"set", "env"}
@@ -6454,7 +6222,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -6473,14 +6241,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "selector"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.set.image",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.set:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.set.image",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6509,7 +6274,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"set", "image"}
@@ -6569,7 +6334,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -6591,14 +6356,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "selector"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.set.resources",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.set:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.set.resources",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6630,7 +6392,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"set", "resources"}
@@ -6699,7 +6461,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -6717,14 +6479,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "resource-version"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.set.selector",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.set:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.set.selector",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6752,7 +6511,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"set", "selector"}
@@ -6809,7 +6568,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -6827,14 +6586,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "recursive"},
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.set.serviceaccount",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.set:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.set.serviceaccount",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6862,7 +6618,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									}
 									args["--template"] = c.String("template")
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"set", "serviceaccount"}
@@ -6919,7 +6675,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -6941,14 +6697,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "show-managed-fields"},
 							&cli.StringFlag{Name: "template"},
 							&cli.StringSliceFlag{Name: "user"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.set.subject",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.set:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.set.subject",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -6986,7 +6739,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										positional = append(positional, v)
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"set", "subject"}
@@ -7061,7 +6814,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -7080,14 +6833,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "template"},
 					&cli.StringFlag{Name: "validate"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.taint",
-						Kind:  policy.Mutating,
-						Scope: "kubectl.taint:write",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.taint",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -7110,7 +6860,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							args["--template"] = c.String("template")
 							args["--validate"] = c.String("validate")
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"taint"}
@@ -7160,7 +6910,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -7176,14 +6926,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.BoolFlag{Name: "show-capacity"},
 							&cli.StringFlag{Name: "sort-by"},
 							&cli.BoolFlag{Name: "use-protocol-buffers"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.top.node",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.top:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.top.node",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -7199,7 +6946,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--use-protocol-buffers"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"top", "node"}
@@ -7232,7 +6979,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 					&cli.Command{
@@ -7247,14 +6994,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							&cli.StringFlag{Name: "sort-by"},
 							&cli.BoolFlag{Name: "sum"},
 							&cli.BoolFlag{Name: "use-protocol-buffers"},
-							&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
-								Name:  "kubectl.top.pod",
-								Kind:  policy.Mutating,
-								Scope: "kubectl.top:write",
-								ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+								Name: "kubectl.top.pod",
+								ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
@@ -7277,7 +7021,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 										args["--use-protocol-buffers"] = "true"
 									}
 									positional = append(positional, c.Args().Slice()...)
-									return args, positional, verb.Token(c)
+									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"top", "pod"}
@@ -7323,7 +7067,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 									return r.Exec(ctx, BinaryName, argv...)
 								},
 							},
-							v, w,
+							w,
 						),
 					},
 				},
@@ -7334,21 +7078,18 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 				Flags: []cli.Flag{
 					&cli.StringFlag{Name: "dry-run"},
 					&cli.StringFlag{Name: "selector"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.uncordon",
-						Kind:  policy.Mutating,
-						Scope: "kubectl.uncordon:write",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.uncordon",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
 							args["--dry-run"] = c.String("dry-run")
 							args["--selector"] = c.String("selector")
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"uncordon"}
@@ -7366,7 +7107,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 			&cli.Command{
@@ -7386,14 +7127,11 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 					&cli.BoolFlag{Name: "show-managed-fields"},
 					&cli.StringFlag{Name: "template"},
 					&cli.StringFlag{Name: "timeout"},
-					&cli.StringFlag{Name: "token", Usage: "coily confirmation token for mutating verbs (or $COILY_TOKEN env)"},
 				},
 				Action: verb.Wrap(
 					verb.Spec{
-						Name:  "kubectl.wait",
-						Kind:  policy.ReadOnly,
-						Scope: "kubectl.wait:read",
-						ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
+						Name: "kubectl.wait",
+						ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
@@ -7425,7 +7163,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							args["--template"] = c.String("template")
 							args["--timeout"] = c.String("timeout")
 							positional = append(positional, c.Args().Slice()...)
-							return args, positional, verb.Token(c)
+							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"wait"}
@@ -7490,7 +7228,7 @@ func Command(r *shell.Runner, v policy.TokenVerifier, w *audit.Writer) *cli.Comm
 							return r.Exec(ctx, BinaryName, argv...)
 						},
 					},
-					v, w,
+					w,
 				),
 			},
 		},

@@ -49,11 +49,6 @@ out one agent per item, each touching a single file.
 - **Completion scripts**. The bash/zsh/fish scripts I wrote are standard
   patterns for urfave/cli v3, but I did not verify any of them work
   end-to-end in a live shell. Sub-agent test #9 should catch regressions.
-- **HMAC token key lifecycle**. First-use key creation works and perms are
-  tight. But key rotation is not built. If Kai wants to invalidate all
-  outstanding tokens, they delete the key file, which invalidates
-  everything indiscriminately. Finer rotation would need a key version
-  field in the token.
 - **lockdown defaults.yaml**. I wrote ~80 rules mostly by thinking through
   the threat model. I did not run `coily lockdown --apply` against my
   laptop's real `~/.claude/settings.json` and audit the merged result. It

@@ -28,17 +28,18 @@ type Config struct {
 	KaiServer KaiServer `yaml:"kai_server"`
 	Audit     Audit     `yaml:"audit"`
 	AWS       AWS       `yaml:"aws"`
-	Tokens    Tokens    `yaml:"tokens"`
 	Eco       Eco       `yaml:"eco"`
 	Loaded    time.Time `yaml:"-"`
 }
 
-// Eco is the local-side config for `coily eco world` verbs. configs_dir
-// points at a checkout of the eco-configs repo (the same one
-// eco-cycle-prep/worldgen.py operates on). Optional: if empty, world
-// verbs require --configs-dir explicitly.
+// Eco is the local-side + remote-side config for `coily eco` verbs.
+// configs_dir points at a local checkout of the eco-configs repo (the
+// same one eco-cycle-prep/worldgen.py operates on); used by `eco world`.
+// server_dir is the absolute path to the Eco dedicated server install on
+// kai-server; used by `eco mod install` as the root for Mods/<Name>/.
 type Eco struct {
 	ConfigsDir string `yaml:"configs_dir"`
+	ServerDir  string `yaml:"server_dir"`
 }
 
 type KaiServer struct {
@@ -58,16 +59,11 @@ type AWS struct {
 	Profile string `yaml:"profile"`
 }
 
-type Tokens struct {
-	IssuerKeyPath string        `yaml:"issuer_key_path"`
-	DefaultTTL    time.Duration `yaml:"default_ttl"`
-}
-
 // Load returns the layered config. Embedded is parsed first, then
 // ~/.coily/config.yaml is overlaid on top, then ./.coily/config.yaml. Any
-// missing layer is silently skipped. Path defaults (audit log, issuer key)
-// are filled in from the homedir-based defaults when the merged config left
-// them blank, and any "~/" prefix is expanded to an absolute path.
+// missing layer is silently skipped. The audit log path default is filled
+// in from the homedir when the merged config left it blank, and any "~/"
+// prefix is expanded to an absolute path.
 func Load() (*Config, error) {
 	var c Config
 	if err := yaml.Unmarshal(embeddedConfigBytes, &c); err != nil {
@@ -124,15 +120,6 @@ func applyDefaults(c *Config) error {
 		c.Audit.LogPath = p
 	} else {
 		c.Audit.LogPath = expandHome(c.Audit.LogPath)
-	}
-	if c.Tokens.IssuerKeyPath == "" {
-		p, err := DefaultIssuerKeyPath()
-		if err != nil {
-			return err
-		}
-		c.Tokens.IssuerKeyPath = p
-	} else {
-		c.Tokens.IssuerKeyPath = expandHome(c.Tokens.IssuerKeyPath)
 	}
 	return nil
 }

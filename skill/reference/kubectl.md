@@ -320,11 +320,9 @@ Set a user entry in kubeconfig.
 
 Flags:
 
-- `--client-certificate`
-- `--token`
-- `--username`
 - `--auth-provider`
 - `--auth-provider-arg`
+- `--client-certificate`
 - `--client-key`
 - `--embed-certs`
 - `--exec-api-version`
@@ -332,6 +330,8 @@ Flags:
 - `--exec-command`
 - `--exec-env`
 - `--password`
+- `--token`
+- `--username`
 
 ### `coily kubectl config unset`
 
@@ -475,14 +475,14 @@ Create an ingress with the specified name.
 
 Flags:
 
-- `--annotation`
-- `--rule`
-- `--default-backend`
 - `--allow-missing-template-keys`
+- `--annotation`
 - `--class`
+- `--default-backend`
 - `--dry-run`
 - `--field-manager`
 - `--output`
+- `--rule`
 - `--save-config`
 - `--show-managed-fields`
 - `--template`

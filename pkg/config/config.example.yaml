@@ -3,10 +3,8 @@
 # //go:embed can reach it. This file exists as a committed placeholder; the
 # gitignored pkg/config/config.yaml is what actually gets embedded.
 #
-# Path fields left blank fall back to homedir-based defaults computed at load
-# time. log_path defaults to ~/.coily/audit/<owner>-<repo>.jsonl, derived
-# from `git remote get-url origin`. issuer_key_path defaults to
-# ~/.coily/token-issuer.key. See pkg/config/paths.go.
+# log_path defaults to ~/.coily/audit/<owner>-<repo>.jsonl, derived from
+# `git remote get-url origin`. See pkg/config/paths.go.
 
 kai_server:
   tailscale_host: kai-server
@@ -23,11 +21,10 @@ audit:
 aws:
   profile: default
 
-tokens:
-  # issuer_key_path: ""   # blank picks ~/.coily/token-issuer.key
-  default_ttl: 5m
-
 eco:
   # Local checkout of eco-configs. Used by `coily eco world` verbs. Empty
   # means --configs-dir is required on every invocation.
   configs_dir: ""
+  # Absolute path to the Eco dedicated server install on kai-server. Used
+  # by `coily eco mod install`. Defaults to the Steam install location.
+  server_dir: "/home/kai/Steam/steamapps/common/EcoServer"

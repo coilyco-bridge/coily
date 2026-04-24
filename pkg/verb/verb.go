@@ -1,13 +1,13 @@
 // Package verb is the middleware that wraps every coily command action in
 // the standard pipeline of:
 //
-//  1. Policy enforcement (argv validation + confirmation-token check).
+//  1. Argument validation (no shell metacharacters).
 //  2. Action execution.
 //  3. Audit-log record.
 //
 // Using verb.Wrap is the way coily guarantees that every user-visible verb
 // goes through the security boundary. Anything that constructs a
-// *cli.Command.Action by hand bypasses audit logging and policy checks.
+// *cli.Command.Action by hand bypasses audit logging and argv validation.
 // Don't do that.
 package verb
 
@@ -26,62 +26,26 @@ type Spec struct {
 	// "aws.route53.change-resource-record-sets" or "lockdown".
 	Name string
 
-	// Kind is ReadOnly or Mutating. Mutating verbs require a confirmation
-	// token. If KindFunc is set, it overrides Kind per invocation (used by
-	// `coily lockdown` to switch on --apply --replace).
-	Kind policy.Kind
-
-	// KindFunc, if non-nil, is called per invocation to compute Kind
-	// dynamically from the *cli.Command. Used when a verb's classification
-	// depends on flag combinations (`coily lockdown --apply --replace` is
-	// Mutating, bare `coily lockdown` is ReadOnly). Takes precedence over
-	// the static Kind field.
-	KindFunc func(*cli.Command) policy.Kind
-
-	// Scope is the required token scope for mutating verbs, shaped as
-	// `<binary>.<service>:<bucket>` (e.g. `aws.route53:write`). Ignored
-	// for ReadOnly verbs. May be left empty for ReadOnly. For Mutating
-	// verbs, leaving Scope empty is a wiring bug and policy.Enforce will
-	// reject the invocation.
-	Scope string
-
 	// ArgsFunc extracts the user-supplied string arguments from the
-	// *cli.Command. Returns three parts:
-	//
-	//   - args: named flags, e.g. {"--hosted-zone-id": "Z123"}.
-	//   - positional: positional args in order.
-	//   - token: the confirmation token if present (COILY_TOKEN env or a
-	//     --token flag), or "" if none.
-	//
-	// All returned strings are fed to policy.Enforce. If ArgsFunc is nil,
-	// Wrap treats the verb as having no user-supplied string input.
-	ArgsFunc func(*cli.Command) (args map[string]string, positional []string, token string)
+	// *cli.Command for validation. Returns named flags and positional args.
+	// Both are fed to policy.ValidateArgs / ValidateArgSlice. If ArgsFunc is
+	// nil, Wrap treats the verb as having no user-supplied string input.
+	ArgsFunc func(*cli.Command) (args map[string]string, positional []string)
 
-	// Action is the verb's real work. Called only after policy.Enforce passes.
+	// Action is the verb's real work. Called only after argv validation passes.
 	Action cli.ActionFunc
 }
 
 // Wrap returns a cli.ActionFunc that runs the full coily verb pipeline.
 //
-// Either writer or verifier may be nil in dev contexts. A nil writer skips
-// audit logging with a warning. A nil verifier is only safe for ReadOnly
-// verbs; Mutating verbs with a nil verifier always fail policy.Enforce.
-func Wrap(spec Spec, verifier policy.TokenVerifier, writer *audit.Writer) cli.ActionFunc {
+// writer may be nil in dev contexts; a nil writer skips audit logging.
+func Wrap(spec Spec, writer *audit.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
-		args, positional, token := extractArgs(spec, cmd)
-		kind := spec.Kind
-		if spec.KindFunc != nil {
-			kind = spec.KindFunc(cmd)
+		args, positional := extractArgs(spec, cmd)
+		if err := policy.ValidateArgs(args); err != nil {
+			return err
 		}
-		inv := policy.Invocation{
-			Verb:       spec.Name,
-			Kind:       kind,
-			Scope:      spec.Scope,
-			Args:       args,
-			Positional: positional,
-			Token:      token,
-		}
-		if err := policy.Enforce(inv, verifier); err != nil {
+		if err := policy.ValidateArgSlice("positional", positional); err != nil {
 			return err
 		}
 
@@ -98,34 +62,9 @@ func Wrap(spec Spec, verifier policy.TokenVerifier, writer *audit.Writer) cli.Ac
 	}
 }
 
-func extractArgs(spec Spec, cmd *cli.Command) (args map[string]string, positional []string, token string) {
+func extractArgs(spec Spec, cmd *cli.Command) (args map[string]string, positional []string) {
 	if spec.ArgsFunc == nil {
-		return nil, nil, ""
+		return nil, nil
 	}
 	return spec.ArgsFunc(cmd)
-}
-
-// TokenEnvVar is the name of the environment variable that holds a coily
-// confirmation token when `--token` is not passed explicitly. Documented in
-// cmd/coily/ops_auth.go ("paste it into the mutating invocation as --token
-// or $COILY_TOKEN").
-const TokenEnvVar = "COILY_TOKEN"
-
-// Token resolves the coily confirmation token for the current invocation,
-// preferring an explicit --token flag over the $COILY_TOKEN environment
-// variable. Used by every mutating verb's ArgsFunc so the flag and env
-// sources stay in sync. Returns "" when neither is set.
-func Token(c *cli.Command) string {
-	if t := c.String("token"); t != "" {
-		return t
-	}
-	return TokenFromEnv()
-}
-
-// TokenFromEnv reads only the $COILY_TOKEN environment variable. Used by
-// generated leaves whose underlying CLI already defines a native --token
-// flag (e.g. kubectl config set-credentials), where c.String("token") would
-// return the native value rather than a coily confirmation token.
-func TokenFromEnv() string {
-	return os.Getenv(TokenEnvVar)
 }

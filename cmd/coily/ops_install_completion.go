@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
 )
@@ -42,13 +41,11 @@ Pass --dry-run to print the script to stdout instead of writing.`,
 		Action: verb.Wrap(
 			verb.Spec{
 				Name: "install-completion",
-				Kind: policy.ReadOnly,
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string, string) {
-					return map[string]string{"--shell": c.String("shell")}, nil, ""
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					return map[string]string{"--shell": c.String("shell")}, nil
 				},
 				Action: installCompletionAction,
 			},
-			r.Verifier,
 			r.Audit,
 		),
 	}

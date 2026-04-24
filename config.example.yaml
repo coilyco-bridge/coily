@@ -2,10 +2,8 @@
 # Copy to config.yaml (gitignored) and edit before `make build` / `make install`.
 # Changes require rebuild + sudo install - that's intentional (see docs/threat-model.md).
 #
-# Path fields left blank fall back to homedir-based defaults computed at load
-# time. log_path defaults to ~/.coily/audit/<owner>-<repo>.jsonl, derived
-# from `git remote get-url origin`. issuer_key_path defaults to
-# ~/.coily/token-issuer.key. See pkg/config/paths.go.
+# log_path defaults to ~/.coily/audit/<owner>-<repo>.jsonl, derived from
+# `git remote get-url origin`. See pkg/config/paths.go.
 
 kai_server:
   # Tailscale hostname for the homelab box. Resolved dynamically via tailscale SDK at runtime;
@@ -29,15 +27,13 @@ aws:
   # Route53 zone IDs are discovered at runtime via the SDK (list-hosted-zones).
   # Do not hardcode them.
 
-tokens:
-  # Confirmation tokens for destructive verbs are issued via `coily auth issue ...`
-  # and stored in the global ~/.coily/ tree. This file only holds the issuer config.
-  # issuer_key_path: ""   # blank picks ~/.coily/token-issuer.key
-  default_ttl: 5m
-
 eco:
   # Local checkout of the eco-configs repo (the same one
   # eco-cycle-prep/worldgen.py operates on). Used by `coily eco world ...`
   # verbs to read and write Configs/WorldGenerator.eco. Optional. If empty,
   # `coily eco world ...` verbs require --configs-dir on every invocation.
   configs_dir: ""
+  # Absolute path to the Eco dedicated server install on kai-server. Used
+  # by `coily eco mod install` as the root for Mods/<Name>/. Steam installs
+  # land here on kai-server.
+  server_dir: "/home/kai/Steam/steamapps/common/EcoServer"

@@ -6,5 +6,5 @@ import (
 )
 
 func (r *Runner) awsCommand() *cli.Command {
-	return aws.Command(r.Runner, r.Verifier, r.Audit)
+	return aws.Command(r.Runner, r.Audit)
 }

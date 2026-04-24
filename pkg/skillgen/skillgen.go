@@ -229,7 +229,6 @@ func writeSkillWillNotDo(b *strings.Builder) {
 	b.WriteString("- Open a shell. There is no `coily run` or `coily exec`, ever.\n")
 	b.WriteString("- Take free-form string arguments that reach a shell. Shell metacharacters are rejected at the policy layer.\n")
 	b.WriteString("- Self-update at runtime. Binary updates go through `make deploy-server` from Kai's laptop.\n")
-	b.WriteString("- Perform destructive operations without a valid confirmation token (see `coily auth issue`).\n")
 }
 
 func renderReferenceMD(m Manifest) string {

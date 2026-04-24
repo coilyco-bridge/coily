@@ -18,7 +18,7 @@ import (
 )
 
 // GlobalDirName is the single directory under $HOME that holds every coily
-// global - configs, the token issuer key, and the per-repo audit subtree.
+// global - configs and the per-repo audit subtree.
 const GlobalDirName = ".coily"
 
 // LocalDirName is the per-repo overlay directory. Lives at the root of the
@@ -62,15 +62,6 @@ func LocalConfigPath() (string, error) {
 		return "", fmt.Errorf("config: getwd: %w", err)
 	}
 	return filepath.Join(cwd, LocalDirName, "config.yaml"), nil
-}
-
-// DefaultIssuerKeyPath returns ~/.coily/token-issuer.key.
-func DefaultIssuerKeyPath() (string, error) {
-	dir, err := GlobalDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(dir, "token-issuer.key"), nil
 }
 
 // DefaultAuditPath returns ~/.coily/audit/<slug>.jsonl, where slug is

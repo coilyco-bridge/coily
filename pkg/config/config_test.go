@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/coilysiren/coily/pkg/config"
 )
@@ -35,13 +34,6 @@ func TestLoad_HasExpectedFields(t *testing.T) {
 	}
 	if c.KaiServer.SSHUser == "" {
 		t.Error("kai_server.ssh_user is empty")
-	}
-	if c.Tokens.DefaultTTL == 0 {
-		t.Error("tokens.default_ttl is zero")
-	}
-	// DefaultTTL should parse as a duration.
-	if c.Tokens.DefaultTTL < time.Second {
-		t.Errorf("tokens.default_ttl = %v, want >= 1s", c.Tokens.DefaultTTL)
 	}
 }
 
@@ -75,10 +67,6 @@ func TestLoad_DefaultPathsFallToHome(t *testing.T) {
 	wantAuditPrefix := filepath.Join(home, ".coily", "audit")
 	if !strings.HasPrefix(c.Audit.LogPath, wantAuditPrefix) {
 		t.Errorf("Audit.LogPath = %q, want prefix %q", c.Audit.LogPath, wantAuditPrefix)
-	}
-	wantKey := filepath.Join(home, ".coily", "token-issuer.key")
-	if c.Tokens.IssuerKeyPath != wantKey {
-		t.Errorf("Tokens.IssuerKeyPath = %q, want %q", c.Tokens.IssuerKeyPath, wantKey)
 	}
 }
 
