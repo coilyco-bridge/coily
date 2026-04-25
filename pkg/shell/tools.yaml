@@ -6,14 +6,14 @@ tools:
       version: 2.34.37
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-arm64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.pkg
-      sha256: d1df09b7c41f6050afbeb672189ebf65f13cdf5e75268297dbb6fec42dbfa6a2
+      sha256: dcdd975f6b69639ead7208a91d6f8c4ee7d442899aae5a4a9b412a2cd5579b66
       archive: tar.gz
       entry: dist/aws
     darwin/amd64:
       version: 2.34.37
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-amd64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.pkg
-      sha256: 1d7409ad1c1b4a4e622b182b64915eca48a47d72011d97be8433db675b62b9bd
+      sha256: 3868551ab396116144bef2302554caedb00c5a642f6890cf703cb1bd732d9cb4
       archive: tar.gz
       entry: dist/aws
     linux/amd64:
@@ -34,7 +34,7 @@ tools:
       version: 2.34.37
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-windows-amd64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.msi
-      sha256: c390e6850dbee59f5d9f37922e3d018af6bb0718edc152e61e2416e27f524e59
+      sha256: 2f0fc961fde81c164fcf81f81c1375b610ac4f0fb623a6559976190cd53de6e0
       archive: tar.gz
       entry: dist/aws.exe
   kubectl:
