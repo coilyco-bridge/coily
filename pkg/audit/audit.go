@@ -1,5 +1,5 @@
 // Package audit writes one JSONL record per coily invocation to an
-// append-only log outside the working tree. Per docs/threat-model.md, the
+// append-only log outside the working tree. Per SECURITY.md, the
 // audit log is the forensic trail if an agent (or a confused human) invokes
 // something destructive.
 //

@@ -1,6 +1,6 @@
 # Per-repo command allowlist. Loaded at runtime by pkg/repocfg when coily is
 # invoked anywhere inside this checkout. See pkg/repocfg/repocfg.go for the
-# loader, docs/threat-model.md for the security story.
+# loader, SECURITY.md for the security story.
 #
 # Rules:
 #   - Every token parses via strings.Fields and must pass policy.ValidateArg.

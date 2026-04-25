@@ -76,7 +76,7 @@ install:
 install-windows: _sync-config
 	@# Windows analog of `make install`. C:\Program Files\coily is admin-write
 	@# required, same ACL story as /usr/local/bin being root-owned on unix -
-	@# see docs/threat-model.md for the reasoning. Run this from an elevated
+	@# see SECURITY.md for the reasoning. Run this from an elevated
 	@# shell (Run as Administrator) or mkdir below will fail.
 	@mkdir -p bin
 	GOOS=windows GOARCH=$(WINDOWS_ARCH) $(GO) build -tags prod -ldflags "$(LDFLAGS)" -o bin/$(BIN_NAME).exe ./cmd/coily

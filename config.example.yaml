@@ -1,6 +1,6 @@
 # coily embedded config.
 # Copy to config.yaml (gitignored) and edit before `make build` / `make install`.
-# Changes require rebuild + sudo install - that's intentional (see docs/threat-model.md).
+# Changes require rebuild + sudo install - that's intentional (see SECURITY.md).
 #
 # log_path defaults to ~/.coily/audit/<owner>-<repo>.jsonl, derived from
 # `git remote get-url origin`. See pkg/config/paths.go.

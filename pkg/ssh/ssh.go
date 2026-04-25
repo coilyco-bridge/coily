@@ -1,5 +1,5 @@
 // Package ssh is the Go-SDK boundary for ssh and scp. Per
-// docs/threat-model.md, simple-API tools (ssh, scp, tailscale) talk to
+// SECURITY.md, simple-API tools (ssh, scp, tailscale) talk to
 // remote hosts through Go SDKs instead of shelling out, so no argv ever
 // reaches an OS exec layer for these verbs.
 //

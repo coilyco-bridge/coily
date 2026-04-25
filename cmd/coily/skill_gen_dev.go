@@ -12,7 +12,7 @@ import (
 )
 
 // skill-gen is only registered in dev builds. Production coily cannot write
-// skill files. Per docs/threat-model.md, dev-only conveniences are compiled
+// skill files. Per SECURITY.md, dev-only conveniences are compiled
 // out of the prod binary so an agent that lands on /usr/local/bin/coily
 // cannot call them.
 func init() {

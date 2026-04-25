@@ -41,7 +41,7 @@ effectively zero.
 
 ## Non-features: do not test
 
-- Self-update / CI-signed binaries: deliberately unbuilt per docs/threat-model.md.
+- Self-update / CI-signed binaries: deliberately unbuilt per SECURITY.md.
 - Adversarial review loop: out of scope for v1.
 - Embedded sub-binaries (aws/kubectl/gh inside the coily binary): planned but not built. pkg/shell resolves via PATH currently.
 - SDK-native ssh/tailscale: planned. Currently ssh shells out.

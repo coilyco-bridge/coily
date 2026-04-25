@@ -75,7 +75,7 @@ func TestRenderForwardsPositionalArgs(t *testing.T) {
 // TestRenderNoTokenFlag confirms the generator does NOT emit any
 // coily-confirmation --token flag or scope metadata. Tokens were removed
 // from coily because they added no security over the allowlist + audit +
-// Claude Code deny rules - see docs/threat-model.md.
+// Claude Code deny rules - see SECURITY.md.
 func TestRenderNoTokenFlag(t *testing.T) {
 	m := Manifest{
 		Binary: "aws",

@@ -1,4 +1,4 @@
-// Path defaults and per-repo audit derivation. See docs/threat-model.md for
+// Path defaults and per-repo audit derivation. See SECURITY.md for
 // the durability story. Globals live under ~/.coily so they outlive any
 // individual repo. Locals live under ./.coily so a repo can carry its own
 // allowlist into a fresh checkout.

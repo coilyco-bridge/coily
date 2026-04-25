@@ -1,5 +1,5 @@
 // Package policy validates that verb arguments do not contain shell
-// metacharacters. Per docs/threat-model.md, coily's subprocess execution
+// metacharacters. Per SECURITY.md, coily's subprocess execution
 // always uses an explicit argv slice, but some downstream tools (ssh
 // <host> <remote-command>, kubectl exec, etc.) hand the last positional
 // argument to a remote shell. Rejecting these characters at the coily

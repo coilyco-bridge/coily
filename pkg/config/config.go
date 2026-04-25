@@ -2,7 +2,7 @@
 // to highest precedence: an embedded yaml that ships with the binary,
 // ~/.coily/config.yaml (the global overlay), and ./.coily/config.yaml (the
 // per-repo local overlay). Local always wins on a per-key basis. See
-// docs/threat-model.md for the broader picture.
+// SECURITY.md for the broader picture.
 //
 // The embedded layer guarantees coily can boot with no on-disk state at all.
 // The global layer holds Kai's personal defaults (audit rotation knobs, AWS
