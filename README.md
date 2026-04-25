@@ -24,12 +24,12 @@ $ coily aws ssm get-parameter --name '/discord/server-id; cat /etc/passwd'
 Error: policy: shell metacharacter rejected: arg name contains ";" at index 18
 ```
 
-Both rows land in the audit log. `decision` distinguishes a coily-side scrub from a downstream failure:
+Both rows land in the audit log. `decision` distinguishes a coily-side scrub from a downstream failure; `argv` preserves the literal command:
 
 ```
 $ tail -2 ~/.coily/audit/coilysiren-coily.jsonl
-{"decision":"accept","verb":"whoami",...}
-{"decision":"reject","verb":"aws.ssm.get-parameter",...}
+{"decision":"accept","argv":["coily","whoami"],...}
+{"decision":"reject","argv":["coily","aws","ssm","get-parameter","--name","/discord/server-id; cat /etc/passwd"],...}
 ```
 
 This repo exists for three reasons.
