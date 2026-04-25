@@ -13,6 +13,7 @@ package verb
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/coilysiren/coily/pkg/audit"
@@ -41,24 +42,42 @@ type Spec struct {
 // writer may be nil in dev contexts; a nil writer skips audit logging.
 func Wrap(spec Spec, writer *audit.Writer) cli.ActionFunc {
 	return func(ctx context.Context, cmd *cli.Command) error {
+		// os.Args is what the user typed. Better for audit than trying to
+		// reconstruct from cli.Command state (which requires a fully-
+		// initialized cmd and is awkward to assemble).
+		argv := append([]string{}, os.Args...)
 		args, positional := extractArgs(spec, cmd)
 		if err := policy.ValidateArgs(args); err != nil {
+			logReject(writer, spec.Name, argv, err)
 			return err
 		}
 		if err := policy.ValidateArgSlice("positional", positional); err != nil {
+			logReject(writer, spec.Name, argv, err)
 			return err
 		}
 
 		if writer == nil {
 			return spec.Action(ctx, cmd)
 		}
-		// os.Args is what the user typed. Better for audit than trying to
-		// reconstruct from cli.Command state (which requires a fully-
-		// initialized cmd and is awkward to assemble).
-		argv := append([]string{}, os.Args...)
 		return writer.Wrap(ctx, spec.Name, argv, func() error {
 			return spec.Action(ctx, cmd)
 		})
+	}
+}
+
+func logReject(writer *audit.Writer, verbName string, argv []string, err error) {
+	if writer == nil {
+		return
+	}
+	rec := audit.Record{
+		Decision: audit.DecisionReject,
+		Verb:     verbName,
+		Argv:     argv,
+		ExitCode: 1,
+		Error:    err.Error(),
+	}
+	if aerr := writer.Append(rec); aerr != nil {
+		fmt.Fprintf(os.Stderr, "audit: %v\n", aerr)
 	}
 }
 

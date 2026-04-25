@@ -2,6 +2,36 @@
 
 Operator CLI for Kai's homelab (kai-server, coilysiren k3s cluster, and associated AWS/Tailscale resources).
 
+A successful read against three different tools, unified into one yaml shape:
+
+```
+$ coily whoami
+aws:
+    account: "..."
+    arn: arn:aws:iam::...:user/coilysiren
+gh:
+    login: coilysiren
+    name: Kai
+kubectl:
+    cluster: kai-server
+    current_context: kai-server
+```
+
+A rejected invocation. The metacharacter never reaches `aws`:
+
+```
+$ coily aws ssm get-parameter --name '/discord/server-id; cat /etc/passwd'
+Error: policy: shell metacharacter rejected: arg name contains ";" at index 18
+```
+
+Both rows land in the audit log. `decision` distinguishes a coily-side scrub from a downstream failure:
+
+```
+$ tail -2 ~/.coily/audit/coilysiren-coily.jsonl
+{"decision":"accept","verb":"whoami",...}
+{"decision":"reject","verb":"aws.ssm.get-parameter",...}
+```
+
 This repo exists for three reasons.
 
 1. **Developer velocity.** Every pass-through verb gets auto-generated exhaustive documentation with every flag known at build time, plus smart defaults (route53 zone IDs discovered via SDK, AWS profile from embedded config, kubectl context pinned to kai-server). All output normalized to yaml. We're all yaml engineers now, might as well own it. One tab-completion install covers `coily aws ...`, `coily kubectl ...`, and `coily gh ...` instead of three separate completion scripts. The same command manifest feeds a generated `SKILL.md` so Claude has a complete offline reference. No round-trip to `aws help`, and no per-tool quirks (aws opens a pager, kubectl doesn't, gh has its own style, coily smooths this out). Flag validation fails fast before the underlying API is ever called.

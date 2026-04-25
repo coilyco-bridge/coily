@@ -45,6 +45,7 @@ func TestWrap_RunsAction(t *testing.T) {
 }
 
 func TestWrap_RejectsShellMetacharInArg(t *testing.T) {
+	w := newTestWriter(t)
 	spec := verb.Spec{
 		Name: "test.ro",
 		ArgsFunc: func(_ *cli.Command) (map[string]string, []string) {
@@ -55,9 +56,20 @@ func TestWrap_RejectsShellMetacharInArg(t *testing.T) {
 			return nil
 		},
 	}
-	err := runWrapped(t, spec, newTestWriter(t))
+	err := runWrapped(t, spec, w)
 	if !errors.Is(err, policy.ErrShellMeta) {
 		t.Errorf("err = %v, want ErrShellMeta", err)
+	}
+	b, _ := os.ReadFile(w.Path)
+	records, _ := audit.ReadAll(bytes.NewReader(b))
+	if len(records) != 1 {
+		t.Fatalf("got %d audit records on policy reject, want 1", len(records))
+	}
+	if records[0].Decision != audit.DecisionReject {
+		t.Errorf("decision = %q, want %q", records[0].Decision, audit.DecisionReject)
+	}
+	if records[0].ExitCode != 1 {
+		t.Errorf("exit_code = %d, want 1", records[0].ExitCode)
 	}
 }
 
@@ -103,6 +115,9 @@ func TestWrap_WritesAuditRecord(t *testing.T) {
 	}
 	if records[0].Verb != "test.ro" {
 		t.Errorf("verb = %q", records[0].Verb)
+	}
+	if records[0].Decision != audit.DecisionAccept {
+		t.Errorf("decision = %q, want %q", records[0].Decision, audit.DecisionAccept)
 	}
 }
 

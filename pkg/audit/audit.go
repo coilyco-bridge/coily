@@ -31,15 +31,28 @@ import (
 
 // Record is one line in the audit log. Timestamp is unix seconds (int64),
 // JSON-encoded as a number. Easier to sort and diff than RFC3339 strings.
+//
+// Decision is "accept" if the verb was allowed to run (regardless of whether
+// the underlying tool then succeeded or failed) or "reject" if coily's policy
+// blocked the invocation before any subprocess or SDK call. Both outcomes are
+// audited; "reject" lets a forensic reader cleanly distinguish a metacharacter
+// scrub from an AccessDenied at the AWS edge.
 type Record struct {
 	Timestamp  int64    `json:"ts"`
 	Version    string   `json:"version,omitempty"`
+	Decision   string   `json:"decision"`
 	Verb       string   `json:"verb"`
 	Argv       []string `json:"argv"`
 	ExitCode   int      `json:"exit_code"`
 	Error      string   `json:"error,omitempty"`
 	DurationMS int64    `json:"duration_ms,omitempty"`
 }
+
+// Decision values for Record.Decision.
+const (
+	DecisionAccept = "accept"
+	DecisionReject = "reject"
+)
 
 // Writer appends records to a JSONL file. The zero value is unusable. Use
 // NewWriter or set Path explicitly.
@@ -137,6 +150,7 @@ func (w *Writer) Wrap(_ context.Context, verb string, argv []string, fn func() e
 	start := w.now()
 	err := fn()
 	rec := Record{
+		Decision:   DecisionAccept,
 		Verb:       verb,
 		Argv:       argv,
 		ExitCode:   0,
