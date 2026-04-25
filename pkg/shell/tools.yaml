@@ -3,38 +3,38 @@ release_url_base: https://github.com/coilysiren/coily/releases/download/tools-la
 tools:
   aws:
     darwin/arm64:
-      version: 2.34.36
+      version: 2.34.37
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-arm64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.pkg
-      sha256: 4632d96eee0c95dfc6b810a635d85bd60804563eff2fa46f0b296f87d9cc7ff2
+      sha256: d7f9841819cd8eea4c73709837adec9aa84bb42ac0035211ff2a0cab04605fed
       archive: tar.gz
       entry: dist/aws
     darwin/amd64:
-      version: 2.34.36
+      version: 2.34.37
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-amd64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.pkg
-      sha256: 6e3a6aaf5508ac1c568111116871fff7d94d4cd4480b981d15555bb947272e2c
+      sha256: 2218f184692d29186e4eb554e46f086450cab85612975f8aec996ed23fd7aaf5
       archive: tar.gz
       entry: dist/aws
     linux/amd64:
-      version: 2.34.36
+      version: 2.34.37
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-linux-amd64.tar.gz
       upstream_url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
-      sha256: 5bc2c366cc9ecd154c115f21064831edfc5f5755d2c56d742f3ab0275f5314eb
+      sha256: 4a2b34fe6fd1589813460527bf7aa8070fb52884355e709156246afac9799441
       archive: tar.gz
       entry: dist/aws
     linux/arm64:
-      version: 2.34.36
+      version: 2.34.37
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-linux-arm64.tar.gz
       upstream_url: https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
-      sha256: cb42713352f4b2ee9ae09cf30325dbb8c46b782bb36f3303695a53de55f4bcd4
+      sha256: 65ef4f55af12ba4d5f967f22e34f9d3a7cd8e96c5b3ad9f90124892a59ec47a0
       archive: tar.gz
       entry: dist/aws
     windows/amd64:
-      version: 2.34.36
+      version: 2.34.37
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-windows-amd64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.msi
-      sha256: e61885f897f00b60a8835cf44a6f5f0ff53b5f0281771b76cb219fc010242b7e
+      sha256: c7f7dac3a0cb9027f5210b0ac41fe1c516c462b07b1c285f937e20d275623273
       archive: tar.gz
       entry: dist/aws.exe
   kubectl:
