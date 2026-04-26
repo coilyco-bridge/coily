@@ -24,8 +24,18 @@ import (
 type Runner struct {
 	Cfg    *config.Config
 	Runner *shell.Runner
-	Audit  *audit.Writer
-	SSH    *coilyssh.Client
+	// RepoRunner is the shell.Runner used for per-repo coily.yaml verbs
+	// (uv, make, pre-commit, etc). Its resolver is the strict FetchingResolver
+	// wrapped in PathFallbackResolver, so unpinned dev tools fall through to
+	// $PATH while pinned tools and integrity errors keep the strict behavior.
+	// The strict Runner above is what the privileged passthroughs
+	// (aws/gh/kubectl/tailscale/docker) use - they must never touch PATH, and
+	// extending this fallback to them would defeat coily's whole reason for
+	// existing. Tests/mocks may leave this nil; ops_repo.buildRepoCommand
+	// falls back to Runner in that case.
+	RepoRunner *shell.Runner
+	Audit      *audit.Writer
+	SSH        *coilyssh.Client
 }
 
 // NewRunner builds the production Runner from layered config. Exits the
@@ -71,13 +81,20 @@ func NewRunner() *Runner {
 		os.Exit(2)
 	}
 
+	strictResolve := fr.AsResolverFunc()
 	return &Runner{
 		Cfg: cfg,
 		Runner: &shell.Runner{
 			Stdout:  os.Stdout,
 			Stderr:  os.Stderr,
 			Stdin:   os.Stdin,
-			Resolve: fr.AsResolverFunc(),
+			Resolve: strictResolve,
+		},
+		RepoRunner: &shell.Runner{
+			Stdout:  os.Stdout,
+			Stderr:  os.Stderr,
+			Stdin:   os.Stdin,
+			Resolve: shell.PathFallbackResolver(strictResolve),
 		},
 		Audit: aw,
 		// SSH wraps golang.org/x/crypto/ssh. When kai_server.ssh_key_path is

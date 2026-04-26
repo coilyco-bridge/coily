@@ -77,12 +77,22 @@ func ParseManifest(b []byte) (*ToolManifest, error) {
 	return &m, nil
 }
 
+// ErrToolNotPinned is the sentinel returned when a manifest lookup fails
+// because the tool isn't listed at all (as opposed to being listed without
+// a matching platform entry, or having an unverified SHA). PathFallbackResolver
+// uses errors.Is on this to decide whether falling through to $PATH is safe.
+// Any other error - placeholder SHA, verification failure, missing platform
+// entry - must propagate so a real integrity failure can never be silently
+// bypassed by falling through.
+var ErrToolNotPinned = errors.New("shell: tool not pinned in manifest")
+
 // Lookup returns the PlatformEntry for (tool, goos, goarch) or an error if
-// the manifest doesn't pin that combination.
+// the manifest doesn't pin that combination. Wraps ErrToolNotPinned when the
+// tool name isn't in the manifest at all so callers can errors.Is.
 func (m *ToolManifest) Lookup(tool, goos, goarch string) (PlatformEntry, error) {
 	platforms, ok := m.Tools[tool]
 	if !ok {
-		return PlatformEntry{}, fmt.Errorf("shell: tool %q not pinned in manifest", tool)
+		return PlatformEntry{}, fmt.Errorf("%w: %q", ErrToolNotPinned, tool)
 	}
 	key := goos + "/" + goarch
 	e, ok := platforms[key]

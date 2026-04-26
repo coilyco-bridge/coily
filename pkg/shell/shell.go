@@ -32,6 +32,32 @@ func PathResolver(bin string) (string, error) {
 	return p, nil
 }
 
+// PathFallbackResolver wraps a strict primary resolver with a $PATH fallback
+// that only kicks in when the primary fails with ErrToolNotPinned (i.e. the
+// tool simply isn't in the pinned manifest). Any other primary error - SHA
+// placeholder, fetch failure, hash mismatch, missing platform entry -
+// propagates unchanged. The narrow error gate is the security property: a
+// real integrity failure must never be silently bypassed by falling through
+// to whatever lives on PATH.
+//
+// This resolver is for repo-command execution (per-repo coily.yaml verbs
+// like uv, make, pre-commit) where the developer's own toolchain is in
+// scope. The strict pass-through Runner used for aws/gh/kubectl/tailscale
+// must NOT use this - those surfaces are the whole reason coily refuses to
+// trust PATH in the first place.
+func PathFallbackResolver(primary Resolver) Resolver {
+	return func(bin string) (string, error) {
+		p, err := primary(bin)
+		if err == nil {
+			return p, nil
+		}
+		if errors.Is(err, ErrToolNotPinned) {
+			return PathResolver(bin)
+		}
+		return "", err
+	}
+}
+
 // Runner executes subprocesses on behalf of coily verbs. Build one in main
 // with the default Resolver and plumb it through to verbs that need it.
 type Runner struct {

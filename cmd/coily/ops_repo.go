@@ -72,7 +72,16 @@ func (r *Runner) buildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) *cli.
 				Action: func(ctx context.Context, c *cli.Command) error {
 					argv := append([]string{}, rc.Argv[1:]...)
 					argv = append(argv, c.Args().Slice()...)
-					return r.Runner.Exec(ctx, rc.Argv[0], argv...)
+					// RepoRunner uses the PathFallback resolver so unpinned
+					// dev tools (uv, pre-commit, ...) work from $PATH while
+					// pinned tools and integrity errors keep strict semantics.
+					// Tests/mocks may construct *Runner without RepoRunner;
+					// fall back to the strict Runner in that case.
+					runner := r.RepoRunner
+					if runner == nil {
+						runner = r.Runner
+					}
+					return runner.Exec(ctx, rc.Argv[0], argv...)
 				},
 			},
 			r.Audit,

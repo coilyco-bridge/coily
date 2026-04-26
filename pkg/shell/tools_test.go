@@ -6,6 +6,7 @@ import (
 	"compress/gzip"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -232,6 +233,12 @@ func TestFetchingResolver_UnpinnedToolErrors(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "not pinned") {
 		t.Errorf("err = %v, want 'not pinned'", err)
+	}
+	// Verify the typed sentinel: PathFallbackResolver depends on errors.Is
+	// matching ErrToolNotPinned to decide whether $PATH fallthrough is safe.
+	// Plain string-compare alone would not survive future error wrapping.
+	if !errors.Is(err, shell.ErrToolNotPinned) {
+		t.Errorf("err = %v, want errors.Is(ErrToolNotPinned)", err)
 	}
 }
 
