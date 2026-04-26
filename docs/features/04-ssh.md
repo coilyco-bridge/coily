@@ -1,12 +1,19 @@
-# 4. `coily ssh exec | copy`
+# 4. `coily ssh`
 
-**What it is**: Sanctioned ssh / sftp path to kai-server. Exists so the lockdown rules that block raw `ssh` and `scp` have a wrapper to point at, same role aws/gh/kubectl wrappers play for their respective tools.
+**What it is**: Named-verb wrappers over an authenticated ssh transport to kai-server (or any host passed via `--host`). Free-form remote exec is intentionally absent - the lockdown that blocks raw `ssh` only adds value if the wrapper doesn't restore the same escape.
 
 **How to invoke**:
-- `coily ssh exec <command> [args...]` - run command on kai-server, stream stdout/stderr
-- `coily ssh copy <local-path> <remote-path>` - sftp upload to kai-server
 
-**Expected shape**: Host and user come from embedded config (`kai_server.tailscale_host`, `kai_server.ssh_user`). All work routes through `pkg/ssh` (golang.org/x/crypto/ssh); no `ssh` / `scp` subprocess is spawned. Host keys verified against `~/.ssh/known_hosts` (no `InsecureIgnoreHostKey` reachable). Every invocation recorded in the audit log via `verb.Wrap`, with positional args validated by `policy.ValidateArgSlice` before reaching the remote shell.
+- `coily ssh copy <local> <remote>` - sftp upload, no remote shell.
+- `coily ssh systemctl status|start|stop|restart|enable|disable <unit>` - one fixed-shape systemctl call (sudo-prefixed).
+- `coily ssh systemctl daemon-reload` - no unit arg.
+- `coily ssh rm-unit <unit>` - removes `/etc/systemd/system/<unit>.service` and reloads systemd. Captures the cleanup pattern that previously needed a free-form `ssh exec`.
+
+Every leaf accepts `--host` / `--user`; defaults come from `kai_server.tailscale_host` and `kai_server.ssh_user` so the common case is flag-free.
+
+**Expected shape**: Each call goes through `pkg/ssh` (golang.org/x/crypto/ssh). No `ssh` subprocess is spawned. The unit-name argument is validated against a sane character set before being interpolated into the remote command.
 
 **Test prompt**:
-> Verify `coily ssh exec echo hi` reaches the ssh layer (stub by setting `KAI_SERVER_TAILSCALE_HOST` to a non-existent host and asserting the error surfaces from the dial step). Verify `coily ssh copy ./does-not-exist /tmp/x` errors at the local-open step before opening a connection. Verify a positional arg containing a shell metacharacter (`;`, backtick) is rejected by policy validation, not by the remote shell. Verify an audit record is written for each invocation. Do NOT run anything mutating on kai-server in the test.
+> Verify `coily ssh systemctl status nonexistent.service --host` set to a non-existent host surfaces the dial error. Verify `coily ssh copy ./does-not-exist /tmp/x` errors at the local-open step before opening a connection. Verify a unit name containing a `;`, backtick, or leading `-` is rejected by `validateUnitName` before any remote dispatch. Verify an audit record is written for each invocation. Do NOT run anything mutating on kai-server in the test.
+
+**Why no `ssh exec`**: a free-form `coily ssh exec <command>` would let any holder of the binary run arbitrary commands as `kai` on the homelab - a near-total bypass of the lockdown that blocks raw `ssh`. The wrapper exists to *route* shell access through a gate, not to *constrain* it. Cleanup operations that would previously have needed a free-form exec (e.g. `sudo rm /etc/systemd/system/foo.service`) get named verbs instead. For the genuinely one-off case where no named verb fits, drop out to raw `ssh kai@kai-server` and let the lockdown deny rule force an explicit override.
