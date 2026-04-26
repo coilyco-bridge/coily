@@ -45,6 +45,14 @@ repos:
         pass_filenames: false
         stages: [pre-commit, pre-push]
 
+      - id: coily-skill-regen
+        name: regenerate coily-passthroughs skill
+        description: Walks the in-process cli.Command tree and rewrites skills/coily-passthroughs/SKILL.md. Triggers on Go source under cmd/, pkg/, configs/commands, or .coily/coily.yaml. Adds the regenerated file back to staging so the commit picks up any drift.
+        entry: bash -c 'go run -tags dev ./cmd/coily lockdown skill >/dev/null && git add skills/coily-passthroughs/SKILL.md'
+        language: system
+        files: '^(cmd/|pkg/)[^/]*/[^/]*\.go$|^configs/commands/.*\.yaml$|^\.coily/coily\.yaml$'
+        pass_filenames: false
+
       - id: verify-tools-manifest
         name: verify pkg/shell/tools.yaml (schema + upstream cross-check)
         description: Schema-check every entry and cross-check kubectl entries against upstream .sha256. Placeholder SHAs are tolerated locally because the release-tools workflow is what fills them in; the workflow re-runs this verifier without --allow-placeholders before committing its refresh.

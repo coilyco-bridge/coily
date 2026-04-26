@@ -6,11 +6,50 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/coilysiren/coily/pkg/lockdown"
+	"github.com/coilysiren/coily/pkg/skillgen"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
 )
+
+// lockdownSkillCommand regenerates skills/coily-passthroughs/SKILL.md by
+// walking the in-process cli.Command tree. Sits under `coily lockdown`
+// because the skill is the discoverability side of the deny list - same
+// event ("the coily command surface changed") regenerates both. CI
+// diff-checks the file; the pre-commit hook keeps it fresh locally.
+func (r *Runner) lockdownSkillCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "skill",
+		Usage: "Regenerate skills/coily-passthroughs/SKILL.md from the in-process command tree.",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "out",
+				Usage: "output path",
+				Value: "skills/coily-passthroughs/SKILL.md",
+			},
+		},
+		Action: verb.Wrap(
+			verb.Spec{
+				Name: "lockdown.skill",
+				Action: func(_ context.Context, c *cli.Command) error {
+					body := skillgen.RenderPassthroughs(r.builtInCommands())
+					out := c.String("out")
+					if err := os.MkdirAll(filepath.Dir(out), 0o755); err != nil {
+						return fmt.Errorf("lockdown skill: mkdir: %w", err)
+					}
+					if err := os.WriteFile(out, []byte(body), 0o644); err != nil {
+						return fmt.Errorf("lockdown skill: write: %w", err)
+					}
+					fmt.Fprintln(os.Stderr, "wrote", out)
+					return nil
+				},
+			},
+			r.Audit,
+		),
+	}
+}
 
 // lockdownCommand is tiered by blast radius:
 //
@@ -34,6 +73,9 @@ Three modes, by blast radius:
   coily lockdown                    Print the plan and exit. No write.
   coily lockdown --apply            Write a fresh file. Refuses if one exists.
   coily lockdown --apply --replace  Overwrite an existing settings file.`,
+		Commands: []*cli.Command{
+			r.lockdownSkillCommand(),
+		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "path",

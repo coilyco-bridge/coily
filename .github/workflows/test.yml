@@ -1,0 +1,46 @@
+# Build, test, lint, and verify the generated coily-passthroughs skill is
+# in sync with the in-process command tree. The skill regen runs locally
+# via the pre-commit hook; this CI step catches anyone who skipped it.
+#
+# No untrusted github.event.* values are interpolated into run blocks;
+# everything here is repo-controlled config or static commands.
+
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - name: Sync embedded config
+        run: cp config.example.yaml config.yaml && cp config.yaml pkg/config/config.yaml
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: go test
+        run: go test ./...
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+
+      - name: regenerate coily-passthroughs skill and assert no diff
+        run: |
+          go run -tags dev ./cmd/coily lockdown skill
+          if ! git diff --exit-code skills/coily-passthroughs/SKILL.md; then
+            echo "skills/coily-passthroughs/SKILL.md is stale."
+            echo "Run 'coily lockdown skill' locally (or rely on the pre-commit hook) and commit the result."
+            exit 1
+          fi
