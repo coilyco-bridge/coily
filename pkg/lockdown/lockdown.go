@@ -35,12 +35,27 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 	"sort"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
+
+// validateShellSyntax pipes the script through `sh -n`, which parses
+// without executing. Used to guard hook generation: a malformed script
+// would silently neutralize the Desktop deny gate.
+func validateShellSyntax(body string) error {
+	cmd := exec.Command("sh", "-n")
+	cmd.Stdin = strings.NewReader(body)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%w: %s", err, string(out))
+	}
+	return nil
+}
 
 //go:embed defaults.yaml
 var defaultsYAML []byte
@@ -106,6 +121,23 @@ func BuildPlan(targetPath string, d *Defaults) (*Plan, error) {
 			"allow": uniqueSorted(append([]string(nil), d.Allow...)),
 			"deny":  uniqueSorted(append([]string(nil), d.Deny...)),
 		},
+		// PreToolUse Bash hook is the Desktop-side enforcement path; the
+		// built-in deny matcher is silently bypassed there. On the CLI the
+		// matcher is the primary gate and this hook is defense-in-depth.
+		// Two independent enforcement layers, neither depends on the other.
+		"hooks": map[string]any{
+			"PreToolUse": []any{
+				map[string]any{
+					"matcher": "Bash",
+					"hooks": []any{
+						map[string]any{
+							"type":    "command",
+							"command": HookSettingsPath,
+						},
+					},
+				},
+			},
+		},
 	}
 
 	encoded, err := json.MarshalIndent(out, "", "  ")
@@ -123,6 +155,33 @@ func Write(plan *Plan) error {
 		return fmt.Errorf("lockdown: mkdir: %w", err)
 	}
 	return os.WriteFile(plan.TargetPath, plan.After, 0o600)
+}
+
+// HookPath returns the absolute path of the generated PreToolUse hook
+// script. It sits next to settings.json under .claude/.
+func HookPath(settingsPath string) string {
+	return filepath.Join(filepath.Dir(settingsPath), HookFileName)
+}
+
+// WriteHook renders and writes the PreToolUse hook script with 0755 perms.
+// Validates the generated script with `sh -n` before writing - a syntax
+// error would silently neutralize the deny gate on Desktop, so fail loud.
+func WriteHook(settingsPath string, d *Defaults) (string, error) {
+	body, err := RenderHookScript(d)
+	if err != nil {
+		return "", err
+	}
+	if err := validateShellSyntax(body); err != nil {
+		return "", fmt.Errorf("lockdown: generated hook failed sh -n: %w", err)
+	}
+	hookPath := HookPath(settingsPath)
+	if err := os.MkdirAll(filepath.Dir(hookPath), 0o750); err != nil {
+		return "", fmt.Errorf("lockdown: mkdir hook: %w", err)
+	}
+	if err := os.WriteFile(hookPath, []byte(body), 0o755); err != nil {
+		return "", fmt.Errorf("lockdown: write hook: %w", err)
+	}
+	return hookPath, nil
 }
 
 // TargetPath returns the settings file path under dir. If local is true,

@@ -2,7 +2,9 @@ package lockdown_test
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -168,6 +170,99 @@ func TestWrite_WritesWithTightPerms(t *testing.T) {
 	if perm := info.Mode().Perm(); perm != 0o600 {
 		t.Errorf("file perm = %o, want 0600", perm)
 	}
+}
+
+func TestRenderHookScript_PassesShellSyntaxCheck(t *testing.T) {
+	d, _ := lockdown.LoadDefaults()
+	body, err := lockdown.RenderHookScript(d)
+	if err != nil {
+		t.Fatalf("RenderHookScript: %v", err)
+	}
+	if !strings.Contains(body, "#!/bin/sh") {
+		t.Error("hook script missing /bin/sh shebang")
+	}
+	// Must mention at least one well-known deny prefix.
+	for _, want := range []string{"aws", "kubectl apply", "docker", "ssh"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("hook script missing deny prefix %q", want)
+		}
+	}
+}
+
+func TestWriteHook_Executable(t *testing.T) {
+	d, _ := lockdown.LoadDefaults()
+	target := filepath.Join(t.TempDir(), ".claude", "settings.json")
+	plan, _ := lockdown.BuildPlan(target, d)
+	if err := lockdown.Write(plan); err != nil {
+		t.Fatalf("Write: %v", err)
+	}
+	hookPath, err := lockdown.WriteHook(plan.TargetPath, d)
+	if err != nil {
+		t.Fatalf("WriteHook: %v", err)
+	}
+	info, err := os.Stat(hookPath)
+	if err != nil {
+		t.Fatalf("stat hook: %v", err)
+	}
+	if perm := info.Mode().Perm(); perm != 0o755 {
+		t.Errorf("hook perm = %o, want 0755", perm)
+	}
+}
+
+func TestWriteHook_BlocksDeniedCommand(t *testing.T) {
+	// End-to-end: render the hook, write it, invoke it with a synthetic
+	// PreToolUse JSON for a denied command, expect exit 2 + stderr message.
+	if _, err := exec.LookPath("sh"); err != nil {
+		t.Skip("no sh on PATH")
+	}
+	d, _ := lockdown.LoadDefaults()
+	target := filepath.Join(t.TempDir(), ".claude", "settings.json")
+	if err := lockdown.Write(must(lockdown.BuildPlan(target, d))); err != nil {
+		t.Fatalf("Write: %v", err)
+	}
+	hookPath, err := lockdown.WriteHook(target, d)
+	if err != nil {
+		t.Fatalf("WriteHook: %v", err)
+	}
+
+	cases := []struct {
+		name   string
+		stdin  string
+		wantRC int
+	}{
+		{"aws denied", `{"tool_input":{"command":"aws s3 ls"}}`, 2},
+		{"kubectl apply denied", `{"tool_input":{"command":"kubectl apply -f x.yaml"}}`, 2},
+		{"piped aws denied", `{"tool_input":{"command":"echo hi | aws s3 cp - s3://b/x"}}`, 2},
+		{"env-prefixed aws denied", `{"tool_input":{"command":"env AWS_PROFILE=x aws s3 ls"}}`, 2},
+		{"ls allowed", `{"tool_input":{"command":"ls -la"}}`, 0},
+		{"empty command allowed", `{"tool_input":{"command":""}}`, 0},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			cmd := exec.Command("sh", hookPath)
+			cmd.Stdin = strings.NewReader(tc.stdin)
+			err := cmd.Run()
+			rc := 0
+			if err != nil {
+				var ee *exec.ExitError
+				if errors.As(err, &ee) {
+					rc = ee.ExitCode()
+				} else {
+					t.Fatalf("run hook: %v", err)
+				}
+			}
+			if rc != tc.wantRC {
+				t.Errorf("exit code = %d, want %d", rc, tc.wantRC)
+			}
+		})
+	}
+}
+
+func must[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
 }
 
 func TestTargetPath_LocalToggle(t *testing.T) {

@@ -107,10 +107,19 @@ func lockdownAction(_ context.Context, c *cli.Command) error {
 		return fmt.Errorf("lockdown: %s already exists. Use `coily lockdown --apply --replace` to overwrite", plan.TargetPath)
 	}
 
+	return writeLockdown(plan, d)
+}
+
+func writeLockdown(plan *lockdown.Plan, d *lockdown.Defaults) error {
 	if err := lockdown.Write(plan); err != nil {
 		return err
 	}
 	fmt.Fprintln(os.Stderr, "wrote", plan.TargetPath)
+	hookPath, err := lockdown.WriteHook(plan.TargetPath, d)
+	if err != nil {
+		return fmt.Errorf("lockdown: hook write failed (settings.json was written): %w", err)
+	}
+	fmt.Fprintln(os.Stderr, "wrote", hookPath)
 	return nil
 }
 
