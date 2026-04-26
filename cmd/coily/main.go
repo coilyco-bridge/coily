@@ -97,5 +97,6 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.ghCommand(),
 		r.kubectlCommand(),
 		r.tailscaleCommand(),
+		r.modioCommand(),
 	}
 }

@@ -1,0 +1,10 @@
+package main
+
+import (
+	"github.com/coilysiren/coily/pkg/ops/modio"
+	"github.com/urfave/cli/v3"
+)
+
+func (r *Runner) modioCommand() *cli.Command {
+	return modio.Command(r.Runner, r.Audit)
+}
