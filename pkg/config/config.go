@@ -117,7 +117,16 @@ func overlayFromFile(dst *Config, path string) error {
 // applyDefaults fills in any path field that the embedded + overlay layers
 // left blank, and expands ~/ on every path field. Defaults are computed from
 // $HOME, so the binary works on a fresh laptop with no on-disk config.
+//
+// COILY_AUDIT_LOG, if set, wins over both file config and the per-repo
+// default. Documented as the orchestrator-friendly path override - lets
+// an external runner point coily at its own log dir without writing a
+// config file.
 func applyDefaults(c *Config) error {
+	if envPath := os.Getenv("COILY_AUDIT_LOG"); envPath != "" {
+		c.Audit.LogPath = expandHome(envPath)
+		return nil
+	}
 	if c.Audit.LogPath == "" {
 		p, err := DefaultAuditPath()
 		if err != nil {

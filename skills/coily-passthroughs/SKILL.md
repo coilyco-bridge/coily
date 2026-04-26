@@ -15,6 +15,16 @@ Auto-generated lookup table of every coily verb. Regenerate with `coily lockdown
 
 Format: full path, one-line summary, comma-separated flag names. No flag descriptions; click into `coily <path> --help` for those.
 
+## `coily audit path`
+
+Print the resolved audit log path and exit.
+
+## `coily audit tail`
+
+Stream audit records as JSONL.
+
+Flags: --follow, --since
+
 ## `coily aws route53 activate-key-signing-key`
 
 Activates a key-signing key (KSK) so that it can be used for signing by DNSSEC.
@@ -3461,9 +3471,9 @@ Flags: --all, --all-namespaces, --allow-missing-template-keys, --field-selector,
 
 ## `coily lockdown skill`
 
-Regenerate skills/coily-passthroughs/SKILL.md from the in-process command tree.
+Regenerate the coily-passthroughs skill from the in-process command tree.
 
-Flags: --out
+Flags: --format, --out
 
 ## `coily modio mods comments`
 

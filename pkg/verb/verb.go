@@ -17,6 +17,7 @@ import (
 	"os"
 
 	"github.com/coilysiren/coily/pkg/audit"
+	"github.com/coilysiren/coily/pkg/exitcode"
 	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/urfave/cli/v3"
 )
@@ -48,12 +49,16 @@ func Wrap(spec Spec, writer *audit.Writer) cli.ActionFunc {
 		argv := append([]string{}, os.Args...)
 		args, positional := extractArgs(spec, cmd)
 		if err := policy.ValidateArgs(args); err != nil {
-			logReject(writer, spec.Name, argv, err)
-			return err
+			coded := exitcode.New(exitcode.PolicyDenied, "policy_denied", err,
+				"argv contains a shell metacharacter that coily refuses to forward")
+			logReject(writer, spec.Name, argv, coded)
+			return coded
 		}
 		if err := policy.ValidateArgSlice("positional", positional); err != nil {
-			logReject(writer, spec.Name, argv, err)
-			return err
+			coded := exitcode.New(exitcode.PolicyDenied, "policy_denied", err,
+				"a positional argument failed shell-metacharacter validation")
+			logReject(writer, spec.Name, argv, coded)
+			return coded
 		}
 
 		if writer == nil {

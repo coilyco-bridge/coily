@@ -22,20 +22,46 @@ import (
 func (r *Runner) lockdownSkillCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "skill",
-		Usage: "Regenerate skills/coily-passthroughs/SKILL.md from the in-process command tree.",
+		Usage: "Regenerate the coily-passthroughs skill from the in-process command tree.",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "out",
-				Usage: "output path",
-				Value: "skills/coily-passthroughs/SKILL.md",
+				Usage: "output path (defaults to SKILL.md / commands.yaml depending on --format)",
+			},
+			&cli.StringFlag{
+				Name:  "format",
+				Usage: "markdown (default; SKILL.md for Claude Code) or yaml (structured tree for programmatic consumers)",
+				Value: "markdown",
 			},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
 				Name: "lockdown.skill",
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					return map[string]string{"--format": c.String("format"), "--out": c.String("out")}, nil
+				},
 				Action: func(_ context.Context, c *cli.Command) error {
-					body := skillgen.RenderPassthroughs(r.builtInCommands())
+					format := c.String("format")
 					out := c.String("out")
+					var body string
+					switch format {
+					case "markdown", "":
+						body = skillgen.RenderPassthroughs(r.builtInCommands())
+						if out == "" {
+							out = "skills/coily-passthroughs/SKILL.md"
+						}
+					case "yaml":
+						y, err := skillgen.RenderPassthroughsYAML(r.builtInCommands())
+						if err != nil {
+							return err
+						}
+						body = y
+						if out == "" {
+							out = "skills/coily-passthroughs/commands.yaml"
+						}
+					default:
+						return fmt.Errorf("lockdown skill: --format must be markdown or yaml, got %q", format)
+					}
 					if err := os.MkdirAll(filepath.Dir(out), 0o755); err != nil {
 						return fmt.Errorf("lockdown skill: mkdir: %w", err)
 					}

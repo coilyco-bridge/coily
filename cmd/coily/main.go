@@ -2,12 +2,16 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"time"
 
+	"github.com/coilysiren/coily/pkg/exitcode"
 	"github.com/coilysiren/coily/pkg/telemetry"
 	"github.com/urfave/cli/v3"
+	"gopkg.in/yaml.v3"
 )
 
 // Version is injected at build time via -ldflags "-X main.Version=<sha>".
@@ -34,8 +38,72 @@ func main() {
 	}
 	telemetry.Flush(2 * time.Second)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		rc := classifyExit(err)
+		emitErrorEnvelope(os.Stderr, err, rc, r.Cfg.Audit.LogPath)
+		os.Exit(rc)
+	}
+}
+
+// classifyExit walks the error chain looking for a coded error. Falls
+// back to UpstreamFailed for *exec.ExitError (the underlying tool ran
+// and returned non-zero) and Generic for anything else. See
+// pkg/exitcode for the public contract.
+func classifyExit(err error) int {
+	if c := exitcode.From(err); c != nil {
+		return c.Code()
+	}
+	var ee *exec.ExitError
+	if errors.As(err, &ee) {
+		return exitcode.UpstreamFailed
+	}
+	return exitcode.Generic
+}
+
+// errorEnvelope is the structured failure shape coily writes to stderr
+// alongside the human-readable error line. Stable across every refusal /
+// failure path so an external consumer can pattern-match on `kind`
+// instead of stderr regex. See SECURITY.md / docs for the contract.
+type errorEnvelope struct {
+	Kind         string `yaml:"kind"`
+	Message      string `yaml:"message"`
+	Hint         string `yaml:"hint,omitempty"`
+	ExitCode     int    `yaml:"exit_code"`
+	AuditLogPath string `yaml:"audit_log_path,omitempty"`
+	Timestamp    int64  `yaml:"timestamp"`
+}
+
+func emitErrorEnvelope(w *os.File, err error, rc int, auditPath string) {
+	env := errorEnvelope{
+		Kind:         kindFor(err, rc),
+		Message:      err.Error(),
+		ExitCode:     rc,
+		AuditLogPath: auditPath,
+		Timestamp:    time.Now().Unix(),
+	}
+	if c := exitcode.From(err); c != nil {
+		if ce, ok := c.(interface{ HintText() string }); ok {
+			env.Hint = ce.HintText()
+		}
+	}
+	// Write the human line first so it stays visible even if a downstream
+	// pipe truncates; envelope follows for programmatic consumers.
+	_, _ = fmt.Fprintln(w, "coily:", err)
+	out, mErr := yaml.Marshal(map[string]any{"error": env})
+	if mErr != nil {
+		return
+	}
+	_, _ = fmt.Fprint(w, string(out))
+}
+
+func kindFor(err error, rc int) string {
+	if c := exitcode.From(err); c != nil {
+		return c.Kind()
+	}
+	switch rc {
+	case exitcode.UpstreamFailed:
+		return "upstream_failed"
+	default:
+		return "generic"
 	}
 }
 
@@ -60,6 +128,10 @@ func run(r *Runner, argv []string) error {
 		Version:               Version,
 		Commands:              append(append([]*cli.Command{}, builtIns...), repoCmds...),
 		EnableShellCompletion: true,
+		// Default urfave/cli ExitErrHandler calls os.Exit(1) directly,
+		// short-circuiting our coded-exit + yaml-envelope handling in
+		// main(). Replace with a no-op so the error bubbles up.
+		ExitErrHandler: func(_ context.Context, _ *cli.Command, _ error) {},
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:  "list",
@@ -98,5 +170,6 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.kubectlCommand(),
 		r.tailscaleCommand(),
 		r.modioCommand(),
+		r.auditCommand(),
 	}
 }

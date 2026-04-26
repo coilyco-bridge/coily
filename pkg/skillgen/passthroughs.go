@@ -6,7 +6,49 @@ import (
 	"strings"
 
 	"github.com/urfave/cli/v3"
+	"gopkg.in/yaml.v3"
 )
+
+// PassthroughEntry is one leaf verb in the structured (yaml) form of the
+// command tree. Programmatic consumers (an external orchestrator, a
+// plan-time agent) read this shape; humans read the markdown form.
+type PassthroughEntry struct {
+	Path    []string `yaml:"path"`
+	Summary string   `yaml:"summary,omitempty"`
+	Flags   []string `yaml:"flags,omitempty"`
+}
+
+// RenderPassthroughsYAML walks the same cli.Command tree as
+// RenderPassthroughs and emits a yaml document of PassthroughEntry rows.
+// Order matches the markdown form (depth-first by command name) so a
+// consumer can diff the two outputs against each other.
+func RenderPassthroughsYAML(commands []*cli.Command) (string, error) {
+	var entries []PassthroughEntry
+	for _, c := range sorted(commands) {
+		walkPassthroughEntries(&entries, []string{"coily"}, c)
+	}
+	doc := map[string]any{"commands": entries}
+	out, err := yaml.Marshal(doc)
+	if err != nil {
+		return "", fmt.Errorf("skillgen: yaml marshal: %w", err)
+	}
+	return string(out), nil
+}
+
+func walkPassthroughEntries(out *[]PassthroughEntry, parent []string, c *cli.Command) {
+	path := append(append([]string{}, parent...), c.Name)
+	if len(c.Commands) == 0 {
+		*out = append(*out, PassthroughEntry{
+			Path:    path,
+			Summary: strings.TrimSpace(c.Usage),
+			Flags:   flagNames(c.Flags),
+		})
+		return
+	}
+	for _, sub := range sorted(c.Commands) {
+		walkPassthroughEntries(out, path, sub)
+	}
+}
 
 // PassthroughsFrontmatter is the YAML frontmatter prepended to the
 // generated coily-passthroughs SKILL.md. The description is what Claude
