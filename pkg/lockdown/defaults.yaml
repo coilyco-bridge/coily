@@ -178,7 +178,3 @@ deny:
   - Bash(git clean -fd:*)
   - Bash(git push --force:*)
   - Bash(git push -f:*)
-
-deniedMcpServers:
-  - aws-eks
-  - awslabs.eks-mcp-server

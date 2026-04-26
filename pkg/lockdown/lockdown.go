@@ -4,9 +4,16 @@
 // The shape of the output is compatible with Claude Code's settings.json:
 //
 //	{
-//	  "permissions": { "allow": [...], "deny": [...] },
-//	  "deniedMcpServers": [...]
+//	  "permissions": { "allow": [...], "deny": [...] }
 //	}
+//
+// MCP server allowlisting is intentionally out of scope. The Bash deny list
+// gates shell-level blast radius (cluster mutations, secret reads, package
+// installs). MCP-server gating is a different threat model - "is this MCP
+// server trustworthy" - and the answer is per-user / per-machine, not
+// per-repo. Baking it into a repo-scoped settings.json puts the decision in
+// the wrong place. Drop it; let the user manage MCP allowlisting at the
+// user-settings level.
 //
 // Behavior model (per docs/unresolved/13-lockdown-token.md, resolved):
 //
@@ -39,16 +46,14 @@ import (
 var defaultsYAML []byte
 
 type Defaults struct {
-	Allow            []string `yaml:"allow" json:"-"`
-	Deny             []string `yaml:"deny" json:"-"`
-	DeniedMcpServers []string `yaml:"deniedMcpServers" json:"-"`
+	Allow []string `yaml:"allow" json:"-"`
+	Deny  []string `yaml:"deny" json:"-"`
 }
 
 // Settings is the subset of Claude Code settings we manipulate. Other keys
 // in an existing settings file are preserved via rawSettings below.
 type Settings struct {
-	Permissions      Permissions `json:"permissions"`
-	DeniedMcpServers []string    `json:"deniedMcpServers,omitempty"`
+	Permissions Permissions `json:"permissions"`
 }
 
 type Permissions struct {
@@ -101,9 +106,6 @@ func BuildPlan(targetPath string, d *Defaults) (*Plan, error) {
 			"allow": uniqueSorted(append([]string(nil), d.Allow...)),
 			"deny":  uniqueSorted(append([]string(nil), d.Deny...)),
 		},
-	}
-	if mcp := uniqueSorted(append([]string(nil), d.DeniedMcpServers...)); len(mcp) > 0 {
-		out["deniedMcpServers"] = mcp
 	}
 
 	encoded, err := json.MarshalIndent(out, "", "  ")

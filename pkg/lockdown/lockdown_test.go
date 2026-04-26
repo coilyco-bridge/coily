@@ -21,9 +21,6 @@ func TestLoadDefaults_ReturnsNonEmpty(t *testing.T) {
 	if len(d.Deny) == 0 {
 		t.Error("deny list is empty")
 	}
-	if len(d.DeniedMcpServers) == 0 {
-		t.Error("deniedMcpServers is empty")
-	}
 }
 
 func TestLoadDefaults_AllowsCoilyBash(t *testing.T) {
@@ -66,10 +63,21 @@ func TestLoadDefaults_DeniesWindowsExecution(t *testing.T) {
 	}
 }
 
-func TestLoadDefaults_DeniesAwsEksMcp(t *testing.T) {
+func TestBuildPlan_OmitsDeniedMcpServersKey(t *testing.T) {
+	// MCP-server gating is deliberately not lockdown's job. Output JSON must
+	// not carry a deniedMcpServers key.
 	d, _ := lockdown.LoadDefaults()
-	if !contains(d.DeniedMcpServers, "aws-eks") {
-		t.Errorf("deniedMcpServers missing aws-eks. Got: %v", d.DeniedMcpServers)
+	target := filepath.Join(t.TempDir(), ".claude", "settings.json")
+	plan, err := lockdown.BuildPlan(target, d)
+	if err != nil {
+		t.Fatalf("BuildPlan: %v", err)
+	}
+	var after map[string]any
+	if err := json.Unmarshal(plan.After, &after); err != nil {
+		t.Fatalf("unmarshal After: %v", err)
+	}
+	if _, ok := after["deniedMcpServers"]; ok {
+		t.Errorf("After contains deniedMcpServers; want it absent. After=%s", string(plan.After))
 	}
 }
 

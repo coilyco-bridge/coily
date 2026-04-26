@@ -8,7 +8,9 @@
 - `coily lockdown --local --apply` - write to `.claude/settings.local.json`
 - `coily lockdown --replace --apply` - clobber existing allow/deny instead of merging
 
-**Expected shape**: Dry-run prints JSON to stdout. Apply writes a settings.json with `permissions.allow`, `permissions.deny`, `deniedMcpServers`. Existing top-level keys preserved. Existing allow/deny merged unless `--replace`.
+**Expected shape**: Dry-run prints JSON to stdout. Apply writes a settings.json with `permissions.allow` and `permissions.deny` only. Existing top-level keys preserved. Existing allow/deny merged unless `--replace`.
+
+**Scope**: Bash-only. MCP-server allowlisting is intentionally not in scope. The Bash deny list gates shell-level blast radius (cluster mutations, secret reads, package installs). MCP-server gating answers a different question - "is this MCP server trustworthy" - which is per-user / per-machine, not per-repo. Manage MCP servers at the user-settings level instead.
 
 **Test prompt**:
 > In a temp directory, verify `coily lockdown` without flags prints a valid JSON plan. With `--apply` it creates `.claude/settings.json` with 0600 perms. Running it twice does not duplicate entries. Running it against a pre-existing settings.json with a custom allow rule preserves the custom rule and unrelated top-level keys. Running with `--replace --apply` removes the custom rule. Clean up the temp dir when done.
