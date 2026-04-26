@@ -47,6 +47,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - list
@@ -80,6 +82,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - status
@@ -93,6 +97,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - close
@@ -104,6 +110,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - comment
@@ -121,6 +129,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - delete
@@ -130,6 +140,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - develop
@@ -147,6 +159,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - edit
@@ -176,6 +190,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - lock
@@ -185,6 +201,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - pin
@@ -192,6 +210,8 @@ commands:
       flags:
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - reopen
@@ -201,6 +221,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - transfer
@@ -208,6 +230,8 @@ commands:
       flags:
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - unlock
@@ -215,6 +239,8 @@ commands:
       flags:
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - unpin
@@ -222,6 +248,8 @@ commands:
       flags:
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - issue
         - view
@@ -239,6 +267,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
       help: Work with GitHub pull requests.
@@ -306,6 +336,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - list
@@ -341,6 +373,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - status
@@ -356,6 +390,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - checkout
@@ -371,6 +407,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - checks
@@ -392,6 +430,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - close
@@ -403,6 +443,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - comment
@@ -420,6 +462,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - diff
@@ -435,6 +479,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - edit
@@ -470,6 +516,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - lock
@@ -479,6 +527,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - merge
@@ -510,6 +560,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - ready
@@ -519,6 +571,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - reopen
@@ -528,6 +582,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - review
@@ -545,6 +601,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - unlock
@@ -552,6 +610,8 @@ commands:
       flags:
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - pr
         - view
@@ -569,6 +629,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - release
       help: Manage releases
@@ -611,6 +673,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - release
         - list
@@ -632,6 +696,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - release
         - delete
@@ -643,6 +709,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - release
         - download
@@ -662,6 +730,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - release
         - edit
@@ -689,6 +759,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - release
         - upload
@@ -698,6 +770,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - release
         - view
@@ -713,6 +787,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - repo
       help: Work with GitHub repositories.
@@ -829,6 +905,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - repo
         - autolink
@@ -845,6 +923,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - repo
         - autolink
@@ -859,6 +939,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - repo
         - clone
@@ -897,6 +979,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - repo
         - deploy-key
@@ -905,6 +989,8 @@ commands:
       flags:
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - repo
         - deploy-key
@@ -919,6 +1005,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - repo
         - edit
@@ -1042,6 +1130,8 @@ commands:
         - rename
       help: Rename a GitHub repository.
       flags:
+        - name: --repo
+          type: string
         - name: --yes
           type: bool
         - name: --help
@@ -1103,6 +1193,8 @@ commands:
       flags:
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - run
         - delete
@@ -1110,6 +1202,8 @@ commands:
       flags:
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - run
         - download
@@ -1123,6 +1217,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - run
         - list
@@ -1154,6 +1250,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - run
         - rerun
@@ -1167,6 +1265,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - run
         - view
@@ -1194,6 +1294,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - run
         - watch
@@ -1205,6 +1307,8 @@ commands:
           type: int
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - workflow
       help: List, view, and run workflows in GitHub Actions.
@@ -1221,6 +1325,8 @@ commands:
       flags:
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - workflow
         - enable
@@ -1228,6 +1334,8 @@ commands:
       flags:
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - workflow
         - list
@@ -1245,6 +1353,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - workflow
         - run
@@ -1260,6 +1370,8 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - workflow
         - view
@@ -1273,6 +1385,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - api
       help: Makes an authenticated HTTP request to the GitHub API and prints the response.
@@ -1651,6 +1765,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - secret
         - list
@@ -1672,6 +1788,8 @@ commands:
           type: bool
         - name: --help
           type: bool
+        - name: --repo
+          type: string
     - path:
         - secret
         - set
@@ -1697,3 +1815,5 @@ commands:
           type: string
         - name: --help
           type: bool
+        - name: --repo
+          type: string

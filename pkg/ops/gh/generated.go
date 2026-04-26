@@ -181,6 +181,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "comment"},
 							&cli.StringFlag{Name: "reason"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -194,6 +195,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -209,6 +211,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -231,6 +236,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "editor"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -253,6 +259,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -284,6 +291,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -311,6 +321,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "title"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -337,6 +348,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -384,6 +396,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -401,6 +416,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "yes"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -415,6 +431,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -429,6 +446,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -451,6 +471,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "list"},
 							&cli.StringFlag{Name: "name"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -471,6 +492,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -500,6 +522,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -527,6 +552,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "remove-project"},
 							&cli.StringFlag{Name: "title"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -551,6 +577,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -596,6 +623,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -625,6 +655,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -651,6 +682,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -702,6 +734,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -719,6 +754,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "reason"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -731,6 +767,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -743,6 +780,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -760,6 +800,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Usage: "Pin an issue to a repository.",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -771,6 +812,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -780,6 +822,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -798,6 +843,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "comment"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -810,6 +856,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -822,6 +869,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -842,6 +892,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -856,6 +907,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -875,6 +927,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -891,6 +946,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Usage: "Transfer issue to another repository",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -902,6 +958,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -911,6 +968,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -928,6 +988,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Usage: "Unlock issue conversation",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -939,6 +1000,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -948,6 +1010,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -965,6 +1030,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Usage: "Unpin an issue from a repository.",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -976,6 +1042,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -985,6 +1052,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -1007,6 +1077,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1027,6 +1098,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1056,6 +1128,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1082,6 +1157,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "force"},
 							&cli.BoolFlag{Name: "recurse-submodules"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1103,6 +1179,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1131,6 +1208,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1154,6 +1234,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "watch"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1180,6 +1261,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1219,6 +1301,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1237,6 +1322,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "comment"},
 							&cli.BoolFlag{Name: "delete-branch"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1252,6 +1338,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1269,6 +1356,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -1291,6 +1381,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "editor"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1313,6 +1404,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1343,6 +1435,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -1380,6 +1475,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "title"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1427,6 +1523,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1513,6 +1610,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1533,6 +1633,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "patch"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1554,6 +1655,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1581,6 +1683,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -1612,6 +1717,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "remove-reviewer"},
 							&cli.StringFlag{Name: "title"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1639,6 +1745,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1693,6 +1800,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1723,6 +1833,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1752,6 +1863,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1808,6 +1920,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1825,6 +1940,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "reason"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1837,6 +1953,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1849,6 +1966,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -1878,6 +1998,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "squash"},
 							&cli.StringFlag{Name: "subject"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -1915,6 +2036,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1975,6 +2097,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1992,6 +2117,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "undo"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2006,6 +2132,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2020,6 +2147,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2038,6 +2168,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Flags: []cli.Flag{
 							&cli.StringFlag{Name: "comment"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2050,6 +2181,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2062,6 +2194,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2084,6 +2219,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "comment"},
 							&cli.BoolFlag{Name: "request-changes"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2106,6 +2242,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2137,6 +2274,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -2157,6 +2297,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "json"},
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2174,6 +2315,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2198,6 +2340,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -2214,6 +2359,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Usage: "Unlock pull request conversation",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2225,6 +2371,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2234,6 +2381,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2256,6 +2406,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2276,6 +2427,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2304,6 +2456,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2339,6 +2494,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "title"},
 							&cli.BoolFlag{Name: "verify-tag"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2374,6 +2530,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2432,6 +2589,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -2450,6 +2610,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "cleanup-tag"},
 							&cli.BoolFlag{Name: "yes"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2467,6 +2628,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2486,6 +2648,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2509,6 +2674,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "pattern"},
 							&cli.BoolFlag{Name: "skip-existing"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2530,6 +2696,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2562,6 +2729,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -2588,6 +2758,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "title"},
 							&cli.BoolFlag{Name: "verify-tag"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2617,6 +2788,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2665,6 +2837,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -2688,6 +2863,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "order"},
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2710,6 +2886,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2745,6 +2922,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -2762,6 +2942,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "clobber"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2776,6 +2957,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2790,6 +2972,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2811,6 +2996,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -2828,6 +3014,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2851,6 +3038,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2925,6 +3115,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 								Flags: []cli.Flag{
 									&cli.BoolFlag{Name: "numeric"},
 									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "repo"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -2939,6 +3130,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											if c.Bool("help") {
 												args["--help"] = "true"
 											}
+											args["--repo"] = c.String("repo")
 											positional = append(positional, c.Args().Slice()...)
 											return args, positional
 										},
@@ -2953,6 +3145,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 												if c.Bool("help") {
 													argv = append(argv, "--help")
 												}
+											}
+											if c.IsSet("repo") {
+												argv = append(argv, "--repo", c.String("repo"))
 											}
 											// Forward any trailing positional args after flags so verbs
 											// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2974,6 +3169,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									&cli.StringFlag{Name: "template"},
 									&cli.BoolFlag{Name: "web"},
 									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "repo"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -2991,6 +3187,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											if c.Bool("help") {
 												args["--help"] = "true"
 											}
+											args["--repo"] = c.String("repo")
 											positional = append(positional, c.Args().Slice()...)
 											return args, positional
 										},
@@ -3015,6 +3212,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 													argv = append(argv, "--help")
 												}
 											}
+											if c.IsSet("repo") {
+												argv = append(argv, "--repo", c.String("repo"))
+											}
 											// Forward any trailing positional args after flags so verbs
 											// like "gh api <endpoint>", "kubectl get <resource>", and
 											// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -3034,6 +3234,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									&cli.StringFlag{Name: "json"},
 									&cli.StringFlag{Name: "template"},
 									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "repo"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -3048,6 +3249,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											if c.Bool("help") {
 												args["--help"] = "true"
 											}
+											args["--repo"] = c.String("repo")
 											positional = append(positional, c.Args().Slice()...)
 											return args, positional
 										},
@@ -3066,6 +3268,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 												if c.Bool("help") {
 													argv = append(argv, "--help")
 												}
+											}
+											if c.IsSet("repo") {
+												argv = append(argv, "--repo", c.String("repo"))
 											}
 											// Forward any trailing positional args after flags so verbs
 											// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -3337,6 +3542,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									&cli.BoolFlag{Name: "allow-write"},
 									&cli.StringFlag{Name: "title"},
 									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "repo"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -3352,6 +3558,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											if c.Bool("help") {
 												args["--help"] = "true"
 											}
+											args["--repo"] = c.String("repo")
 											positional = append(positional, c.Args().Slice()...)
 											return args, positional
 										},
@@ -3370,6 +3577,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 													argv = append(argv, "--help")
 												}
 											}
+											if c.IsSet("repo") {
+												argv = append(argv, "--repo", c.String("repo"))
+											}
 											// Forward any trailing positional args after flags so verbs
 											// like "gh api <endpoint>", "kubectl get <resource>", and
 											// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -3386,6 +3596,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 								Usage: "Delete a deploy key from a GitHub repository",
 								Flags: []cli.Flag{
 									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "repo"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -3397,6 +3608,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											if c.Bool("help") {
 												args["--help"] = "true"
 											}
+											args["--repo"] = c.String("repo")
 											positional = append(positional, c.Args().Slice()...)
 											return args, positional
 										},
@@ -3406,6 +3618,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 												if c.Bool("help") {
 													argv = append(argv, "--help")
 												}
+											}
+											if c.IsSet("repo") {
+												argv = append(argv, "--repo", c.String("repo"))
 											}
 											// Forward any trailing positional args after flags so verbs
 											// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -3426,6 +3641,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									&cli.StringFlag{Name: "json"},
 									&cli.StringFlag{Name: "template"},
 									&cli.BoolFlag{Name: "help"},
+									&cli.StringFlag{Name: "repo"},
 								},
 								Action: verb.Wrap(
 									verb.Spec{
@@ -3440,6 +3656,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											if c.Bool("help") {
 												args["--help"] = "true"
 											}
+											args["--repo"] = c.String("repo")
 											positional = append(positional, c.Args().Slice()...)
 											return args, positional
 										},
@@ -3458,6 +3675,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 												if c.Bool("help") {
 													argv = append(argv, "--help")
 												}
+											}
+											if c.IsSet("repo") {
+												argv = append(argv, "--repo", c.String("repo"))
 											}
 											// Forward any trailing positional args after flags so verbs
 											// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -4043,6 +4263,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Name:  "rename",
 						Usage: "Rename a GitHub repository.",
 						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "repo"},
 							&cli.BoolFlag{Name: "yes"},
 							&cli.BoolFlag{Name: "help"},
 						},
@@ -4053,6 +4274,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
+									args["--repo"] = c.String("repo")
 									if c.Bool("yes") {
 										args["--yes"] = "true"
 									}
@@ -4064,6 +4286,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"repo", "rename"}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									if c.IsSet("yes") {
 										if c.Bool("yes") {
 											argv = append(argv, "--yes")
@@ -4264,6 +4489,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Usage: "Cancel a workflow run",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4275,6 +4501,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -4284,6 +4511,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -4301,6 +4531,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Usage: "Delete a workflow run",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4312,6 +4543,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -4321,6 +4553,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -4341,6 +4576,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "name"},
 							&cli.StringFlag{Name: "pattern"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4355,6 +4591,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -4373,6 +4610,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -4402,6 +4642,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "user"},
 							&cli.StringFlag{Name: "workflow"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4427,6 +4668,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -4475,6 +4717,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -4494,6 +4739,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "failed"},
 							&cli.StringFlag{Name: "job"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4512,6 +4758,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -4534,6 +4781,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -4561,6 +4811,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "verbose"},
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4592,6 +4843,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -4642,6 +4894,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -4660,6 +4915,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "exit-status"},
 							&cli.IntFlag{Name: "interval"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -4675,6 +4931,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -4692,6 +4949,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -5688,6 +5948,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "org"},
 							&cli.BoolFlag{Name: "user"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5705,6 +5966,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -5729,6 +5991,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -5752,6 +6017,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "user"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5772,6 +6038,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -5805,6 +6072,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -5830,6 +6100,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "user"},
 							&cli.StringFlag{Name: "visibility"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5854,6 +6125,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -5895,6 +6167,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -5917,6 +6192,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Usage: "Disable a workflow, preventing it from running or showing up when listing workflows.",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5928,6 +6204,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -5937,6 +6214,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -5954,6 +6234,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 						Usage: "Enable a workflow, allowing it to be run and show up when listing workflows.",
 						Flags: []cli.Flag{
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -5965,6 +6246,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -5974,6 +6256,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -5996,6 +6281,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.IntFlag{Name: "limit"},
 							&cli.StringFlag{Name: "template"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -6014,6 +6300,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -6041,6 +6328,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -6061,6 +6351,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.StringSliceFlag{Name: "raw-field"},
 							&cli.StringFlag{Name: "ref"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -6082,6 +6373,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -6110,6 +6402,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--help")
 										}
 									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -6129,6 +6424,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							&cli.BoolFlag{Name: "web"},
 							&cli.BoolFlag{Name: "yaml"},
 							&cli.BoolFlag{Name: "help"},
+							&cli.StringFlag{Name: "repo"},
 						},
 						Action: verb.Wrap(
 							verb.Spec{
@@ -6147,6 +6443,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("help") {
 										args["--help"] = "true"
 									}
+									args["--repo"] = c.String("repo")
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -6169,6 +6466,9 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										if c.Bool("help") {
 											argv = append(argv, "--help")
 										}
+									}
+									if c.IsSet("repo") {
+										argv = append(argv, "--repo", c.String("repo"))
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and

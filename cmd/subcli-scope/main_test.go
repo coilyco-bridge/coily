@@ -220,6 +220,20 @@ func TestExtractFlagsTypes(t *testing.T) {
 			},
 		},
 		{
+			name: "gh inherited flags including bracketed placeholder",
+			in: "USAGE\n  gh issue create [flags]\n\n" +
+				"FLAGS\n" +
+				"  -t, --title string     Supply a title.\n" +
+				"INHERITED FLAGS\n" +
+				"      --help                     Show help for command\n" +
+				"  -R, --repo [HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format\n",
+			want: []Flag{
+				{Name: "--title", Type: "string"},
+				{Name: "--help", Type: "bool"},
+				{Name: "--repo", Type: "string"},
+			},
+		},
+		{
 			name: "kubectl options bool stringSlice int string",
 			in: "Apply a thing.\n\n" +
 				"Options:\n" +

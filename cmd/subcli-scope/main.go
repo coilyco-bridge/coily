@@ -549,7 +549,10 @@ func awsTypeFromHint(h string) string {
 // Each line in a FLAGS / INHERITED FLAGS / OPTIONS section is parsed for
 // short alias, long name, optional placeholder, and description. The
 // placeholder + description text drive Type detection.
-var ghFlagLineRE = regexp.MustCompile(`^\s{2,6}(?:-[a-zA-Z],\s+)?(--[a-z][a-zA-Z0-9-]*)(?:\s+([A-Za-z][A-Za-z0-9_:=\[\]/.,-]*))?(\s{2,}.*)?$`)
+// Placeholder leading char includes "[" so bracketed shapes like
+// "[HOST/]OWNER/REPO" (gh's --repo, INHERITED FLAGS) parse cleanly. Without
+// it the whole line failed and the inherited flag was silently dropped.
+var ghFlagLineRE = regexp.MustCompile(`^\s{2,6}(?:-[a-zA-Z],\s+)?(--[a-z][a-zA-Z0-9-]*)(?:\s+([A-Za-z\[][A-Za-z0-9_:=\[\]/.,-]*))?(\s{2,}.*)?$`)
 
 func flagsFromGHStyle(help string) []Flag {
 	scanner := bufio.NewScanner(strings.NewReader(help))

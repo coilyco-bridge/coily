@@ -18,7 +18,7 @@ gh issue create MUTATING
 gh issue delete MUTATING
 gh issue develop MUTATING
 gh issue edit MUTATING
-gh issue list MUTATING
+gh issue list READONLY
 gh issue lock MUTATING
 gh issue pin MUTATING
 gh issue reopen MUTATING
