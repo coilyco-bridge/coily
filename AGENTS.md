@@ -1,19 +1,15 @@
 # Agent instructions
 
-See `../AGENTS.md` for workspace-level conventions (git workflow, test/lint autonomy, readonly ops, writing voice, deploy knowledge). This file covers only what's specific to this repo.
-
-**Exception:** auto-push to main only when this repo is the session's primary cwd (check env block, not live cwd). If a session started in a sibling and cd'd in, do not auto-push.
+Workspace-level conventions (git workflow, test/lint autonomy, readonly ops, writing voice, deploy knowledge) are loaded globally via `~/.claude/CLAUDE.md` -> `coilyco-ai/AGENTS.md`. This file covers only what's specific to this repo.
 
 ---
 
-## Auto-commit policy
+## Editing coily from other repos: forbidden, file an issue
 
-When this repo is your primary working directory, `git add`, `git commit`, and `git push` to `main` automatically after each successful change. No confirmation needed.
+When the session's primary cwd is **not** `/Users/kai/projects/coilysiren/coily` (check the env block, not live cwd), do not edit any file in this repo. Not source, not config, not docs, not AGENTS.md, not even a typo fix.
 
-**Why:** coily is Kai's solo operator CLI. PR review overhead is pure friction here.
+**Instead:** open a GitHub issue with `coily gh issue create --repo coilysiren/coily ...` (or `gh issue create --repo coilysiren/coily ...` if coily isn't installed). Include enough detail to act on cold. Cross-link the originating session/PR if relevant.
 
-**How to apply:**
+**Why:** coily is the wrapper that enforces the lockdown deny list (`aws`, `kubectl`, `ssh`, `scp`). A drive-by edit from a sibling-repo session can silently weaken the wrapper - add a passthrough subcommand, relax a filter, ship it, and the next coily run passes the deny list with the new behavior. The cwd gate forces explicit intent: a coily change must happen in a session Kai consciously started for coily work.
 
-- Only when the session's primary working directory is `/Users/kai/projects/coilysiren/coily` (check the env block at session start). If you were started in a sibling repo and later `cd`'d into coily, do not auto-push - defer to the parent repo's policy.
-- Group related edits into one commit. Don't push half-finished work.
-- Skip the auto-push if the change touches release workflows, secrets, or anything Kai flagged as needing review.
+This rule is stricter than the general workspace git policy. It overrides "commit directly to main" for this one repo.
