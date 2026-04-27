@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/coilysiren/coily/pkg/lockdown"
 	"github.com/coilysiren/coily/pkg/skillgen"
@@ -98,7 +99,10 @@ Three modes, by blast radius:
 
   coily lockdown                    Print the plan and exit. No write.
   coily lockdown --apply            Write a fresh file. Refuses if one exists.
-  coily lockdown --apply --replace  Overwrite an existing settings file.`,
+  coily lockdown --apply --replace  Overwrite an existing settings file.
+
+Pass --recursive to walk up to 4 directories below --path and lock down each
+discovered git repo.`,
 		Commands: []*cli.Command{
 			r.lockdownSkillCommand(),
 		},
@@ -120,13 +124,18 @@ Three modes, by blast radius:
 				Name:  "replace",
 				Usage: "overwrite an existing settings file (requires --apply)",
 			},
+			&cli.BoolFlag{
+				Name:  "recursive",
+				Usage: "scan up to 4 directories below --path for git repos and lock down each",
+			},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
 				Name: "lockdown",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
-						"--path": c.String("path"),
+						"--path":      c.String("path"),
+						"--recursive": fmt.Sprintf("%t", c.Bool("recursive")),
 					}, nil
 				},
 				Action: lockdownAction,
@@ -139,6 +148,7 @@ Three modes, by blast radius:
 func lockdownAction(_ context.Context, c *cli.Command) error {
 	apply := c.Bool("apply")
 	replace := c.Bool("replace")
+	recursive := c.Bool("recursive")
 
 	if replace && !apply {
 		return fmt.Errorf("lockdown: --replace requires --apply (use `coily lockdown --apply --replace`)")
@@ -148,7 +158,35 @@ func lockdownAction(_ context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	target := lockdown.TargetPath(c.String("path"), c.Bool("local"))
+
+	root := c.String("path")
+	local := c.Bool("local")
+
+	var dirs []string
+	if recursive {
+		found, err := findGitRepos(root, recursiveScanDepth)
+		if err != nil {
+			return err
+		}
+		if len(found) == 0 {
+			return fmt.Errorf("lockdown: --recursive found no git repos within %d levels of %s", recursiveScanDepth, root)
+		}
+		dirs = found
+		fmt.Fprintf(os.Stderr, "recursive: found %d git repo(s) under %s\n", len(dirs), root)
+	} else {
+		dirs = []string{root}
+	}
+
+	for _, dir := range dirs {
+		if err := lockdownOne(dir, local, apply, replace, d); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults) error {
+	target := lockdown.TargetPath(dir, local)
 	plan, err := lockdown.BuildPlan(target, d)
 	if err != nil {
 		return err
@@ -176,6 +214,48 @@ func lockdownAction(_ context.Context, c *cli.Command) error {
 	}
 
 	return writeLockdown(plan, d)
+}
+
+const recursiveScanDepth = 4
+
+// findGitRepos walks root up to maxDepth levels deep looking for directories
+// that contain a .git entry (file or dir, to support worktrees and submodules).
+// Returns the repo directories themselves, sorted, deduplicated. The .git
+// subtree is never descended into.
+func findGitRepos(root string, maxDepth int) ([]string, error) {
+	absRoot, err := filepath.Abs(root)
+	if err != nil {
+		return nil, fmt.Errorf("lockdown: resolve %s: %w", root, err)
+	}
+	var repos []string
+	err = filepath.WalkDir(absRoot, func(path string, de os.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if !de.IsDir() {
+			return nil
+		}
+		rel, err := filepath.Rel(absRoot, path)
+		if err != nil {
+			return err
+		}
+		depth := 0
+		if rel != "." {
+			depth = len(strings.Split(rel, string(filepath.Separator)))
+		}
+		if depth > maxDepth {
+			return filepath.SkipDir
+		}
+		if _, err := os.Stat(filepath.Join(path, ".git")); err == nil {
+			repos = append(repos, path)
+			return filepath.SkipDir
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("lockdown: scan %s: %w", absRoot, err)
+	}
+	return repos, nil
 }
 
 func writeLockdown(plan *lockdown.Plan, d *lockdown.Defaults) error {

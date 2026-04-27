@@ -16,6 +16,11 @@ import (
 // for these action-level tests.
 func runLockdown(t *testing.T, dir string, apply, replace bool) error {
 	t.Helper()
+	return runLockdownFlags(t, dir, apply, replace, false)
+}
+
+func runLockdownFlags(t *testing.T, dir string, apply, replace, recursive bool) error {
+	t.Helper()
 	root := &cli.Command{
 		Name: "test-root",
 		Commands: []*cli.Command{
@@ -26,6 +31,7 @@ func runLockdown(t *testing.T, dir string, apply, replace bool) error {
 					&cli.BoolFlag{Name: "local"},
 					&cli.BoolFlag{Name: "apply"},
 					&cli.BoolFlag{Name: "replace"},
+					&cli.BoolFlag{Name: "recursive"},
 					&cli.StringFlag{Name: "token"},
 				},
 				Action: lockdownAction,
@@ -38,6 +44,9 @@ func runLockdown(t *testing.T, dir string, apply, replace bool) error {
 	}
 	if replace {
 		args = append(args, "--replace")
+	}
+	if recursive {
+		args = append(args, "--recursive")
 	}
 	return root.Run(context.Background(), args)
 }
@@ -95,6 +104,47 @@ func TestLockdown_ReplaceWithoutApplyErrors(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "--replace requires --apply") {
 		t.Errorf("error message did not mention required flag combo: %v", err)
+	}
+}
+
+func TestLockdown_RecursiveAppliesToEachGitRepo(t *testing.T) {
+	root := t.TempDir()
+	repos := []string{
+		filepath.Join(root, "a"),
+		filepath.Join(root, "nested", "b"),
+		filepath.Join(root, "x", "y", "z", "deep"), // depth 4, allowed
+	}
+	for _, r := range repos {
+		if err := os.MkdirAll(filepath.Join(r, ".git"), 0o750); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// Out-of-range repo at depth 5 should be ignored.
+	tooDeep := filepath.Join(root, "x", "y", "z", "deep2", "skip")
+	if err := os.MkdirAll(filepath.Join(tooDeep, ".git"), 0o750); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := runLockdownFlags(t, root, true, false, true); err != nil {
+		t.Fatalf("recursive apply errored: %v", err)
+	}
+	for _, r := range repos {
+		target := filepath.Join(r, ".claude", "settings.json")
+		if _, err := os.Stat(target); err != nil {
+			t.Errorf("expected %s to exist: %v", target, err)
+		}
+	}
+	skipped := filepath.Join(tooDeep, ".claude", "settings.json")
+	if _, err := os.Stat(skipped); !os.IsNotExist(err) {
+		t.Errorf("repo beyond max depth was locked down: %s (err=%v)", skipped, err)
+	}
+}
+
+func TestLockdown_RecursiveNoReposErrors(t *testing.T) {
+	root := t.TempDir()
+	err := runLockdownFlags(t, root, false, false, true)
+	if err == nil || !strings.Contains(err.Error(), "no git repos") {
+		t.Fatalf("expected 'no git repos' error, got %v", err)
 	}
 }
 
