@@ -111,25 +111,55 @@ func updateCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 
 func createCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
-		Name:      "create",
-		Usage:     "Create a new Trello card (positional/flag forwarding to scripts/trello/create.js).",
-		ArgsUsage: "[create.js arguments]",
+		Name:  "create",
+		Usage: "Create a new Trello card.",
 		Flags: []cli.Flag{
 			dirFlag(),
+			&cli.StringFlag{Name: "list", Usage: "list to create the card in (exact name match, including any trailing space)"},
+			&cli.StringFlag{Name: "name", Usage: "card name (typically a short company handle)"},
+			&cli.StringFlag{Name: "desc", Usage: "card description"},
+			&cli.StringSliceFlag{Name: "label", Usage: "labels to apply (repeat for multiple)"},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
 				Name: "trello.create",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					return map[string]string{"--dir": c.String("dir")}, c.Args().Slice()
+					return createArgs(c), c.Args().Slice()
 				},
 				Action: func(ctx context.Context, c *cli.Command) error {
-					return runScript(ctx, r, c, "trello:create", nil)
+					if !c.IsSet("list") || !c.IsSet("name") {
+						return fmt.Errorf("trello create: --list and --name are required")
+					}
+					return runScript(ctx, r, c, "trello:create", buildCreateScriptArgs(c))
 				},
 			},
 			w,
 		),
 	}
+}
+
+func createArgs(c *cli.Command) map[string]string {
+	args := map[string]string{
+		"--dir":  c.String("dir"),
+		"--list": c.String("list"),
+		"--name": c.String("name"),
+		"--desc": c.String("desc"),
+	}
+	for i, v := range c.StringSlice("label") {
+		args[fmt.Sprintf("--label[%d]", i)] = v
+	}
+	return args
+}
+
+func buildCreateScriptArgs(c *cli.Command) []string {
+	out := []string{"--list", c.String("list"), "--name", c.String("name")}
+	if c.IsSet("desc") {
+		out = append(out, "--desc", c.String("desc"))
+	}
+	for _, label := range c.StringSlice("label") {
+		out = append(out, "--label", label)
+	}
+	return out
 }
 
 func dirFlag() cli.Flag {
