@@ -170,6 +170,7 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.kubectlCommand(),
 		r.tailscaleCommand(),
 		r.modioCommand(),
+		r.trelloCommand(),
 		r.auditCommand(),
 	}
 }

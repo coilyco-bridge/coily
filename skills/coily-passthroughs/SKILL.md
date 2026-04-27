@@ -3671,6 +3671,24 @@ Show the machine and user associated with a Tailscale IP (v4 or v6)
 
 Flags: --proto
 
+## `coily trello create`
+
+Create a new Trello card (positional/flag forwarding to scripts/trello/create.js).
+
+Flags: --dir
+
+## `coily trello status`
+
+List Trello cards with their list, labels, and last activity.
+
+Flags: --dir
+
+## `coily trello update`
+
+Mutate one Trello card (move list, toggle labels, append a comment, rename, close/reopen).
+
+Flags: --close, --comment, --desc, --dir, --label-off, --label-on, --list, --name, --reopen
+
 ## `coily version`
 
 Print the build version and exit.
