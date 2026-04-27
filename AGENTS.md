@@ -16,6 +16,16 @@ This rule is stricter than the general workspace git policy. It overrides "commi
 
 ---
 
+## Default to `coily gh`, not raw `gh`
+
+For any GitHub op in Kai's workspace - `gh api`, `gh issue`, `gh pr`, `gh repo`, `gh search`, `gh run`, `gh workflow`, `gh release`, `gh secret` - reach for `coily gh ...` first. Same flags, same behavior, just routed through the wrapper so it gets audit-logged and obeys the lockdown deny list.
+
+`coily gh api` flag note: it's `--jq`, not `-q`. Otherwise the surface mirrors `gh` directly.
+
+Raw `gh` is the fallback only when coily isn't installed (CI, fresh machine pre-bootstrap). In an interactive session on Kai's hosts, `coily gh` is the default.
+
+---
+
 ## Release framework
 
 Every push to `main` triggers `.github/workflows/release.yml`, which fully automates versioning and Homebrew distribution. No manual `make release`, no manual tag, no manual PR.
