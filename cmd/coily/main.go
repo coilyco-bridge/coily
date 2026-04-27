@@ -160,6 +160,7 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.whoamiCommand(),
 		r.lockdownCommand(),
 		r.installCompletionCommand(),
+		r.setupCommand(),
 		r.ecoCommand(),
 		r.coreKeeperCommand(),
 		r.icarusCommand(),

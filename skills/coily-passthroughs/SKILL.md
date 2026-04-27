@@ -3493,6 +3493,12 @@ GET /games/{game-id}/mods
 
 Flags: --limit, --offset
 
+## `coily setup`
+
+Run the post-upgrade rituals: completion, skill symlink, and lockdown re-baseline.
+
+Flags: --skip-completion, --skip-lockdown, --skip-skill, --workspace
+
 ## `coily ssh copy`
 
 Upload a local file to the remote via sftp.
