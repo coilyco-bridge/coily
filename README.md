@@ -50,12 +50,20 @@ This repo exists for three reasons.
 
 ## Install
 
-coily itself is never published as a prebuilt binary. Every install is a local build gated by `sudo`, so the install step is always a human (you) compiling from this checkout and placing the result in a root-owned directory. There is no "curl | sh" path and there won't be one.
+coily itself is never published as a prebuilt binary. Every install is a local build, either from a checkout or from a tagged source tarball that the user's machine compiles. There is no "curl | sh" path and there won't be one.
+
+The canonical path is `make install` from a checkout: it sudo-installs to a root-owned `/usr/local/bin`, so an agent running unprivileged can't overwrite the binary. A Homebrew tap exists for fresh-machine bootstrap (still build-from-source, no prebuilt artifacts), but installs to user-writable `/opt/homebrew/bin` and so does not preserve the root-owned-binary property. Use brew to bootstrap a new laptop, then switch to `make install` for day-to-day updates.
 
 ### Laptop (darwin-arm64)
 
 ```
 make install           # builds and sudo-installs /usr/local/bin/coily
+```
+
+Bootstrap-only alternative on a fresh machine:
+
+```
+brew install coilysiren/tap/coily
 ```
 
 ### Laptop (windows-amd64)
