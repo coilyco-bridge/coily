@@ -304,17 +304,30 @@ jobs:
         run: python3 scripts/verify-tools-manifest.py
 
       - name: Commit updated manifest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Branch protection on main requires verified signatures. The
+          # GITHUB_TOKEN identity (github-actions[bot]) cannot sign commits
+          # made by the local git client, but commits created via the
+          # Contents API are auto-signed by GitHub. Push through the API
+          # rather than `git push` so the rule is satisfied.
           if git diff --quiet pkg/shell/tools.yaml; then
             echo "manifest unchanged"
-          else
-            git add pkg/shell/tools.yaml
-            git commit -m "Refresh tools.yaml (aws=${AWS_VERSION}, kubectl=${KUBECTL_VERSION}, gh=${GH_VERSION})"
-            git push
+            exit 0
           fi
+          sha="$(gh api "repos/${GITHUB_REPOSITORY}/contents/pkg/shell/tools.yaml" --jq '.sha')"
+          content_b64="$(base64 -w0 < pkg/shell/tools.yaml)"
+          message="Refresh tools.yaml (aws=${AWS_VERSION}, kubectl=${KUBECTL_VERSION}, gh=${GH_VERSION})"
+          gh api --method PUT "repos/${GITHUB_REPOSITORY}/contents/pkg/shell/tools.yaml" \
+            -f message="$message" \
+            -f content="$content_b64" \
+            -f sha="$sha" \
+            -f branch=main >/dev/null
+          # Pull the new commit so subsequent steps in this job see a clean tree.
+          git fetch origin main
+          git reset --hard origin/main
 
       - name: Force-overwrite tools-latest release
         env:
