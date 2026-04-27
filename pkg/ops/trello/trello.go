@@ -49,7 +49,43 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 			statusCmd(r, w),
 			updateCmd(r, w),
 			createCmd(r, w),
+			sortCmd(r, w),
 		},
+	}
+}
+
+func sortCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
+	return &cli.Command{
+		Name:  "sort",
+		Usage: "Sort each list so cards with the given label rise to the top.",
+		Flags: []cli.Flag{
+			dirFlag(),
+			&cli.StringFlag{Name: "label", Usage: "label that should rise to the top of every list", Value: "Waiting on Me"},
+			&cli.BoolFlag{Name: "dry", Usage: "print the planned moves without writing"},
+		},
+		Action: verb.Wrap(
+			verb.Spec{
+				Name: "trello.sort",
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					args := map[string]string{
+						"--dir":   c.String("dir"),
+						"--label": c.String("label"),
+					}
+					if c.Bool("dry") {
+						args["--dry"] = "true"
+					}
+					return args, c.Args().Slice()
+				},
+				Action: func(ctx context.Context, c *cli.Command) error {
+					scriptArgs := []string{"--label", c.String("label")}
+					if c.Bool("dry") {
+						scriptArgs = append(scriptArgs, "--dry")
+					}
+					return runScript(ctx, r, c, "trello:sort", scriptArgs)
+				},
+			},
+			w,
+		),
 	}
 }
 
