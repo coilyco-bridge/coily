@@ -19,6 +19,7 @@ import (
 //   - coily ssh copy                 sftp upload (constrained to file xfer)
 //   - coily ssh systemctl <verb>     fixed verb tree mirroring systemctl
 //   - coily ssh rm-unit <unit>       remove a /etc/systemd/system unit file
+//   - coily ssh git <verb> <path>    fixed verb tree of read/fast-forward git ops
 //
 // All of them take fixed argv shapes; nothing inside the wrapper joins user
 // strings into a remote shell command. For the genuinely one-off case where
@@ -41,6 +42,7 @@ verbs; see the package doc on ops_ssh.go for the rationale.`,
 			r.sshCopyCommand(),
 			r.sshSystemctlCommand(),
 			r.sshRmUnitCommand(),
+			r.sshGitCommand(),
 		},
 	}
 }

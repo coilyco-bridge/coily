@@ -3499,6 +3499,42 @@ Upload a local file to the remote via sftp.
 
 Flags: --host, --user
 
+## `coily ssh git branch`
+
+Run git branch --show-current in <repo-path>.
+
+Flags: --host, --user
+
+## `coily ssh git fetch`
+
+Run git fetch --all --prune in <repo-path>.
+
+Flags: --host, --user
+
+## `coily ssh git log`
+
+Run git log --oneline -n 20 in <repo-path>.
+
+Flags: --host, --user
+
+## `coily ssh git pull`
+
+Run git pull --ff-only in <repo-path>.
+
+Flags: --host, --user
+
+## `coily ssh git rev-parse`
+
+Run git rev-parse HEAD in <repo-path>.
+
+Flags: --host, --user
+
+## `coily ssh git status`
+
+Run git status --short --branch in <repo-path>.
+
+Flags: --host, --user
+
 ## `coily ssh rm-unit`
 
 Remove /etc/systemd/system/<unit>.service and reload systemd.
@@ -3673,9 +3709,15 @@ Flags: --proto
 
 ## `coily trello create`
 
-Create a new Trello card (positional/flag forwarding to scripts/trello/create.js).
+Create a new Trello card.
 
-Flags: --dir
+Flags: --desc, --dir, --label, --list, --name
+
+## `coily trello sort`
+
+Sort each list so cards with the given label rise to the top.
+
+Flags: --dir, --dry, --label
 
 ## `coily trello status`
 

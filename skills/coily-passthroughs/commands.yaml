@@ -14174,6 +14174,60 @@ commands:
     - path:
         - coily
         - ssh
+        - git
+        - branch
+      summary: Run git branch --show-current in <repo-path>.
+      flags:
+        - --host
+        - --user
+    - path:
+        - coily
+        - ssh
+        - git
+        - fetch
+      summary: Run git fetch --all --prune in <repo-path>.
+      flags:
+        - --host
+        - --user
+    - path:
+        - coily
+        - ssh
+        - git
+        - log
+      summary: Run git log --oneline -n 20 in <repo-path>.
+      flags:
+        - --host
+        - --user
+    - path:
+        - coily
+        - ssh
+        - git
+        - pull
+      summary: Run git pull --ff-only in <repo-path>.
+      flags:
+        - --host
+        - --user
+    - path:
+        - coily
+        - ssh
+        - git
+        - rev-parse
+      summary: Run git rev-parse HEAD in <repo-path>.
+      flags:
+        - --host
+        - --user
+    - path:
+        - coily
+        - ssh
+        - git
+        - status
+      summary: Run git status --short --branch in <repo-path>.
+      flags:
+        - --host
+        - --user
+    - path:
+        - coily
+        - ssh
         - rm-unit
       summary: Remove /etc/systemd/system/<unit>.service and reload systemd.
       flags:
@@ -14438,6 +14492,48 @@ commands:
       summary: Show the machine and user associated with a Tailscale IP (v4 or v6)
       flags:
         - --proto
+    - path:
+        - coily
+        - trello
+        - create
+      summary: Create a new Trello card.
+      flags:
+        - --desc
+        - --dir
+        - --label
+        - --list
+        - --name
+    - path:
+        - coily
+        - trello
+        - sort
+      summary: Sort each list so cards with the given label rise to the top.
+      flags:
+        - --dir
+        - --dry
+        - --label
+    - path:
+        - coily
+        - trello
+        - status
+      summary: List Trello cards with their list, labels, and last activity.
+      flags:
+        - --dir
+    - path:
+        - coily
+        - trello
+        - update
+      summary: Mutate one Trello card (move list, toggle labels, append a comment, rename, close/reopen).
+      flags:
+        - --close
+        - --comment
+        - --desc
+        - --dir
+        - --label-off
+        - --label-on
+        - --list
+        - --name
+        - --reopen
     - path:
         - coily
         - version
