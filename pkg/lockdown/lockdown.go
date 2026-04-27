@@ -166,22 +166,28 @@ func HookPath(settingsPath string) string {
 // WriteHook renders and writes the PreToolUse hook script with 0755 perms.
 // Validates the generated script with `sh -n` before writing - a syntax
 // error would silently neutralize the deny gate on Desktop, so fail loud.
-func WriteHook(settingsPath string, d *Defaults) (string, error) {
+// Returns whether the file existed before the write so callers can report
+// "created" vs "replaced".
+func WriteHook(settingsPath string, d *Defaults) (string, bool, error) {
 	body, err := RenderHookScript(d)
 	if err != nil {
-		return "", err
+		return "", false, err
 	}
 	if err := validateShellSyntax(body); err != nil {
-		return "", fmt.Errorf("lockdown: generated hook failed sh -n: %w", err)
+		return "", false, fmt.Errorf("lockdown: generated hook failed sh -n: %w", err)
 	}
 	hookPath := HookPath(settingsPath)
+	existed := false
+	if _, err := os.Stat(hookPath); err == nil {
+		existed = true
+	}
 	if err := os.MkdirAll(filepath.Dir(hookPath), 0o750); err != nil {
-		return "", fmt.Errorf("lockdown: mkdir hook: %w", err)
+		return "", false, fmt.Errorf("lockdown: mkdir hook: %w", err)
 	}
 	if err := os.WriteFile(hookPath, []byte(body), 0o755); err != nil {
-		return "", fmt.Errorf("lockdown: write hook: %w", err)
+		return "", false, fmt.Errorf("lockdown: write hook: %w", err)
 	}
-	return hookPath, nil
+	return hookPath, existed, nil
 }
 
 // TargetPath returns the settings file path under dir. If local is true,

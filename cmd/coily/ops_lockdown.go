@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -193,19 +191,18 @@ func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults) e
 	}
 
 	disp := displayPath(plan.TargetPath)
-	switch {
-	case !plan.Existed:
-		fmt.Fprintf(os.Stderr, "%s: missing, --apply will create\n", disp)
-	case replace:
-		fmt.Fprintf(os.Stderr, "%s: replacing existing file (--replace)\n", disp)
-	default:
-		fmt.Fprintf(os.Stderr, "%s: exists, --apply alone refuses (use --apply --replace to clobber)\n", disp)
-	}
 
 	if !apply {
-		fmt.Fprintf(os.Stderr, "%s: --- plan (dry run, pass --apply to write) ---\n", disp)
-		fmt.Print(string(prettyJSON(plan.After)))
-		fmt.Println()
+		var verb string
+		switch {
+		case !plan.Existed:
+			verb = "would create"
+		case replace:
+			verb = "would replace"
+		default:
+			verb = "would refuse (exists; use --apply --replace to clobber)"
+		}
+		fmt.Fprintf(os.Stderr, "%s: %s\n", disp, verb)
 		return nil
 	}
 
@@ -213,7 +210,11 @@ func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults) e
 		return fmt.Errorf("lockdown: %s already exists. Use `coily lockdown --apply --replace` to overwrite", disp)
 	}
 
-	return writeLockdown(plan, d)
+	verb := "created"
+	if plan.Existed {
+		verb = "replaced"
+	}
+	return writeLockdown(plan, d, verb)
 }
 
 // displayPath shortens an absolute path to its cwd-relative form when that
@@ -275,23 +276,19 @@ func findGitRepos(root string, maxDepth int) ([]string, error) {
 	return repos, nil
 }
 
-func writeLockdown(plan *lockdown.Plan, d *lockdown.Defaults) error {
+func writeLockdown(plan *lockdown.Plan, d *lockdown.Defaults, verb string) error {
 	if err := lockdown.Write(plan); err != nil {
 		return err
 	}
-	fmt.Fprintf(os.Stderr, "%s: wrote\n", displayPath(plan.TargetPath))
-	hookPath, err := lockdown.WriteHook(plan.TargetPath, d)
+	fmt.Fprintf(os.Stderr, "%s: %s\n", displayPath(plan.TargetPath), verb)
+	hookPath, hookExisted, err := lockdown.WriteHook(plan.TargetPath, d)
 	if err != nil {
 		return fmt.Errorf("lockdown: hook write failed (settings.json was written): %w", err)
 	}
-	fmt.Fprintf(os.Stderr, "%s: wrote\n", displayPath(hookPath))
-	return nil
-}
-
-func prettyJSON(b []byte) []byte {
-	var buf bytes.Buffer
-	if err := json.Indent(&buf, b, "", "  "); err != nil {
-		return b
+	hookVerb := "created"
+	if hookExisted {
+		hookVerb = "replaced"
 	}
-	return buf.Bytes()
+	fmt.Fprintf(os.Stderr, "%s: %s\n", displayPath(hookPath), hookVerb)
+	return nil
 }

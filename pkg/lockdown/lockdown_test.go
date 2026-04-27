@@ -196,7 +196,7 @@ func TestWriteHook_Executable(t *testing.T) {
 	if err := lockdown.Write(plan); err != nil {
 		t.Fatalf("Write: %v", err)
 	}
-	hookPath, err := lockdown.WriteHook(plan.TargetPath, d)
+	hookPath, _, err := lockdown.WriteHook(plan.TargetPath, d)
 	if err != nil {
 		t.Fatalf("WriteHook: %v", err)
 	}
@@ -220,7 +220,7 @@ func TestWriteHook_BlocksDeniedCommand(t *testing.T) {
 	if err := lockdown.Write(must(lockdown.BuildPlan(target, d))); err != nil {
 		t.Fatalf("Write: %v", err)
 	}
-	hookPath, err := lockdown.WriteHook(target, d)
+	hookPath, _, err := lockdown.WriteHook(target, d)
 	if err != nil {
 		t.Fatalf("WriteHook: %v", err)
 	}
