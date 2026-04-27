@@ -60,6 +60,18 @@ func withIsolatedHome(t *testing.T) (homeDir, cwdDir string) {
 
 func TestLoad_DefaultPathsFallToHome(t *testing.T) {
 	home, _ := withIsolatedHome(t)
+	// Clear any audit.log_path that the embedded config may carry. The
+	// committed config.example.yaml leaves this blank, but a developer's
+	// local config.yaml (gitignored, synced into pkg/config/config.yaml at
+	// build time) may set it. The default-path fallback is only exercised
+	// when no layer has filled the field, so explicitly null it here.
+	dir := filepath.Join(home, ".coily")
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "config.yaml"), []byte("audit:\n  log_path: \"\"\n"), 0o600); err != nil {
+		t.Fatalf("write global: %v", err)
+	}
 	c, err := config.Load()
 	if err != nil {
 		t.Fatalf("Load: %v", err)
