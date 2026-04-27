@@ -172,7 +172,7 @@ func lockdownAction(_ context.Context, c *cli.Command) error {
 			return fmt.Errorf("lockdown: --recursive found no git repos within %d levels of %s", recursiveScanDepth, root)
 		}
 		dirs = found
-		fmt.Fprintf(os.Stderr, "recursive: found %d git repo(s) under %s\n", len(dirs), root)
+		fmt.Fprintf(os.Stderr, "recursive: found %d git repo(s) under %s\n", len(dirs), displayPath(root))
 	} else {
 		dirs = []string{root}
 	}
@@ -192,28 +192,45 @@ func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults) e
 		return err
 	}
 
-	fmt.Fprintf(os.Stderr, "target: %s\n", plan.TargetPath)
+	disp := displayPath(plan.TargetPath)
 	switch {
 	case !plan.Existed:
-		fmt.Fprintln(os.Stderr, "target does not exist; --apply will create it")
+		fmt.Fprintf(os.Stderr, "%s: missing, --apply will create\n", disp)
 	case replace:
-		fmt.Fprintln(os.Stderr, "existing file will be overwritten by --replace")
+		fmt.Fprintf(os.Stderr, "%s: replacing existing file (--replace)\n", disp)
 	default:
-		fmt.Fprintln(os.Stderr, "existing file present; --apply alone refuses (use --apply --replace to clobber)")
+		fmt.Fprintf(os.Stderr, "%s: exists, --apply alone refuses (use --apply --replace to clobber)\n", disp)
 	}
 
 	if !apply {
-		fmt.Fprintln(os.Stderr, "--- plan (dry run, pass --apply to write) ---")
+		fmt.Fprintf(os.Stderr, "%s: --- plan (dry run, pass --apply to write) ---\n", disp)
 		fmt.Print(string(prettyJSON(plan.After)))
 		fmt.Println()
 		return nil
 	}
 
 	if plan.Existed && !replace {
-		return fmt.Errorf("lockdown: %s already exists. Use `coily lockdown --apply --replace` to overwrite", plan.TargetPath)
+		return fmt.Errorf("lockdown: %s already exists. Use `coily lockdown --apply --replace` to overwrite", disp)
 	}
 
 	return writeLockdown(plan, d)
+}
+
+// displayPath shortens an absolute path to its cwd-relative form when that
+// is shorter and stays inside the working tree. Falls back to the original.
+func displayPath(p string) string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return p
+	}
+	rel, err := filepath.Rel(cwd, p)
+	if err != nil || strings.HasPrefix(rel, "..") {
+		return p
+	}
+	if len(rel) < len(p) {
+		return rel
+	}
+	return p
 }
 
 const recursiveScanDepth = 4
@@ -262,12 +279,12 @@ func writeLockdown(plan *lockdown.Plan, d *lockdown.Defaults) error {
 	if err := lockdown.Write(plan); err != nil {
 		return err
 	}
-	fmt.Fprintln(os.Stderr, "wrote", plan.TargetPath)
+	fmt.Fprintf(os.Stderr, "%s: wrote\n", displayPath(plan.TargetPath))
 	hookPath, err := lockdown.WriteHook(plan.TargetPath, d)
 	if err != nil {
 		return fmt.Errorf("lockdown: hook write failed (settings.json was written): %w", err)
 	}
-	fmt.Fprintln(os.Stderr, "wrote", hookPath)
+	fmt.Fprintf(os.Stderr, "%s: wrote\n", displayPath(hookPath))
 	return nil
 }
 
