@@ -75,7 +75,9 @@ func (r *Runner) systemdTail(u systemdUnit) *cli.Command {
 			verb.Spec{
 				Name: u.VerbName + ".tail",
 				Action: func(ctx context.Context, c *cli.Command) error {
-					args := []string{"sudo", "journalctl", "-u", u.UnitName, "-n", fmt.Sprint(c.Int("lines"))}
+					// No sudo: kai is in the adm group, which has read access
+					// to /var/log/journal/ on Ubuntu.
+					args := []string{"journalctl", "-u", u.UnitName, "-n", fmt.Sprint(c.Int("lines"))}
 					if c.Bool("follow") {
 						args = append(args, "-f")
 					}

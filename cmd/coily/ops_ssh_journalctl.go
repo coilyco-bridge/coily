@@ -56,8 +56,11 @@ func (r *Runner) sshJournalctlCommand() *cli.Command {
 					if err != nil {
 						return err
 					}
+					// No sudo: kai is in the adm group, which has read access
+					// to /var/log/journal/ on Ubuntu. The systemctl wrapper
+					// in ops_ssh_systemctl.go still uses sudo for writes.
 					argv := []string{
-						"sudo", "journalctl",
+						"journalctl",
 						"-u", unit,
 						"-n", strconv.Itoa(lines),
 						"--no-pager",

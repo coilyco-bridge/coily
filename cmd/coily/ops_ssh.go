@@ -23,7 +23,7 @@ import (
 //   - coily ssh deploy <name>        allowlisted (repo, install-script) pair; fast-forwards source then runs the installer as root via sudo -n with an interactive /dev/tty fallback
 //   - coily ssh ls|tree|cat|head|tail|wc|file <path>   readonly fs inspection on a validated absolute path
 //   - coily ssh grep <pattern> <path>                  fixed-string grep on a validated path
-//   - coily ssh journalctl <unit>    journalctl -u <unit> -n <N> --no-pager (sudo) for a validated unit
+//   - coily ssh journalctl <unit>    journalctl -u <unit> -n <N> --no-pager (adm-group read, no sudo) for a validated unit
 //
 // All of them take fixed argv shapes; nothing inside the wrapper joins user
 // strings into a remote shell command. For the genuinely one-off case where

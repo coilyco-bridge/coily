@@ -77,7 +77,11 @@ func (r *Runner) ecoTailCommand() *cli.Command {
 			verb.Spec{
 				Name: "eco.tail",
 				Action: func(ctx context.Context, c *cli.Command) error {
-					args := []string{"sudo", "journalctl", "-u", "eco-server", "-n", fmt.Sprint(c.Int("lines"))}
+					// No sudo: kai is in the adm group, which has read access
+					// to /var/log/journal/ on Ubuntu. journalctl honours that
+					// without privilege escalation. systemctl writes still
+					// need sudo (start/stop/restart below).
+					args := []string{"journalctl", "-u", "eco-server", "-n", fmt.Sprint(c.Int("lines"))}
 					if c.Bool("follow") {
 						args = append(args, "-f")
 					}
