@@ -59,6 +59,34 @@ func TestValidateRepoPath(t *testing.T) {
 	}
 }
 
+func TestValidateEcoModName(t *testing.T) {
+	cases := []struct {
+		in      string
+		wantErr bool
+	}{
+		{"", true},
+		{"EcoTelemetry", false},
+		{"eco-telemetry", false},
+		{"BunWulf_Educational", false},
+		{"Mod.With.Dots", false},
+		{"-flagy", true},
+		{"foo/bar", true},
+		{"foo bar", true},
+		{"foo;rm", true},
+		{"foo`whoami`", true},
+		{"foo$bar", true},
+		{strings.Repeat("a", 200), true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.in, func(t *testing.T) {
+			err := validateEcoModName(tc.in)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("validateEcoModName(%q) err=%v, wantErr=%v", tc.in, err, tc.wantErr)
+			}
+		})
+	}
+}
+
 func TestValidateGrepPattern(t *testing.T) {
 	cases := []struct {
 		in      string

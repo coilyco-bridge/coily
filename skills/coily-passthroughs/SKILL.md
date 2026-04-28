@@ -225,9 +225,15 @@ Upload a local file to the remote via sftp.
 
 Flags: --host, --user
 
-## `coily ssh deploy eco-telemetry`
+## `coily ssh deploy eco-mod`
 
-Fast-forward /home/kai/projects/coilysiren/infrastructure and run /home/kai/projects/coilysiren/infrastructure/scripts/install-eco-telemetry.sh as root.
+Fetch the latest release zip(s) of <name> and unzip into the EcoServer tree.
+
+Flags: --host, --user
+
+## `coily ssh deploy eco-mod-source`
+
+Rsync the source-tree Eco mod <name> from eco-mods / eco-mods-public into the EcoServer tree.
 
 Flags: --host, --user
 
