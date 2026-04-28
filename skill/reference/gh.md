@@ -55,6 +55,7 @@ Flags:
 - `--title`
 - `--web`
 - `--help`
+- `--repo`
 
 ### `coily gh issue list`
 
@@ -76,6 +77,7 @@ Flags:
 - `--template`
 - `--web`
 - `--help`
+- `--repo`
 
 ### `coily gh issue status`
 
@@ -87,6 +89,7 @@ Flags:
 - `--json`
 - `--template`
 - `--help`
+- `--repo`
 
 ### `coily gh issue close`
 
@@ -97,6 +100,7 @@ Flags:
 - `--comment`
 - `--reason`
 - `--help`
+- `--repo`
 
 ### `coily gh issue comment`
 
@@ -110,6 +114,7 @@ Flags:
 - `--editor`
 - `--web`
 - `--help`
+- `--repo`
 
 ### `coily gh issue delete`
 
@@ -119,6 +124,7 @@ Flags:
 
 - `--yes`
 - `--help`
+- `--repo`
 
 ### `coily gh issue develop`
 
@@ -132,6 +138,7 @@ Flags:
 - `--list`
 - `--name`
 - `--help`
+- `--repo`
 
 ### `coily gh issue edit`
 
@@ -151,6 +158,7 @@ Flags:
 - `--remove-project`
 - `--title`
 - `--help`
+- `--repo`
 
 ### `coily gh issue lock`
 
@@ -160,6 +168,7 @@ Flags:
 
 - `--reason`
 - `--help`
+- `--repo`
 
 ### `coily gh issue pin`
 
@@ -168,6 +177,7 @@ Pin an issue to a repository.
 Flags:
 
 - `--help`
+- `--repo`
 
 ### `coily gh issue reopen`
 
@@ -177,6 +187,7 @@ Flags:
 
 - `--comment`
 - `--help`
+- `--repo`
 
 ### `coily gh issue transfer`
 
@@ -185,6 +196,7 @@ Transfer issue to another repository
 Flags:
 
 - `--help`
+- `--repo`
 
 ### `coily gh issue unlock`
 
@@ -193,6 +205,7 @@ Unlock issue conversation
 Flags:
 
 - `--help`
+- `--repo`
 
 ### `coily gh issue unpin`
 
@@ -201,6 +214,7 @@ Unpin an issue from a repository.
 Flags:
 
 - `--help`
+- `--repo`
 
 ### `coily gh issue view`
 
@@ -214,6 +228,7 @@ Flags:
 - `--template`
 - `--web`
 - `--help`
+- `--repo`
 
 ## `coily gh pr`
 
@@ -250,6 +265,7 @@ Flags:
 - `--title`
 - `--web`
 - `--help`
+- `--repo`
 
 ### `coily gh pr list`
 
@@ -272,6 +288,7 @@ Flags:
 - `--template`
 - `--web`
 - `--help`
+- `--repo`
 
 ### `coily gh pr status`
 
@@ -284,6 +301,7 @@ Flags:
 - `--json`
 - `--template`
 - `--help`
+- `--repo`
 
 ### `coily gh pr checkout`
 
@@ -296,6 +314,7 @@ Flags:
 - `--force`
 - `--recurse-submodules`
 - `--help`
+- `--repo`
 
 ### `coily gh pr checks`
 
@@ -311,6 +330,7 @@ Flags:
 - `--watch`
 - `--web`
 - `--help`
+- `--repo`
 
 ### `coily gh pr close`
 
@@ -321,6 +341,7 @@ Flags:
 - `--comment`
 - `--delete-branch`
 - `--help`
+- `--repo`
 
 ### `coily gh pr comment`
 
@@ -334,6 +355,7 @@ Flags:
 - `--editor`
 - `--web`
 - `--help`
+- `--repo`
 
 ### `coily gh pr diff`
 
@@ -346,6 +368,7 @@ Flags:
 - `--patch`
 - `--web`
 - `--help`
+- `--repo`
 
 ### `coily gh pr edit`
 
@@ -368,6 +391,7 @@ Flags:
 - `--remove-reviewer`
 - `--title`
 - `--help`
+- `--repo`
 
 ### `coily gh pr lock`
 
@@ -377,6 +401,7 @@ Flags:
 
 - `--reason`
 - `--help`
+- `--repo`
 
 ### `coily gh pr merge`
 
@@ -397,6 +422,7 @@ Flags:
 - `--squash`
 - `--subject`
 - `--help`
+- `--repo`
 
 ### `coily gh pr ready`
 
@@ -406,6 +432,7 @@ Flags:
 
 - `--undo`
 - `--help`
+- `--repo`
 
 ### `coily gh pr reopen`
 
@@ -415,6 +442,7 @@ Flags:
 
 - `--comment`
 - `--help`
+- `--repo`
 
 ### `coily gh pr review`
 
@@ -428,6 +456,7 @@ Flags:
 - `--comment`
 - `--request-changes`
 - `--help`
+- `--repo`
 
 ### `coily gh pr unlock`
 
@@ -436,6 +465,7 @@ Unlock pull request conversation
 Flags:
 
 - `--help`
+- `--repo`
 
 ### `coily gh pr view`
 
@@ -449,6 +479,7 @@ Flags:
 - `--template`
 - `--web`
 - `--help`
+- `--repo`
 
 ## `coily gh release`
 
@@ -477,6 +508,7 @@ Flags:
 - `--title`
 - `--verify-tag`
 - `--help`
+- `--repo`
 
 ### `coily gh release list`
 
@@ -492,6 +524,7 @@ Flags:
 - `--order`
 - `--template`
 - `--help`
+- `--repo`
 
 ### `coily gh release delete`
 
@@ -502,6 +535,7 @@ Flags:
 - `--cleanup-tag`
 - `--yes`
 - `--help`
+- `--repo`
 
 ### `coily gh release download`
 
@@ -516,6 +550,7 @@ Flags:
 - `--pattern`
 - `--skip-existing`
 - `--help`
+- `--repo`
 
 ### `coily gh release edit`
 
@@ -534,6 +569,7 @@ Flags:
 - `--title`
 - `--verify-tag`
 - `--help`
+- `--repo`
 
 ### `coily gh release upload`
 
@@ -543,6 +579,7 @@ Flags:
 
 - `--clobber`
 - `--help`
+- `--repo`
 
 ### `coily gh release view`
 
@@ -555,6 +592,7 @@ Flags:
 - `--template`
 - `--web`
 - `--help`
+- `--repo`
 
 ## `coily gh repo`
 
@@ -631,6 +669,7 @@ Flags:
 
 - `--numeric`
 - `--help`
+- `--repo`
 
 ### `coily gh repo autolink list`
 
@@ -643,6 +682,7 @@ Flags:
 - `--template`
 - `--web`
 - `--help`
+- `--repo`
 
 ### `coily gh repo autolink view`
 
@@ -654,6 +694,7 @@ Flags:
 - `--json`
 - `--template`
 - `--help`
+- `--repo`
 
 ### `coily gh repo clone`
 
@@ -688,6 +729,7 @@ Flags:
 - `--allow-write`
 - `--title`
 - `--help`
+- `--repo`
 
 ### `coily gh repo deploy-key delete`
 
@@ -696,6 +738,7 @@ Delete a deploy key from a GitHub repository
 Flags:
 
 - `--help`
+- `--repo`
 
 ### `coily gh repo deploy-key list`
 
@@ -707,6 +750,7 @@ Flags:
 - `--json`
 - `--template`
 - `--help`
+- `--repo`
 
 ### `coily gh repo edit`
 
@@ -803,6 +847,7 @@ Rename a GitHub repository.
 
 Flags:
 
+- `--repo`
 - `--yes`
 - `--help`
 
@@ -854,6 +899,7 @@ Cancel a workflow run
 Flags:
 
 - `--help`
+- `--repo`
 
 ### `coily gh run delete`
 
@@ -862,6 +908,7 @@ Delete a workflow run
 Flags:
 
 - `--help`
+- `--repo`
 
 ### `coily gh run download`
 
@@ -873,6 +920,7 @@ Flags:
 - `--name`
 - `--pattern`
 - `--help`
+- `--repo`
 
 ### `coily gh run list`
 
@@ -893,6 +941,7 @@ Flags:
 - `--user`
 - `--workflow`
 - `--help`
+- `--repo`
 
 ### `coily gh run rerun`
 
@@ -904,6 +953,7 @@ Flags:
 - `--failed`
 - `--job`
 - `--help`
+- `--repo`
 
 ### `coily gh run view`
 
@@ -922,6 +972,7 @@ Flags:
 - `--verbose`
 - `--web`
 - `--help`
+- `--repo`
 
 ### `coily gh run watch`
 
@@ -932,6 +983,7 @@ Flags:
 - `--exit-status`
 - `--interval`
 - `--help`
+- `--repo`
 
 ## `coily gh search`
 
@@ -1138,6 +1190,7 @@ Flags:
 - `--org`
 - `--user`
 - `--help`
+- `--repo`
 
 ### `coily gh secret list`
 
@@ -1153,6 +1206,7 @@ Flags:
 - `--template`
 - `--user`
 - `--help`
+- `--repo`
 
 ### `coily gh secret set`
 
@@ -1170,6 +1224,7 @@ Flags:
 - `--user`
 - `--visibility`
 - `--help`
+- `--repo`
 
 ## `coily gh workflow`
 
@@ -1186,6 +1241,7 @@ Disable a workflow, preventing it from running or showing up when listing workfl
 Flags:
 
 - `--help`
+- `--repo`
 
 ### `coily gh workflow enable`
 
@@ -1194,6 +1250,7 @@ Enable a workflow, allowing it to be run and show up when listing workflows.
 Flags:
 
 - `--help`
+- `--repo`
 
 ### `coily gh workflow list`
 
@@ -1207,6 +1264,7 @@ Flags:
 - `--limit`
 - `--template`
 - `--help`
+- `--repo`
 
 ### `coily gh workflow run`
 
@@ -1219,6 +1277,7 @@ Flags:
 - `--raw-field`
 - `--ref`
 - `--help`
+- `--repo`
 
 ### `coily gh workflow view`
 
@@ -1230,3 +1289,4 @@ Flags:
 - `--web`
 - `--yaml`
 - `--help`
+- `--repo`

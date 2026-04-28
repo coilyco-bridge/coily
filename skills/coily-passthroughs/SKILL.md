@@ -3505,6 +3505,12 @@ Upload a local file to the remote via sftp.
 
 Flags: --host, --user
 
+## `coily ssh deploy repo-recall`
+
+Fast-forward /home/kai/projects/coilysiren/repo-recall and run /home/kai/projects/coilysiren/infrastructure/scripts/install-repo-recall.sh as root.
+
+Flags: --host, --user
+
 ## `coily ssh git branch`
 
 Run git branch --show-current in <repo-path>.

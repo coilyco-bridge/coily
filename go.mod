@@ -11,6 +11,7 @@ require (
 	github.com/getsentry/sentry-go v0.46.0
 	github.com/pkg/sftp v1.13.10
 	golang.org/x/crypto v0.50.0
+	golang.org/x/term v0.42.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 

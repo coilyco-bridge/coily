@@ -150,6 +150,48 @@ type writer interface {
 	Write(p []byte) (int, error)
 }
 
+// StreamStdin is Stream with a stdin reader attached to the remote
+// session. Used by `coily ssh deploy` to pipe a sudo password into a
+// remote `sudo -S` invocation: the password reaches the remote sudo
+// over the encrypted ssh channel, never appears in argv (so it is
+// invisible to ps), and never reaches coily's audit log (which records
+// argv only). stdin may be nil, in which case this behaves like Stream.
+func (c *Client) StreamStdin(ctx context.Context, host, user, cmd string, stdin io.Reader, stdout, stderr writer) error {
+	conn, err := c.dial(ctx, host, user)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = conn.Close() }()
+
+	sess, err := conn.NewSession()
+	if err != nil {
+		return fmt.Errorf("ssh: new session: %w", err)
+	}
+	defer func() { _ = sess.Close() }()
+
+	if stdin != nil {
+		sess.Stdin = stdin
+	}
+	if stdout != nil {
+		sess.Stdout = stdout
+	}
+	if stderr != nil {
+		sess.Stderr = stderr
+	}
+
+	done := make(chan error, 1)
+	go func() { done <- sess.Run(cmd) }()
+
+	select {
+	case err := <-done:
+		return err
+	case <-ctx.Done():
+		_ = sess.Close()
+		<-done
+		return ctx.Err()
+	}
+}
+
 // CopyTo uploads localPath to remotePath on host as user, using SFTP over
 // the same ssh transport as Run / Stream. Host-key verification and auth
 // go through the same dial() path; ssh.InsecureIgnoreHostKey is still
