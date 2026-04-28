@@ -293,7 +293,7 @@ Flags: --host, --user
 
 ## `coily ssh git update-index`
 
-Run git update-index --refresh in <repo-path> (clears stat-stale phantom-dirty entries; mutates only the index's cached-stat column).
+Run git update-index --really-refresh in <repo-path> (re-hashes file contents to clear stat-stale phantom-dirty entries; mutates only the index's cached-stat column).
 
 Flags: --host, --user
 
