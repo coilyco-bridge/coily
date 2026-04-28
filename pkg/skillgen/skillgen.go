@@ -39,6 +39,7 @@ type Verb struct {
 type Manifest struct {
 	Binary     string            `yaml:"binary"`
 	BinVersion string            `yaml:"bin_version,omitempty"`
+	Globals    []ManifestFlag    `yaml:"globals,omitempty"`
 	Commands   []ManifestCommand `yaml:"commands"`
 }
 
@@ -245,7 +246,14 @@ func renderReferenceMD(m Manifest) string {
 	// section. For aws this collapses ~17 globals × 323 verbs = ~5,500
 	// lines of repeated noise into one block, leaving each verb section
 	// listing only its verb-specific flags.
-	globals := computeGlobalFlags(m.Commands)
+	// Prefer manifest-declared globals (e.g. kubectl's `kubectl options` block,
+	// which never appears on any per-verb help and would otherwise be
+	// invisible). Fall back to the intersection heuristic for binaries that
+	// inline globals into every verb's help (aws GLOBAL OPTIONS).
+	globals := m.Globals
+	if len(globals) == 0 {
+		globals = computeGlobalFlags(m.Commands)
+	}
 	globalSet := make(map[string]struct{}, len(globals))
 	for _, f := range globals {
 		globalSet[f.Name] = struct{}{}

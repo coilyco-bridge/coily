@@ -4,6 +4,37 @@ Mirrors `kubectl`.
 
 Command shape: `coily kubectl <verb...> [flags]`. Flags match the underlying CLI.
 
+## Global flags
+
+Accepted by every `coily kubectl` verb. Per-verb sections below list only verb-specific flags; these are omitted there to keep the reference scannable.
+
+- `--as`
+- `--as-group`
+- `--as-uid`
+- `--cache-dir`
+- `--certificate-authority`
+- `--client-certificate`
+- `--client-key`
+- `--cluster`
+- `--context`
+- `--disable-compression`
+- `--insecure-skip-tls-verify`
+- `--kubeconfig`
+- `--log-flush-frequency`
+- `--match-server-version`
+- `--namespace`
+- `--password`
+- `--profile`
+- `--profile-output`
+- `--request-timeout`
+- `--server`
+- `--tls-server-name`
+- `--token`
+- `--user`
+- `--username`
+- `--vmodule`
+- `--warnings-as-errors`
+
 ## `coily kubectl annotate`
 
 ### `coily kubectl annotate`
@@ -296,12 +327,8 @@ Set a cluster entry in kubeconfig.
 
 Flags:
 
-- `--certificate-authority`
 - `--embed-certs`
-- `--insecure-skip-tls-verify`
 - `--proxy-url`
-- `--server`
-- `--tls-server-name`
 
 ### `coily kubectl config set-context`
 
@@ -309,10 +336,7 @@ Set a context entry in kubeconfig.
 
 Flags:
 
-- `--cluster`
 - `--current`
-- `--namespace`
-- `--user`
 
 ### `coily kubectl config set-credentials`
 
@@ -322,16 +346,11 @@ Flags:
 
 - `--auth-provider`
 - `--auth-provider-arg`
-- `--client-certificate`
-- `--client-key`
 - `--embed-certs`
 - `--exec-api-version`
 - `--exec-arg`
 - `--exec-command`
 - `--exec-env`
-- `--password`
-- `--token`
-- `--username`
 
 ### `coily kubectl config unset`
 
@@ -411,7 +430,6 @@ Flags:
 - `--serviceaccount`
 - `--show-managed-fields`
 - `--template`
-- `--user`
 - `--validate`
 
 ### `coily kubectl create configmap`
@@ -609,7 +627,6 @@ Flags:
 - `--serviceaccount`
 - `--show-managed-fields`
 - `--template`
-- `--user`
 - `--validate`
 
 ### `coily kubectl create secret` (group)
@@ -1288,7 +1305,6 @@ Flags:
 - `--serviceaccount`
 - `--show-managed-fields`
 - `--template`
-- `--user`
 
 ## `coily kubectl taint`
 

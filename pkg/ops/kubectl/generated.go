@@ -25,6 +25,37 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  BinaryName,
 		Usage: "Pass-through to " + BinaryName + ".",
+		// Global flags accepted by every verb of kubectl. urfave/cli/v3
+		// flags propagate to subcommands by default, so leaves can read
+		// these via c.IsSet/c.String/etc. and forward them into argv.
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: "as"},
+			&cli.StringSliceFlag{Name: "as-group"},
+			&cli.StringFlag{Name: "as-uid"},
+			&cli.StringFlag{Name: "cache-dir"},
+			&cli.StringFlag{Name: "certificate-authority"},
+			&cli.StringFlag{Name: "client-certificate"},
+			&cli.StringFlag{Name: "client-key"},
+			&cli.StringFlag{Name: "cluster"},
+			&cli.StringFlag{Name: "context"},
+			&cli.BoolFlag{Name: "disable-compression"},
+			&cli.BoolFlag{Name: "insecure-skip-tls-verify"},
+			&cli.StringFlag{Name: "kubeconfig"},
+			&cli.StringFlag{Name: "log-flush-frequency"},
+			&cli.BoolFlag{Name: "match-server-version"},
+			&cli.StringFlag{Name: "namespace", Aliases: []string{"n"}},
+			&cli.StringFlag{Name: "password"},
+			&cli.StringFlag{Name: "profile"},
+			&cli.StringFlag{Name: "profile-output"},
+			&cli.StringFlag{Name: "request-timeout"},
+			&cli.StringFlag{Name: "server", Aliases: []string{"s"}},
+			&cli.StringFlag{Name: "tls-server-name"},
+			&cli.StringFlag{Name: "token"},
+			&cli.StringFlag{Name: "user"},
+			&cli.StringFlag{Name: "username"},
+			&cli.StringFlag{Name: "vmodule"},
+			&cli.BoolFlag{Name: "warnings-as-errors"},
+		},
 		Commands: []*cli.Command{
 			&cli.Command{
 				Name:  "annotate",
@@ -90,6 +121,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 								args["--show-managed-fields"] = "true"
 							}
 							args["--template"] = c.String("template")
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -164,6 +283,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							if c.IsSet("template") {
 								argv = append(argv, "--template", c.String("template"))
 							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
+							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
 							// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -213,6 +420,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							for _, v := range c.StringSlice("verbs") {
 								positional = append(positional, v)
 							}
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -252,6 +547,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									argv = append(argv, "--verbs", v)
 								}
 							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
+							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
 							// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -273,11 +656,187 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							args := map[string]string{}
 							var positional []string
 							_ = positional
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
 						Action: func(ctx context.Context, c *cli.Command) error {
 							argv := []string{"api-versions"}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
+							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
 							// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -335,6 +894,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("windows-line-endings") {
 										args["--windows-line-endings"] = "true"
 									}
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -378,6 +1025,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("windows-line-endings") {
 										if c.Bool("windows-line-endings") {
 											argv = append(argv, "--windows-line-endings")
+										}
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
 										}
 									}
 									// Forward any trailing positional args after flags so verbs
@@ -425,6 +1160,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -458,6 +1281,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -500,6 +1411,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--recursive"] = "true"
 									}
 									args["--selector"] = c.String("selector")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -528,6 +1527,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("selector") {
 										argv = append(argv, "--selector", c.String("selector"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -576,6 +1663,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--quiet"] = "true"
 									}
 									args["--subresource"] = c.String("subresource")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -603,6 +1778,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("subresource") {
 										argv = append(argv, "--subresource", c.String("subresource"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -659,6 +1922,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -706,6 +2057,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
 									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -741,6 +2180,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -761,6 +2288,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -825,6 +2440,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 								args["--show-managed-fields"] = "true"
 							}
 							args["--template"] = c.String("template")
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -882,6 +2585,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							if c.IsSet("template") {
 								argv = append(argv, "--template", c.String("template"))
 							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
+							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
 							// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -935,6 +2726,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -973,6 +2852,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -1023,6 +2990,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1061,6 +3116,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -1115,6 +3258,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1152,6 +3383,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
 									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1179,11 +3498,187 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "current-context"}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1205,11 +3700,187 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "delete-cluster"}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1231,11 +3902,187 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "delete-context"}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1257,11 +4104,187 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "delete-user"}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1283,11 +4306,187 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "get-clusters"}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1317,6 +4516,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--no-headers"] = "true"
 									}
 									args["--output"] = c.String("output")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1329,6 +4616,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("output") {
 										argv = append(argv, "--output", c.String("output"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -1351,11 +4726,187 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "get-users"}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1377,11 +4928,187 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "rename-context"}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1409,6 +5136,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("set-raw-bytes") {
 										args["--set-raw-bytes"] = "true"
 									}
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1417,6 +5232,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("set-raw-bytes") {
 										if c.Bool("set-raw-bytes") {
 											argv = append(argv, "--set-raw-bytes")
+										}
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
 										}
 									}
 									// Forward any trailing positional args after flags so verbs
@@ -1458,6 +5361,80 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									args["--proxy-url"] = c.String("proxy-url")
 									args["--server"] = c.String("server")
 									args["--tls-server-name"] = c.String("tls-server-name")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1484,6 +5461,80 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("tls-server-name") {
 										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -1518,6 +5569,85 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									args["--namespace"] = c.String("namespace")
 									args["--user"] = c.String("user")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1536,6 +5666,85 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("user") {
 										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -1592,6 +5801,79 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									args["--password"] = c.String("password")
 									args["--token"] = c.String("token")
 									args["--username"] = c.String("username")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1641,6 +5923,79 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("username") {
 										argv = append(argv, "--username", c.String("username"))
 									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1662,11 +6017,187 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "unset"}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1688,11 +6219,187 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									args := map[string]string{}
 									var positional []string
 									_ = positional
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
 								Action: func(ctx context.Context, c *cli.Command) error {
 									argv := []string{"config", "use-context"}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1744,6 +6451,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1785,6 +6580,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
 									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -1814,6 +6697,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							_ = positional
 							args["--dry-run"] = c.String("dry-run")
 							args["--selector"] = c.String("selector")
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -1824,6 +6795,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							}
 							if c.IsSet("selector") {
 								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
 							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -1892,6 +6951,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									for _, v := range c.StringSlice("verb") {
 										positional = append(positional, v)
 									}
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -1948,6 +7095,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("verb") {
 										for _, v := range c.StringSlice("verb") {
 											argv = append(argv, "--verb", v)
+										}
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
 										}
 									}
 									// Forward any trailing positional args after flags so verbs
@@ -2009,6 +7244,91 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										positional = append(positional, v)
 									}
 									args["--validate"] = c.String("validate")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2061,6 +7381,91 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("validate") {
 										argv = append(argv, "--validate", c.String("validate"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2123,6 +7528,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2178,6 +7671,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("validate") {
 										argv = append(argv, "--validate", c.String("validate"))
 									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -2229,6 +7810,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2272,6 +7941,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("validate") {
 										argv = append(argv, "--validate", c.String("validate"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2326,6 +8083,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2371,6 +8216,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("validate") {
 										argv = append(argv, "--validate", c.String("validate"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2429,6 +8362,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2480,6 +8501,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("validate") {
 										argv = append(argv, "--validate", c.String("validate"))
 									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -2529,6 +8638,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2569,6 +8766,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("validate") {
 										argv = append(argv, "--validate", c.String("validate"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2615,6 +8900,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2649,6 +9022,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("validate") {
 										argv = append(argv, "--validate", c.String("validate"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2701,6 +9162,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2744,6 +9293,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("validate") {
 										argv = append(argv, "--validate", c.String("validate"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2800,6 +9437,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
 									args["--value"] = strconv.Itoa(int(c.Int("value")))
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2848,6 +9573,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("value") {
 										argv = append(argv, "--value", strconv.Itoa(int(c.Int("value"))))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2898,6 +9711,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -2938,6 +9839,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("validate") {
 										argv = append(argv, "--validate", c.String("validate"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -2996,6 +9985,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									for _, v := range c.StringSlice("verb") {
 										positional = append(positional, v)
 									}
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -3044,6 +10121,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("verb") {
 										for _, v := range c.StringSlice("verb") {
 											argv = append(argv, "--verb", v)
+										}
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
 										}
 									}
 									// Forward any trailing positional args after flags so verbs
@@ -3107,6 +10272,91 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										positional = append(positional, v)
 									}
 									args["--validate"] = c.String("validate")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -3162,6 +10412,91 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("validate") {
 										argv = append(argv, "--validate", c.String("validate"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -3228,6 +10563,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											}
 											args["--template"] = c.String("template")
 											args["--validate"] = c.String("validate")
+											if c.IsSet("as") {
+												args["--as"] = c.String("as")
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													positional = append(positional, v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												args["--as-uid"] = c.String("as-uid")
+											}
+											if c.IsSet("cache-dir") {
+												args["--cache-dir"] = c.String("cache-dir")
+											}
+											if c.IsSet("certificate-authority") {
+												args["--certificate-authority"] = c.String("certificate-authority")
+											}
+											if c.IsSet("client-certificate") {
+												args["--client-certificate"] = c.String("client-certificate")
+											}
+											if c.IsSet("client-key") {
+												args["--client-key"] = c.String("client-key")
+											}
+											if c.IsSet("cluster") {
+												args["--cluster"] = c.String("cluster")
+											}
+											if c.IsSet("context") {
+												args["--context"] = c.String("context")
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													args["--disable-compression"] = "true"
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													args["--insecure-skip-tls-verify"] = "true"
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												args["--kubeconfig"] = c.String("kubeconfig")
+											}
+											if c.IsSet("log-flush-frequency") {
+												args["--log-flush-frequency"] = c.String("log-flush-frequency")
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													args["--match-server-version"] = "true"
+												}
+											}
+											if c.IsSet("namespace") {
+												args["--namespace"] = c.String("namespace")
+											}
+											if c.IsSet("password") {
+												args["--password"] = c.String("password")
+											}
+											if c.IsSet("profile") {
+												args["--profile"] = c.String("profile")
+											}
+											if c.IsSet("profile-output") {
+												args["--profile-output"] = c.String("profile-output")
+											}
+											if c.IsSet("request-timeout") {
+												args["--request-timeout"] = c.String("request-timeout")
+											}
+											if c.IsSet("server") {
+												args["--server"] = c.String("server")
+											}
+											if c.IsSet("tls-server-name") {
+												args["--tls-server-name"] = c.String("tls-server-name")
+											}
+											if c.IsSet("token") {
+												args["--token"] = c.String("token")
+											}
+											if c.IsSet("user") {
+												args["--user"] = c.String("user")
+											}
+											if c.IsSet("username") {
+												args["--username"] = c.String("username")
+											}
+											if c.IsSet("vmodule") {
+												args["--vmodule"] = c.String("vmodule")
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													args["--warnings-as-errors"] = "true"
+												}
+											}
 											positional = append(positional, c.Args().Slice()...)
 											return args, positional
 										},
@@ -3284,6 +10707,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											}
 											if c.IsSet("validate") {
 												argv = append(argv, "--validate", c.String("validate"))
+											}
+											if c.IsSet("as") {
+												argv = append(argv, "--as", c.String("as"))
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													argv = append(argv, "--as-group", v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												argv = append(argv, "--as-uid", c.String("as-uid"))
+											}
+											if c.IsSet("cache-dir") {
+												argv = append(argv, "--cache-dir", c.String("cache-dir"))
+											}
+											if c.IsSet("certificate-authority") {
+												argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+											}
+											if c.IsSet("client-certificate") {
+												argv = append(argv, "--client-certificate", c.String("client-certificate"))
+											}
+											if c.IsSet("client-key") {
+												argv = append(argv, "--client-key", c.String("client-key"))
+											}
+											if c.IsSet("cluster") {
+												argv = append(argv, "--cluster", c.String("cluster"))
+											}
+											if c.IsSet("context") {
+												argv = append(argv, "--context", c.String("context"))
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													argv = append(argv, "--disable-compression")
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													argv = append(argv, "--insecure-skip-tls-verify")
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+											}
+											if c.IsSet("log-flush-frequency") {
+												argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													argv = append(argv, "--match-server-version")
+												}
+											}
+											if c.IsSet("namespace") {
+												argv = append(argv, "--namespace", c.String("namespace"))
+											}
+											if c.IsSet("password") {
+												argv = append(argv, "--password", c.String("password"))
+											}
+											if c.IsSet("profile") {
+												argv = append(argv, "--profile", c.String("profile"))
+											}
+											if c.IsSet("profile-output") {
+												argv = append(argv, "--profile-output", c.String("profile-output"))
+											}
+											if c.IsSet("request-timeout") {
+												argv = append(argv, "--request-timeout", c.String("request-timeout"))
+											}
+											if c.IsSet("server") {
+												argv = append(argv, "--server", c.String("server"))
+											}
+											if c.IsSet("tls-server-name") {
+												argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+											}
+											if c.IsSet("token") {
+												argv = append(argv, "--token", c.String("token"))
+											}
+											if c.IsSet("user") {
+												argv = append(argv, "--user", c.String("user"))
+											}
+											if c.IsSet("username") {
+												argv = append(argv, "--username", c.String("username"))
+											}
+											if c.IsSet("vmodule") {
+												argv = append(argv, "--vmodule", c.String("vmodule"))
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													argv = append(argv, "--warnings-as-errors")
+												}
 											}
 											// Forward any trailing positional args after flags so verbs
 											// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -3348,6 +10859,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											args["--template"] = c.String("template")
 											args["--type"] = c.String("type")
 											args["--validate"] = c.String("validate")
+											if c.IsSet("as") {
+												args["--as"] = c.String("as")
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													positional = append(positional, v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												args["--as-uid"] = c.String("as-uid")
+											}
+											if c.IsSet("cache-dir") {
+												args["--cache-dir"] = c.String("cache-dir")
+											}
+											if c.IsSet("certificate-authority") {
+												args["--certificate-authority"] = c.String("certificate-authority")
+											}
+											if c.IsSet("client-certificate") {
+												args["--client-certificate"] = c.String("client-certificate")
+											}
+											if c.IsSet("client-key") {
+												args["--client-key"] = c.String("client-key")
+											}
+											if c.IsSet("cluster") {
+												args["--cluster"] = c.String("cluster")
+											}
+											if c.IsSet("context") {
+												args["--context"] = c.String("context")
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													args["--disable-compression"] = "true"
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													args["--insecure-skip-tls-verify"] = "true"
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												args["--kubeconfig"] = c.String("kubeconfig")
+											}
+											if c.IsSet("log-flush-frequency") {
+												args["--log-flush-frequency"] = c.String("log-flush-frequency")
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													args["--match-server-version"] = "true"
+												}
+											}
+											if c.IsSet("namespace") {
+												args["--namespace"] = c.String("namespace")
+											}
+											if c.IsSet("password") {
+												args["--password"] = c.String("password")
+											}
+											if c.IsSet("profile") {
+												args["--profile"] = c.String("profile")
+											}
+											if c.IsSet("profile-output") {
+												args["--profile-output"] = c.String("profile-output")
+											}
+											if c.IsSet("request-timeout") {
+												args["--request-timeout"] = c.String("request-timeout")
+											}
+											if c.IsSet("server") {
+												args["--server"] = c.String("server")
+											}
+											if c.IsSet("tls-server-name") {
+												args["--tls-server-name"] = c.String("tls-server-name")
+											}
+											if c.IsSet("token") {
+												args["--token"] = c.String("token")
+											}
+											if c.IsSet("user") {
+												args["--user"] = c.String("user")
+											}
+											if c.IsSet("username") {
+												args["--username"] = c.String("username")
+											}
+											if c.IsSet("vmodule") {
+												args["--vmodule"] = c.String("vmodule")
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													args["--warnings-as-errors"] = "true"
+												}
+											}
 											positional = append(positional, c.Args().Slice()...)
 											return args, positional
 										},
@@ -3406,6 +11005,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											if c.IsSet("validate") {
 												argv = append(argv, "--validate", c.String("validate"))
 											}
+											if c.IsSet("as") {
+												argv = append(argv, "--as", c.String("as"))
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													argv = append(argv, "--as-group", v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												argv = append(argv, "--as-uid", c.String("as-uid"))
+											}
+											if c.IsSet("cache-dir") {
+												argv = append(argv, "--cache-dir", c.String("cache-dir"))
+											}
+											if c.IsSet("certificate-authority") {
+												argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+											}
+											if c.IsSet("client-certificate") {
+												argv = append(argv, "--client-certificate", c.String("client-certificate"))
+											}
+											if c.IsSet("client-key") {
+												argv = append(argv, "--client-key", c.String("client-key"))
+											}
+											if c.IsSet("cluster") {
+												argv = append(argv, "--cluster", c.String("cluster"))
+											}
+											if c.IsSet("context") {
+												argv = append(argv, "--context", c.String("context"))
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													argv = append(argv, "--disable-compression")
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													argv = append(argv, "--insecure-skip-tls-verify")
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+											}
+											if c.IsSet("log-flush-frequency") {
+												argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													argv = append(argv, "--match-server-version")
+												}
+											}
+											if c.IsSet("namespace") {
+												argv = append(argv, "--namespace", c.String("namespace"))
+											}
+											if c.IsSet("password") {
+												argv = append(argv, "--password", c.String("password"))
+											}
+											if c.IsSet("profile") {
+												argv = append(argv, "--profile", c.String("profile"))
+											}
+											if c.IsSet("profile-output") {
+												argv = append(argv, "--profile-output", c.String("profile-output"))
+											}
+											if c.IsSet("request-timeout") {
+												argv = append(argv, "--request-timeout", c.String("request-timeout"))
+											}
+											if c.IsSet("server") {
+												argv = append(argv, "--server", c.String("server"))
+											}
+											if c.IsSet("tls-server-name") {
+												argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+											}
+											if c.IsSet("token") {
+												argv = append(argv, "--token", c.String("token"))
+											}
+											if c.IsSet("user") {
+												argv = append(argv, "--user", c.String("user"))
+											}
+											if c.IsSet("username") {
+												argv = append(argv, "--username", c.String("username"))
+											}
+											if c.IsSet("vmodule") {
+												argv = append(argv, "--vmodule", c.String("vmodule"))
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													argv = append(argv, "--warnings-as-errors")
+												}
+											}
 											// Forward any trailing positional args after flags so verbs
 											// like "gh api <endpoint>", "kubectl get <resource>", and
 											// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -3459,6 +11146,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											}
 											args["--template"] = c.String("template")
 											args["--validate"] = c.String("validate")
+											if c.IsSet("as") {
+												args["--as"] = c.String("as")
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													positional = append(positional, v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												args["--as-uid"] = c.String("as-uid")
+											}
+											if c.IsSet("cache-dir") {
+												args["--cache-dir"] = c.String("cache-dir")
+											}
+											if c.IsSet("certificate-authority") {
+												args["--certificate-authority"] = c.String("certificate-authority")
+											}
+											if c.IsSet("client-certificate") {
+												args["--client-certificate"] = c.String("client-certificate")
+											}
+											if c.IsSet("client-key") {
+												args["--client-key"] = c.String("client-key")
+											}
+											if c.IsSet("cluster") {
+												args["--cluster"] = c.String("cluster")
+											}
+											if c.IsSet("context") {
+												args["--context"] = c.String("context")
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													args["--disable-compression"] = "true"
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													args["--insecure-skip-tls-verify"] = "true"
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												args["--kubeconfig"] = c.String("kubeconfig")
+											}
+											if c.IsSet("log-flush-frequency") {
+												args["--log-flush-frequency"] = c.String("log-flush-frequency")
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													args["--match-server-version"] = "true"
+												}
+											}
+											if c.IsSet("namespace") {
+												args["--namespace"] = c.String("namespace")
+											}
+											if c.IsSet("password") {
+												args["--password"] = c.String("password")
+											}
+											if c.IsSet("profile") {
+												args["--profile"] = c.String("profile")
+											}
+											if c.IsSet("profile-output") {
+												args["--profile-output"] = c.String("profile-output")
+											}
+											if c.IsSet("request-timeout") {
+												args["--request-timeout"] = c.String("request-timeout")
+											}
+											if c.IsSet("server") {
+												args["--server"] = c.String("server")
+											}
+											if c.IsSet("tls-server-name") {
+												args["--tls-server-name"] = c.String("tls-server-name")
+											}
+											if c.IsSet("token") {
+												args["--token"] = c.String("token")
+											}
+											if c.IsSet("user") {
+												args["--user"] = c.String("user")
+											}
+											if c.IsSet("username") {
+												args["--username"] = c.String("username")
+											}
+											if c.IsSet("vmodule") {
+												args["--vmodule"] = c.String("vmodule")
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													args["--warnings-as-errors"] = "true"
+												}
+											}
 											positional = append(positional, c.Args().Slice()...)
 											return args, positional
 										},
@@ -3504,6 +11279,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											}
 											if c.IsSet("validate") {
 												argv = append(argv, "--validate", c.String("validate"))
+											}
+											if c.IsSet("as") {
+												argv = append(argv, "--as", c.String("as"))
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													argv = append(argv, "--as-group", v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												argv = append(argv, "--as-uid", c.String("as-uid"))
+											}
+											if c.IsSet("cache-dir") {
+												argv = append(argv, "--cache-dir", c.String("cache-dir"))
+											}
+											if c.IsSet("certificate-authority") {
+												argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+											}
+											if c.IsSet("client-certificate") {
+												argv = append(argv, "--client-certificate", c.String("client-certificate"))
+											}
+											if c.IsSet("client-key") {
+												argv = append(argv, "--client-key", c.String("client-key"))
+											}
+											if c.IsSet("cluster") {
+												argv = append(argv, "--cluster", c.String("cluster"))
+											}
+											if c.IsSet("context") {
+												argv = append(argv, "--context", c.String("context"))
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													argv = append(argv, "--disable-compression")
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													argv = append(argv, "--insecure-skip-tls-verify")
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+											}
+											if c.IsSet("log-flush-frequency") {
+												argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													argv = append(argv, "--match-server-version")
+												}
+											}
+											if c.IsSet("namespace") {
+												argv = append(argv, "--namespace", c.String("namespace"))
+											}
+											if c.IsSet("password") {
+												argv = append(argv, "--password", c.String("password"))
+											}
+											if c.IsSet("profile") {
+												argv = append(argv, "--profile", c.String("profile"))
+											}
+											if c.IsSet("profile-output") {
+												argv = append(argv, "--profile-output", c.String("profile-output"))
+											}
+											if c.IsSet("request-timeout") {
+												argv = append(argv, "--request-timeout", c.String("request-timeout"))
+											}
+											if c.IsSet("server") {
+												argv = append(argv, "--server", c.String("server"))
+											}
+											if c.IsSet("tls-server-name") {
+												argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+											}
+											if c.IsSet("token") {
+												argv = append(argv, "--token", c.String("token"))
+											}
+											if c.IsSet("user") {
+												argv = append(argv, "--user", c.String("user"))
+											}
+											if c.IsSet("username") {
+												argv = append(argv, "--username", c.String("username"))
+											}
+											if c.IsSet("vmodule") {
+												argv = append(argv, "--vmodule", c.String("vmodule"))
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													argv = append(argv, "--warnings-as-errors")
+												}
 											}
 											// Forward any trailing positional args after flags so verbs
 											// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -3562,6 +11425,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											}
 											args["--template"] = c.String("template")
 											args["--validate"] = c.String("validate")
+											if c.IsSet("as") {
+												args["--as"] = c.String("as")
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													positional = append(positional, v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												args["--as-uid"] = c.String("as-uid")
+											}
+											if c.IsSet("cache-dir") {
+												args["--cache-dir"] = c.String("cache-dir")
+											}
+											if c.IsSet("certificate-authority") {
+												args["--certificate-authority"] = c.String("certificate-authority")
+											}
+											if c.IsSet("client-certificate") {
+												args["--client-certificate"] = c.String("client-certificate")
+											}
+											if c.IsSet("client-key") {
+												args["--client-key"] = c.String("client-key")
+											}
+											if c.IsSet("cluster") {
+												args["--cluster"] = c.String("cluster")
+											}
+											if c.IsSet("context") {
+												args["--context"] = c.String("context")
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													args["--disable-compression"] = "true"
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													args["--insecure-skip-tls-verify"] = "true"
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												args["--kubeconfig"] = c.String("kubeconfig")
+											}
+											if c.IsSet("log-flush-frequency") {
+												args["--log-flush-frequency"] = c.String("log-flush-frequency")
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													args["--match-server-version"] = "true"
+												}
+											}
+											if c.IsSet("namespace") {
+												args["--namespace"] = c.String("namespace")
+											}
+											if c.IsSet("password") {
+												args["--password"] = c.String("password")
+											}
+											if c.IsSet("profile") {
+												args["--profile"] = c.String("profile")
+											}
+											if c.IsSet("profile-output") {
+												args["--profile-output"] = c.String("profile-output")
+											}
+											if c.IsSet("request-timeout") {
+												args["--request-timeout"] = c.String("request-timeout")
+											}
+											if c.IsSet("server") {
+												args["--server"] = c.String("server")
+											}
+											if c.IsSet("tls-server-name") {
+												args["--tls-server-name"] = c.String("tls-server-name")
+											}
+											if c.IsSet("token") {
+												args["--token"] = c.String("token")
+											}
+											if c.IsSet("user") {
+												args["--user"] = c.String("user")
+											}
+											if c.IsSet("username") {
+												args["--username"] = c.String("username")
+											}
+											if c.IsSet("vmodule") {
+												args["--vmodule"] = c.String("vmodule")
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													args["--warnings-as-errors"] = "true"
+												}
+											}
 											positional = append(positional, c.Args().Slice()...)
 											return args, positional
 										},
@@ -3604,6 +11555,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											}
 											if c.IsSet("validate") {
 												argv = append(argv, "--validate", c.String("validate"))
+											}
+											if c.IsSet("as") {
+												argv = append(argv, "--as", c.String("as"))
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													argv = append(argv, "--as-group", v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												argv = append(argv, "--as-uid", c.String("as-uid"))
+											}
+											if c.IsSet("cache-dir") {
+												argv = append(argv, "--cache-dir", c.String("cache-dir"))
+											}
+											if c.IsSet("certificate-authority") {
+												argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+											}
+											if c.IsSet("client-certificate") {
+												argv = append(argv, "--client-certificate", c.String("client-certificate"))
+											}
+											if c.IsSet("client-key") {
+												argv = append(argv, "--client-key", c.String("client-key"))
+											}
+											if c.IsSet("cluster") {
+												argv = append(argv, "--cluster", c.String("cluster"))
+											}
+											if c.IsSet("context") {
+												argv = append(argv, "--context", c.String("context"))
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													argv = append(argv, "--disable-compression")
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													argv = append(argv, "--insecure-skip-tls-verify")
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+											}
+											if c.IsSet("log-flush-frequency") {
+												argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													argv = append(argv, "--match-server-version")
+												}
+											}
+											if c.IsSet("namespace") {
+												argv = append(argv, "--namespace", c.String("namespace"))
+											}
+											if c.IsSet("password") {
+												argv = append(argv, "--password", c.String("password"))
+											}
+											if c.IsSet("profile") {
+												argv = append(argv, "--profile", c.String("profile"))
+											}
+											if c.IsSet("profile-output") {
+												argv = append(argv, "--profile-output", c.String("profile-output"))
+											}
+											if c.IsSet("request-timeout") {
+												argv = append(argv, "--request-timeout", c.String("request-timeout"))
+											}
+											if c.IsSet("server") {
+												argv = append(argv, "--server", c.String("server"))
+											}
+											if c.IsSet("tls-server-name") {
+												argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+											}
+											if c.IsSet("token") {
+												argv = append(argv, "--token", c.String("token"))
+											}
+											if c.IsSet("user") {
+												argv = append(argv, "--user", c.String("user"))
+											}
+											if c.IsSet("username") {
+												argv = append(argv, "--username", c.String("username"))
+											}
+											if c.IsSet("vmodule") {
+												argv = append(argv, "--vmodule", c.String("vmodule"))
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													argv = append(argv, "--warnings-as-errors")
+												}
 											}
 											// Forward any trailing positional args after flags so verbs
 											// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -3656,6 +11695,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											}
 											args["--template"] = c.String("template")
 											args["--validate"] = c.String("validate")
+											if c.IsSet("as") {
+												args["--as"] = c.String("as")
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													positional = append(positional, v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												args["--as-uid"] = c.String("as-uid")
+											}
+											if c.IsSet("cache-dir") {
+												args["--cache-dir"] = c.String("cache-dir")
+											}
+											if c.IsSet("certificate-authority") {
+												args["--certificate-authority"] = c.String("certificate-authority")
+											}
+											if c.IsSet("client-certificate") {
+												args["--client-certificate"] = c.String("client-certificate")
+											}
+											if c.IsSet("client-key") {
+												args["--client-key"] = c.String("client-key")
+											}
+											if c.IsSet("cluster") {
+												args["--cluster"] = c.String("cluster")
+											}
+											if c.IsSet("context") {
+												args["--context"] = c.String("context")
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													args["--disable-compression"] = "true"
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													args["--insecure-skip-tls-verify"] = "true"
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												args["--kubeconfig"] = c.String("kubeconfig")
+											}
+											if c.IsSet("log-flush-frequency") {
+												args["--log-flush-frequency"] = c.String("log-flush-frequency")
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													args["--match-server-version"] = "true"
+												}
+											}
+											if c.IsSet("namespace") {
+												args["--namespace"] = c.String("namespace")
+											}
+											if c.IsSet("password") {
+												args["--password"] = c.String("password")
+											}
+											if c.IsSet("profile") {
+												args["--profile"] = c.String("profile")
+											}
+											if c.IsSet("profile-output") {
+												args["--profile-output"] = c.String("profile-output")
+											}
+											if c.IsSet("request-timeout") {
+												args["--request-timeout"] = c.String("request-timeout")
+											}
+											if c.IsSet("server") {
+												args["--server"] = c.String("server")
+											}
+											if c.IsSet("tls-server-name") {
+												args["--tls-server-name"] = c.String("tls-server-name")
+											}
+											if c.IsSet("token") {
+												args["--token"] = c.String("token")
+											}
+											if c.IsSet("user") {
+												args["--user"] = c.String("user")
+											}
+											if c.IsSet("username") {
+												args["--username"] = c.String("username")
+											}
+											if c.IsSet("vmodule") {
+												args["--vmodule"] = c.String("vmodule")
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													args["--warnings-as-errors"] = "true"
+												}
+											}
 											positional = append(positional, c.Args().Slice()...)
 											return args, positional
 										},
@@ -3698,6 +11825,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											}
 											if c.IsSet("validate") {
 												argv = append(argv, "--validate", c.String("validate"))
+											}
+											if c.IsSet("as") {
+												argv = append(argv, "--as", c.String("as"))
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													argv = append(argv, "--as-group", v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												argv = append(argv, "--as-uid", c.String("as-uid"))
+											}
+											if c.IsSet("cache-dir") {
+												argv = append(argv, "--cache-dir", c.String("cache-dir"))
+											}
+											if c.IsSet("certificate-authority") {
+												argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+											}
+											if c.IsSet("client-certificate") {
+												argv = append(argv, "--client-certificate", c.String("client-certificate"))
+											}
+											if c.IsSet("client-key") {
+												argv = append(argv, "--client-key", c.String("client-key"))
+											}
+											if c.IsSet("cluster") {
+												argv = append(argv, "--cluster", c.String("cluster"))
+											}
+											if c.IsSet("context") {
+												argv = append(argv, "--context", c.String("context"))
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													argv = append(argv, "--disable-compression")
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													argv = append(argv, "--insecure-skip-tls-verify")
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+											}
+											if c.IsSet("log-flush-frequency") {
+												argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													argv = append(argv, "--match-server-version")
+												}
+											}
+											if c.IsSet("namespace") {
+												argv = append(argv, "--namespace", c.String("namespace"))
+											}
+											if c.IsSet("password") {
+												argv = append(argv, "--password", c.String("password"))
+											}
+											if c.IsSet("profile") {
+												argv = append(argv, "--profile", c.String("profile"))
+											}
+											if c.IsSet("profile-output") {
+												argv = append(argv, "--profile-output", c.String("profile-output"))
+											}
+											if c.IsSet("request-timeout") {
+												argv = append(argv, "--request-timeout", c.String("request-timeout"))
+											}
+											if c.IsSet("server") {
+												argv = append(argv, "--server", c.String("server"))
+											}
+											if c.IsSet("tls-server-name") {
+												argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+											}
+											if c.IsSet("token") {
+												argv = append(argv, "--token", c.String("token"))
+											}
+											if c.IsSet("user") {
+												argv = append(argv, "--user", c.String("user"))
+											}
+											if c.IsSet("username") {
+												argv = append(argv, "--username", c.String("username"))
+											}
+											if c.IsSet("vmodule") {
+												argv = append(argv, "--vmodule", c.String("vmodule"))
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													argv = append(argv, "--warnings-as-errors")
+												}
 											}
 											// Forward any trailing positional args after flags so verbs
 											// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -3748,6 +11963,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											}
 											args["--template"] = c.String("template")
 											args["--validate"] = c.String("validate")
+											if c.IsSet("as") {
+												args["--as"] = c.String("as")
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													positional = append(positional, v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												args["--as-uid"] = c.String("as-uid")
+											}
+											if c.IsSet("cache-dir") {
+												args["--cache-dir"] = c.String("cache-dir")
+											}
+											if c.IsSet("certificate-authority") {
+												args["--certificate-authority"] = c.String("certificate-authority")
+											}
+											if c.IsSet("client-certificate") {
+												args["--client-certificate"] = c.String("client-certificate")
+											}
+											if c.IsSet("client-key") {
+												args["--client-key"] = c.String("client-key")
+											}
+											if c.IsSet("cluster") {
+												args["--cluster"] = c.String("cluster")
+											}
+											if c.IsSet("context") {
+												args["--context"] = c.String("context")
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													args["--disable-compression"] = "true"
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													args["--insecure-skip-tls-verify"] = "true"
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												args["--kubeconfig"] = c.String("kubeconfig")
+											}
+											if c.IsSet("log-flush-frequency") {
+												args["--log-flush-frequency"] = c.String("log-flush-frequency")
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													args["--match-server-version"] = "true"
+												}
+											}
+											if c.IsSet("namespace") {
+												args["--namespace"] = c.String("namespace")
+											}
+											if c.IsSet("password") {
+												args["--password"] = c.String("password")
+											}
+											if c.IsSet("profile") {
+												args["--profile"] = c.String("profile")
+											}
+											if c.IsSet("profile-output") {
+												args["--profile-output"] = c.String("profile-output")
+											}
+											if c.IsSet("request-timeout") {
+												args["--request-timeout"] = c.String("request-timeout")
+											}
+											if c.IsSet("server") {
+												args["--server"] = c.String("server")
+											}
+											if c.IsSet("tls-server-name") {
+												args["--tls-server-name"] = c.String("tls-server-name")
+											}
+											if c.IsSet("token") {
+												args["--token"] = c.String("token")
+											}
+											if c.IsSet("user") {
+												args["--user"] = c.String("user")
+											}
+											if c.IsSet("username") {
+												args["--username"] = c.String("username")
+											}
+											if c.IsSet("vmodule") {
+												args["--vmodule"] = c.String("vmodule")
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													args["--warnings-as-errors"] = "true"
+												}
+											}
 											positional = append(positional, c.Args().Slice()...)
 											return args, positional
 										},
@@ -3787,6 +12090,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											}
 											if c.IsSet("validate") {
 												argv = append(argv, "--validate", c.String("validate"))
+											}
+											if c.IsSet("as") {
+												argv = append(argv, "--as", c.String("as"))
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													argv = append(argv, "--as-group", v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												argv = append(argv, "--as-uid", c.String("as-uid"))
+											}
+											if c.IsSet("cache-dir") {
+												argv = append(argv, "--cache-dir", c.String("cache-dir"))
+											}
+											if c.IsSet("certificate-authority") {
+												argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+											}
+											if c.IsSet("client-certificate") {
+												argv = append(argv, "--client-certificate", c.String("client-certificate"))
+											}
+											if c.IsSet("client-key") {
+												argv = append(argv, "--client-key", c.String("client-key"))
+											}
+											if c.IsSet("cluster") {
+												argv = append(argv, "--cluster", c.String("cluster"))
+											}
+											if c.IsSet("context") {
+												argv = append(argv, "--context", c.String("context"))
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													argv = append(argv, "--disable-compression")
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													argv = append(argv, "--insecure-skip-tls-verify")
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+											}
+											if c.IsSet("log-flush-frequency") {
+												argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													argv = append(argv, "--match-server-version")
+												}
+											}
+											if c.IsSet("namespace") {
+												argv = append(argv, "--namespace", c.String("namespace"))
+											}
+											if c.IsSet("password") {
+												argv = append(argv, "--password", c.String("password"))
+											}
+											if c.IsSet("profile") {
+												argv = append(argv, "--profile", c.String("profile"))
+											}
+											if c.IsSet("profile-output") {
+												argv = append(argv, "--profile-output", c.String("profile-output"))
+											}
+											if c.IsSet("request-timeout") {
+												argv = append(argv, "--request-timeout", c.String("request-timeout"))
+											}
+											if c.IsSet("server") {
+												argv = append(argv, "--server", c.String("server"))
+											}
+											if c.IsSet("tls-server-name") {
+												argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+											}
+											if c.IsSet("token") {
+												argv = append(argv, "--token", c.String("token"))
+											}
+											if c.IsSet("user") {
+												argv = append(argv, "--user", c.String("user"))
+											}
+											if c.IsSet("username") {
+												argv = append(argv, "--username", c.String("username"))
+											}
+											if c.IsSet("vmodule") {
+												argv = append(argv, "--vmodule", c.String("vmodule"))
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													argv = append(argv, "--warnings-as-errors")
+												}
 											}
 											// Forward any trailing positional args after flags so verbs
 											// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -3839,6 +12230,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											}
 											args["--template"] = c.String("template")
 											args["--validate"] = c.String("validate")
+											if c.IsSet("as") {
+												args["--as"] = c.String("as")
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													positional = append(positional, v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												args["--as-uid"] = c.String("as-uid")
+											}
+											if c.IsSet("cache-dir") {
+												args["--cache-dir"] = c.String("cache-dir")
+											}
+											if c.IsSet("certificate-authority") {
+												args["--certificate-authority"] = c.String("certificate-authority")
+											}
+											if c.IsSet("client-certificate") {
+												args["--client-certificate"] = c.String("client-certificate")
+											}
+											if c.IsSet("client-key") {
+												args["--client-key"] = c.String("client-key")
+											}
+											if c.IsSet("cluster") {
+												args["--cluster"] = c.String("cluster")
+											}
+											if c.IsSet("context") {
+												args["--context"] = c.String("context")
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													args["--disable-compression"] = "true"
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													args["--insecure-skip-tls-verify"] = "true"
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												args["--kubeconfig"] = c.String("kubeconfig")
+											}
+											if c.IsSet("log-flush-frequency") {
+												args["--log-flush-frequency"] = c.String("log-flush-frequency")
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													args["--match-server-version"] = "true"
+												}
+											}
+											if c.IsSet("namespace") {
+												args["--namespace"] = c.String("namespace")
+											}
+											if c.IsSet("password") {
+												args["--password"] = c.String("password")
+											}
+											if c.IsSet("profile") {
+												args["--profile"] = c.String("profile")
+											}
+											if c.IsSet("profile-output") {
+												args["--profile-output"] = c.String("profile-output")
+											}
+											if c.IsSet("request-timeout") {
+												args["--request-timeout"] = c.String("request-timeout")
+											}
+											if c.IsSet("server") {
+												args["--server"] = c.String("server")
+											}
+											if c.IsSet("tls-server-name") {
+												args["--tls-server-name"] = c.String("tls-server-name")
+											}
+											if c.IsSet("token") {
+												args["--token"] = c.String("token")
+											}
+											if c.IsSet("user") {
+												args["--user"] = c.String("user")
+											}
+											if c.IsSet("username") {
+												args["--username"] = c.String("username")
+											}
+											if c.IsSet("vmodule") {
+												args["--vmodule"] = c.String("vmodule")
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													args["--warnings-as-errors"] = "true"
+												}
+											}
 											positional = append(positional, c.Args().Slice()...)
 											return args, positional
 										},
@@ -3881,6 +12360,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											}
 											if c.IsSet("validate") {
 												argv = append(argv, "--validate", c.String("validate"))
+											}
+											if c.IsSet("as") {
+												argv = append(argv, "--as", c.String("as"))
+											}
+											if c.IsSet("as-group") {
+												for _, v := range c.StringSlice("as-group") {
+													argv = append(argv, "--as-group", v)
+												}
+											}
+											if c.IsSet("as-uid") {
+												argv = append(argv, "--as-uid", c.String("as-uid"))
+											}
+											if c.IsSet("cache-dir") {
+												argv = append(argv, "--cache-dir", c.String("cache-dir"))
+											}
+											if c.IsSet("certificate-authority") {
+												argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+											}
+											if c.IsSet("client-certificate") {
+												argv = append(argv, "--client-certificate", c.String("client-certificate"))
+											}
+											if c.IsSet("client-key") {
+												argv = append(argv, "--client-key", c.String("client-key"))
+											}
+											if c.IsSet("cluster") {
+												argv = append(argv, "--cluster", c.String("cluster"))
+											}
+											if c.IsSet("context") {
+												argv = append(argv, "--context", c.String("context"))
+											}
+											if c.IsSet("disable-compression") {
+												if c.Bool("disable-compression") {
+													argv = append(argv, "--disable-compression")
+												}
+											}
+											if c.IsSet("insecure-skip-tls-verify") {
+												if c.Bool("insecure-skip-tls-verify") {
+													argv = append(argv, "--insecure-skip-tls-verify")
+												}
+											}
+											if c.IsSet("kubeconfig") {
+												argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+											}
+											if c.IsSet("log-flush-frequency") {
+												argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+											}
+											if c.IsSet("match-server-version") {
+												if c.Bool("match-server-version") {
+													argv = append(argv, "--match-server-version")
+												}
+											}
+											if c.IsSet("namespace") {
+												argv = append(argv, "--namespace", c.String("namespace"))
+											}
+											if c.IsSet("password") {
+												argv = append(argv, "--password", c.String("password"))
+											}
+											if c.IsSet("profile") {
+												argv = append(argv, "--profile", c.String("profile"))
+											}
+											if c.IsSet("profile-output") {
+												argv = append(argv, "--profile-output", c.String("profile-output"))
+											}
+											if c.IsSet("request-timeout") {
+												argv = append(argv, "--request-timeout", c.String("request-timeout"))
+											}
+											if c.IsSet("server") {
+												argv = append(argv, "--server", c.String("server"))
+											}
+											if c.IsSet("tls-server-name") {
+												argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+											}
+											if c.IsSet("token") {
+												argv = append(argv, "--token", c.String("token"))
+											}
+											if c.IsSet("user") {
+												argv = append(argv, "--user", c.String("user"))
+											}
+											if c.IsSet("username") {
+												argv = append(argv, "--username", c.String("username"))
+											}
+											if c.IsSet("vmodule") {
+												argv = append(argv, "--vmodule", c.String("vmodule"))
+											}
+											if c.IsSet("warnings-as-errors") {
+												if c.Bool("warnings-as-errors") {
+													argv = append(argv, "--warnings-as-errors")
+												}
 											}
 											// Forward any trailing positional args after flags so verbs
 											// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -3929,6 +12496,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									args["--template"] = c.String("template")
 									args["--validate"] = c.String("validate")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -3963,6 +12618,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("validate") {
 										argv = append(argv, "--validate", c.String("validate"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -4011,6 +12754,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -4048,6 +12879,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -4124,6 +13043,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							if c.Bool("wait") {
 								args["--wait"] = "true"
 							}
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -4196,6 +13203,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									argv = append(argv, "--wait")
 								}
 							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
+							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
 							// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -4241,6 +13336,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							if c.Bool("show-events") {
 								args["--show-events"] = "true"
 							}
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -4273,6 +13456,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							if c.IsSet("show-events") {
 								if c.Bool("show-events") {
 									argv = append(argv, "--show-events")
+								}
+							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
 								}
 							}
 							// Forward any trailing positional args after flags so verbs
@@ -4332,6 +13603,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							if c.Bool("show-managed-fields") {
 								args["--show-managed-fields"] = "true"
 							}
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -4379,6 +13738,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							if c.IsSet("show-managed-fields") {
 								if c.Bool("show-managed-fields") {
 									argv = append(argv, "--show-managed-fields")
+								}
+							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
 								}
 							}
 							// Forward any trailing positional args after flags so verbs
@@ -4434,6 +13881,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							args["--selector"] = c.String("selector")
 							args["--skip-wait-for-delete-timeout"] = strconv.Itoa(int(c.Int("skip-wait-for-delete-timeout")))
 							args["--timeout"] = c.String("timeout")
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -4479,6 +14014,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							}
 							if c.IsSet("timeout") {
 								argv = append(argv, "--timeout", c.String("timeout"))
+							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
 							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -4535,6 +14158,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							if c.Bool("watch") {
 								args["--watch"] = "true"
 							}
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -4582,6 +14293,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									argv = append(argv, "--watch")
 								}
 							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
+							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
 							// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -4613,6 +14412,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							if c.Bool("recursive") {
 								args["--recursive"] = "true"
 							}
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -4627,6 +14514,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							if c.IsSet("recursive") {
 								if c.Bool("recursive") {
 									argv = append(argv, "--recursive")
+								}
+							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
 								}
 							}
 							// Forward any trailing positional args after flags so verbs
@@ -4708,6 +14683,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							args["--target-port"] = c.String("target-port")
 							args["--template"] = c.String("template")
 							args["--type"] = c.String("type")
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -4791,6 +14854,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							}
 							if c.IsSet("type") {
 								argv = append(argv, "--type", c.String("type"))
+							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
 							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -4888,6 +15039,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							}
 							if c.Bool("watch-only") {
 								args["--watch-only"] = "true"
+							}
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
 							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
@@ -4991,6 +15230,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									argv = append(argv, "--watch-only")
 								}
 							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
+							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
 							// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -5066,6 +15393,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 								args["--show-managed-fields"] = "true"
 							}
 							args["--template"] = c.String("template")
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -5140,6 +15555,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							if c.IsSet("template") {
 								argv = append(argv, "--template", c.String("template"))
 							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
+							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
 							// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -5207,6 +15710,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							if c.Bool("timestamps") {
 								args["--timestamps"] = "true"
 							}
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -5271,6 +15862,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									argv = append(argv, "--timestamps")
 								}
 							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
+							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
 							// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -5332,6 +16011,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							args["--subresource"] = c.String("subresource")
 							args["--template"] = c.String("template")
 							args["--type"] = c.String("type")
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -5389,6 +16156,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							if c.IsSet("type") {
 								argv = append(argv, "--type", c.String("type"))
 							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
+							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
 							// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -5442,6 +16297,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -5481,6 +16424,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -5531,6 +16562,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -5570,6 +16689,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -5620,6 +16827,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -5659,6 +16954,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -5709,6 +17092,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -5748,6 +17219,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -5792,6 +17351,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("watch") {
 										args["--watch"] = "true"
 									}
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -5822,6 +17469,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("watch") {
 										if c.Bool("watch") {
 											argv = append(argv, "--watch")
+										}
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
 										}
 									}
 									// Forward any trailing positional args after flags so verbs
@@ -5875,6 +17610,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									args["--template"] = c.String("template")
 									args["--to-revision"] = strconv.Itoa(int(c.Int("to-revision")))
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -5917,6 +17740,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("to-revision") {
 										argv = append(argv, "--to-revision", strconv.Itoa(int(c.Int("to-revision"))))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -5981,6 +17892,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							}
 							args["--template"] = c.String("template")
 							args["--timeout"] = c.String("timeout")
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -6037,6 +18036,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							}
 							if c.IsSet("timeout") {
 								argv = append(argv, "--timeout", c.String("timeout"))
+							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
 							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -6127,6 +18214,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -6214,6 +18389,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
 									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -6273,6 +18536,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -6325,6 +18676,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -6391,6 +18830,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -6453,6 +18980,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
 									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -6510,6 +19125,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -6559,6 +19262,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -6617,6 +19408,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 										args["--show-managed-fields"] = "true"
 									}
 									args["--template"] = c.String("template")
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -6666,6 +19545,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									}
 									if c.IsSet("template") {
 										argv = append(argv, "--template", c.String("template"))
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
 									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -6738,6 +19705,91 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									for _, v := range c.StringSlice("user") {
 										positional = append(positional, v)
 									}
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -6806,6 +19858,91 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--user", v)
 										}
 									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -6859,6 +19996,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							}
 							args["--template"] = c.String("template")
 							args["--validate"] = c.String("validate")
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -6901,6 +20126,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							}
 							if c.IsSet("validate") {
 								argv = append(argv, "--validate", c.String("validate"))
+							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
 							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -6945,6 +20258,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("use-protocol-buffers") {
 										args["--use-protocol-buffers"] = "true"
 									}
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -6969,6 +20370,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.IsSet("use-protocol-buffers") {
 										if c.Bool("use-protocol-buffers") {
 											argv = append(argv, "--use-protocol-buffers")
+										}
+									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
 										}
 									}
 									// Forward any trailing positional args after flags so verbs
@@ -7020,6 +20509,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 									if c.Bool("use-protocol-buffers") {
 										args["--use-protocol-buffers"] = "true"
 									}
+									if c.IsSet("as") {
+										args["--as"] = c.String("as")
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											positional = append(positional, v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										args["--as-uid"] = c.String("as-uid")
+									}
+									if c.IsSet("cache-dir") {
+										args["--cache-dir"] = c.String("cache-dir")
+									}
+									if c.IsSet("certificate-authority") {
+										args["--certificate-authority"] = c.String("certificate-authority")
+									}
+									if c.IsSet("client-certificate") {
+										args["--client-certificate"] = c.String("client-certificate")
+									}
+									if c.IsSet("client-key") {
+										args["--client-key"] = c.String("client-key")
+									}
+									if c.IsSet("cluster") {
+										args["--cluster"] = c.String("cluster")
+									}
+									if c.IsSet("context") {
+										args["--context"] = c.String("context")
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											args["--disable-compression"] = "true"
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											args["--insecure-skip-tls-verify"] = "true"
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										args["--kubeconfig"] = c.String("kubeconfig")
+									}
+									if c.IsSet("log-flush-frequency") {
+										args["--log-flush-frequency"] = c.String("log-flush-frequency")
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											args["--match-server-version"] = "true"
+										}
+									}
+									if c.IsSet("namespace") {
+										args["--namespace"] = c.String("namespace")
+									}
+									if c.IsSet("password") {
+										args["--password"] = c.String("password")
+									}
+									if c.IsSet("profile") {
+										args["--profile"] = c.String("profile")
+									}
+									if c.IsSet("profile-output") {
+										args["--profile-output"] = c.String("profile-output")
+									}
+									if c.IsSet("request-timeout") {
+										args["--request-timeout"] = c.String("request-timeout")
+									}
+									if c.IsSet("server") {
+										args["--server"] = c.String("server")
+									}
+									if c.IsSet("tls-server-name") {
+										args["--tls-server-name"] = c.String("tls-server-name")
+									}
+									if c.IsSet("token") {
+										args["--token"] = c.String("token")
+									}
+									if c.IsSet("user") {
+										args["--user"] = c.String("user")
+									}
+									if c.IsSet("username") {
+										args["--username"] = c.String("username")
+									}
+									if c.IsSet("vmodule") {
+										args["--vmodule"] = c.String("vmodule")
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											args["--warnings-as-errors"] = "true"
+										}
+									}
 									positional = append(positional, c.Args().Slice()...)
 									return args, positional
 								},
@@ -7059,6 +20636,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 											argv = append(argv, "--use-protocol-buffers")
 										}
 									}
+									if c.IsSet("as") {
+										argv = append(argv, "--as", c.String("as"))
+									}
+									if c.IsSet("as-group") {
+										for _, v := range c.StringSlice("as-group") {
+											argv = append(argv, "--as-group", v)
+										}
+									}
+									if c.IsSet("as-uid") {
+										argv = append(argv, "--as-uid", c.String("as-uid"))
+									}
+									if c.IsSet("cache-dir") {
+										argv = append(argv, "--cache-dir", c.String("cache-dir"))
+									}
+									if c.IsSet("certificate-authority") {
+										argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+									}
+									if c.IsSet("client-certificate") {
+										argv = append(argv, "--client-certificate", c.String("client-certificate"))
+									}
+									if c.IsSet("client-key") {
+										argv = append(argv, "--client-key", c.String("client-key"))
+									}
+									if c.IsSet("cluster") {
+										argv = append(argv, "--cluster", c.String("cluster"))
+									}
+									if c.IsSet("context") {
+										argv = append(argv, "--context", c.String("context"))
+									}
+									if c.IsSet("disable-compression") {
+										if c.Bool("disable-compression") {
+											argv = append(argv, "--disable-compression")
+										}
+									}
+									if c.IsSet("insecure-skip-tls-verify") {
+										if c.Bool("insecure-skip-tls-verify") {
+											argv = append(argv, "--insecure-skip-tls-verify")
+										}
+									}
+									if c.IsSet("kubeconfig") {
+										argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+									}
+									if c.IsSet("log-flush-frequency") {
+										argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+									}
+									if c.IsSet("match-server-version") {
+										if c.Bool("match-server-version") {
+											argv = append(argv, "--match-server-version")
+										}
+									}
+									if c.IsSet("namespace") {
+										argv = append(argv, "--namespace", c.String("namespace"))
+									}
+									if c.IsSet("password") {
+										argv = append(argv, "--password", c.String("password"))
+									}
+									if c.IsSet("profile") {
+										argv = append(argv, "--profile", c.String("profile"))
+									}
+									if c.IsSet("profile-output") {
+										argv = append(argv, "--profile-output", c.String("profile-output"))
+									}
+									if c.IsSet("request-timeout") {
+										argv = append(argv, "--request-timeout", c.String("request-timeout"))
+									}
+									if c.IsSet("server") {
+										argv = append(argv, "--server", c.String("server"))
+									}
+									if c.IsSet("tls-server-name") {
+										argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+									}
+									if c.IsSet("token") {
+										argv = append(argv, "--token", c.String("token"))
+									}
+									if c.IsSet("user") {
+										argv = append(argv, "--user", c.String("user"))
+									}
+									if c.IsSet("username") {
+										argv = append(argv, "--username", c.String("username"))
+									}
+									if c.IsSet("vmodule") {
+										argv = append(argv, "--vmodule", c.String("vmodule"))
+									}
+									if c.IsSet("warnings-as-errors") {
+										if c.Bool("warnings-as-errors") {
+											argv = append(argv, "--warnings-as-errors")
+										}
+									}
 									// Forward any trailing positional args after flags so verbs
 									// like "gh api <endpoint>", "kubectl get <resource>", and
 									// "aws s3 cp <src> <dst>" reach the underlying tool.
@@ -7088,6 +20753,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							_ = positional
 							args["--dry-run"] = c.String("dry-run")
 							args["--selector"] = c.String("selector")
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -7098,6 +20851,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							}
 							if c.IsSet("selector") {
 								argv = append(argv, "--selector", c.String("selector"))
+							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
 							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and
@@ -7162,6 +21003,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							}
 							args["--template"] = c.String("template")
 							args["--timeout"] = c.String("timeout")
+							if c.IsSet("as") {
+								args["--as"] = c.String("as")
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									positional = append(positional, v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								args["--as-uid"] = c.String("as-uid")
+							}
+							if c.IsSet("cache-dir") {
+								args["--cache-dir"] = c.String("cache-dir")
+							}
+							if c.IsSet("certificate-authority") {
+								args["--certificate-authority"] = c.String("certificate-authority")
+							}
+							if c.IsSet("client-certificate") {
+								args["--client-certificate"] = c.String("client-certificate")
+							}
+							if c.IsSet("client-key") {
+								args["--client-key"] = c.String("client-key")
+							}
+							if c.IsSet("cluster") {
+								args["--cluster"] = c.String("cluster")
+							}
+							if c.IsSet("context") {
+								args["--context"] = c.String("context")
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									args["--disable-compression"] = "true"
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									args["--insecure-skip-tls-verify"] = "true"
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								args["--kubeconfig"] = c.String("kubeconfig")
+							}
+							if c.IsSet("log-flush-frequency") {
+								args["--log-flush-frequency"] = c.String("log-flush-frequency")
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									args["--match-server-version"] = "true"
+								}
+							}
+							if c.IsSet("namespace") {
+								args["--namespace"] = c.String("namespace")
+							}
+							if c.IsSet("password") {
+								args["--password"] = c.String("password")
+							}
+							if c.IsSet("profile") {
+								args["--profile"] = c.String("profile")
+							}
+							if c.IsSet("profile-output") {
+								args["--profile-output"] = c.String("profile-output")
+							}
+							if c.IsSet("request-timeout") {
+								args["--request-timeout"] = c.String("request-timeout")
+							}
+							if c.IsSet("server") {
+								args["--server"] = c.String("server")
+							}
+							if c.IsSet("tls-server-name") {
+								args["--tls-server-name"] = c.String("tls-server-name")
+							}
+							if c.IsSet("token") {
+								args["--token"] = c.String("token")
+							}
+							if c.IsSet("user") {
+								args["--user"] = c.String("user")
+							}
+							if c.IsSet("username") {
+								args["--username"] = c.String("username")
+							}
+							if c.IsSet("vmodule") {
+								args["--vmodule"] = c.String("vmodule")
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									args["--warnings-as-errors"] = "true"
+								}
+							}
 							positional = append(positional, c.Args().Slice()...)
 							return args, positional
 						},
@@ -7219,6 +21148,94 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 							}
 							if c.IsSet("timeout") {
 								argv = append(argv, "--timeout", c.String("timeout"))
+							}
+							if c.IsSet("as") {
+								argv = append(argv, "--as", c.String("as"))
+							}
+							if c.IsSet("as-group") {
+								for _, v := range c.StringSlice("as-group") {
+									argv = append(argv, "--as-group", v)
+								}
+							}
+							if c.IsSet("as-uid") {
+								argv = append(argv, "--as-uid", c.String("as-uid"))
+							}
+							if c.IsSet("cache-dir") {
+								argv = append(argv, "--cache-dir", c.String("cache-dir"))
+							}
+							if c.IsSet("certificate-authority") {
+								argv = append(argv, "--certificate-authority", c.String("certificate-authority"))
+							}
+							if c.IsSet("client-certificate") {
+								argv = append(argv, "--client-certificate", c.String("client-certificate"))
+							}
+							if c.IsSet("client-key") {
+								argv = append(argv, "--client-key", c.String("client-key"))
+							}
+							if c.IsSet("cluster") {
+								argv = append(argv, "--cluster", c.String("cluster"))
+							}
+							if c.IsSet("context") {
+								argv = append(argv, "--context", c.String("context"))
+							}
+							if c.IsSet("disable-compression") {
+								if c.Bool("disable-compression") {
+									argv = append(argv, "--disable-compression")
+								}
+							}
+							if c.IsSet("insecure-skip-tls-verify") {
+								if c.Bool("insecure-skip-tls-verify") {
+									argv = append(argv, "--insecure-skip-tls-verify")
+								}
+							}
+							if c.IsSet("kubeconfig") {
+								argv = append(argv, "--kubeconfig", c.String("kubeconfig"))
+							}
+							if c.IsSet("log-flush-frequency") {
+								argv = append(argv, "--log-flush-frequency", c.String("log-flush-frequency"))
+							}
+							if c.IsSet("match-server-version") {
+								if c.Bool("match-server-version") {
+									argv = append(argv, "--match-server-version")
+								}
+							}
+							if c.IsSet("namespace") {
+								argv = append(argv, "--namespace", c.String("namespace"))
+							}
+							if c.IsSet("password") {
+								argv = append(argv, "--password", c.String("password"))
+							}
+							if c.IsSet("profile") {
+								argv = append(argv, "--profile", c.String("profile"))
+							}
+							if c.IsSet("profile-output") {
+								argv = append(argv, "--profile-output", c.String("profile-output"))
+							}
+							if c.IsSet("request-timeout") {
+								argv = append(argv, "--request-timeout", c.String("request-timeout"))
+							}
+							if c.IsSet("server") {
+								argv = append(argv, "--server", c.String("server"))
+							}
+							if c.IsSet("tls-server-name") {
+								argv = append(argv, "--tls-server-name", c.String("tls-server-name"))
+							}
+							if c.IsSet("token") {
+								argv = append(argv, "--token", c.String("token"))
+							}
+							if c.IsSet("user") {
+								argv = append(argv, "--user", c.String("user"))
+							}
+							if c.IsSet("username") {
+								argv = append(argv, "--username", c.String("username"))
+							}
+							if c.IsSet("vmodule") {
+								argv = append(argv, "--vmodule", c.String("vmodule"))
+							}
+							if c.IsSet("warnings-as-errors") {
+								if c.Bool("warnings-as-errors") {
+									argv = append(argv, "--warnings-as-errors")
+								}
 							}
 							// Forward any trailing positional args after flags so verbs
 							// like "gh api <endpoint>", "kubectl get <resource>", and

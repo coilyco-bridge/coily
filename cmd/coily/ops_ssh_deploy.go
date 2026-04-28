@@ -26,11 +26,15 @@ type deployTarget struct {
 	// checkout that should be fast-forwarded before the installer runs.
 	RepoDir string
 	// Script is the absolute path on the remote host of the install
-	// script that runs as root via sudo. Each entry needs a matching
-	// NOPASSWD sudoers line for zero-prompt repeat deploys; mismatch
-	// fails closed (the -n attempt is denied and we fall back to
-	// interactive prompt).
+	// script. When NoSudo is false the script is invoked as
+	// `sudo bash <script>` and needs a matching NOPASSWD sudoers line
+	// for zero-prompt repeat deploys; when NoSudo is true the script
+	// runs as the ssh user.
 	Script string
+	// NoSudo skips the sudo dance and runs the install script as the
+	// plain ssh user. Use this for installers whose file ops all live
+	// in user-owned paths (e.g. dropping a mod into /home/kai/...).
+	NoSudo bool
 }
 
 // deployTargets is the closed allowlist of deploy verbs. New entries
@@ -47,9 +51,12 @@ var deployTargets = []deployTarget{
 		// not from a source checkout. RepoDir points at infrastructure
 		// so the install script itself is fast-forwarded on each
 		// deploy; the install script then curls the release asset.
+		// Drops files into /home/kai/Steam/... which is kai-owned, so
+		// no sudo needed.
 		Name:    "eco-telemetry",
 		RepoDir: "/home/kai/projects/coilysiren/infrastructure",
 		Script:  "/home/kai/projects/coilysiren/infrastructure/scripts/install-eco-telemetry.sh",
+		NoSudo:  true,
 	},
 }
 
@@ -116,6 +123,16 @@ func (r *Runner) runDeploy(ctx context.Context, host, user string, t deployTarge
 	fmt.Fprintf(os.Stderr, "deploy %s: %s\n", t.Name, strings.Join(pullArgv, " "))
 	if err := r.SSH.Stream(ctx, host, user, strings.Join(pullArgv, " "), os.Stdout, os.Stderr); err != nil {
 		return fmt.Errorf("ssh deploy %s: git pull: %w", t.Name, err)
+	}
+
+	// Phase 2 (no-sudo path): just run the script as the ssh user.
+	if t.NoSudo {
+		runArgv := []string{"bash", t.Script}
+		fmt.Fprintf(os.Stderr, "deploy %s: %s\n", t.Name, strings.Join(runArgv, " "))
+		if err := r.SSH.Stream(ctx, host, user, strings.Join(runArgv, " "), os.Stdout, os.Stderr); err != nil {
+			return fmt.Errorf("ssh deploy %s: install: %w", t.Name, err)
+		}
+		return nil
 	}
 
 	// Phase 2a: try sudo -n. If NOPASSWD covers the script, this

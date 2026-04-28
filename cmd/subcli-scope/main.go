@@ -68,9 +68,10 @@ type Scope struct {
 // "int", flagTypeStringSlice; the codegen in cmd/gen-passthrough emits a matching
 // cli.*Flag for each. Detection is heuristic and falls back to "string".
 type Flag struct {
-	Name string `yaml:"name"`
-	Help string `yaml:"help,omitempty"`
-	Type string `yaml:"type,omitempty"`
+	Name    string   `yaml:"name"`
+	Help    string   `yaml:"help,omitempty"`
+	Type    string   `yaml:"type,omitempty"`
+	Aliases []string `yaml:"aliases,omitempty"`
 }
 
 type Command struct {
@@ -82,10 +83,16 @@ type Command struct {
 }
 
 type Manifest struct {
-	Binary     string    `yaml:"binary"`
-	BinVersion string    `yaml:"bin_version,omitempty"`
-	ScannedAt  string    `yaml:"scanned_at"`
-	Commands   []Command `yaml:"commands"`
+	Binary     string `yaml:"binary"`
+	BinVersion string `yaml:"bin_version,omitempty"`
+	ScannedAt  string `yaml:"scanned_at"`
+	// Globals are flags accepted by every verb of the underlying CLI. Not
+	// every binary publishes a separate global-options listing; populated
+	// only for binaries with a known fetcher (currently kubectl via
+	// `kubectl options`). Empty for binaries whose globals are inlined into
+	// per-verb help (aws, gh).
+	Globals  []Flag    `yaml:"globals,omitempty"`
+	Commands []Command `yaml:"commands"`
 }
 
 // HelpFetcher returns the help-text output for a given subcommand path of a
@@ -118,6 +125,7 @@ func main() {
 		Binary:     bin,
 		BinVersion: binVersion(bin),
 		ScannedAt:  time.Now().UTC().Format(time.RFC3339),
+		Globals:    fetchGlobals(bin),
 		Commands:   Scan(bin, scope, fetch),
 	}
 
@@ -168,6 +176,16 @@ func loadScope(bin string) (*Scope, error) {
 		return nil, fmt.Errorf("scope mode must be 'allow' or 'deny', got %q", s.Mode)
 	}
 	return &s, nil
+}
+
+// fetchGlobals returns globals for binaries that publish them in a separate
+// listing rather than inlining them into per-verb help. Returns nil for any
+// binary without a known fetcher.
+func fetchGlobals(bin string) []Flag {
+	if filepath.Base(bin) == "kubectl" {
+		return fetchKubectlGlobals(bin)
+	}
+	return nil
 }
 
 func binVersion(bin string) string {
@@ -660,6 +678,62 @@ func ghType(placeholder, desc string) string {
 //
 // The default value after `=` is the type tell.
 var kubectlFlagLineRE = regexp.MustCompile(`^\s{2,8}(?:-[a-zA-Z],\s+)?(--[a-z][a-zA-Z0-9-]*)=(.*?):\s*$`)
+
+// kubectlGlobalLineRE is like kubectlFlagLineRE but also captures the short
+// alias (group 1) when present. Used by parseKubectlGlobals to keep -n /
+// --namespace and -s / --server reachable through the wrapper.
+var kubectlGlobalLineRE = regexp.MustCompile(`^\s{2,8}(?:-([a-zA-Z]),\s+)?(--[a-z][a-zA-Z0-9-]*)=(.*?):\s*$`)
+
+// parseKubectlGlobals parses the body of `kubectl options` (no "Options:"
+// header — the entire output is one flag block prefaced by "The following
+// options can be passed to any command:"). Returns flags in source order
+// with aliases attached. Skips `--v` because urfave/cli/v3 treats a
+// single-letter long flag as a short flag and a v-as-short clashes with
+// the verbose flag pattern across CLIs; users can fall back to bare
+// kubectl for log-level tuning.
+func parseKubectlGlobals(help string) []Flag {
+	scanner := bufio.NewScanner(strings.NewReader(help))
+	scanner.Buffer(make([]byte, 64*1024), 1024*1024)
+	seen := map[string]bool{}
+	var out []Flag
+	for scanner.Scan() {
+		line := scanner.Text()
+		m := kubectlGlobalLineRE.FindStringSubmatch(line)
+		if m == nil {
+			continue
+		}
+		alias := m[1]
+		name := m[2]
+		def := strings.TrimSpace(m[3])
+		if name == "--v" {
+			continue
+		}
+		if seen[name] {
+			continue
+		}
+		seen[name] = true
+		f := Flag{Name: name, Type: kubectlType(def)}
+		if alias != "" {
+			f.Aliases = []string{alias}
+		}
+		out = append(out, f)
+	}
+	return out
+}
+
+// fetchKubectlGlobals runs `kubectl options` (no help suffix — the
+// subcommand IS the listing) and returns the parsed global flags.
+func fetchKubectlGlobals(bin string) []Flag {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, bin, "options")
+	cmd.Env = append(os.Environ(), "PAGER=cat", "TERM=dumb")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil
+	}
+	return parseKubectlGlobals(stripOverstrike(string(out)))
+}
 
 func flagsFromKubectlStyle(help string) []Flag {
 	if !strings.Contains(help, "\nOptions:\n") {

@@ -27,6 +27,11 @@ import (
 type Manifest struct {
 	Binary   string            `yaml:"binary"`
 	Commands []ManifestCommand `yaml:"commands"`
+	// Globals are flags accepted by every verb of the underlying CLI (e.g.
+	// kubectl's --context / --kubeconfig / --namespace). Rendered as
+	// non-Local flags on the root cli.Command so urfave/cli/v3 propagates
+	// them to every subcommand, and forwarded into argv from each leaf.
+	Globals []ManifestFlag `yaml:"globals,omitempty"`
 }
 
 type ManifestCommand struct {
@@ -37,8 +42,9 @@ type ManifestCommand struct {
 }
 
 type ManifestFlag struct {
-	Name string `yaml:"name"`
-	Type string `yaml:"type,omitempty"`
+	Name    string   `yaml:"name"`
+	Type    string   `yaml:"type,omitempty"`
+	Aliases []string `yaml:"aliases,omitempty"`
 }
 
 func main() {
@@ -90,10 +96,11 @@ func runOne(binary string) {
 // FlagKind is the cli.*Flag constructor (StringFlag, BoolFlag, IntFlag,
 // StringSliceFlag).
 type flagSpec struct {
-	Bare     string // "method"
-	Long     string // "--method"
-	Type     string // "string", "bool", "int", "stringSlice"
-	FlagKind string // "StringFlag" | "BoolFlag" | "IntFlag" | "StringSliceFlag"
+	Bare     string   // "method"
+	Long     string   // "--method"
+	Type     string   // "string", "bool", "int", "stringSlice"
+	FlagKind string   // "StringFlag" | "BoolFlag" | "IntFlag" | "StringSliceFlag"
+	Aliases  []string // short names without the leading "-", e.g. ["n"] for --namespace
 }
 
 // tree is the intermediate structure the template walks to render nested
@@ -104,6 +111,29 @@ type tree struct {
 	Help     string
 	Flags    []flagSpec
 	Children []*tree
+}
+
+// effectiveGlobals returns globals minus any whose name collides with a
+// locally-defined leaf flag. urfave/cli/v3 silently drops a persistent flag
+// when the child redefines the same name (see command_parse.go), so we must
+// also skip forwarding it from the globals loop or the leaf would emit the
+// flag twice.
+func effectiveGlobals(local []flagSpec, globals []flagSpec) []flagSpec {
+	if len(globals) == 0 {
+		return nil
+	}
+	taken := make(map[string]struct{}, len(local))
+	for _, f := range local {
+		taken[f.Bare] = struct{}{}
+	}
+	out := make([]flagSpec, 0, len(globals))
+	for _, g := range globals {
+		if _, dup := taken[g.Bare]; dup {
+			continue
+		}
+		out = append(out, g)
+	}
+	return out
 }
 
 func buildTree(m Manifest) *tree {
@@ -165,11 +195,16 @@ func makeFlagSpec(f ManifestFlag) flagSpec {
 	case flagTypeStringSlice:
 		kind = "StringSliceFlag"
 	}
+	aliases := make([]string, 0, len(f.Aliases))
+	for _, a := range f.Aliases {
+		aliases = append(aliases, strings.TrimLeft(a, "-"))
+	}
 	return flagSpec{
 		Bare:     bare,
 		Long:     "--" + bare,
 		Type:     t,
 		FlagKind: kind,
+		Aliases:  aliases,
 	}
 }
 
@@ -185,20 +220,27 @@ func sanitize(s string) string {
 func render(m Manifest) (string, error) {
 	t := buildTree(m)
 	funcs := template.FuncMap{
-		"goString":   goString,
-		"dottedPath": dottedPath,
-		"join":       strings.Join,
-		"args":       func(v ...any) []any { return v },
+		"goString":         goString,
+		"dottedPath":       dottedPath,
+		"join":             strings.Join,
+		"args":             func(v ...any) []any { return v },
+		"effectiveGlobals": effectiveGlobals,
 	}
 	tpl, err := template.New("gen").Funcs(funcs).Parse(tmpl)
 	if err != nil {
 		return "", err
 	}
+	globals := make([]flagSpec, 0, len(m.Globals))
+	for _, f := range m.Globals {
+		globals = append(globals, makeFlagSpec(f))
+	}
+
 	var sb strings.Builder
 	data := map[string]any{
 		"Binary":  m.Binary,
 		"Package": m.Binary,
 		"Root":    t,
+		"Globals": globals,
 	}
 	if err := tpl.Execute(&sb, data); err != nil {
 		return "", err
@@ -242,11 +284,21 @@ const BinaryName = {{.Binary | goString}}
 // logging apply uniformly.
 func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
-		Name:     BinaryName,
-		Usage:    "Pass-through to " + BinaryName + ".",
+		Name:  BinaryName,
+		Usage: "Pass-through to " + BinaryName + ".",
+{{- if .Globals}}
+		// Global flags accepted by every verb of {{.Binary}}. urfave/cli/v3
+		// flags propagate to subcommands by default, so leaves can read
+		// these via c.IsSet/c.String/etc. and forward them into argv.
+		Flags: []cli.Flag{
+		{{- range .Globals}}
+			&cli.{{.FlagKind}}{Name: {{.Bare | goString}}{{if .Aliases}}, Aliases: []string{ {{range .Aliases}}{{. | goString}}, {{end}} }{{end}} },
+		{{- end}}
+		},
+{{- end}}
 		Commands: []*cli.Command{
 {{- range .Root.Children}}
-			{{template "cmd" (args . $.Binary $.Root.Name)}},
+			{{template "cmd" (args . $.Binary $.Root.Name $.Globals)}},
 {{- end}}
 		},
 	}
@@ -256,6 +308,7 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 {{- $node := index . 0 -}}
 {{- $binary := index . 1 -}}
 {{- $rootName := index . 2 -}}
+{{- $globals := index . 3 -}}
 &cli.Command{
 	Name: {{$node.Name | goString}},
 	Usage: {{$node.Help | goString}},
@@ -269,10 +322,11 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 {{- if $node.Children}}
 	Commands: []*cli.Command{
 	{{- range $node.Children}}
-		{{template "cmd" (args . $binary $rootName)}},
+		{{template "cmd" (args . $binary $rootName $globals)}},
 	{{- end}}
 	},
 {{- else}}
+	{{- $leafGlobals := effectiveGlobals $node.Flags $globals}}
 	Action: verb.Wrap(
 		verb.Spec{
 			Name: {{dottedPath $binary $node.Path | goString}},
@@ -295,12 +349,46 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 				args[{{.Long | goString}}] = c.String({{.Bare | goString}})
 				{{- end}}
 				{{- end}}
+				{{- range $leafGlobals}}
+				if c.IsSet({{.Bare | goString}}) {
+				{{- if eq .Type "bool"}}
+					if c.Bool({{.Bare | goString}}) {
+						args[{{.Long | goString}}] = "true"
+					}
+				{{- else if eq .Type "int"}}
+					args[{{.Long | goString}}] = strconv.Itoa(int(c.Int({{.Bare | goString}})))
+				{{- else if eq .Type "stringSlice"}}
+					for _, v := range c.StringSlice({{.Bare | goString}}) {
+						positional = append(positional, v)
+					}
+				{{- else}}
+					args[{{.Long | goString}}] = c.String({{.Bare | goString}})
+				{{- end}}
+				}
+				{{- end}}
 				positional = append(positional, c.Args().Slice()...)
 				return args, positional
 			},
 			Action: func(ctx context.Context, c *cli.Command) error {
 				argv := []string{ {{range $node.Path}}{{. | goString}}, {{end}} }
 				{{- range $node.Flags}}
+				if c.IsSet({{.Bare | goString}}) {
+				{{- if eq .Type "bool"}}
+					if c.Bool({{.Bare | goString}}) {
+						argv = append(argv, {{.Long | goString}})
+					}
+				{{- else if eq .Type "int"}}
+					argv = append(argv, {{.Long | goString}}, strconv.Itoa(int(c.Int({{.Bare | goString}}))))
+				{{- else if eq .Type "stringSlice"}}
+					for _, v := range c.StringSlice({{.Bare | goString}}) {
+						argv = append(argv, {{.Long | goString}}, v)
+					}
+				{{- else}}
+					argv = append(argv, {{.Long | goString}}, c.String({{.Bare | goString}}))
+				{{- end}}
+				}
+				{{- end}}
+				{{- range $leafGlobals}}
 				if c.IsSet({{.Bare | goString}}) {
 				{{- if eq .Type "bool"}}
 					if c.Bool({{.Bare | goString}}) {
