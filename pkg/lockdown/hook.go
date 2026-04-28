@@ -50,6 +50,19 @@ func extractBashDenyPrefixes(deny []string) []string {
 // per-Bash-call subprocess overhead beyond /bin/sh starting up. Re-run
 // `coily lockdown --apply --replace` to regenerate after the deny list
 // changes; the contract is one regen per coily release.
+//
+// TODO: revisit once Claude Code Desktop honors permissions.deny again.
+// Tracking issues upstream:
+//   - https://github.com/anthropics/claude-code/issues/29026 (Desktop
+//     ignores settings.json permissions on macOS)
+//   - https://github.com/anthropics/claude-code/issues/38662 (Desktop
+//     ignores bypassPermissions; same matcher path)
+//
+// When the upstream Bash matcher fires on Desktop, this whole script
+// becomes dead weight on the CLI (defense-in-depth there) and removable
+// outright on Desktop. Test before deleting: stage a deny rule, run a
+// matching command in Desktop agent mode, confirm the built-in matcher
+// blocks it without the hook installed.
 func RenderHookScript(d *Defaults) (string, error) {
 	prefixes := extractBashDenyPrefixes(d.Deny)
 	if len(prefixes) == 0 {

@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"golang.org/x/term"
 )
@@ -69,7 +70,7 @@ func Zero(b []byte) {
 // transport does not forward locale, so the C-locale strings apply.
 func PasswordRequired(stderr string) bool {
 	for _, sentinel := range passwordSentinels {
-		if contains(stderr, sentinel) {
+		if strings.Contains(stderr, sentinel) {
 			return true
 		}
 	}
@@ -80,22 +81,4 @@ var passwordSentinels = []string{
 	"a password is required",
 	"a terminal is required",
 	"sorry, a password is required",
-}
-
-// contains is a tiny strings.Contains stand-in to avoid pulling in
-// strings just for the substring check; keeps the package's import
-// surface to {errors, fmt, os, x/term}.
-func contains(haystack, needle string) bool {
-	if len(needle) == 0 {
-		return true
-	}
-	if len(haystack) < len(needle) {
-		return false
-	}
-	for i := 0; i+len(needle) <= len(haystack); i++ {
-		if haystack[i:i+len(needle)] == needle {
-			return true
-		}
-	}
-	return false
 }
