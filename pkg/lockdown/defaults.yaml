@@ -106,15 +106,28 @@ deny:
 
   # Build runners that dispatch to arbitrary targets.
   - Bash(make:*)
-  - Bash(npm:*)
-  - Bash(pnpm:*)
-  - Bash(yarn:*)
-  - Bash(cargo run:*)
   - Bash(just:*)
   - Bash(task:*)
   - Bash(invoke:*)
   - Bash(nox:*)
   - Bash(tox:*)
+
+  # Package managers. Wrapped as thin pass-throughs by coily so every
+  # install / add / remove / run lands in the audit log and goes through
+  # argv validation. The bare binaries are denied here so the agent can
+  # only reach them via `coily <pkgmgr> ...`. bun is also denied above
+  # under "scripting interpreters" - same prefix, one rule covers both.
+  - Bash(npm:*)
+  - Bash(pnpm:*)
+  - Bash(yarn:*)
+  - Bash(uv:*)
+  - Bash(pip:*)
+  - Bash(pipx:*)
+  - Bash(poetry:*)
+  - Bash(cargo:*)
+  - Bash(gem:*)
+  - Bash(bundle:*)
+  - Bash(brew:*)
 
   # kubectl write verbs. These go through coily k8s, which policy-checks and
   # audits them.

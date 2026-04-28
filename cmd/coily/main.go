@@ -155,7 +155,7 @@ func run(r *Runner, argv []string) error {
 // they are wired in. Adding a verb means writing the file and appending its
 // builder here.
 func (r *Runner) builtInCommands() []*cli.Command {
-	return []*cli.Command{
+	cmds := []*cli.Command{
 		r.versionCommand(),
 		r.whoamiCommand(),
 		r.lockdownCommand(),
@@ -174,4 +174,6 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.trelloCommand(),
 		r.auditCommand(),
 	}
+	cmds = append(cmds, r.pkgmgrCommands()...)
+	return cmds
 }

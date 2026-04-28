@@ -1963,6 +1963,22 @@ Returns a set of temporary credentials for an Amazon Web Services account or IAM
 
 Flags: --ca-bundle, --cli-auto-prompt, --cli-binary-format, --cli-connect-timeout, --cli-input-json, --cli-read-timeout, --color, --debug, --duration-seconds, --endpoint-url, --generate-cli-skeleton, --no-cli-auto-prompt, --no-cli-pager, --no-paginate, --no-sign-request, --no-verify-ssl, --output, --profile, --query, --region, --serial-number, --token-code, --version
 
+## `coily brew`
+
+Pass-through to brew with argv validation + audit log.
+
+## `coily bun`
+
+Pass-through to bun with argv validation + audit log.
+
+## `coily bundle`
+
+Pass-through to bundle with argv validation + audit log.
+
+## `coily cargo`
+
+Pass-through to cargo with argv validation + audit log.
+
 ## `coily core-keeper restart`
 
 Restart the core-keeper-server unit.
@@ -2500,6 +2516,10 @@ Flags: --configs-dir, --seed
 Copy Configs/WorldGenerator.eco to --target.
 
 Flags: --configs-dir, --target
+
+## `coily gem`
+
+Pass-through to gem with argv validation + audit log.
 
 ## `coily gh api`
 
@@ -3493,6 +3513,26 @@ GET /games/{game-id}/mods
 
 Flags: --limit, --offset
 
+## `coily npm`
+
+Pass-through to npm with argv validation + audit log.
+
+## `coily pip`
+
+Pass-through to pip with argv validation + audit log.
+
+## `coily pipx`
+
+Pass-through to pipx with argv validation + audit log.
+
+## `coily pnpm`
+
+Pass-through to pnpm with argv validation + audit log.
+
+## `coily poetry`
+
+Pass-through to poetry with argv validation + audit log.
+
 ## `coily setup`
 
 Run the post-upgrade rituals: completion, skill symlink, and lockdown re-baseline.
@@ -3743,6 +3783,10 @@ Mutate one Trello card (move list, toggle labels, append a comment, rename, clos
 
 Flags: --close, --comment, --desc, --dir, --label-off, --label-on, --list, --name, --reopen
 
+## `coily uv`
+
+Pass-through to uv with argv validation + audit log.
+
 ## `coily version`
 
 Print the build version and exit.
@@ -3750,3 +3794,7 @@ Print the build version and exit.
 ## `coily whoami`
 
 Print the authenticated identity coily sees across aws, kubectl, and gh.
+
+## `coily yarn`
+
+Pass-through to yarn with argv validation + audit log.
