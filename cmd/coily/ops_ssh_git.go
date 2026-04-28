@@ -41,6 +41,9 @@ var gitVerbs = []struct {
 	{"diff", "Run git diff in <repo-path> (read-only, unstaged changes).", func(p string) []string {
 		return []string{"git", "-C", p, "diff"}
 	}},
+	{"update-index", "Run git update-index --refresh in <repo-path> (clears stat-stale phantom-dirty entries; mutates only the index's cached-stat column).", func(p string) []string {
+		return []string{"git", "-C", p, "update-index", "--refresh"}
+	}},
 }
 
 func (r *Runner) sshGitCommand() *cli.Command {

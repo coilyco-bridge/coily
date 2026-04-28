@@ -291,6 +291,12 @@ Run git status --short --branch in <repo-path>.
 
 Flags: --host, --user
 
+## `coily ssh git update-index`
+
+Run git update-index --refresh in <repo-path> (clears stat-stale phantom-dirty entries; mutates only the index's cached-stat column).
+
+Flags: --host, --user
+
 ## `coily ssh grep`
 
 Run grep -F -- '<pattern>' <path> (fixed-string match).
