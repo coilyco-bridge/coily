@@ -42,6 +42,15 @@ var deployTargets = []deployTarget{
 		RepoDir: "/home/kai/projects/coilysiren/repo-recall",
 		Script:  "/home/kai/projects/coilysiren/infrastructure/scripts/install-repo-recall.sh",
 	},
+	{
+		// eco-telemetry deploys from the latest GitHub release zip,
+		// not from a source checkout. RepoDir points at infrastructure
+		// so the install script itself is fast-forwarded on each
+		// deploy; the install script then curls the release asset.
+		Name:    "eco-telemetry",
+		RepoDir: "/home/kai/projects/coilysiren/infrastructure",
+		Script:  "/home/kai/projects/coilysiren/infrastructure/scripts/install-eco-telemetry.sh",
+	},
 }
 
 func (r *Runner) sshDeployCommand() *cli.Command {

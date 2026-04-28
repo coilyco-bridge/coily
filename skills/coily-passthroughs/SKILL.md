@@ -3545,6 +3545,12 @@ Upload a local file to the remote via sftp.
 
 Flags: --host, --user
 
+## `coily ssh deploy eco-telemetry`
+
+Fast-forward /home/kai/projects/coilysiren/infrastructure and run /home/kai/projects/coilysiren/infrastructure/scripts/install-eco-telemetry.sh as root.
+
+Flags: --host, --user
+
 ## `coily ssh deploy repo-recall`
 
 Fast-forward /home/kai/projects/coilysiren/repo-recall and run /home/kai/projects/coilysiren/infrastructure/scripts/install-repo-recall.sh as root.
