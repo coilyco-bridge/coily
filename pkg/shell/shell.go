@@ -4,11 +4,14 @@
 // the argv slice explicitly and the argv is guarded by policy.ValidateArg at
 // the verb layer.
 //
-// Production runs use FetchingResolver (see tools.go). It consults an
-// in-tree manifest (tools.yaml) and a per-user download cache instead of
-// $PATH. PATH is intentionally not trusted - an agent who swaps
-// /usr/local/bin/aws is ignored. PathResolver is kept for tests and for
-// any caller that genuinely wants $PATH.
+// Binary resolution is via $PATH. coily used to ship a manifest of pinned
+// binaries (aws/gh/kubectl/tailscale) fetched from a GitHub Release and
+// verified by sha256, with $PATH intentionally bypassed. That machinery was
+// removed because the threat it addressed - an attacker with write to a
+// $PATH directory but not to $HOME - is a narrow slice that did not justify
+// the release-pipeline + manifest + per-tool refresh cadence. Argv
+// validation, audit logging, and the lockdown deny list carry the safety
+// boundary now; binary authenticity is the host's problem.
 package shell
 
 import (
@@ -20,7 +23,8 @@ import (
 	"os/exec"
 )
 
-// Resolver turns a binary name into an executable path.
+// Resolver turns a binary name into an executable path. Pluggable so tests
+// can avoid touching the real $PATH.
 type Resolver func(bin string) (string, error)
 
 // PathResolver is the default resolver. Looks the binary up on $PATH.
@@ -30,32 +34,6 @@ func PathResolver(bin string) (string, error) {
 		return "", fmt.Errorf("shell: %s not found on PATH: %w", bin, err)
 	}
 	return p, nil
-}
-
-// PathFallbackResolver wraps a strict primary resolver with a $PATH fallback
-// that only kicks in when the primary fails with ErrToolNotPinned (i.e. the
-// tool simply isn't in the pinned manifest). Any other primary error - SHA
-// placeholder, fetch failure, hash mismatch, missing platform entry -
-// propagates unchanged. The narrow error gate is the security property: a
-// real integrity failure must never be silently bypassed by falling through
-// to whatever lives on PATH.
-//
-// This resolver is for repo-command execution (per-repo coily.yaml verbs
-// like uv, make, pre-commit) where the developer's own toolchain is in
-// scope. The strict pass-through Runner used for aws/gh/kubectl/tailscale
-// must NOT use this - those surfaces are the whole reason coily refuses to
-// trust PATH in the first place.
-func PathFallbackResolver(primary Resolver) Resolver {
-	return func(bin string) (string, error) {
-		p, err := primary(bin)
-		if err == nil {
-			return p, nil
-		}
-		if errors.Is(err, ErrToolNotPinned) {
-			return PathResolver(bin)
-		}
-		return "", err
-	}
 }
 
 // Runner executes subprocesses on behalf of coily verbs. Build one in main

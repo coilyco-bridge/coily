@@ -4,9 +4,8 @@
 // The underlying tooling is a Node project at ~/projects/coilysiren/message-ops
 // invoked via `npm run trello:<verb>`. The checkout path is resolved from the
 // --dir flag, then $COILY_MESSAGE_OPS_DIR, then the workspace default
-// ~/projects/coilysiren/message-ops. npm itself is not pinned in coily's tools
-// manifest, so this package uses the RepoRunner (PathFallback resolver) to
-// find it on $PATH the same way uv / make / pre-commit are found.
+// ~/projects/coilysiren/message-ops. npm is resolved via $PATH like every
+// other binary coily shells out to.
 //
 // Argv is forwarded verbatim through `npm --prefix <dir> run trello:<verb> --`
 // so the underlying scripts see the same flags they would from a direct shell
@@ -39,8 +38,7 @@ const (
 	DefaultRelPath = "projects/coilysiren/message-ops"
 )
 
-// Command returns the cli.Command tree for `coily trello`. The runner must be
-// the RepoRunner (PathFallback resolver) so npm can be found on $PATH.
+// Command returns the cli.Command tree for `coily trello`.
 func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  "trello",

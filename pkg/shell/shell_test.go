@@ -48,59 +48,6 @@ func TestCapture_EmptyBinaryErrors(t *testing.T) {
 	}
 }
 
-func TestPathFallbackResolver_PrimarySucceeds(t *testing.T) {
-	calls := 0
-	primary := func(bin string) (string, error) {
-		calls++
-		return "/pinned/" + bin, nil
-	}
-	res := shell.PathFallbackResolver(primary)
-	got, err := res("aws")
-	if err != nil {
-		t.Fatalf("res: %v", err)
-	}
-	if got != "/pinned/aws" {
-		t.Errorf("got %q, want /pinned/aws", got)
-	}
-	if calls != 1 {
-		t.Errorf("primary call count = %d, want 1 (no PATH fallthrough on success)", calls)
-	}
-}
-
-func TestPathFallbackResolver_NotPinnedFallsThrough(t *testing.T) {
-	primary := func(_ string) (string, error) {
-		return "", shell.ErrToolNotPinned
-	}
-	res := shell.PathFallbackResolver(primary)
-	// `sh` is on PATH on every Unix CI runner.
-	got, err := res("sh")
-	if err != nil {
-		t.Fatalf("res: %v", err)
-	}
-	if got == "" {
-		t.Error("PATH fallback returned empty path")
-	}
-}
-
-func TestPathFallbackResolver_OtherErrorPropagates(t *testing.T) {
-	// Security-critical assertion: only ErrToolNotPinned permits PATH
-	// fallthrough. Any other error (sha mismatch, fetch failure, missing
-	// platform) must propagate so an integrity failure cannot be silently
-	// bypassed by reaching for whatever is on PATH.
-	sentinel := errors.New("shell: sha mismatch (synthetic)")
-	primary := func(_ string) (string, error) {
-		return "", sentinel
-	}
-	res := shell.PathFallbackResolver(primary)
-	_, err := res("aws")
-	if err == nil {
-		t.Fatal("res: nil error, want propagated sentinel")
-	}
-	if !errors.Is(err, sentinel) {
-		t.Errorf("err = %v, want errors.Is(sentinel)", err)
-	}
-}
-
 func TestResolve_PluggedInReplacesPathLookup(t *testing.T) {
 	called := 0
 	r := &shell.Runner{
