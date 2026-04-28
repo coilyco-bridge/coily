@@ -213,6 +213,12 @@ Run the post-upgrade rituals: completion, skill symlink, and lockdown re-baselin
 
 Flags: --skip-completion, --skip-lockdown, --skip-skill, --workspace
 
+## `coily ssh cat`
+
+Run cat <path>.
+
+Flags: --host, --user
+
 ## `coily ssh copy`
 
 Upload a local file to the remote via sftp.
@@ -228,6 +234,12 @@ Flags: --host, --user
 ## `coily ssh deploy repo-recall`
 
 Fast-forward /home/kai/projects/coilysiren/repo-recall and run /home/kai/projects/coilysiren/infrastructure/scripts/install-repo-recall.sh as root.
+
+Flags: --host, --user
+
+## `coily ssh file`
+
+Run file <path>.
 
 Flags: --host, --user
 
@@ -264,6 +276,30 @@ Flags: --host, --user
 ## `coily ssh git status`
 
 Run git status --short --branch in <repo-path>.
+
+Flags: --host, --user
+
+## `coily ssh grep`
+
+Run grep -F -- '<pattern>' <path> (fixed-string match).
+
+Flags: --host, --user
+
+## `coily ssh head`
+
+Run head <path> (first 10 lines).
+
+Flags: --host, --user
+
+## `coily ssh journalctl`
+
+Run journalctl -u <unit> -n <lines> --no-pager on the remote.
+
+Flags: --host, --lines, --user
+
+## `coily ssh ls`
+
+Run ls -la <path>.
 
 Flags: --host, --user
 
@@ -312,6 +348,24 @@ Flags: --host, --user
 ## `coily ssh systemctl stop`
 
 Stop <unit>.
+
+Flags: --host, --user
+
+## `coily ssh tail`
+
+Run tail <path> (last 10 lines).
+
+Flags: --host, --user
+
+## `coily ssh tree`
+
+Run tree -L 2 <path> (depth-limited).
+
+Flags: --host, --user
+
+## `coily ssh wc`
+
+Run wc <path>.
 
 Flags: --host, --user
 

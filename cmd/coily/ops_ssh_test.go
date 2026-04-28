@@ -58,3 +58,27 @@ func TestValidateRepoPath(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateGrepPattern(t *testing.T) {
+	cases := []struct {
+		in      string
+		wantErr bool
+	}{
+		{"", true},
+		{"hello", false},
+		{"two words", false},
+		{"path/to/thing", false},
+		{"version=1.2.3", false},
+		{"-flagy", true},
+		{"has'quote", true},
+		{strings.Repeat("a", 2000), true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.in, func(t *testing.T) {
+			err := validateGrepPattern(tc.in)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("validateGrepPattern(%q) err=%v, wantErr=%v", tc.in, err, tc.wantErr)
+			}
+		})
+	}
+}

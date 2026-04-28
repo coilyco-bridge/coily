@@ -21,6 +21,9 @@ import (
 //   - coily ssh rm-unit <unit>       remove a /etc/systemd/system unit file
 //   - coily ssh git <verb> <path>    fixed verb tree of read/fast-forward git ops
 //   - coily ssh deploy <name>        allowlisted (repo, install-script) pair; fast-forwards source then runs the installer as root via sudo -n with an interactive /dev/tty fallback
+//   - coily ssh ls|tree|cat|head|tail|wc|file <path>   readonly fs inspection on a validated absolute path
+//   - coily ssh grep <pattern> <path>                  fixed-string grep on a validated path
+//   - coily ssh journalctl <unit>    journalctl -u <unit> -n <N> --no-pager (sudo) for a validated unit
 //
 // All of them take fixed argv shapes; nothing inside the wrapper joins user
 // strings into a remote shell command. For the genuinely one-off case where
@@ -39,14 +42,25 @@ func (r *Runner) sshCommand() *cli.Command {
 kai_server.tailscale_host as kai_server.ssh_user (override per-call with
 --host / --user). Free-form remote exec was removed in favor of named
 verbs; see the package doc on ops_ssh.go for the rationale.`,
-		Commands: []*cli.Command{
-			r.sshCopyCommand(),
-			r.sshSystemctlCommand(),
-			r.sshRmUnitCommand(),
-			r.sshGitCommand(),
-			r.sshDeployCommand(),
-		},
+		Commands: r.sshSubcommands(),
 	}
+}
+
+// sshSubcommands assembles the full ssh leaf list. Split out so the
+// flat fs verbs (ls, tree, cat, ...) can splice in alongside the
+// grouped verbs (systemctl, git, deploy) without bloating the parent
+// constructor.
+func (r *Runner) sshSubcommands() []*cli.Command {
+	cmds := []*cli.Command{
+		r.sshCopyCommand(),
+		r.sshSystemctlCommand(),
+		r.sshRmUnitCommand(),
+		r.sshGitCommand(),
+		r.sshDeployCommand(),
+		r.sshJournalctlCommand(),
+	}
+	cmds = append(cmds, r.sshFsCommands()...)
+	return cmds
 }
 
 // sshHostUserFlags returns the flag pair every ssh leaf accepts. Defaults
