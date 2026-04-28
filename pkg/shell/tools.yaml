@@ -6,35 +6,35 @@ tools:
       version: 2.34.38
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-arm64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.pkg
-      sha256: cbef2a9f5076740fb2e31fb39fc9f9f8546027f4765d48af3e79876bdd486c5f
+      sha256: 0d8e330dc7cd7d3f95d4624ec7731404bfa3a0b1d2a13e651883384acd911745
       archive: tar.gz
       entry: dist/aws
     darwin/amd64:
       version: 2.34.38
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-darwin-amd64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.pkg
-      sha256: e7a04fc93d22a8d2471b085bc183b851376e952a3976c3515c48e144b39d05a2
+      sha256: 7b2079608459c099ba9924c360da0495e8734c8c311bebbb21876ddf719a688c
       archive: tar.gz
       entry: dist/aws
     linux/amd64:
       version: 2.34.38
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-linux-amd64.tar.gz
       upstream_url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
-      sha256: 56a9f11acc76114fe0303fa66e8c0f320ed28581ce09b1dabab620c8417be358
+      sha256: 58caaafe39103d65e4bf05e0d059f55d9fd5c361b5c65e201f3e2d5b6258ed43
       archive: tar.gz
       entry: dist/aws
     linux/arm64:
       version: 2.34.38
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-linux-arm64.tar.gz
       upstream_url: https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
-      sha256: 61437708279e789969799681259c9adae820697232bcee54507918f0f69ec26f
+      sha256: ec11087b96855f33c40f0b88b3dbbf3f13696864003ee693083fd1d34e84a399
       archive: tar.gz
       entry: dist/aws
     windows/amd64:
       version: 2.34.38
       url: https://github.com/coilysiren/coily/releases/download/tools-latest/aws-windows-amd64.tar.gz
       upstream_url: https://awscli.amazonaws.com/AWSCLIV2.msi
-      sha256: 4e044c642fef5cc94bce2ed810713197d87610562a07ef360d69698d0eee8587
+      sha256: 99759edd0067ca7d706b74db1715e05a28614a35afd9f9da04ec48de7a3d9aad
       archive: tar.gz
       entry: dist/aws.exe
   kubectl:
