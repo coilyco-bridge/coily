@@ -38,6 +38,9 @@ var gitVerbs = []struct {
 	{"rev-parse", "Run git rev-parse HEAD in <repo-path>.", func(p string) []string {
 		return []string{"git", "-C", p, "rev-parse", "HEAD"}
 	}},
+	{"diff", "Run git diff in <repo-path> (read-only, unstaged changes).", func(p string) []string {
+		return []string{"git", "-C", p, "diff"}
+	}},
 }
 
 func (r *Runner) sshGitCommand() *cli.Command {

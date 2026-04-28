@@ -255,6 +255,12 @@ Run git branch --show-current in <repo-path>.
 
 Flags: --host, --user
 
+## `coily ssh git diff`
+
+Run git diff in <repo-path> (read-only, unstaged changes).
+
+Flags: --host, --user
+
 ## `coily ssh git fetch`
 
 Run git fetch --all --prune in <repo-path>.
