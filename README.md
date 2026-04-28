@@ -35,6 +35,17 @@ $ tail -2 ~/.coily/audit/coilysiren-coily.jsonl
 This repo exists for three reasons.
 
 1. **One audited surface for every privileged tool.** `coily aws ...`, `coily gh ...`, `coily kubectl ...`, `coily docker ...`, `coily tailscale ...`, plus every package manager (`coily pnpm`, `coily uv`, `coily cargo`, `coily brew`, ...) all forward verbatim to the underlying binary, gated by argv-level shell-metacharacter rejection and an audit-logged invocation. The pass-through is intentionally thin (`SkipFlagParsing`, no per-leaf subcommand modeling); the upstream tool's own `--help` is the source of truth for verb shape, and the lockdown deny list is the source of truth for read-vs-write gating.
+
+    Package managers look the same as anything else, just `coily <tool> <args...>`:
+
+    ```
+    coily pnpm install
+    coily uv pip install -r requirements.txt
+    coily cargo build --release
+    coily brew upgrade
+    ```
+
+    Same audit row, same metacharacter rejection. Nothing the upstream tool understands is reshaped on the way through.
 2. **Safety boundary for AI agents.** Claude Code's `deny: "Bash(kubectl delete:*)"` rule is prefix-matched, so every one of these gets past it:
 
     ```
