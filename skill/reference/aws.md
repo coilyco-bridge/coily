@@ -4,6 +4,29 @@ Mirrors `aws`. Underlying version at scan time: aws-cli/2.26.5 Python/3.13.3 Dar
 
 Command shape: `coily aws <verb...> [flags]`. Flags match the underlying CLI.
 
+## Global flags
+
+Accepted by every `coily aws` verb. Per-verb sections below list only verb-specific flags; these are omitted there to keep the reference scannable.
+
+- `--ca-bundle`
+- `--cli-auto-prompt`
+- `--cli-binary-format`
+- `--cli-connect-timeout`
+- `--cli-read-timeout`
+- `--color`
+- `--debug`
+- `--endpoint-url`
+- `--no-cli-auto-prompt`
+- `--no-cli-pager`
+- `--no-paginate`
+- `--no-sign-request`
+- `--no-verify-ssl`
+- `--output`
+- `--profile`
+- `--query`
+- `--region`
+- `--version`
+
 ## `coily aws route53`
 
 ### `coily aws route53` (group)
@@ -22,24 +45,6 @@ Flags:
 - `--name`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 associate-vpc-with-hosted-zone`
 
@@ -52,24 +57,6 @@ Flags:
 - `--comment`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 change-cidr-collection`
 
@@ -82,24 +69,6 @@ Flags:
 - `--changes`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 change-resource-record-sets`
 
@@ -111,24 +80,6 @@ Flags:
 - `--change-batch`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 change-tags-for-resource`
 
@@ -142,24 +93,6 @@ Flags:
 - `--remove-tag-keys`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 create-cidr-collection`
 
@@ -171,24 +104,6 @@ Flags:
 - `--caller-reference`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 create-health-check`
 
@@ -200,24 +115,6 @@ Flags:
 - `--health-check-config`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 create-hosted-zone`
 
@@ -232,24 +129,6 @@ Flags:
 - `--delegation-set-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 create-key-signing-key`
 
@@ -264,24 +143,6 @@ Flags:
 - `--status`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 create-query-logging-config`
 
@@ -293,24 +154,6 @@ Flags:
 - `--cloud-watch-logs-log-group-arn`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 create-reusable-delegation-set`
 
@@ -322,24 +165,6 @@ Flags:
 - `--hosted-zone-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 create-traffic-policy`
 
@@ -352,24 +177,6 @@ Flags:
 - `--comment`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 create-traffic-policy-instance`
 
@@ -384,24 +191,6 @@ Flags:
 - `--traffic-policy-version`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 create-traffic-policy-version`
 
@@ -414,24 +203,6 @@ Flags:
 - `--comment`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 create-vpc-association-authorization`
 
@@ -443,24 +214,6 @@ Flags:
 - `--vpc`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 deactivate-key-signing-key`
 
@@ -472,24 +225,6 @@ Flags:
 - `--name`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 delete-cidr-collection`
 
@@ -500,24 +235,6 @@ Flags:
 - `--id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 delete-health-check`
 
@@ -528,24 +245,6 @@ Flags:
 - `--health-check-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 delete-hosted-zone`
 
@@ -556,24 +255,6 @@ Flags:
 - `--id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 delete-key-signing-key`
 
@@ -585,24 +266,6 @@ Flags:
 - `--name`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 delete-query-logging-config`
 
@@ -613,24 +276,6 @@ Flags:
 - `--id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 delete-reusable-delegation-set`
 
@@ -641,24 +286,6 @@ Flags:
 - `--id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 delete-traffic-policy`
 
@@ -670,24 +297,6 @@ Flags:
 - `--traffic-policy-version`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 delete-traffic-policy-instance`
 
@@ -698,24 +307,6 @@ Flags:
 - `--id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 delete-vpc-association-authorization`
 
@@ -727,24 +318,6 @@ Flags:
 - `--vpc`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 disable-hosted-zone-dnssec`
 
@@ -755,24 +328,6 @@ Flags:
 - `--hosted-zone-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 disassociate-vpc-from-hosted-zone`
 
@@ -785,24 +340,6 @@ Flags:
 - `--comment`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 enable-hosted-zone-dnssec`
 
@@ -813,24 +350,6 @@ Flags:
 - `--hosted-zone-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-account-limit`
 
@@ -841,24 +360,6 @@ Flags:
 - `--type`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-change`
 
@@ -869,24 +370,6 @@ Flags:
 - `--id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-checker-ip-ranges`
 
@@ -896,24 +379,6 @@ Flags:
 
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-dnssec`
 
@@ -924,24 +389,6 @@ Flags:
 - `--hosted-zone-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-geo-location`
 
@@ -954,24 +401,6 @@ Flags:
 - `--subdivision-code`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-health-check`
 
@@ -982,24 +411,6 @@ Flags:
 - `--health-check-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-health-check-count`
 
@@ -1009,24 +420,6 @@ Flags:
 
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-health-check-last-failure-reason`
 
@@ -1037,24 +430,6 @@ Flags:
 - `--health-check-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-health-check-status`
 
@@ -1065,24 +440,6 @@ Flags:
 - `--health-check-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-hosted-zone`
 
@@ -1093,24 +450,6 @@ Flags:
 - `--id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-hosted-zone-count`
 
@@ -1120,24 +459,6 @@ Flags:
 
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-hosted-zone-limit`
 
@@ -1149,24 +470,6 @@ Flags:
 - `--hosted-zone-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-query-logging-config`
 
@@ -1177,24 +480,6 @@ Flags:
 - `--id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-reusable-delegation-set`
 
@@ -1205,24 +490,6 @@ Flags:
 - `--id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-reusable-delegation-set-limit`
 
@@ -1234,24 +501,6 @@ Flags:
 - `--delegation-set-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-traffic-policy`
 
@@ -1263,24 +512,6 @@ Flags:
 - `--traffic-policy-version`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-traffic-policy-instance`
 
@@ -1291,24 +522,6 @@ Flags:
 - `--id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 get-traffic-policy-instance-count`
 
@@ -1318,24 +531,6 @@ Flags:
 
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-cidr-blocks`
 
@@ -1350,24 +545,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-cidr-collections`
 
@@ -1380,24 +557,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-cidr-locations`
 
@@ -1411,24 +570,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-geo-locations`
 
@@ -1442,24 +583,6 @@ Flags:
 - `--max-items`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-health-checks`
 
@@ -1472,24 +595,6 @@ Flags:
 - `--starting-token`
 - `--page-size`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-hosted-zones`
 
@@ -1504,24 +609,6 @@ Flags:
 - `--starting-token`
 - `--page-size`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-hosted-zones-by-name`
 
@@ -1534,24 +621,6 @@ Flags:
 - `--max-items`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-hosted-zones-by-vpc`
 
@@ -1565,24 +634,6 @@ Flags:
 - `--next-token`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-query-logging-configs`
 
@@ -1596,24 +647,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-resource-record-sets`
 
@@ -1627,24 +660,6 @@ Flags:
 - `--starting-token`
 - `--page-size`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-reusable-delegation-sets`
 
@@ -1656,24 +671,6 @@ Flags:
 - `--max-items`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-tags-for-resource`
 
@@ -1685,24 +682,6 @@ Flags:
 - `--resource-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-tags-for-resources`
 
@@ -1714,24 +693,6 @@ Flags:
 - `--resource-ids`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-traffic-policies`
 
@@ -1743,24 +704,6 @@ Flags:
 - `--max-items`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-traffic-policy-instances`
 
@@ -1774,24 +717,6 @@ Flags:
 - `--max-items`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-traffic-policy-instances-by-policy`
 
@@ -1807,24 +732,6 @@ Flags:
 - `--max-items`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-traffic-policy-versions`
 
@@ -1837,24 +744,6 @@ Flags:
 - `--max-items`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 list-vpc-association-authorizations`
 
@@ -1868,24 +757,6 @@ Flags:
 - `--starting-token`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 test-dns-answer`
 
@@ -1901,24 +772,6 @@ Flags:
 - `--edns0-client-subnet-mask`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 update-health-check`
 
@@ -1945,24 +798,6 @@ Flags:
 - `--reset-elements`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 update-hosted-zone-comment`
 
@@ -1974,24 +809,6 @@ Flags:
 - `--comment`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 update-traffic-policy-comment`
 
@@ -2004,24 +821,6 @@ Flags:
 - `--traffic-policy-version`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 update-traffic-policy-instance`
 
@@ -2035,24 +834,6 @@ Flags:
 - `--traffic-policy-version`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws route53 wait` (group)
 
@@ -2069,24 +850,6 @@ Flags:
 - `--id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ## `coily aws s3`
 
@@ -2138,24 +901,6 @@ Flags:
 - `--metadata-directive`
 - `--expected-size`
 - `--recursive`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3 ls`
 
@@ -2170,49 +915,10 @@ Flags:
 - `--request-payer`
 - `--bucket-name-prefix`
 - `--bucket-region`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3 mb`
 
 Creates an S3 bucket.
-
-Flags:
-
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3 mv`
 
@@ -2256,24 +962,6 @@ Flags:
 - `--metadata-directive`
 - `--recursive`
 - `--validate-same-s3-paths`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3 presign`
 
@@ -2282,24 +970,6 @@ Generate a pre-signed URL for an Amazon S3 object.
 Flags:
 
 - `--expires-in`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3 rb`
 
@@ -2308,24 +978,6 @@ Deletes an empty S3 bucket.
 Flags:
 
 - `--force`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3 rm`
 
@@ -2341,24 +993,6 @@ Flags:
 - `--exclude`
 - `--only-show-errors`
 - `--page-size`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3 sync`
 
@@ -2403,24 +1037,6 @@ Flags:
 - `--size-only`
 - `--exact-timestamps`
 - `--delete`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3 website`
 
@@ -2430,24 +1046,6 @@ Flags:
 
 - `--index-document`
 - `--error-document`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ## `coily aws s3api`
 
@@ -2469,24 +1067,6 @@ Flags:
 - `--if-match-initiated-time`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api complete-multipart-upload`
 
@@ -2514,24 +1094,6 @@ Flags:
 - `--sse-customer-key-md5`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api copy-object`
 
@@ -2582,24 +1144,6 @@ Flags:
 - `--expected-source-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api create-bucket`
 
@@ -2618,24 +1162,6 @@ Flags:
 - `--object-ownership`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api create-multipart-upload`
 
@@ -2676,24 +1202,6 @@ Flags:
 - `--checksum-type`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api create-session`
 
@@ -2709,24 +1217,6 @@ Flags:
 - `--bucket-key-enabled`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-bucket`
 
@@ -2738,24 +1228,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-bucket-analytics-configuration`
 
@@ -2768,24 +1240,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-bucket-cors`
 
@@ -2797,24 +1251,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-bucket-encryption`
 
@@ -2826,24 +1262,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-bucket-inventory-configuration`
 
@@ -2856,24 +1274,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-bucket-lifecycle`
 
@@ -2885,24 +1285,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-bucket-metrics-configuration`
 
@@ -2915,24 +1297,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-bucket-ownership-controls`
 
@@ -2944,24 +1308,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-bucket-policy`
 
@@ -2973,24 +1319,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-bucket-replication`
 
@@ -3002,24 +1330,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-bucket-tagging`
 
@@ -3031,24 +1341,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-bucket-website`
 
@@ -3060,24 +1352,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-object`
 
@@ -3096,24 +1370,6 @@ Flags:
 - `--if-match-size`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-object-tagging`
 
@@ -3127,24 +1383,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-objects`
 
@@ -3160,24 +1398,6 @@ Flags:
 - `--checksum-algorithm`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api delete-public-access-block`
 
@@ -3189,24 +1409,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-accelerate-configuration`
 
@@ -3219,24 +1421,6 @@ Flags:
 - `--request-payer`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-acl`
 
@@ -3248,24 +1432,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-analytics-configuration`
 
@@ -3278,24 +1444,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-cors`
 
@@ -3307,24 +1455,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-encryption`
 
@@ -3336,24 +1466,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-inventory-configuration`
 
@@ -3366,24 +1478,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-lifecycle-configuration`
 
@@ -3395,24 +1489,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-location`
 
@@ -3424,24 +1500,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-logging`
 
@@ -3453,24 +1511,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-metadata-table-configuration`
 
@@ -3482,24 +1522,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-metrics-configuration`
 
@@ -3512,24 +1534,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-notification-configuration`
 
@@ -3541,24 +1545,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-ownership-controls`
 
@@ -3570,24 +1556,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-policy`
 
@@ -3599,24 +1567,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-policy-status`
 
@@ -3628,24 +1578,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-replication`
 
@@ -3657,24 +1589,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-request-payment`
 
@@ -3686,24 +1600,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-tagging`
 
@@ -3715,24 +1611,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-versioning`
 
@@ -3744,24 +1622,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-bucket-website`
 
@@ -3773,24 +1633,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-object`
 
@@ -3819,24 +1661,6 @@ Flags:
 - `--part-number`
 - `--expected-bucket-owner`
 - `--checksum-mode`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-object-acl`
 
@@ -3851,24 +1675,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-object-attributes`
 
@@ -3889,24 +1695,6 @@ Flags:
 - `--object-attributes`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-object-legal-hold`
 
@@ -3921,24 +1709,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-object-lock-configuration`
 
@@ -3950,24 +1720,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-object-retention`
 
@@ -3982,24 +1734,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-object-tagging`
 
@@ -4014,24 +1748,6 @@ Flags:
 - `--request-payer`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-object-torrent`
 
@@ -4043,24 +1759,6 @@ Flags:
 - `--key`
 - `--request-payer`
 - `--expected-bucket-owner`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api get-public-access-block`
 
@@ -4072,24 +1770,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api head-bucket`
 
@@ -4101,24 +1781,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api head-object`
 
@@ -4149,24 +1811,6 @@ Flags:
 - `--checksum-mode`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api list-bucket-analytics-configurations`
 
@@ -4179,24 +1823,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api list-bucket-inventory-configurations`
 
@@ -4209,24 +1835,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api list-bucket-metrics-configurations`
 
@@ -4239,24 +1847,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api list-buckets`
 
@@ -4271,24 +1861,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api list-directory-buckets`
 
@@ -4301,24 +1873,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api list-multipart-uploads`
 
@@ -4337,24 +1891,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api list-object-versions`
 
@@ -4374,24 +1910,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api list-objects`
 
@@ -4411,24 +1929,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api list-objects-v2`
 
@@ -4450,24 +1950,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api list-parts`
 
@@ -4488,24 +1970,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-accelerate-configuration`
 
@@ -4519,24 +1983,6 @@ Flags:
 - `--checksum-algorithm`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-acl`
 
@@ -4557,24 +2003,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-analytics-configuration`
 
@@ -4588,24 +2016,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-cors`
 
@@ -4620,24 +2030,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-encryption`
 
@@ -4652,24 +2044,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-inventory-configuration`
 
@@ -4683,24 +2057,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-lifecycle-configuration`
 
@@ -4715,24 +2071,6 @@ Flags:
 - `--transition-default-minimum-object-size`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-logging`
 
@@ -4747,24 +2085,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-metrics-configuration`
 
@@ -4778,24 +2098,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-notification-configuration`
 
@@ -4808,24 +2110,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-ownership-controls`
 
@@ -4839,24 +2123,6 @@ Flags:
 - `--ownership-controls`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-policy`
 
@@ -4872,24 +2138,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-replication`
 
@@ -4905,24 +2153,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-request-payment`
 
@@ -4937,24 +2167,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-tagging`
 
@@ -4969,24 +2181,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-versioning`
 
@@ -5002,24 +2196,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-bucket-website`
 
@@ -5034,24 +2210,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-object`
 
@@ -5101,24 +2259,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-object-acl`
 
@@ -5142,24 +2282,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-object-legal-hold`
 
@@ -5177,24 +2299,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-object-lock-configuration`
 
@@ -5211,24 +2315,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-object-retention`
 
@@ -5246,24 +2332,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-object-tagging`
 
@@ -5281,24 +2349,6 @@ Flags:
 - `--request-payer`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api put-public-access-block`
 
@@ -5313,24 +2363,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api restore-object`
 
@@ -5347,24 +2379,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api select-object-content`
 
@@ -5384,24 +2398,6 @@ Flags:
 - `--output-serialization`
 - `--scan-range`
 - `--expected-bucket-owner`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api upload-part`
 
@@ -5428,24 +2424,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api upload-part-copy`
 
@@ -5474,24 +2452,6 @@ Flags:
 - `--expected-source-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api wait` (group)
 
@@ -5509,24 +2469,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api wait bucket-not-exists`
 
@@ -5538,24 +2480,6 @@ Flags:
 - `--expected-bucket-owner`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api wait object-exists`
 
@@ -5586,24 +2510,6 @@ Flags:
 - `--checksum-mode`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api wait object-not-exists`
 
@@ -5634,24 +2540,6 @@ Flags:
 - `--checksum-mode`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws s3api write-get-object-response`
 
@@ -5701,24 +2589,6 @@ Flags:
 - `--bucket-key-enabled`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ## `coily aws ssm`
 
@@ -5739,24 +2609,6 @@ Flags:
 - `--tags`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm associate-ops-item-related-item`
 
@@ -5770,24 +2622,6 @@ Flags:
 - `--resource-uri`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm cancel-command`
 
@@ -5799,24 +2633,6 @@ Flags:
 - `--instance-ids`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm cancel-maintenance-window-execution`
 
@@ -5827,24 +2643,6 @@ Flags:
 - `--window-execution-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm create-activation`
 
@@ -5861,24 +2659,6 @@ Flags:
 - `--registration-metadata`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm create-association`
 
@@ -5908,24 +2688,6 @@ Flags:
 - `--alarm-configuration`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm create-association-batch`
 
@@ -5936,24 +2698,6 @@ Flags:
 - `--entries`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm create-document`
 
@@ -5973,24 +2717,6 @@ Flags:
 - `--tags`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm create-maintenance-window`
 
@@ -6011,24 +2737,6 @@ Flags:
 - `--tags`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm create-ops-item`
 
@@ -6054,24 +2762,6 @@ Flags:
 - `--account-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm create-ops-metadata`
 
@@ -6084,24 +2774,6 @@ Flags:
 - `--tags`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm create-patch-baseline`
 
@@ -6118,24 +2790,6 @@ Flags:
 - `--no-approved-patches-enable-non-security`
 - `--rejected-patches`
 - `--rejected-patches-action`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm create-resource-data-sync`
 
@@ -6149,24 +2803,6 @@ Flags:
 - `--sync-source`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm delete-activation`
 
@@ -6177,24 +2813,6 @@ Flags:
 - `--activation-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm delete-association`
 
@@ -6207,24 +2825,6 @@ Flags:
 - `--association-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm delete-document`
 
@@ -6238,24 +2838,6 @@ Flags:
 - `--force`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm delete-inventory`
 
@@ -6269,24 +2851,6 @@ Flags:
 - `--client-token`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm delete-maintenance-window`
 
@@ -6297,24 +2861,6 @@ Flags:
 - `--window-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm delete-ops-item`
 
@@ -6325,24 +2871,6 @@ Flags:
 - `--ops-item-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm delete-ops-metadata`
 
@@ -6353,24 +2881,6 @@ Flags:
 - `--ops-metadata-arn`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm delete-parameter`
 
@@ -6381,24 +2891,6 @@ Flags:
 - `--name`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm delete-parameters`
 
@@ -6409,24 +2901,6 @@ Flags:
 - `--names`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm delete-patch-baseline`
 
@@ -6437,24 +2911,6 @@ Flags:
 - `--baseline-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm delete-resource-data-sync`
 
@@ -6466,24 +2922,6 @@ Flags:
 - `--sync-type`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm delete-resource-policy`
 
@@ -6496,24 +2934,6 @@ Flags:
 - `--policy-hash`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm deregister-managed-instance`
 
@@ -6524,24 +2944,6 @@ Flags:
 - `--instance-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm deregister-patch-baseline-for-patch-group`
 
@@ -6553,24 +2955,6 @@ Flags:
 - `--patch-group`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm deregister-target-from-maintenance-window`
 
@@ -6583,24 +2967,6 @@ Flags:
 - `--safe`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm deregister-task-from-maintenance-window`
 
@@ -6612,24 +2978,6 @@ Flags:
 - `--window-task-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-activations`
 
@@ -6643,24 +2991,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-association`
 
@@ -6674,24 +3004,6 @@ Flags:
 - `--association-version`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-association-execution-targets`
 
@@ -6707,24 +3019,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-association-executions`
 
@@ -6739,24 +3033,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-automation-executions`
 
@@ -6770,24 +3046,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-automation-step-executions`
 
@@ -6803,24 +3061,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-available-patches`
 
@@ -6834,24 +3074,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-document`
 
@@ -6864,24 +3086,6 @@ Flags:
 - `--version-name`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-document-permission`
 
@@ -6895,24 +3099,6 @@ Flags:
 - `--next-token`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-effective-instance-associations`
 
@@ -6926,24 +3112,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-instance-associations-status`
 
@@ -6957,24 +3125,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-instance-information`
 
@@ -6989,24 +3139,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-instance-patch-states`
 
@@ -7020,24 +3152,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-instance-patches`
 
@@ -7052,24 +3166,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-instance-properties`
 
@@ -7084,24 +3180,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-inventory-deletions`
 
@@ -7115,24 +3193,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-maintenance-window-executions`
 
@@ -7147,24 +3207,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-maintenance-window-schedule`
 
@@ -7181,24 +3223,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-maintenance-window-targets`
 
@@ -7213,24 +3237,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-maintenance-window-tasks`
 
@@ -7245,24 +3251,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-maintenance-windows`
 
@@ -7276,24 +3264,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-maintenance-windows-for-target`
 
@@ -7308,24 +3278,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-ops-items`
 
@@ -7339,24 +3291,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-parameters`
 
@@ -7372,24 +3306,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-patch-baselines`
 
@@ -7403,24 +3319,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-patch-group-state`
 
@@ -7431,24 +3329,6 @@ Flags:
 - `--patch-group`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-patch-groups`
 
@@ -7462,24 +3342,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-patch-properties`
 
@@ -7495,24 +3357,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm describe-sessions`
 
@@ -7527,24 +3371,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm disassociate-ops-item-related-item`
 
@@ -7556,24 +3382,6 @@ Flags:
 - `--association-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-automation-execution`
 
@@ -7584,24 +3392,6 @@ Flags:
 - `--automation-execution-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-calendar-state`
 
@@ -7613,24 +3403,6 @@ Flags:
 - `--at-time`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-command-invocation`
 
@@ -7643,24 +3415,6 @@ Flags:
 - `--plugin-name`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-connection-status`
 
@@ -7671,24 +3425,6 @@ Flags:
 - `--target`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-default-patch-baseline`
 
@@ -7699,24 +3435,6 @@ Flags:
 - `--operating-system`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-document`
 
@@ -7730,24 +3448,6 @@ Flags:
 - `--document-format`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-execution-preview`
 
@@ -7758,24 +3458,6 @@ Flags:
 - `--execution-preview-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-inventory`
 
@@ -7791,24 +3473,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-inventory-schema`
 
@@ -7824,24 +3488,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-maintenance-window`
 
@@ -7852,24 +3498,6 @@ Flags:
 - `--window-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-maintenance-window-execution`
 
@@ -7880,24 +3508,6 @@ Flags:
 - `--window-execution-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-maintenance-window-execution-task`
 
@@ -7909,24 +3519,6 @@ Flags:
 - `--task-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-maintenance-window-task`
 
@@ -7938,24 +3530,6 @@ Flags:
 - `--window-task-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-ops-item`
 
@@ -7967,24 +3541,6 @@ Flags:
 - `--ops-item-arn`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-ops-metadata`
 
@@ -7997,24 +3553,6 @@ Flags:
 - `--next-token`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-ops-summary`
 
@@ -8031,24 +3569,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-parameter`
 
@@ -8060,24 +3580,6 @@ Flags:
 - `--with-decryption`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-parameter-history`
 
@@ -8092,24 +3594,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-parameters`
 
@@ -8121,24 +3605,6 @@ Flags:
 - `--with-decryption`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-parameters-by-path`
 
@@ -8155,24 +3621,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-patch-baseline`
 
@@ -8183,24 +3631,6 @@ Flags:
 - `--baseline-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-patch-baseline-for-patch-group`
 
@@ -8212,24 +3642,6 @@ Flags:
 - `--operating-system`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-resource-policies`
 
@@ -8243,24 +3655,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm get-service-setting`
 
@@ -8271,24 +3665,6 @@ Flags:
 - `--setting-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm label-parameter-version`
 
@@ -8301,24 +3677,6 @@ Flags:
 - `--labels`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-association-versions`
 
@@ -8332,24 +3690,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-associations`
 
@@ -8363,24 +3703,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-command-invocations`
 
@@ -8397,24 +3719,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-commands`
 
@@ -8430,24 +3734,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-compliance-items`
 
@@ -8463,24 +3749,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-compliance-summaries`
 
@@ -8494,24 +3762,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-document-metadata-history`
 
@@ -8526,24 +3776,6 @@ Flags:
 - `--max-results`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-document-versions`
 
@@ -8557,24 +3789,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-documents`
 
@@ -8589,24 +3803,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-inventory-entries`
 
@@ -8621,24 +3817,6 @@ Flags:
 - `--max-results`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-nodes`
 
@@ -8653,24 +3831,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-nodes-summary`
 
@@ -8686,24 +3846,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-ops-item-events`
 
@@ -8717,24 +3859,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-ops-item-related-items`
 
@@ -8749,24 +3873,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-ops-metadata`
 
@@ -8780,24 +3886,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-resource-compliance-summaries`
 
@@ -8811,24 +3899,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-resource-data-sync`
 
@@ -8842,24 +3912,6 @@ Flags:
 - `--page-size`
 - `--max-items`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm list-tags-for-resource`
 
@@ -8871,24 +3923,6 @@ Flags:
 - `--resource-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm modify-document-permission`
 
@@ -8903,24 +3937,6 @@ Flags:
 - `--shared-document-version`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm put-compliance-items`
 
@@ -8937,24 +3953,6 @@ Flags:
 - `--upload-type`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm put-inventory`
 
@@ -8966,24 +3964,6 @@ Flags:
 - `--items`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm put-parameter`
 
@@ -9004,24 +3984,6 @@ Flags:
 - `--data-type`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm put-resource-policy`
 
@@ -9035,24 +3997,6 @@ Flags:
 - `--policy-hash`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm register-default-patch-baseline`
 
@@ -9063,24 +4007,6 @@ Flags:
 - `--baseline-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm register-patch-baseline-for-patch-group`
 
@@ -9092,24 +4018,6 @@ Flags:
 - `--patch-group`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm register-target-with-maintenance-window`
 
@@ -9126,24 +4034,6 @@ Flags:
 - `--client-token`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm register-task-with-maintenance-window`
 
@@ -9169,24 +4059,6 @@ Flags:
 - `--alarm-configuration`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm remove-tags-from-resource`
 
@@ -9199,24 +4071,6 @@ Flags:
 - `--tag-keys`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm reset-service-setting`
 
@@ -9227,24 +4081,6 @@ Flags:
 - `--setting-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm resume-session`
 
@@ -9255,24 +4091,6 @@ Flags:
 - `--session-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm send-automation-signal`
 
@@ -9285,24 +4103,6 @@ Flags:
 - `--payload`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm send-command`
 
@@ -9330,24 +4130,6 @@ Flags:
 - `--alarm-configuration`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm start-associations-once`
 
@@ -9358,24 +4140,6 @@ Flags:
 - `--association-ids`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm start-automation-execution`
 
@@ -9399,24 +4163,6 @@ Flags:
 - `--target-locations-url`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm start-change-request-execution`
 
@@ -9437,24 +4183,6 @@ Flags:
 - `--change-details`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm start-execution-preview`
 
@@ -9466,24 +4194,6 @@ Flags:
 - `--document-version`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm start-session`
 
@@ -9497,24 +4207,6 @@ Flags:
 - `--parameters`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm stop-automation-execution`
 
@@ -9526,24 +4218,6 @@ Flags:
 - `--type`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm terminate-session`
 
@@ -9554,24 +4228,6 @@ Flags:
 - `--session-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm unlabel-parameter-version`
 
@@ -9584,24 +4240,6 @@ Flags:
 - `--labels`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-association`
 
@@ -9631,24 +4269,6 @@ Flags:
 - `--alarm-configuration`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-association-status`
 
@@ -9661,24 +4281,6 @@ Flags:
 - `--association-status`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-document`
 
@@ -9696,24 +4298,6 @@ Flags:
 - `--target-type`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-document-default-version`
 
@@ -9725,24 +4309,6 @@ Flags:
 - `--document-version`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-document-metadata`
 
@@ -9755,24 +4321,6 @@ Flags:
 - `--document-reviews`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-maintenance-window`
 
@@ -9794,24 +4342,6 @@ Flags:
 - `--replace`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-maintenance-window-target`
 
@@ -9828,24 +4358,6 @@ Flags:
 - `--replace`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-maintenance-window-task`
 
@@ -9871,24 +4383,6 @@ Flags:
 - `--alarm-configuration`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-managed-instance-role`
 
@@ -9900,24 +4394,6 @@ Flags:
 - `--iam-role`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-ops-item`
 
@@ -9943,24 +4419,6 @@ Flags:
 - `--ops-item-arn`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-ops-metadata`
 
@@ -9973,24 +4431,6 @@ Flags:
 - `--keys-to-delete`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-patch-baseline`
 
@@ -10007,24 +4447,6 @@ Flags:
 - `--no-approved-patches-enable-non-security`
 - `--rejected-patches`
 - `--rejected-patches-action`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-resource-data-sync`
 
@@ -10037,24 +4459,6 @@ Flags:
 - `--sync-source`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm update-service-setting`
 
@@ -10066,24 +4470,6 @@ Flags:
 - `--setting-value`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws ssm wait` (group)
 
@@ -10102,24 +4488,6 @@ Flags:
 - `--plugin-name`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ## `coily aws sts`
 
@@ -10149,24 +4517,6 @@ Flags:
 - `--provided-contexts`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws sts assume-role-with-saml`
 
@@ -10182,24 +4532,6 @@ Flags:
 - `--duration-seconds`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws sts assume-role-with-web-identity`
 
@@ -10216,24 +4548,6 @@ Flags:
 - `--duration-seconds`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws sts assume-root`
 
@@ -10246,24 +4560,6 @@ Flags:
 - `--duration-seconds`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws sts decode-authorization-message`
 
@@ -10274,24 +4570,6 @@ Flags:
 - `--encoded-message`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws sts get-access-key-info`
 
@@ -10302,24 +4580,6 @@ Flags:
 - `--access-key-id`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws sts get-caller-identity`
 
@@ -10329,24 +4589,6 @@ Flags:
 
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws sts get-federation-token`
 
@@ -10361,24 +4603,6 @@ Flags:
 - `--tags`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`
 
 ### `coily aws sts get-session-token`
 
@@ -10391,21 +4615,3 @@ Flags:
 - `--token-code`
 - `--cli-input-json`
 - `--generate-cli-skeleton`
-- `--debug`
-- `--endpoint-url`
-- `--no-verify-ssl`
-- `--no-paginate`
-- `--output`
-- `--query`
-- `--profile`
-- `--region`
-- `--version`
-- `--color`
-- `--no-sign-request`
-- `--ca-bundle`
-- `--cli-read-timeout`
-- `--cli-connect-timeout`
-- `--cli-binary-format`
-- `--no-cli-pager`
-- `--cli-auto-prompt`
-- `--no-cli-auto-prompt`

@@ -241,6 +241,27 @@ func renderReferenceMD(m Manifest) string {
 	}
 	b.WriteString("Command shape: `coily " + m.Binary + " <verb...> [flags]`. Flags match the underlying CLI.\n\n")
 
+	// Hoist flags that appear on every leaf into a single top-level
+	// section. For aws this collapses ~17 globals × 323 verbs = ~5,500
+	// lines of repeated noise into one block, leaving each verb section
+	// listing only its verb-specific flags.
+	globals := computeGlobalFlags(m.Commands)
+	globalSet := make(map[string]struct{}, len(globals))
+	for _, f := range globals {
+		globalSet[f.Name] = struct{}{}
+	}
+	if len(globals) > 0 {
+		fmt.Fprintf(&b, "## Global flags\n\nAccepted by every `coily %s` verb. Per-verb sections below list only verb-specific flags; these are omitted there to keep the reference scannable.\n\n", m.Binary)
+		for _, f := range globals {
+			if f.Help != "" {
+				fmt.Fprintf(&b, "- `%s` - %s\n", f.Name, f.Help)
+			} else {
+				fmt.Fprintf(&b, "- `%s`\n", f.Name)
+			}
+		}
+		b.WriteString("\n")
+	}
+
 	// Group by top-level subcommand (first path element) for readability.
 	groups := map[string][]ManifestCommand{}
 	var topNames []string
@@ -259,13 +280,67 @@ func renderReferenceMD(m Manifest) string {
 	for _, top := range topNames {
 		fmt.Fprintf(&b, "## `coily %s %s`\n\n", m.Binary, top)
 		for _, c := range groups[top] {
-			renderCommand(&b, m.Binary, c)
+			renderCommand(&b, m.Binary, c, globalSet)
 		}
 	}
 	return b.String()
 }
 
-func renderCommand(b *strings.Builder, binary string, c ManifestCommand) {
+// computeGlobalFlags returns the intersection of flag names across every
+// leaf in cmds, paired with one representative ManifestFlag per name (so
+// any associated help text survives the dedup). Returns nil unless the
+// hoist would meaningfully shrink the file: at least 3 leaves with flags
+// and at least 3 flags shared across all of them. Below those thresholds
+// the per-verb listing is already short enough that splitting introduces
+// more navigation cost than it saves.
+func computeGlobalFlags(cmds []ManifestCommand) []ManifestFlag {
+	type leafSet struct {
+		names map[string]ManifestFlag
+	}
+	var leaves []leafSet
+	for _, c := range cmds {
+		if len(c.Children) > 0 {
+			continue
+		}
+		if len(c.Flags) == 0 {
+			continue
+		}
+		set := leafSet{names: make(map[string]ManifestFlag, len(c.Flags))}
+		for _, f := range c.Flags {
+			set.names[f.Name] = f
+		}
+		leaves = append(leaves, set)
+	}
+	if len(leaves) < 3 {
+		return nil
+	}
+
+	// Start with the first leaf's flags and intersect down. Carry the
+	// ManifestFlag value (not just the name) so help text survives.
+	common := make(map[string]ManifestFlag, len(leaves[0].names))
+	for k, v := range leaves[0].names {
+		common[k] = v
+	}
+	for _, l := range leaves[1:] {
+		for k := range common {
+			if _, ok := l.names[k]; !ok {
+				delete(common, k)
+			}
+		}
+	}
+	if len(common) < 3 {
+		return nil
+	}
+
+	out := make([]ManifestFlag, 0, len(common))
+	for _, f := range common {
+		out = append(out, f)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	return out
+}
+
+func renderCommand(b *strings.Builder, binary string, c ManifestCommand, globals map[string]struct{}) {
 	path := strings.Join(c.Path, " ")
 	if len(c.Children) > 0 {
 		// Internal node. Just list the children as a navigation hint.
@@ -288,9 +363,16 @@ func renderCommand(b *strings.Builder, binary string, c ManifestCommand) {
 	if c.Help != "" {
 		b.WriteString(c.Help + "\n\n")
 	}
-	if len(c.Flags) > 0 {
+	local := make([]ManifestFlag, 0, len(c.Flags))
+	for _, f := range c.Flags {
+		if _, isGlobal := globals[f.Name]; isGlobal {
+			continue
+		}
+		local = append(local, f)
+	}
+	if len(local) > 0 {
 		b.WriteString("Flags:\n\n")
-		for _, f := range c.Flags {
+		for _, f := range local {
 			if f.Help != "" {
 				fmt.Fprintf(b, "- `%s` - %s\n", f.Name, f.Help)
 			} else {
