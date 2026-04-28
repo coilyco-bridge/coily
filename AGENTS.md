@@ -47,3 +47,15 @@ Every push to `main` triggers `.github/workflows/release.yml`, which fully autom
 **Formula source of truth:** `Formula/coily.rb` in `coilysiren/homebrew-tap`. The bump-tap job edits `url` + `sha256` only - any structural change to the formula (new dependency, install steps, test block) is a hand-edit on the tap and is not overwritten on release.
 
 **Brew install caveat:** the Homebrew install path produces a *user-writable* `/opt/homebrew/bin/coily`, which loses the root-owned-binary property that `make install` preserves on unix. Brew is for fresh-machine bootstrap; the canonical install remains `make install` from a checkout.
+
+---
+
+## Post-push follow-up (auto-schedule)
+
+Per the workspace "Default to proactive scheduling" rule: after pushing to `main`, schedule a wake-up to land the new binary on Kai's laptop and re-baseline the lockdown rules. The release workflow needs ~1-3 min to finish (tag + GitHub Release + tap formula push).
+
+- **Cadence**: 300-360s after push. Cache stays warm at 270s but the tap-bump can lag past that, so 300s is the floor.
+- **Verify CI green first**: `coily gh run list --repo coilysiren/coily --limit 1` should show the release run as `completed/success`. If still in progress, re-schedule once at +180s; if failed, surface the failure and stop.
+- **Upgrade**: `brew outdated coilysiren/tap/coily` - if upgradeable, `brew upgrade coilysiren/tap/coily`. No sudo (Homebrew installs to user-writable `/opt/homebrew`).
+- **Re-baseline lockdown** *only when the bumped commit changed `pkg/lockdown/` or `Formula/coily.rb`-relevant code*: `coily lockdown --apply --replace --recursive --path ~/projects/coilysiren`. Skip when the bump is unrelated to lockdown defaults (most patch bumps).
+- **Skip the auto-schedule** when the push is documentation-only (README, AGENTS.md, docs/) - the binary changes but nothing in it has user-visible effect.
