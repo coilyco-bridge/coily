@@ -37,23 +37,14 @@ help:
 	@echo "  make vet              go vet ./..."
 	@echo "  make clean            remove build outputs"
 
-.PHONY: _sync-config
-_sync-config:
-	@# //go:embed can only reach files in the same package; mirror the canonical
-	@# repo-root config.yaml into pkg/config/ before build. Both are gitignored.
-	@# Per-user / per-repo overrides live at ~/.coily/config.yaml and
-	@# ./.coily/config.yaml respectively, layered on top of this embedded base.
-	@if [ ! -f config.yaml ]; then cp config.example.yaml config.yaml; fi
-	@cp config.yaml pkg/config/config.yaml
-
 .PHONY: dev
-dev: _sync-config
+dev:
 	@mkdir -p bin
 	$(GO) build -tags dev -ldflags "$(LDFLAGS)" -o bin/$(DEV_BIN_NAME) ./cmd/coily
 	@echo "built bin/$(DEV_BIN_NAME) — invoke via ./bin/$(DEV_BIN_NAME) from the repo root only"
 
 .PHONY: build
-build: _sync-config
+build:
 	@mkdir -p bin
 	$(GO) build -tags prod -ldflags "$(LDFLAGS)" -o bin/$(BIN_NAME) ./cmd/coily
 
@@ -73,7 +64,7 @@ install:
 	@echo "installed $(INSTALL_PREFIX)/bin/$(BIN_NAME) (version $(VERSION))"
 
 .PHONY: install-windows
-install-windows: _sync-config
+install-windows:
 	@# Windows analog of `make install`. C:\Program Files\coily is admin-write
 	@# required, same ACL story as /usr/local/bin being root-owned on unix -
 	@# see SECURITY.md for the reasoning. Run this from an elevated
@@ -86,7 +77,7 @@ install-windows: _sync-config
 	@echo "if coily is not on PATH yet: add 'C:\\Program Files\\coily' to your user or system PATH (once)."
 
 .PHONY: deploy-server
-deploy-server: _sync-config
+deploy-server:
 	@mkdir -p bin
 	GOOS=linux GOARCH=$(SERVER_ARCH) $(GO) build -tags prod -ldflags "$(LDFLAGS)" -o bin/$(BIN_NAME)-linux-$(SERVER_ARCH) ./cmd/coily
 	scp bin/$(BIN_NAME)-linux-$(SERVER_ARCH) $(SERVER_USER)@$(SERVER_HOST):/tmp/$(BIN_NAME)

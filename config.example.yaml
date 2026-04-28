@@ -1,6 +1,7 @@
-# coily embedded config.
-# Copy to config.yaml (gitignored) and edit before `make build` / `make install`.
-# Changes require rebuild + sudo install - that's intentional (see SECURITY.md).
+# Reference for ~/.coily/config.yaml (global overlay) or ./.coily/config.yaml
+# (per-repo overlay). The shipped binary carries these same values as
+# Go-literal defaults; you only need a file to change one. Per-key precedence
+# is: binary defaults < ~/.coily/config.yaml < ./.coily/config.yaml.
 #
 # log_path defaults to ~/.coily/audit/<owner>-<repo>.jsonl, derived from
 # `git remote get-url origin`. See pkg/config/paths.go.

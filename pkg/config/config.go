@@ -1,17 +1,16 @@
 // Package config loads the coily configuration in three layers. From lowest
-// to highest precedence: an embedded yaml that ships with the binary,
+// to highest precedence: a Go-literal default baked into the binary,
 // ~/.coily/config.yaml (the global overlay), and ./.coily/config.yaml (the
 // per-repo local overlay). Local always wins on a per-key basis. See
 // SECURITY.md for the broader picture.
 //
-// The embedded layer guarantees coily can boot with no on-disk state at all.
+// The default layer guarantees coily can boot with no on-disk state at all.
 // The global layer holds Kai's personal defaults (audit rotation knobs, AWS
 // profile name). The local layer lets a repo carry its own overrides into a
 // fresh checkout without touching ~/.
 package config
 
 import (
-	_ "embed"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -21,8 +20,28 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-//go:embed config.yaml
-var embeddedConfigBytes []byte
+// defaults returns the baseline config used when no overlay layer fills a
+// field. Mirrors what the committed config.example.yaml would parse to.
+// LogPath stays empty so applyDefaults() falls to the per-repo
+// DefaultAuditPath under ~/.coily/audit/.
+func defaults() Config {
+	return Config{
+		KaiServer: KaiServer{
+			TailscaleHost: "kai-server",
+			SSHUser:       "kai",
+		},
+		Audit: Audit{
+			MaxSizeMB:  10,
+			MaxBackups: 10,
+			MaxAgeDays: 30,
+			Compress:   false,
+		},
+		AWS: AWS{Profile: "default"},
+		Eco: Eco{
+			ServerDir: "/home/kai/Steam/steamapps/common/EcoServer",
+		},
+	}
+}
 
 type Config struct {
 	KaiServer KaiServer `yaml:"kai_server"`
@@ -65,16 +84,13 @@ type AWS struct {
 	Profile string `yaml:"profile"`
 }
 
-// Load returns the layered config. Embedded is parsed first, then
+// Load returns the layered config. The Go-literal default is the base, then
 // ~/.coily/config.yaml is overlaid on top, then ./.coily/config.yaml. Any
 // missing layer is silently skipped. The audit log path default is filled
 // in from the homedir when the merged config left it blank, and any "~/"
 // prefix is expanded to an absolute path.
 func Load() (*Config, error) {
-	var c Config
-	if err := yaml.Unmarshal(embeddedConfigBytes, &c); err != nil {
-		return nil, fmt.Errorf("parse embedded config: %w", err)
-	}
+	c := defaults()
 
 	globalPath, gerr := GlobalConfigPath()
 	if gerr == nil {
