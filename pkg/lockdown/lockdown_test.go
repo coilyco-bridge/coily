@@ -35,8 +35,14 @@ func TestLoadDefaults_AllowsCoilyBash(t *testing.T) {
 func TestLoadDefaults_DeniesDangerousBase(t *testing.T) {
 	d, _ := lockdown.LoadDefaults()
 	mustDeny := []string{
-		"Bash(python:*)", "Bash(bash:*)", "Bash(aws:*)", "Bash(gh:*)",
+		"Bash(python:*)", "Bash(bash:*)",
 		"Bash(kubectl apply:*)", "Bash(kubectl delete:*)",
+		// aws/gh are not bare-denied (read verbs are explicitly allowed
+		// above); the deny list enumerates the destructive write surface
+		// that has to flow through coily for argv validation + audit.
+		"Bash(aws s3 cp:*)", "Bash(aws ec2 terminate-instances:*)",
+		"Bash(aws ssm get-parameter:*)", "Bash(aws lambda invoke:*)",
+		"Bash(gh pr merge:*)", "Bash(gh secret set:*)", "Bash(gh api:*)",
 	}
 	for _, rule := range mustDeny {
 		if !contains(d.Deny, rule) {
@@ -230,10 +236,16 @@ func TestWriteHook_BlocksDeniedCommand(t *testing.T) {
 		stdin  string
 		wantRC int
 	}{
-		{"aws denied", `{"tool_input":{"command":"aws s3 ls"}}`, 2},
+		{"aws s3 cp denied", `{"tool_input":{"command":"aws s3 cp foo s3://b/x"}}`, 2},
+		{"aws ssm get-parameter denied", `{"tool_input":{"command":"aws ssm get-parameter --name /foo"}}`, 2},
 		{"kubectl apply denied", `{"tool_input":{"command":"kubectl apply -f x.yaml"}}`, 2},
-		{"piped aws denied", `{"tool_input":{"command":"echo hi | aws s3 cp - s3://b/x"}}`, 2},
-		{"env-prefixed aws denied", `{"tool_input":{"command":"env AWS_PROFILE=x aws s3 ls"}}`, 2},
+		{"piped aws s3 cp denied", `{"tool_input":{"command":"echo hi | aws s3 cp - s3://b/x"}}`, 2},
+		{"env-prefixed aws s3 cp denied", `{"tool_input":{"command":"env AWS_PROFILE=x aws s3 cp foo s3://b/x"}}`, 2},
+		{"gh pr merge denied", `{"tool_input":{"command":"gh pr merge 123"}}`, 2},
+		{"gh api denied", `{"tool_input":{"command":"gh api repos/foo/bar"}}`, 2},
+		// Read verbs that bypass coily by design.
+		{"aws s3 ls allowed (read)", `{"tool_input":{"command":"aws s3 ls"}}`, 0},
+		{"gh pr view allowed (read)", `{"tool_input":{"command":"gh pr view 123"}}`, 0},
 		{"ls allowed", `{"tool_input":{"command":"ls -la"}}`, 0},
 		{"empty command allowed", `{"tool_input":{"command":""}}`, 0},
 	}
