@@ -40,12 +40,6 @@ out one agent per item, each touching a single file.
 
 ## Things that are done but deserve skepticism
 
-- **Classifier heuristic**. High-confidence on common cases. Low-
-  confidence on the long tail. The per-tool classification snapshot at
-  `cmd/subcli-scope/testdata/<tool>.classified.txt` makes a wrong label
-  show up in the diff on every fixture refresh, so misses surface during
-  review instead of silently dropping the policy gate. See features.md
-  test #13 for the full coverage plan.
 - **Completion scripts**. The bash/zsh/fish scripts I wrote are standard
   patterns for urfave/cli v3, but I did not verify any of them work
   end-to-end in a live shell. Sub-agent test #9 should catch regressions.

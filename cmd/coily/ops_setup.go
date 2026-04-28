@@ -130,18 +130,28 @@ func runLockdownStep(ctx context.Context, self, workspace string) error {
 	return nil
 }
 
-// installSkillSymlink points ~/.claude/skills/coily at the skill dir staged
-// next to the coily binary (<bin>/../share/coily/skill). This matches the
-// brew formula's `(pkgshare/"skill").install Dir["skill/*"]` layout.
+// installSkillSymlink points ~/.claude/skills/coily at the
+// coily-passthroughs skill dir staged next to the coily binary
+// (<bin>/../share/coily/skills/coily-passthroughs). Brew formulas under
+// coilysiren/homebrew-tap stage skills/coily-passthroughs/ into that path.
+// On hosts where the staged path is missing (running from a source
+// checkout, or older brew install before the rename), the step skips
+// with a warning rather than failing the whole setup.
 func installSkillSymlink(selfPath string) error {
 	binDir := filepath.Dir(selfPath)
-	src := filepath.Join(binDir, "..", "share", "coily", "skill")
+	src := filepath.Join(binDir, "..", "share", "coily", "skills", "coily-passthroughs")
 	src, err := filepath.Abs(src)
 	if err != nil {
 		return fmt.Errorf("resolve skill path: %w", err)
 	}
-	if _, err := os.Stat(filepath.Join(src, "SKILL.md")); err != nil {
-		return fmt.Errorf("skill not found at %s (expected when installed via brew). %w", src, err)
+	if _, statErr := os.Stat(filepath.Join(src, "SKILL.md")); statErr != nil {
+		// Skip with a warning rather than fail the whole `coily setup` run:
+		// a source-checkout build won't have the brew-staged share/ tree,
+		// and an older brew install may pre-date the coily-passthroughs
+		// rename. Either case is recoverable; setup's other steps still want
+		// to run.
+		fmt.Fprintf(os.Stderr, "    skipped: skill not found at %s (%v)\n", src, statErr)
+		return nil //nolint:nilerr // intentional: missing staged skill is non-fatal
 	}
 
 	home, err := os.UserHomeDir()

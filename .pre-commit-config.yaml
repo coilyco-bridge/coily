@@ -1,8 +1,3 @@
-# Fixtures under cmd/subcli-scope/testdata/fixtures/ are verbatim captures of
-# live CLI help output. They must stay byte-identical to what the upstream
-# tool emits, so whitespace-normalizing hooks skip that path.
-exclude: ^cmd/subcli-scope/testdata/fixtures/
-
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -50,5 +45,5 @@ repos:
         description: Walks the in-process cli.Command tree and rewrites skills/coily-passthroughs/SKILL.md. Triggers on Go source under cmd/, pkg/, configs/commands, or .coily/coily.yaml. Adds the regenerated file back to staging so the commit picks up any drift.
         entry: bash -c 'go run -tags dev ./cmd/coily lockdown skill >/dev/null && git add skills/coily-passthroughs/SKILL.md'
         language: system
-        files: '^(cmd/|pkg/)[^/]*/[^/]*\.go$|^configs/commands/.*\.yaml$|^\.coily/coily\.yaml$'
+        files: '^(cmd/|pkg/)[^/]*/[^/]*\.go$|^\.coily/coily\.yaml$'
         pass_filenames: false

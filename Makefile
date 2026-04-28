@@ -27,12 +27,6 @@ help:
 	@echo "  make install          sudo-install ./bin/$(BIN_NAME) to $(INSTALL_PREFIX)/bin"
 	@echo "  make install-windows  build + install bin/$(BIN_NAME).exe to $(WINDOWS_INSTALL_DIR) (run from elevated shell)"
 	@echo "  make deploy-server    cross-compile + scp + sudo-install on $(SERVER_HOST)"
-	@echo "  make scope-aws        run subcli-scope against aws"
-	@echo "  make scope-gh         run subcli-scope against gh"
-	@echo "  make scope-kubectl    run subcli-scope against kubectl"
-	@echo "  make scope-tailscale  run subcli-scope against tailscale"
-	@echo "  make scope-docker     run subcli-scope against docker"
-	@echo "  make scope-all        run subcli-scope against all scoped CLIs"
 	@echo "  make test             go test ./..."
 	@echo "  make vet              go vet ./..."
 	@echo "  make clean            remove build outputs"
@@ -83,65 +77,6 @@ deploy-server:
 	scp bin/$(BIN_NAME)-linux-$(SERVER_ARCH) $(SERVER_USER)@$(SERVER_HOST):/tmp/$(BIN_NAME)
 	ssh $(SERVER_USER)@$(SERVER_HOST) 'sudo install -o root -g root -m 0755 /tmp/$(BIN_NAME) /usr/local/bin/$(BIN_NAME) && rm /tmp/$(BIN_NAME)'
 	@echo "deployed $(VERSION) to $(SERVER_HOST)"
-
-.PHONY: scope-aws
-scope-aws:
-	$(GO) run ./cmd/subcli-scope aws
-
-.PHONY: scope-gh
-scope-gh:
-	$(GO) run ./cmd/subcli-scope gh
-
-.PHONY: scope-kubectl
-scope-kubectl:
-	$(GO) run ./cmd/subcli-scope kubectl
-
-.PHONY: scope-tailscale
-scope-tailscale:
-	$(GO) run ./cmd/subcli-scope tailscale
-
-.PHONY: scope-docker
-scope-docker:
-	$(GO) run ./cmd/subcli-scope docker
-
-.PHONY: scope-all
-scope-all: scope-aws scope-gh scope-kubectl scope-tailscale scope-docker
-
-.PHONY: gen-passthrough
-gen-passthrough:
-	@# Regenerate pkg/ops/{aws,gh,kubectl}/generated.go from configs/commands/*.yaml.
-	@# Run after update-fixtures or whenever the command manifests change.
-	$(GO) run ./cmd/gen-passthrough all
-	gofmt -w pkg/ops/
-
-.PHONY: update-fixtures
-update-fixtures:
-	@# Recapture help-text fixtures from live aws/gh/kubectl into cmd/subcli-scope/testdata/fixtures/.
-	@# Refresh the goldens AND the per-tool classification snapshots
-	@# (cmd/subcli-scope/testdata/<tool>.classified.txt), then regenerate
-	@# the pass-through and the skill. Review the resulting diff before
-	@# committing - in particular the .classified.txt diff is the place a
-	@# new MUTATING verb mis-labeled READONLY will show up.
-	$(GO) run ./cmd/subcli-scope -capture cmd/subcli-scope/testdata/fixtures gh
-	$(GO) run ./cmd/subcli-scope -capture cmd/subcli-scope/testdata/fixtures kubectl
-	$(GO) run ./cmd/subcli-scope -capture cmd/subcli-scope/testdata/fixtures aws
-	$(GO) run ./cmd/subcli-scope -capture cmd/subcli-scope/testdata/fixtures tailscale
-	$(GO) run ./cmd/subcli-scope -capture cmd/subcli-scope/testdata/fixtures docker
-	$(GO) test ./cmd/subcli-scope -update
-	$(MAKE) gen-passthrough
-	$(MAKE) skill
-	@echo "fixtures + goldens + classified snapshots + pass-through + skill refreshed. diff and commit if you approve the changes."
-
-.PHONY: skill
-skill: dev
-	@# Regenerate skill/SKILL.md and skill/reference/*.md from configs/commands/*.yaml.
-	@# Uses the dev binary because skill-gen is a dev-only subcommand (not in prod).
-	./bin/$(DEV_BIN_NAME) skill-gen
-
-.PHONY: install-skill
-install-skill: skill
-	@# Thin wrapper over the dev-only `coily install-skill` subcommand.
-	./bin/$(DEV_BIN_NAME) install-skill --force
 
 .PHONY: test
 test:

@@ -17,16 +17,6 @@ import (
 // Version is injected at build time via -ldflags "-X main.Version=<sha>".
 var Version = "dev"
 
-// devCommandBuilders is populated by init() in files with `//go:build dev`.
-// Empty in prod builds. Each builder receives the Runner and returns a
-// cli.Command. Kept separate from prod commands so the split is visible to
-// readers and auditors.
-var devCommandBuilders []func(*Runner) *cli.Command
-
-func registerDevCommandBuilder(b func(*Runner) *cli.Command) {
-	devCommandBuilders = append(devCommandBuilders, b)
-}
-
 func main() {
 	if err := telemetry.Init(Version); err != nil {
 		fmt.Fprintln(os.Stderr, "coily:", err)
@@ -112,9 +102,6 @@ func kindFor(err error, rc int) string {
 // dependencies through a real cli.Command tree.
 func run(r *Runner, argv []string) error {
 	builtIns := r.builtInCommands()
-	for _, b := range devCommandBuilders {
-		builtIns = append(builtIns, b(r))
-	}
 
 	reserved := map[string]bool{}
 	for _, c := range builtIns {

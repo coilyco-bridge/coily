@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/coilysiren/coily/pkg/ops/docker"
+	"github.com/coilysiren/coily/pkg/ops/passthrough"
 	"github.com/urfave/cli/v3"
 )
 
 func (r *Runner) dockerCommand() *cli.Command {
-	return docker.Command(r.Runner, r.Audit)
+	return passthrough.Command("docker", r.Runner, r.Audit)
 }

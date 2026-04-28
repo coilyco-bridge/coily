@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/coilysiren/coily/pkg/ops/pkgmgr"
+	"github.com/coilysiren/coily/pkg/ops/passthrough"
 	"github.com/urfave/cli/v3"
 )
 
@@ -31,7 +31,7 @@ var pkgmgrBinaries = []string{
 func (r *Runner) pkgmgrCommands() []*cli.Command {
 	out := make([]*cli.Command, 0, len(pkgmgrBinaries))
 	for _, bin := range pkgmgrBinaries {
-		out = append(out, pkgmgr.Command(bin, r.Runner, r.Audit))
+		out = append(out, passthrough.Command(bin, r.Runner, r.Audit))
 	}
 	return out
 }

@@ -34,7 +34,7 @@ $ tail -2 ~/.coily/audit/coilysiren-coily.jsonl
 
 This repo exists for three reasons.
 
-1. **Developer velocity.** Every pass-through verb gets auto-generated exhaustive documentation with every flag known at build time, plus smart defaults (route53 zone IDs discovered via SDK, AWS profile from embedded config, kubectl context pinned to kai-server). All output normalized to yaml. We're all yaml engineers now, might as well own it. One tab-completion install covers `coily aws ...`, `coily kubectl ...`, and `coily gh ...` instead of three separate completion scripts. The same command manifest feeds a generated `SKILL.md` so Claude has a complete offline reference. No round-trip to `aws help`, and no per-tool quirks (aws opens a pager, kubectl doesn't, gh has its own style, coily smooths this out). Flag validation fails fast before the underlying API is ever called.
+1. **One audited surface for every privileged tool.** `coily aws ...`, `coily gh ...`, `coily kubectl ...`, `coily docker ...`, `coily tailscale ...`, plus every package manager (`coily pnpm`, `coily uv`, `coily cargo`, `coily brew`, ...) all forward verbatim to the underlying binary, gated by argv-level shell-metacharacter rejection and an audit-logged invocation. The pass-through is intentionally thin (`SkipFlagParsing`, no per-leaf subcommand modeling); the upstream tool's own `--help` is the source of truth for verb shape, and the lockdown deny list is the source of truth for read-vs-write gating.
 2. **Safety boundary for AI agents.** Claude Code's `deny: "Bash(kubectl delete:*)"` rule is prefix-matched, so every one of these gets past it:
 
     ```

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/coilysiren/coily/pkg/ops/aws"
+	"github.com/coilysiren/coily/pkg/ops/passthrough"
 	"github.com/urfave/cli/v3"
 )
 
 func (r *Runner) awsCommand() *cli.Command {
-	return aws.Command(r.Runner, r.Audit)
+	return passthrough.Command("aws", r.Runner, r.Audit)
 }
