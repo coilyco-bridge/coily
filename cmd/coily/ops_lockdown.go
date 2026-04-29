@@ -35,7 +35,8 @@ func (r *Runner) lockdownSkillCommand() *cli.Command {
 		},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "lockdown.skill",
+				Name:      "lockdown.skill",
+				SkipScope: true,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--format": c.String("format"), "--out": c.String("out")}, nil
 				},
@@ -129,7 +130,8 @@ discovered git repo.`,
 		},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "lockdown",
+				Name:      "lockdown",
+				SkipScope: true,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
 						"--path":      c.String("path"),

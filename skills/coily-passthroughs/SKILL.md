@@ -131,6 +131,22 @@ Pass-through to gem with argv validation + audit log.
 
 Pass-through to gh with argv validation + audit log.
 
+## `coily git audit-show`
+
+Resolve an Audit-log trailer back to its full audit record.
+
+Flags: --scope, --since
+
+## `coily git trailer`
+
+Emit Audit-log: trailers for the current repo.
+
+Flags: --max, --scope, --since
+
+## `coily git trailer-hook`
+
+prepare-commit-msg hook: append Audit-log: trailers in place.
+
 ## `coily icarus restart`
 
 Restart the icarus-server unit.

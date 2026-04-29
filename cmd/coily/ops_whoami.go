@@ -25,8 +25,9 @@ Non-fatal. If any tool is not configured or returns an error, its block
 reports the error but the other tools still run.`,
 		Action: verb.Wrap(
 			verb.Spec{
-				Name:   "whoami",
-				Action: r.whoamiAction,
+				Name:      "whoami",
+				SkipScope: true,
+				Action:    r.whoamiAction,
 			},
 			r.Audit,
 		),

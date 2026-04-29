@@ -40,7 +40,8 @@ Pass --dry-run to print the script to stdout instead of writing.`,
 		},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "install-completion",
+				Name:      "install-completion",
+				SkipScope: true,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--shell": c.String("shell")}, nil
 				},

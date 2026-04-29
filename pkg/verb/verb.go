@@ -19,8 +19,14 @@ import (
 	"github.com/coilysiren/coily/pkg/audit"
 	"github.com/coilysiren/coily/pkg/exitcode"
 	"github.com/coilysiren/coily/pkg/policy"
+	"github.com/coilysiren/coily/pkg/scope"
 	"github.com/urfave/cli/v3"
 )
+
+// CommitScopeFlag is the canonical name of the global --commit-scope flag.
+// Exported so cmd/coily can declare the flag and verb.Wrap can read it
+// without disagreeing on spelling.
+const CommitScopeFlag = "commit-scope"
 
 // Spec describes a verb before it is wrapped into a cli.ActionFunc.
 type Spec struct {
@@ -46,6 +52,14 @@ type Spec struct {
 	// and gets in the way of legitimate argv content like markdown bodies
 	// (backticks, '>', '$') that callers want to forward verbatim.
 	SkipPolicy bool
+
+	// SkipScope disables --commit-scope resolution for this verb. Set true
+	// for read-only or self-referential verbs that would refuse to run
+	// outside a git repo otherwise (version, whoami, audit, git trailer/
+	// audit-show, lockdown, setup, install-completion). The audit row is
+	// still written; CommitScope is just left empty so the row never appears
+	// in any commit's trailer query.
+	SkipScope bool
 }
 
 // Wrap returns a cli.ActionFunc that runs the full coily verb pipeline.
@@ -73,13 +87,53 @@ func Wrap(spec Spec, writer *audit.Writer) cli.ActionFunc {
 			}
 		}
 
+		base, scopeErr := buildBaseRecord(spec.Name, argv, cmd, spec.SkipScope)
+		if scopeErr != nil {
+			coded := exitcode.New(exitcode.Generic, "scope_unresolved", scopeErr,
+				"set --commit-scope=<repo-path>, COILY_COMMIT_SCOPE=<repo-path>, "+
+					"or --commit-scope=- to opt out of trailer binding")
+			logReject(writer, spec.Name, argv, coded)
+			return coded
+		}
+
 		if writer == nil {
 			return spec.Action(ctx, cmd)
 		}
-		return writer.Wrap(ctx, spec.Name, argv, func() error {
+		return writer.Wrap(ctx, base, func() error {
 			return spec.Action(ctx, cmd)
 		})
 	}
+}
+
+// buildBaseRecord composes the per-invocation Record that writer.Wrap will
+// fill in with Decision/ExitCode/DurationMS. Resolves --commit-scope here
+// so a misconfigured shell fails loud before fn runs.
+func buildBaseRecord(verbName string, argv []string, cmd *cli.Command, skipScope bool) (audit.Record, error) {
+	cwd := scope.CWD()
+	repoRoot, _ := scope.Resolve("auto", "", cwd) // forensic-only, ignore error
+	if skipScope {
+		return audit.Record{
+			Verb:     verbName,
+			Argv:     argv,
+			RepoRoot: repoRoot,
+		}, nil
+	}
+	root := cmd
+	if r := cmd.Root(); r != nil {
+		root = r
+	}
+	flagVal := root.String(CommitScopeFlag)
+	envVal := os.Getenv("COILY_COMMIT_SCOPE")
+	commitScope, err := scope.Resolve(flagVal, envVal, cwd)
+	if err != nil {
+		return audit.Record{}, err
+	}
+	return audit.Record{
+		Verb:        verbName,
+		Argv:        argv,
+		RepoRoot:    repoRoot,
+		CommitScope: commitScope,
+	}, nil
 }
 
 func logReject(writer *audit.Writer, verbName string, argv []string, err error) {

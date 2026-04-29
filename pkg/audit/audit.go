@@ -17,12 +17,15 @@ package audit
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"encoding/base32"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -38,6 +41,10 @@ import (
 // audited; "reject" lets a forensic reader cleanly distinguish a metacharacter
 // scrub from an AccessDenied at the AWS edge.
 type Record struct {
+	// ID is a UUID v7 (time-ordered) populated on Append if unset. Used as
+	// the stable identifier in commit trailers (`coily://<ts>/<short>`),
+	// where short is the first 8 base32 chars of the raw bytes.
+	ID         string   `json:"id,omitempty"`
 	Timestamp  int64    `json:"ts"`
 	Version    string   `json:"version,omitempty"`
 	Decision   string   `json:"decision"`
@@ -46,6 +53,101 @@ type Record struct {
 	ExitCode   int      `json:"exit_code"`
 	Error      string   `json:"error,omitempty"`
 	DurationMS int64    `json:"duration_ms,omitempty"`
+	// RepoRoot is git rev-parse --show-toplevel of cwd at invocation time,
+	// or empty if cwd was not inside a git repo. Forensic only: tells the
+	// reader where the operator actually was, independent of CommitScope.
+	RepoRoot string `json:"repo_root,omitempty"`
+	// CommitScope binds this row to a commit-trailer query. Resolved from
+	// --commit-scope (default "auto" = cwd's git toplevel). Empty means the
+	// op was deliberately not bound to any commit and will not appear in
+	// any trailer.
+	CommitScope string `json:"commit_scope,omitempty"`
+}
+
+// ShortID returns the 8-char base32 prefix of the raw UUID bytes. Used in
+// the trailer suffix. Returns empty if ID is unset or unparseable.
+func (r Record) ShortID() string {
+	return shortIDFromUUID(r.ID)
+}
+
+// Trailer returns the canonical Audit-log trailer value for this record:
+// `coily://<unix-ts>/<short-id>`. Empty if ID is unset.
+func (r Record) Trailer() string {
+	short := r.ShortID()
+	if short == "" {
+		return ""
+	}
+	return fmt.Sprintf("coily://%d/%s", r.Timestamp, short)
+}
+
+// ParseTrailer extracts the unix timestamp and short ID from a coily://
+// trailer value. Returns (ts, short, true) on a well-formed input.
+func ParseTrailer(s string) (int64, string, bool) {
+	const prefix = "coily://"
+	if !strings.HasPrefix(s, prefix) {
+		return 0, "", false
+	}
+	rest := s[len(prefix):]
+	slash := strings.IndexByte(rest, '/')
+	if slash <= 0 || slash == len(rest)-1 {
+		return 0, "", false
+	}
+	var ts int64
+	if _, err := fmt.Sscanf(rest[:slash], "%d", &ts); err != nil {
+		return 0, "", false
+	}
+	return ts, rest[slash+1:], true
+}
+
+// shortB32 is the base32 alphabet used for short IDs. Standard RFC 4648
+// uppercase, no padding. Matches the trailer doc.
+var shortB32 = base32.StdEncoding.WithPadding(base32.NoPadding)
+
+func shortIDFromUUID(id string) string {
+	raw, err := decodeUUID(id)
+	if err != nil {
+		return ""
+	}
+	return shortB32.EncodeToString(raw)[:8]
+}
+
+// newUUIDv7 returns a UUID v7 string (time-ordered) using crypto/rand.
+// 48-bit unix-millis prefix, version=7, variant=10, rest random.
+func newUUIDv7(now time.Time) (string, error) {
+	var b [16]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return "", fmt.Errorf("audit: rand: %w", err)
+	}
+	ms := uint64(now.UnixMilli()) //nolint:gosec // UnixMilli fits in 48 bits for the next ~8000 years
+	b[0] = byte(ms >> 40 & 0xff)  //nolint:gosec // mask makes overflow inert
+	b[1] = byte(ms >> 32 & 0xff)  //nolint:gosec
+	b[2] = byte(ms >> 24 & 0xff)  //nolint:gosec
+	b[3] = byte(ms >> 16 & 0xff)  //nolint:gosec
+	b[4] = byte(ms >> 8 & 0xff)   //nolint:gosec
+	b[5] = byte(ms & 0xff)        //nolint:gosec
+	b[6] = (b[6] & 0x0f) | 0x70
+	b[8] = (b[8] & 0x3f) | 0x80
+	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x",
+		b[0:4], b[4:6], b[6:8], b[8:10], b[10:16]), nil
+}
+
+func decodeUUID(s string) ([]byte, error) {
+	if len(s) != 36 {
+		return nil, fmt.Errorf("audit: uuid length %d, want 36", len(s))
+	}
+	hex := strings.ReplaceAll(s, "-", "")
+	if len(hex) != 32 {
+		return nil, fmt.Errorf("audit: uuid hyphenation invalid")
+	}
+	out := make([]byte, 16)
+	for i := 0; i < 16; i++ {
+		var n int
+		if _, err := fmt.Sscanf(hex[2*i:2*i+2], "%02x", &n); err != nil {
+			return nil, fmt.Errorf("audit: uuid hex: %w", err)
+		}
+		out[i] = byte(n & 0xff) //nolint:gosec // %02x bounds n to [0,255]
+	}
+	return out, nil
 }
 
 // Decision values for Record.Decision.
@@ -96,8 +198,16 @@ func (w *Writer) Append(r Record) error {
 	if w.Path == "" {
 		return ErrPathUnset
 	}
+	now := w.now()
 	if r.Timestamp == 0 {
-		r.Timestamp = w.now().Unix()
+		r.Timestamp = now.Unix()
+	}
+	if r.ID == "" {
+		id, err := newUUIDv7(now)
+		if err != nil {
+			return err
+		}
+		r.ID = id
 	}
 
 	if err := os.MkdirAll(filepath.Dir(w.Path), 0o700); err != nil {
@@ -141,21 +251,19 @@ func (w *Writer) Close() error {
 	return err
 }
 
-// Wrap records an invocation by running fn and logging the result. If fn
-// returns an error, Record.Error is set. ExitCode is 0 on success, 1 on
-// error. DurationMS is measured around fn. The returned error is whatever
-// fn returned, unmodified. Audit append failures are written to stderr so
-// the operator notices, but they do not mask fn's error.
-func (w *Writer) Wrap(_ context.Context, verb string, argv []string, fn func() error) error {
+// Wrap records an invocation by running fn and logging the result. base
+// supplies caller-set fields (Verb, Argv, RepoRoot, CommitScope, Version);
+// Wrap fills in Decision, ExitCode, DurationMS, and Error. The returned
+// error is whatever fn returned, unmodified. Audit append failures are
+// written to stderr so the operator notices, but they do not mask fn's
+// error.
+func (w *Writer) Wrap(_ context.Context, base Record, fn func() error) error {
 	start := w.now()
 	err := fn()
-	rec := Record{
-		Decision:   DecisionAccept,
-		Verb:       verb,
-		Argv:       argv,
-		ExitCode:   0,
-		DurationMS: w.now().Sub(start).Milliseconds(),
-	}
+	rec := base
+	rec.Decision = DecisionAccept
+	rec.ExitCode = 0
+	rec.DurationMS = w.now().Sub(start).Milliseconds()
 	if err != nil {
 		rec.ExitCode = 1
 		rec.Error = err.Error()

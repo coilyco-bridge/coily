@@ -98,7 +98,7 @@ func TestAppend_ErrorsOnUnsetPath(t *testing.T) {
 func TestWrap_LogsSuccess(t *testing.T) {
 	w := tempWriter(t)
 	called := false
-	err := w.Wrap(context.Background(), "test.verb", []string{"test", "--flag"}, func() error {
+	err := w.Wrap(context.Background(), audit.Record{Verb: "test.verb", Argv: []string{"test", "--flag"}}, func() error {
 		called = true
 		return nil
 	})
@@ -127,7 +127,7 @@ func TestWrap_LogsSuccess(t *testing.T) {
 func TestWrap_LogsFailure(t *testing.T) {
 	w := tempWriter(t)
 	want := errors.New("boom")
-	err := w.Wrap(context.Background(), "test.verb", []string{"x"}, func() error {
+	err := w.Wrap(context.Background(), audit.Record{Verb: "test.verb", Argv: []string{"x"}}, func() error {
 		return want
 	})
 	if !errors.Is(err, want) {
@@ -318,7 +318,7 @@ func TestWrap_PrintsStderrOnAppendFailure(t *testing.T) {
 		Now:  func() time.Time { return time.Date(2026, 4, 22, 12, 0, 0, 0, time.UTC) },
 	}
 	for i := 0; i < 3; i++ {
-		_ = w.Wrap(context.Background(), "v", []string{"x"}, func() error { return nil })
+		_ = w.Wrap(context.Background(), audit.Record{Verb: "v", Argv: []string{"x"}}, func() error { return nil })
 	}
 	if err := pw.Close(); err != nil {
 		t.Fatalf("close pipe writer: %v", err)

@@ -56,7 +56,8 @@ Skips the lockdown step if the workspace does not exist.`,
 		},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "setup",
+				Name:      "setup",
+				SkipScope: true,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--workspace": c.String("workspace")}, nil
 				},

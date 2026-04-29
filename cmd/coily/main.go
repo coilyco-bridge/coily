@@ -10,6 +10,7 @@ import (
 
 	"github.com/coilysiren/coily/pkg/exitcode"
 	"github.com/coilysiren/coily/pkg/telemetry"
+	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )
@@ -124,6 +125,16 @@ func run(r *Runner, argv []string) error {
 				Name:  "list",
 				Usage: "print every command coily can run (built-in + repo) and exit",
 			},
+			&cli.StringFlag{
+				Name: verb.CommitScopeFlag,
+				Usage: "bind audit rows to a commit scope. " +
+					"`auto` (default) = git toplevel of cwd; " +
+					"`<path>` = explicit repo path; " +
+					"`-` / `none` = opt out (row not bound to any commit). " +
+					"Read from $COILY_COMMIT_SCOPE if unset.",
+				Value:   "auto",
+				Sources: cli.EnvVars("COILY_COMMIT_SCOPE"),
+			},
 		},
 		Action: func(_ context.Context, c *cli.Command) error {
 			if c.Bool("list") {
@@ -160,6 +171,7 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.modioCommand(),
 		r.trelloCommand(),
 		r.auditCommand(),
+		r.gitCommand(),
 	}
 	cmds = append(cmds, r.pkgmgrCommands()...)
 	return cmds

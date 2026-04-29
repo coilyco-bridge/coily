@@ -43,7 +43,8 @@ func (r *Runner) auditPathCommand() *cli.Command {
 		Usage: "Print the resolved audit log path and exit.",
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "audit.path",
+				Name:      "audit.path",
+				SkipScope: true,
 				Action: func(_ context.Context, _ *cli.Command) error {
 					fmt.Println(r.Cfg.Audit.LogPath)
 					return nil
@@ -75,7 +76,8 @@ with jq or any JSON library.`,
 		},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "audit.tail",
+				Name:      "audit.tail",
+				SkipScope: true,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--since": c.String("since")}, nil
 				},
