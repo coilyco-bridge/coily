@@ -25,7 +25,6 @@ Read-only verbs (version, whoami, audit, lockdown, setup, install-completion, th
       language: system
       stages: [prepare-commit-msg]
       always_run: true
-      pass_filenames: false
       require_serial: true
 ```
 
