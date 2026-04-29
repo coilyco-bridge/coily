@@ -39,11 +39,37 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+// Option configures a pass-through Command. Use the With* helpers below
+// rather than setting fields directly.
+type Option func(*config)
+
+type config struct {
+	skipPolicy bool
+}
+
+// WithSkipPolicy disables the shell-metacharacter check for this binary.
+// Use only for tools whose argv goes through execve straight to the
+// underlying CLI without ever being handed to a shell. Safe set: gh, aws,
+// tailscale, package managers (npm/pnpm/yarn/cargo/uv/pip/...). Unsafe
+// set: kubectl, docker, ssh - these have exec-into-shell paths where
+// argv content can reach a remote bash -c. The audit log and lockdown
+// deny list still cover the safe set; the metacharacter check was only
+// ever defending the shell-bound path, and rejecting '>' / backticks /
+// '$' in argv breaks legitimate markdown bodies in (e.g.)
+// `gh issue create --body`.
+func WithSkipPolicy() Option {
+	return func(c *config) { c.skipPolicy = true }
+}
+
 // Command returns the *cli.Command for `coily <bin>`. Every argument
 // after the binary name is forwarded verbatim through the pass-through
 // pipeline (argv validation -> audit -> exec). SkipFlagParsing keeps
 // urfave/cli from interpreting flags meant for the underlying tool.
-func Command(bin string, r *shell.Runner, w *audit.Writer) *cli.Command {
+func Command(bin string, r *shell.Runner, w *audit.Writer, opts ...Option) *cli.Command {
+	cfg := config{}
+	for _, opt := range opts {
+		opt(&cfg)
+	}
 	return &cli.Command{
 		Name:            bin,
 		Usage:           fmt.Sprintf("Pass-through to %s with argv validation + audit log.", bin),
@@ -57,6 +83,7 @@ func Command(bin string, r *shell.Runner, w *audit.Writer) *cli.Command {
 				Action: func(ctx context.Context, c *cli.Command) error {
 					return r.Exec(ctx, bin, c.Args().Slice()...)
 				},
+				SkipPolicy: cfg.skipPolicy,
 			},
 			w,
 		),

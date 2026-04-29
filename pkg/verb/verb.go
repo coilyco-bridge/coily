@@ -36,6 +36,16 @@ type Spec struct {
 
 	// Action is the verb's real work. Called only after argv validation passes.
 	Action cli.ActionFunc
+
+	// SkipPolicy disables the shell-metacharacter check for this verb. Set
+	// true only for pass-throughs whose argv goes straight through execve to
+	// a tool that does not feed it back through a shell (gh, aws, tailscale,
+	// package managers). The audit log and the lockdown deny list still
+	// cover the boundary; the metacharacter check is paranoia for the
+	// remote-shell path (ssh remote-cmd, kubectl/docker exec into bash -c)
+	// and gets in the way of legitimate argv content like markdown bodies
+	// (backticks, '>', '$') that callers want to forward verbatim.
+	SkipPolicy bool
 }
 
 // Wrap returns a cli.ActionFunc that runs the full coily verb pipeline.
@@ -47,18 +57,20 @@ func Wrap(spec Spec, writer *audit.Writer) cli.ActionFunc {
 		// reconstruct from cli.Command state (which requires a fully-
 		// initialized cmd and is awkward to assemble).
 		argv := append([]string{}, os.Args...)
-		args, positional := extractArgs(spec, cmd)
-		if err := policy.ValidateArgs(args); err != nil {
-			coded := exitcode.New(exitcode.PolicyDenied, "policy_denied", err,
-				"argv contains a shell metacharacter that coily refuses to forward")
-			logReject(writer, spec.Name, argv, coded)
-			return coded
-		}
-		if err := policy.ValidateArgSlice("positional", positional); err != nil {
-			coded := exitcode.New(exitcode.PolicyDenied, "policy_denied", err,
-				"a positional argument failed shell-metacharacter validation")
-			logReject(writer, spec.Name, argv, coded)
-			return coded
+		if !spec.SkipPolicy {
+			args, positional := extractArgs(spec, cmd)
+			if err := policy.ValidateArgs(args); err != nil {
+				coded := exitcode.New(exitcode.PolicyDenied, "policy_denied", err,
+					"argv contains a shell metacharacter that coily refuses to forward")
+				logReject(writer, spec.Name, argv, coded)
+				return coded
+			}
+			if err := policy.ValidateArgSlice("positional", positional); err != nil {
+				coded := exitcode.New(exitcode.PolicyDenied, "policy_denied", err,
+					"a positional argument failed shell-metacharacter validation")
+				logReject(writer, spec.Name, argv, coded)
+				return coded
+			}
 		}
 
 		if writer == nil {

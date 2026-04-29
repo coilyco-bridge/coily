@@ -6,5 +6,5 @@ import (
 )
 
 func (r *Runner) tailscaleCommand() *cli.Command {
-	return passthrough.Command("tailscale", r.Runner, r.Audit)
+	return passthrough.Command("tailscale", r.Runner, r.Audit, passthrough.WithSkipPolicy())
 }

@@ -126,6 +126,45 @@ func TestCommand_ForwardsArgvVerbatim(t *testing.T) {
 	}
 }
 
+// TestCommand_WithSkipPolicy_AllowsShellMetacharacters pins the per-binary
+// opt-out: a pass-through built with WithSkipPolicy forwards argv that
+// would otherwise trip the metacharacter check, so callers can pass
+// markdown bodies (blockquotes, backticks, '$', parens) through `coily gh
+// issue create --body ...` and similar verbatim. The audit row still
+// records the invocation as accepted.
+func TestCommand_WithSkipPolicy_AllowsShellMetacharacters(t *testing.T) {
+	dir := t.TempDir()
+	logPath := filepath.Join(dir, "audit.jsonl")
+	w := audit.NewWriter(logPath)
+	if err := w.Preflight(); err != nil {
+		t.Fatalf("audit preflight: %v", err)
+	}
+
+	var stdout bytes.Buffer
+	r := &shell.Runner{
+		Stdout:  &stdout,
+		Stderr:  os.Stderr,
+		Resolve: func(_ string) (string, error) { return "/bin/echo", nil },
+	}
+
+	cmd := passthrough.Command("gh", r, w, passthrough.WithSkipPolicy())
+	body := "> 🤖 Filed by Claude Code on Kai's behalf.\n\nfix `foo` and $bar"
+	argv := []string{"coily-test", "issue", "create", "--body", body}
+	if err := cmd.Run(context.Background(), argv); err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if got := stdout.String(); !strings.Contains(got, "issue create --body") {
+		t.Errorf("stdout = %q, want substring %q", got, "issue create --body")
+	}
+	auditBody, err := os.ReadFile(logPath)
+	if err != nil {
+		t.Fatalf("read audit: %v", err)
+	}
+	if !strings.Contains(string(auditBody), `"decision":"accept"`) {
+		t.Errorf("audit row missing decision=accept; got %q", string(auditBody))
+	}
+}
+
 // TestCommand_RejectsShellMetacharacters pins the security property:
 // argv with a shell metacharacter is refused before the subprocess runs,
 // the refusal is recorded in the audit log, and the error surfaces.
