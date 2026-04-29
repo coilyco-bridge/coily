@@ -129,8 +129,8 @@ func run(r *Runner, argv []string) error {
 				Name: verb.CommitScopeFlag,
 				Usage: "bind audit rows to a commit scope. " +
 					"`auto` (default) = git toplevel of cwd; " +
-					"`<path>` = explicit repo path; " +
-					"`-` / `none` = opt out (row not bound to any commit). " +
+					"`<path>` = explicit repo path. " +
+					"There is no opt-out: every invocation must bind to a real repo. " +
 					"Read from $COILY_COMMIT_SCOPE if unset.",
 				Value:   "auto",
 				Sources: cli.EnvVars("COILY_COMMIT_SCOPE"),

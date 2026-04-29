@@ -75,23 +75,33 @@ func TestResolve_AutoOutsideRepoErrors(t *testing.T) {
 	}
 }
 
-func TestResolve_DashOptsOut(t *testing.T) {
-	got, err := scope.Resolve("-", "", t.TempDir())
-	if err != nil {
-		t.Fatalf("Resolve: %v", err)
+func TestResolve_DashRejected(t *testing.T) {
+	_, err := scope.Resolve("-", "", t.TempDir())
+	if err == nil {
+		t.Fatal("Resolve(\"-\"): got nil err, want ErrOptOutRejected")
 	}
-	if got != "" {
-		t.Errorf("got %q, want empty (opt-out)", got)
+	if !errors.Is(err, scope.ErrOptOutRejected) {
+		t.Errorf("err = %v, want ErrOptOutRejected", err)
 	}
 }
 
-func TestResolve_NoneOptsOut(t *testing.T) {
-	got, err := scope.Resolve("none", "", t.TempDir())
-	if err != nil {
-		t.Fatalf("Resolve: %v", err)
+func TestResolve_NoneRejected(t *testing.T) {
+	_, err := scope.Resolve("none", "", t.TempDir())
+	if err == nil {
+		t.Fatal("Resolve(\"none\"): got nil err, want ErrOptOutRejected")
 	}
-	if got != "" {
-		t.Errorf("got %q, want empty", got)
+	if !errors.Is(err, scope.ErrOptOutRejected) {
+		t.Errorf("err = %v, want ErrOptOutRejected", err)
+	}
+}
+
+func TestResolve_OffRejected(t *testing.T) {
+	_, err := scope.Resolve("off", "", t.TempDir())
+	if err == nil {
+		t.Fatal("Resolve(\"off\"): got nil err, want ErrOptOutRejected")
+	}
+	if !errors.Is(err, scope.ErrOptOutRejected) {
+		t.Errorf("err = %v, want ErrOptOutRejected", err)
 	}
 }
 

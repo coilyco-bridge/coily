@@ -90,8 +90,8 @@ func Wrap(spec Spec, writer *audit.Writer) cli.ActionFunc {
 		base, scopeErr := buildBaseRecord(spec.Name, argv, cmd, spec.SkipScope)
 		if scopeErr != nil {
 			coded := exitcode.New(exitcode.Generic, "scope_unresolved", scopeErr,
-				"set --commit-scope=<repo-path>, COILY_COMMIT_SCOPE=<repo-path>, "+
-					"or --commit-scope=- to opt out of trailer binding")
+				"set --commit-scope=<repo-path> or COILY_COMMIT_SCOPE=<repo-path>; "+
+					"there is no opt-out, every audit row must bind to a real repo")
 			logReject(writer, spec.Name, argv, coded)
 			return coded
 		}

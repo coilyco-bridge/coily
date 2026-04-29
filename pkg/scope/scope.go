@@ -8,9 +8,12 @@
 // explicit path. Kai works in the directory above her repos most of the
 // time, so this is the common case.
 //
-// An explicit empty string disables binding entirely (op will not appear
-// in any commit's trailer). Any other value is treated as a literal path
-// and absolute-ized.
+// There is no user-facing opt-out. Every audit row produced by a non-
+// SkipScope verb must be bindable to a real commit; dashes, "none",
+// "off", or any other "skip" sentinel are rejected. Verbs that
+// genuinely should not be tied to a repo set verb.Spec.SkipScope at the
+// definition site so the decision is visible in the verb's source, not
+// papered over at the call site.
 package scope
 
 import (
@@ -25,15 +28,21 @@ import (
 // ErrNotInRepo is returned when --commit-scope=auto is requested but cwd
 // is not inside a git repo. Caller is expected to pass --commit-scope
 // explicitly.
-var ErrNotInRepo = errors.New("scope: cwd is not inside a git repo; pass --commit-scope=<path> explicitly")
+var ErrNotInRepo = errors.New("scope: cwd is not inside a git repo; pass --commit-scope=<repo-path> explicitly")
+
+// ErrOptOutRejected is returned when the caller passes a value meant to
+// disable binding ("-", "none", "off"). The opt-out hatch was removed -
+// every audit row must bind to a real commit-scope path. Verbs that
+// genuinely should run without a scope set verb.Spec.SkipScope at the
+// definition site instead.
+var ErrOptOutRejected = errors.New("scope: --commit-scope opt-out is not supported; pass an explicit repo path")
 
 // Resolve interprets a --commit-scope flag value:
 //   - "auto" (case-insensitive): git toplevel of cwd, or ErrNotInRepo.
-//   - "" (deliberately empty, via --commit-scope=""): no binding.
-//   - "-": same as "" - explicit "skip".
+//   - "-", "none", "off" (case-insensitive): rejected with ErrOptOutRejected.
 //   - any other value: treated as a path, made absolute relative to cwd.
 //
-// envFallback, when non-empty, is used in place of an empty flagValue so
+// An empty flagValue falls back to envFallback, then to "auto", so
 // $COILY_COMMIT_SCOPE works without overriding an explicit flag.
 func Resolve(flagValue, envFallback, cwd string) (string, error) {
 	val := flagValue
@@ -47,7 +56,7 @@ func Resolve(flagValue, envFallback, cwd string) (string, error) {
 	case "auto":
 		return gitToplevel(cwd)
 	case "-", "none", "off":
-		return "", nil
+		return "", ErrOptOutRejected
 	}
 	if !filepath.IsAbs(val) {
 		val = filepath.Join(cwd, val)
