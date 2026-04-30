@@ -28,10 +28,21 @@ var pkgmgrBinaries = []string{
 	"brew",
 }
 
-func (r *Runner) pkgmgrCommands() []*cli.Command {
-	out := make([]*cli.Command, 0, len(pkgmgrBinaries))
+// pkgCommand groups every package-manager pass-through under a single
+// `coily pkg <tool>` namespace, e.g. `coily pkg pip install foo`.
+func (r *Runner) pkgCommand() *cli.Command {
+	subs := make([]*cli.Command, 0, len(pkgmgrBinaries))
 	for _, bin := range pkgmgrBinaries {
-		out = append(out, passthrough.Command(bin, r.Runner, r.Audit))
+		subs = append(subs, passthrough.Command(bin, r.Runner, r.Audit))
 	}
-	return out
+	return &cli.Command{
+		Name:  "pkg",
+		Usage: "Audited pass-throughs for language package managers.",
+		Description: `pkg groups the thin pass-through wrappers around language package
+managers (pip, npm, cargo, brew, etc.). Each subcommand forwards its
+arguments to the underlying binary while emitting an audit record, so
+'coily pkg pip install foo' runs 'pip install foo' under coily's
+audit + scope rules.`,
+		Commands: subs,
+	}
 }

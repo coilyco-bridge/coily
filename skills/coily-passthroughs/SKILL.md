@@ -29,22 +29,6 @@ Flags: --follow, --since
 
 Pass-through to aws with argv validation + audit log.
 
-## `coily brew`
-
-Pass-through to brew with argv validation + audit log.
-
-## `coily bun`
-
-Pass-through to bun with argv validation + audit log.
-
-## `coily bundle`
-
-Pass-through to bundle with argv validation + audit log.
-
-## `coily cargo`
-
-Pass-through to cargo with argv validation + audit log.
-
 ## `coily core-keeper restart`
 
 Restart the core-keeper-server unit.
@@ -123,10 +107,6 @@ Copy Configs/WorldGenerator.eco to --target.
 
 Flags: --configs-dir, --target
 
-## `coily gem`
-
-Pass-through to gem with argv validation + audit log.
-
 ## `coily gh`
 
 Pass-through to gh with argv validation + audit log.
@@ -203,25 +183,53 @@ GET /games/{game-id}/mods
 
 Flags: --limit, --offset
 
-## `coily npm`
+## `coily pkg brew`
+
+Pass-through to brew with argv validation + audit log.
+
+## `coily pkg bun`
+
+Pass-through to bun with argv validation + audit log.
+
+## `coily pkg bundle`
+
+Pass-through to bundle with argv validation + audit log.
+
+## `coily pkg cargo`
+
+Pass-through to cargo with argv validation + audit log.
+
+## `coily pkg gem`
+
+Pass-through to gem with argv validation + audit log.
+
+## `coily pkg npm`
 
 Pass-through to npm with argv validation + audit log.
 
-## `coily pip`
+## `coily pkg pip`
 
 Pass-through to pip with argv validation + audit log.
 
-## `coily pipx`
+## `coily pkg pipx`
 
 Pass-through to pipx with argv validation + audit log.
 
-## `coily pnpm`
+## `coily pkg pnpm`
 
 Pass-through to pnpm with argv validation + audit log.
 
-## `coily poetry`
+## `coily pkg poetry`
 
 Pass-through to poetry with argv validation + audit log.
+
+## `coily pkg uv`
+
+Pass-through to uv with argv validation + audit log.
+
+## `coily pkg yarn`
+
+Pass-through to yarn with argv validation + audit log.
 
 ## `coily setup`
 
@@ -431,10 +439,6 @@ Mutate one Trello card (move list, toggle labels, append a comment, rename, clos
 
 Flags: --close, --comment, --desc, --dir, --label-off, --label-on, --list, --name, --reopen
 
-## `coily uv`
-
-Pass-through to uv with argv validation + audit log.
-
 ## `coily version`
 
 Print the build version and exit.
@@ -442,7 +446,3 @@ Print the build version and exit.
 ## `coily whoami`
 
 Print the authenticated identity coily sees across aws, kubectl, and gh.
-
-## `coily yarn`
-
-Pass-through to yarn with argv validation + audit log.

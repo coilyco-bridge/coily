@@ -172,7 +172,7 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.trelloCommand(),
 		r.auditCommand(),
 		r.gitCommand(),
+		r.pkgCommand(),
 	}
-	cmds = append(cmds, r.pkgmgrCommands()...)
 	return cmds
 }

@@ -34,15 +34,15 @@ $ tail -2 ~/.coily/audit/coilysiren-coily.jsonl
 
 This repo exists for three reasons.
 
-1. **One audited surface for every privileged tool.** `coily aws ...`, `coily gh ...`, `coily kubectl ...`, `coily docker ...`, `coily tailscale ...`, plus every package manager (`coily pnpm`, `coily uv`, `coily cargo`, `coily brew`, ...) all forward verbatim to the underlying binary, gated by argv-level shell-metacharacter rejection and an audit-logged invocation. The pass-through is intentionally thin (`SkipFlagParsing`, no per-leaf subcommand modeling); the upstream tool's own `--help` is the source of truth for verb shape, and the lockdown deny list is the source of truth for read-vs-write gating.
+1. **One audited surface for every privileged tool.** `coily aws ...`, `coily gh ...`, `coily kubectl ...`, `coily docker ...`, `coily tailscale ...`, plus every package manager nested under `coily pkg` (`coily pkg pnpm`, `coily pkg uv`, `coily pkg cargo`, `coily pkg brew`, ...) all forward verbatim to the underlying binary, gated by argv-level shell-metacharacter rejection and an audit-logged invocation. The pass-through is intentionally thin (`SkipFlagParsing`, no per-leaf subcommand modeling); the upstream tool's own `--help` is the source of truth for verb shape, and the lockdown deny list is the source of truth for read-vs-write gating.
 
-    Package managers look the same as anything else, just `coily <tool> <args...>`:
+    Package managers all live under the `pkg` namespace:
 
     ```
-    coily pnpm install
-    coily uv pip install -r requirements.txt
-    coily cargo build --release
-    coily brew upgrade
+    coily pkg pnpm install
+    coily pkg uv pip install -r requirements.txt
+    coily pkg cargo build --release
+    coily pkg brew upgrade
     ```
 
     Same audit row, same metacharacter rejection. Nothing the upstream tool understands is reshaped on the way through.

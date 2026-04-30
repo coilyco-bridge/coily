@@ -18,22 +18,6 @@ commands:
       summary: Pass-through to aws with argv validation + audit log.
     - path:
         - coily
-        - brew
-      summary: Pass-through to brew with argv validation + audit log.
-    - path:
-        - coily
-        - bun
-      summary: Pass-through to bun with argv validation + audit log.
-    - path:
-        - coily
-        - bundle
-      summary: Pass-through to bundle with argv validation + audit log.
-    - path:
-        - coily
-        - cargo
-      summary: Pass-through to cargo with argv validation + audit log.
-    - path:
-        - coily
         - core-keeper
         - restart
       summary: Restart the core-keeper-server unit.
@@ -138,12 +122,30 @@ commands:
         - --target
     - path:
         - coily
-        - gem
-      summary: Pass-through to gem with argv validation + audit log.
-    - path:
-        - coily
         - gh
       summary: Pass-through to gh with argv validation + audit log.
+    - path:
+        - coily
+        - git
+        - audit-show
+      summary: Resolve an Audit-log trailer back to its full audit record.
+      flags:
+        - --scope
+        - --since
+    - path:
+        - coily
+        - git
+        - trailer
+      summary: 'Emit Audit-log: trailers for the current repo.'
+      flags:
+        - --max
+        - --scope
+        - --since
+    - path:
+        - coily
+        - git
+        - trailer-hook
+      summary: 'prepare-commit-msg hook: append Audit-log: trailers in place.'
     - path:
         - coily
         - icarus
@@ -220,24 +222,64 @@ commands:
         - --offset
     - path:
         - coily
+        - pkg
+        - brew
+      summary: Pass-through to brew with argv validation + audit log.
+    - path:
+        - coily
+        - pkg
+        - bun
+      summary: Pass-through to bun with argv validation + audit log.
+    - path:
+        - coily
+        - pkg
+        - bundle
+      summary: Pass-through to bundle with argv validation + audit log.
+    - path:
+        - coily
+        - pkg
+        - cargo
+      summary: Pass-through to cargo with argv validation + audit log.
+    - path:
+        - coily
+        - pkg
+        - gem
+      summary: Pass-through to gem with argv validation + audit log.
+    - path:
+        - coily
+        - pkg
         - npm
       summary: Pass-through to npm with argv validation + audit log.
     - path:
         - coily
+        - pkg
         - pip
       summary: Pass-through to pip with argv validation + audit log.
     - path:
         - coily
+        - pkg
         - pipx
       summary: Pass-through to pipx with argv validation + audit log.
     - path:
         - coily
+        - pkg
         - pnpm
       summary: Pass-through to pnpm with argv validation + audit log.
     - path:
         - coily
+        - pkg
         - poetry
       summary: Pass-through to poetry with argv validation + audit log.
+    - path:
+        - coily
+        - pkg
+        - uv
+      summary: Pass-through to uv with argv validation + audit log.
+    - path:
+        - coily
+        - pkg
+        - yarn
+      summary: Pass-through to yarn with argv validation + audit log.
     - path:
         - coily
         - setup
@@ -311,6 +353,15 @@ commands:
         - coily
         - ssh
         - git
+        - diff
+      summary: Run git diff in <repo-path> (read-only, unstaged changes).
+      flags:
+        - --host
+        - --user
+    - path:
+        - coily
+        - ssh
+        - git
         - fetch
       summary: Run git fetch --all --prune in <repo-path>.
       flags:
@@ -349,6 +400,15 @@ commands:
         - git
         - status
       summary: Run git status --short --branch in <repo-path>.
+      flags:
+        - --host
+        - --user
+    - path:
+        - coily
+        - ssh
+        - git
+        - update-index
+      summary: Run git update-index --really-refresh in <repo-path> (re-hashes file contents to clear stat-stale phantom-dirty entries; mutates only the index's cached-stat column).
       flags:
         - --host
         - --user
@@ -528,17 +588,9 @@ commands:
         - --reopen
     - path:
         - coily
-        - uv
-      summary: Pass-through to uv with argv validation + audit log.
-    - path:
-        - coily
         - version
       summary: Print the build version and exit.
     - path:
         - coily
         - whoami
       summary: Print the authenticated identity coily sees across aws, kubectl, and gh.
-    - path:
-        - coily
-        - yarn
-      summary: Pass-through to yarn with argv validation + audit log.
