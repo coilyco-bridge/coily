@@ -47,6 +47,12 @@ func TestValidateRepoPath(t *testing.T) {
 		{"/foo\tbar", true},
 		{"/foo\nbar", true},
 		{"/repo.with.dots-and_dashes", false},
+		{"~", false},
+		{"~/", false},
+		{"~/projects/coilysiren/infrastructure", false},
+		{"~/foo/..", true},
+		{"~root/etc", true},
+		{"~/foo bar", true},
 		{strings.Repeat("/a", 3000), true},
 	}
 	for _, tc := range cases {

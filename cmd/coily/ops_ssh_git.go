@@ -97,8 +97,11 @@ func (r *Runner) sshGitVerb(name, usage string, build func(string) []string) *cl
 
 // validateRepoPath rejects anything that isn't a sane absolute filesystem
 // path safe to interpolate after `git -C`. verb.Wrap already rejects shell
-// metacharacters in argv; this adds the path-shape constraints (absolute,
-// no `..`, no embedded whitespace, no leading `-`, length cap).
+// metacharacters in argv; this adds the path-shape constraints (absolute
+// or `~`-rooted, no `..`, no embedded whitespace, length cap). `~` and
+// `~/...` pass validation and tilde-expand on the remote shell to the ssh
+// user's home dir; `~user/...` is rejected to keep the expansion target
+// predictable.
 func validateRepoPath(path string) error {
 	if path == "" {
 		return fmt.Errorf("repo path is empty")
@@ -106,16 +109,12 @@ func validateRepoPath(path string) error {
 	if len(path) > 4096 {
 		return fmt.Errorf("repo path too long")
 	}
-	if !strings.HasPrefix(path, "/") {
-		return fmt.Errorf("repo path must be absolute (start with '/')")
+	rooted := strings.HasPrefix(path, "/") || path == "~" || strings.HasPrefix(path, "~/")
+	if !rooted {
+		return fmt.Errorf("repo path must be absolute (start with '/' or '~/')")
 	}
-	if strings.HasPrefix(path, "-") {
-		return fmt.Errorf("repo path must not start with '-'")
-	}
-	for _, r := range path {
-		if r == ' ' || r == '\t' || r == '\n' || r == '\r' {
-			return fmt.Errorf("repo path must not contain whitespace")
-		}
+	if strings.ContainsAny(path, " \t\n\r") {
+		return fmt.Errorf("repo path must not contain whitespace")
 	}
 	for _, seg := range strings.Split(path, "/") {
 		if seg == ".." {
