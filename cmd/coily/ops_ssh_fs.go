@@ -78,7 +78,7 @@ func (r *Runner) sshFsVerb(name, usage string, build func(string) []string) *cli
 					}
 					path := c.Args().First()
 					if err := validateRepoPath(path); err != nil {
-						return err
+						return fmt.Errorf("ssh %s: %w", name, err)
 					}
 					host, user, err := sshTarget(c)
 					if err != nil {
@@ -126,7 +126,7 @@ func (r *Runner) sshGrepCommand() *cli.Command {
 						return err
 					}
 					if err := validateRepoPath(path); err != nil {
-						return err
+						return fmt.Errorf("ssh grep: %w", err)
 					}
 					host, user, err := sshTarget(c)
 					if err != nil {

@@ -80,7 +80,7 @@ func (r *Runner) sshGitVerb(name, usage string, build func(string) []string) *cl
 					}
 					path := c.Args().First()
 					if err := validateRepoPath(path); err != nil {
-						return err
+						return fmt.Errorf("ssh git %s: %w", name, err)
 					}
 					host, user, err := sshTarget(c)
 					if err != nil {
@@ -101,25 +101,25 @@ func (r *Runner) sshGitVerb(name, usage string, build func(string) []string) *cl
 // no `..`, no embedded whitespace, no leading `-`, length cap).
 func validateRepoPath(path string) error {
 	if path == "" {
-		return fmt.Errorf("ssh git: repo path is empty")
+		return fmt.Errorf("repo path is empty")
 	}
 	if len(path) > 4096 {
-		return fmt.Errorf("ssh git: repo path too long")
+		return fmt.Errorf("repo path too long")
 	}
 	if !strings.HasPrefix(path, "/") {
-		return fmt.Errorf("ssh git: repo path must be absolute (start with '/')")
+		return fmt.Errorf("repo path must be absolute (start with '/')")
 	}
 	if strings.HasPrefix(path, "-") {
-		return fmt.Errorf("ssh git: repo path must not start with '-'")
+		return fmt.Errorf("repo path must not start with '-'")
 	}
 	for _, r := range path {
 		if r == ' ' || r == '\t' || r == '\n' || r == '\r' {
-			return fmt.Errorf("ssh git: repo path must not contain whitespace")
+			return fmt.Errorf("repo path must not contain whitespace")
 		}
 	}
 	for _, seg := range strings.Split(path, "/") {
 		if seg == ".." {
-			return fmt.Errorf("ssh git: repo path must not contain '..' segments")
+			return fmt.Errorf("repo path must not contain '..' segments")
 		}
 	}
 	return nil
