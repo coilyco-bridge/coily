@@ -98,6 +98,8 @@ make dev               # builds ./bin/coily-dev (different binary name, not on P
 ./bin/coily-dev ...    # invoke from repo root only
 ```
 
+`make test` defaults to [`gotest`](https://github.com/rakyll/gotest), a drop-in `go test` wrapper that colorizes PASS/FAIL lines. Install once with `go install github.com/rakyll/gotest@latest`. To opt out, run `make test GO_TEST="go test"`. CI uses raw `go test` so log output stays clean.
+
 The agent's allowlist trusts `coily`, not `coily-dev`. The rename mostly stops `make dev` from shadowing the installed binary on `$PATH`; the security value is narrow (the workspace deny list already blocks the `go run` path, and `./bin/coily-dev` is not on `$PATH`). Dev builds have `-tags dev` with extra diagnostics. Production builds use `-tags prod` which strips dev code paths.
 
 ### What about `aws`, `kubectl`, `gh`?

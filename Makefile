@@ -18,6 +18,10 @@ VERSION := $(shell git rev-parse --short HEAD 2>/dev/null || echo dev)
 LDFLAGS := -s -w -X main.Version=$(VERSION)
 
 GO := go
+# gotest is a drop-in for `go test` that colorizes PASS/FAIL lines. Install
+# with `go install github.com/rakyll/gotest@latest`. CI overrides this back
+# to `go test` since color codes are noise in Actions logs.
+GO_TEST ?= gotest
 
 .PHONY: help
 help:
@@ -27,7 +31,7 @@ help:
 	@echo "  make install          sudo-install ./bin/$(BIN_NAME) to $(INSTALL_PREFIX)/bin"
 	@echo "  make install-windows  build + install bin/$(BIN_NAME).exe to $(WINDOWS_INSTALL_DIR) (run from elevated shell)"
 	@echo "  make deploy-server    cross-compile + scp + sudo-install on $(SERVER_HOST)"
-	@echo "  make test             go test ./..."
+	@echo "  make test             $(GO_TEST) ./..."
 	@echo "  make vet              go vet ./..."
 	@echo "  make clean            remove build outputs"
 
@@ -80,13 +84,13 @@ deploy-server:
 
 .PHONY: test
 test:
-	$(GO) test ./...
+	$(GO_TEST) ./...
 
 .PHONY: test-integration
 test-integration:
 	@# Layer 2 integration tests. Shell out to live aws/gh/kubectl via
 	@# whoami-style verbs. Requires these binaries to be on PATH.
-	$(GO) test -tags integration ./test/integration/...
+	$(GO_TEST) -tags integration ./test/integration/...
 
 .PHONY: vet
 vet:
@@ -102,7 +106,7 @@ lint-fix:
 
 .PHONY: cover
 cover:
-	$(GO) test -coverprofile=coverage.out ./...
+	$(GO_TEST) -coverprofile=coverage.out ./...
 	$(GO) tool cover -func=coverage.out | tail -20
 	@echo "HTML report: go tool cover -html=coverage.out"
 
