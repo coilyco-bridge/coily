@@ -29,83 +29,155 @@ Flags: --follow, --since
 
 Pass-through to aws with argv validation + audit log.
 
-## `coily core-keeper restart`
+## `coily docker`
+
+Pass-through to docker with argv validation + audit log.
+
+## `coily gaming core-keeper restart`
 
 Restart the core-keeper-server unit.
 
-## `coily core-keeper start`
+## `coily gaming core-keeper start`
 
 Start the core-keeper-server unit.
 
-## `coily core-keeper status`
+## `coily gaming core-keeper status`
 
 Print systemctl status core-keeper-server.
 
-## `coily core-keeper stop`
+## `coily gaming core-keeper stop`
 
 Stop the core-keeper-server unit.
 
-## `coily core-keeper tail`
+## `coily gaming core-keeper tail`
 
 Tail core-keeper-server journal logs (journalctl -u core-keeper-server -f).
 
 Flags: --follow, --lines
 
-## `coily docker`
-
-Pass-through to docker with argv validation + audit log.
-
-## `coily eco mod push`
+## `coily gaming eco mod push`
 
 scp a .zip to <server_dir> on kai-server and unzip -o it.
 
 Flags: --keep-remote, --server-dir, --src
 
-## `coily eco restart`
+## `coily gaming eco restart`
 
 Restart the eco-server systemd unit.
 
-## `coily eco start`
+## `coily gaming eco start`
 
 Start the eco-server systemd unit.
 
-## `coily eco status`
+## `coily gaming eco status`
 
 Print systemctl status eco-server.
 
-## `coily eco stop`
+## `coily gaming eco stop`
 
 Stop the eco-server systemd unit.
 
-## `coily eco tail`
+## `coily gaming eco tail`
 
 Tail eco-server journal logs (journalctl -u eco-server -f).
 
 Flags: --follow, --lines
 
-## `coily eco world get-seed`
+## `coily gaming eco world get-seed`
 
 Print the current Seed from Configs/WorldGenerator.eco.
 
 Flags: --configs-dir
 
-## `coily eco world randomize`
+## `coily gaming eco world randomize`
 
 Generate a random seed and write it to Configs/WorldGenerator.eco.
 
 Flags: --configs-dir
 
-## `coily eco world set-seed`
+## `coily gaming eco world set-seed`
 
 Write a specific Seed into Configs/WorldGenerator.eco.
 
 Flags: --configs-dir, --seed
 
-## `coily eco world snapshot`
+## `coily gaming eco world snapshot`
 
 Copy Configs/WorldGenerator.eco to --target.
 
 Flags: --configs-dir, --target
+
+## `coily gaming factorio mods list`
+
+Print mod-list.json entries with their enabled flag.
+
+## `coily gaming factorio players adminlist`
+
+Print entries from server-adminlist.json.
+
+## `coily gaming factorio players banlist`
+
+Print entries from server-banlist.json.
+
+## `coily gaming factorio players whitelist`
+
+Print entries from server-whitelist.json.
+
+## `coily gaming factorio restart`
+
+Restart the factorio-server unit.
+
+## `coily gaming factorio saves backup-now`
+
+Trigger an immediate off-cluster snapshot of the saves dir.
+
+## `coily gaming factorio saves list`
+
+List zip saves under the FactorioServer/saves directory.
+
+## `coily gaming factorio start`
+
+Start the factorio-server unit.
+
+## `coily gaming factorio status`
+
+Print systemctl status factorio-server.
+
+## `coily gaming factorio stop`
+
+Stop the factorio-server unit.
+
+## `coily gaming factorio tail`
+
+Tail factorio-server journal logs (journalctl -u factorio-server -f).
+
+Flags: --follow, --lines
+
+## `coily gaming factorio update`
+
+Run steamcmd against app 427520 to update the factorio install.
+
+## `coily gaming icarus restart`
+
+Restart the icarus-server unit.
+
+## `coily gaming icarus start`
+
+Start the icarus-server unit.
+
+## `coily gaming icarus status`
+
+Print systemctl status icarus-server.
+
+## `coily gaming icarus stop`
+
+Stop the icarus-server unit.
+
+## `coily gaming icarus tail`
+
+Tail icarus-server journal logs (journalctl -u icarus-server -f).
+
+Flags: --follow, --lines
 
 ## `coily gh`
 
@@ -126,28 +198,6 @@ Flags: --max, --scope, --since
 ## `coily git trailer-hook`
 
 prepare-commit-msg hook: append Audit-log: trailers in place.
-
-## `coily icarus restart`
-
-Restart the icarus-server unit.
-
-## `coily icarus start`
-
-Start the icarus-server unit.
-
-## `coily icarus status`
-
-Print systemctl status icarus-server.
-
-## `coily icarus stop`
-
-Stop the icarus-server unit.
-
-## `coily icarus tail`
-
-Tail icarus-server journal logs (journalctl -u icarus-server -f).
-
-Flags: --follow, --lines
 
 ## `coily install-completion`
 

@@ -40,6 +40,9 @@ func defaults() Config {
 		Eco: Eco{
 			ServerDir: "/home/kai/Steam/steamapps/common/EcoServer",
 		},
+		Factorio: Factorio{
+			ServerDir: "/home/kai/Steam/steamapps/common/FactorioServer",
+		},
 	}
 }
 
@@ -48,6 +51,7 @@ type Config struct {
 	Audit     Audit     `yaml:"audit"`
 	AWS       AWS       `yaml:"aws"`
 	Eco       Eco       `yaml:"eco"`
+	Factorio  Factorio  `yaml:"factorio"`
 	Loaded    time.Time `yaml:"-"`
 }
 
@@ -59,6 +63,14 @@ type Config struct {
 type Eco struct {
 	ConfigsDir string `yaml:"configs_dir"`
 	ServerDir  string `yaml:"server_dir"`
+}
+
+// Factorio is the remote-side config for `coily gaming factorio` verbs.
+// server_dir is the absolute path to the dedicated server install on
+// kai-server (the directory that contains saves/, mods/, bin/x64/factorio).
+// Defaults to the Steam install path used by factorio-server-{pre,start}.sh.
+type Factorio struct {
+	ServerDir string `yaml:"server_dir"`
 }
 
 type KaiServer struct {

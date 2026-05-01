@@ -134,7 +134,7 @@ config.eco.server_dir. The asset existing on a coilysiren-owned repo IS
 the security check; coily does not maintain a per-mod allowlist.
 
 Files land under kai-owned paths so no sudo is involved. The verb does
-not restart the Eco server - run 'coily eco restart' separately when
+not restart the Eco server - run 'coily gaming eco restart' separately when
 the new mod should take effect.`,
 		Flags: r.sshHostUserFlags(),
 		Action: verb.Wrap(
@@ -203,7 +203,7 @@ fast-forwards each repo that has a match, and rsyncs the matched
 subtree into config.eco.server_dir.
 
 Files land under kai-owned paths so no sudo is involved. The verb does
-not restart the Eco server - run 'coily eco restart' separately when
+not restart the Eco server - run 'coily gaming eco restart' separately when
 the new mod should take effect.`,
 		Flags: r.sshHostUserFlags(),
 		Action: verb.Wrap(

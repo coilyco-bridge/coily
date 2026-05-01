@@ -27,7 +27,7 @@ func (r *Runner) ecoModCommand() *cli.Command {
 kai-server. Today only 'push' exists; list/remove land when Kai needs
 them.
 
-A push does not restart the server - run 'coily eco restart' separately
+A push does not restart the server - run 'coily gaming eco restart' separately
 when you want the new mod(s) to take effect.`,
 		Commands: []*cli.Command{
 			r.ecoModPushCommand(),
@@ -55,7 +55,7 @@ Typical archive shapes (same convention as eco-mods/tasks.py):
 uploaded .zip on kai-server after extract (default: delete it to keep
 the Eco server root tidy).
 
-This verb does NOT restart the server. 'coily eco restart' is the next
+This verb does NOT restart the server. 'coily gaming eco restart' is the next
 step for Mods/UserCode/ changes; compiled-DLL mods also need a restart
 for Eco's ModKitPlugin to pick them up.`,
 		Flags: []cli.Flag{
@@ -146,6 +146,6 @@ func (r *Runner) ecoModPushAction(ctx context.Context, c *cli.Command) error {
 		}
 	}
 
-	fmt.Fprintf(os.Stderr, "eco mod push: done. Run 'coily eco restart' to load.\n")
+	fmt.Fprintf(os.Stderr, "eco mod push: done. Run 'coily gaming eco restart' to load.\n")
 	return nil
 }

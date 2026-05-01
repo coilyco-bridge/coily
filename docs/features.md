@@ -24,7 +24,7 @@ effectively zero.
 4. [`coily aws ...` pass-through](features/05-aws.md)
 5. [`coily gh ...` pass-through](features/06-gh.md)
 6. [`coily kubectl ...` pass-through](features/07-kubectl.md)
-7. [`coily eco status | tail | restart | stop | start`](features/08-eco.md)
+7. [`coily gaming {eco,core-keeper,icarus,factorio} ...`](features/08-eco.md)
 8. [`coily install-completion`](features/09-install-completion.md)
 9. [Policy / metachar rejection](features/14-policy-metachar.md)
 10. [Audit log](features/15-audit-log.md)

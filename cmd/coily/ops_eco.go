@@ -147,7 +147,7 @@ func (r *Runner) ecoWorldCommand() *cli.Command {
 get-seed, set-seed, randomize, snapshot. All four are local file ops on
 a checkout of the eco-configs repo. None of them touch kai-server. To
 restart the eco-server after rotating the world file, use
-'coily eco restart' separately.
+'coily gaming eco restart' separately.
 
 The eco-configs checkout is located via --configs-dir, falling back to
 config.eco.configs_dir from the embedded config.`,
