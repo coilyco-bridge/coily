@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 )
 
@@ -44,6 +45,12 @@ type Runner struct {
 	Stdin  io.Reader
 	// Resolve locates a binary. Defaults to PathResolver when nil.
 	Resolve Resolver
+	// Env, when non-nil, is appended to os.Environ() and passed to the
+	// child as cmd.Env. Used by the egress-proxy plumbing to inject
+	// HTTPS_PROXY / HTTP_PROXY for the duration of one invocation. When
+	// nil, cmd.Env is left unset and the child inherits the parent
+	// environment (Go's default).
+	Env []string
 }
 
 // ErrEmptyBinary is returned when Exec or Capture is called with "".
@@ -70,6 +77,9 @@ func (r *Runner) Exec(ctx context.Context, bin string, argv ...string) error {
 	cmd.Stdout = r.Stdout
 	cmd.Stderr = r.Stderr
 	cmd.Stdin = r.Stdin
+	if r.Env != nil {
+		cmd.Env = append(os.Environ(), r.Env...)
+	}
 	return cmd.Run()
 }
 
@@ -89,6 +99,9 @@ func (r *Runner) Capture(ctx context.Context, bin string, argv ...string) ([]byt
 	cmd.Stdout = &buf
 	cmd.Stderr = r.Stderr
 	cmd.Stdin = r.Stdin
+	if r.Env != nil {
+		cmd.Env = append(os.Environ(), r.Env...)
+	}
 	if err := cmd.Run(); err != nil {
 		return buf.Bytes(), err
 	}

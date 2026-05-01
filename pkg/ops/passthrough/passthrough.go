@@ -34,6 +34,7 @@ import (
 	"fmt"
 
 	"github.com/coilysiren/coily/pkg/audit"
+	"github.com/coilysiren/coily/pkg/egress"
 	"github.com/coilysiren/coily/pkg/shell"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
@@ -45,6 +46,9 @@ type Option func(*config)
 
 type config struct {
 	skipPolicy bool
+	egressOn   bool
+	egressList []string
+	egressMode egress.Mode
 }
 
 // WithSkipPolicy disables the shell-metacharacter check for this binary.
@@ -61,6 +65,21 @@ func WithSkipPolicy() Option {
 	return func(c *config) { c.skipPolicy = true }
 }
 
+// WithEgress wires the per-invocation HTTP CONNECT proxy. The child runs
+// with HTTPS_PROXY/HTTP_PROXY pointed at 127.0.0.1:NNNNN for the lifetime
+// of this invocation; the proxy collects one row per host contacted and
+// attaches them to the audit record. In ModeEnforce, hosts not on the
+// allowlist are denied with 403 (the underlying tool sees a connection
+// failure). In ModeObserve, every host is forwarded and logged; the
+// allowlist is ignored. See pkg/egress and issue #35.
+func WithEgress(allowlist []string, mode egress.Mode) Option {
+	return func(c *config) {
+		c.egressOn = true
+		c.egressList = allowlist
+		c.egressMode = mode
+	}
+}
+
 // Command returns the *cli.Command for `coily <bin>`. Every argument
 // after the binary name is forwarded verbatim through the pass-through
 // pipeline (argv validation -> audit -> exec). SkipFlagParsing keeps
@@ -70,22 +89,56 @@ func Command(bin string, r *shell.Runner, w *audit.Writer, opts ...Option) *cli.
 	for _, opt := range opts {
 		opt(&cfg)
 	}
+	spec := verb.Spec{
+		Name: bin,
+		ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+			return nil, c.Args().Slice()
+		},
+		Action: func(ctx context.Context, c *cli.Command) error {
+			return r.Exec(ctx, bin, c.Args().Slice()...)
+		},
+		SkipPolicy: cfg.skipPolicy,
+	}
+	if cfg.egressOn {
+		spec.Action, spec.OnComplete = withEgressAction(bin, r, cfg.egressList, cfg.egressMode)
+	}
 	return &cli.Command{
 		Name:            bin,
 		Usage:           fmt.Sprintf("Pass-through to %s with argv validation + audit log.", bin),
 		SkipFlagParsing: true,
-		Action: verb.Wrap(
-			verb.Spec{
-				Name: bin,
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					return nil, c.Args().Slice()
-				},
-				Action: func(ctx context.Context, c *cli.Command) error {
-					return r.Exec(ctx, bin, c.Args().Slice()...)
-				},
-				SkipPolicy: cfg.skipPolicy,
-			},
-			w,
-		),
+		Action:          verb.Wrap(spec, w),
 	}
+}
+
+// withEgressAction wraps the standard exec action to start a per-invocation
+// proxy, inject HTTPS_PROXY/HTTP_PROXY into a per-call shadow Runner so
+// concurrent commands stay independent, and surface the collected rows
+// through OnComplete.
+func withEgressAction(bin string, base *shell.Runner, allowlist []string, mode egress.Mode) (cli.ActionFunc, func(*audit.Record)) {
+	var rows []audit.EgressRow
+	action := func(ctx context.Context, c *cli.Command) error {
+		p := egress.New(allowlist, mode)
+		proxyURL, err := p.Start(ctx)
+		if err != nil {
+			return fmt.Errorf("egress: start proxy: %w", err)
+		}
+		// Shadow the Runner so we don't mutate the shared base state.
+		shadow := *base
+		shadow.Env = append([]string(nil), base.Env...)
+		shadow.Env = append(shadow.Env,
+			"HTTPS_PROXY="+proxyURL,
+			"HTTP_PROXY="+proxyURL,
+			"https_proxy="+proxyURL,
+			"http_proxy="+proxyURL,
+		)
+		execErr := shadow.Exec(ctx, bin, c.Args().Slice()...)
+		rows = p.Stop()
+		return execErr
+	}
+	hook := func(rec *audit.Record) {
+		if len(rows) > 0 {
+			rec.Egress = rows
+		}
+	}
+	return action, hook
 }

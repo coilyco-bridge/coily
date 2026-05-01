@@ -60,6 +60,14 @@ type Spec struct {
 	// still written; CommitScope is just left empty so the row never appears
 	// in any commit's trailer query.
 	SkipScope bool
+
+	// OnComplete, if set, runs inside writer.Wrap after Action returns and
+	// before the audit record is appended. Receives a pointer to the record
+	// being finalized so the verb can attach side-channel data (e.g. the
+	// rows collected by the egress proxy in pkg/egress). Decision /
+	// ExitCode / DurationMS / Error are already set when OnComplete runs;
+	// mutating them is not the contract.
+	OnComplete func(*audit.Record)
 }
 
 // Wrap returns a cli.ActionFunc that runs the full coily verb pipeline.
@@ -99,9 +107,9 @@ func Wrap(spec Spec, writer *audit.Writer) cli.ActionFunc {
 		if writer == nil {
 			return spec.Action(ctx, cmd)
 		}
-		return writer.Wrap(ctx, base, func() error {
+		return writer.WrapHook(ctx, base, func() error {
 			return spec.Action(ctx, cmd)
-		})
+		}, spec.OnComplete)
 	}
 }
 

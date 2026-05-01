@@ -157,6 +157,30 @@ func TestWrap_RecordsFailureInAudit(t *testing.T) {
 	}
 }
 
+func TestWrap_OnCompleteMutatesRecord(t *testing.T) {
+	w := newTestWriter(t)
+	spec := verb.Spec{
+		Name:   "test.ro",
+		Action: func(_ context.Context, _ *cli.Command) error { return nil },
+		OnComplete: func(r *audit.Record) {
+			r.Egress = []audit.EgressRow{
+				{Host: "formulae.brew.sh", Decision: audit.EgressAllow, BytesUp: 100, BytesDown: 200, DurationMS: 5},
+			}
+		},
+	}
+	if err := runWrapped(t, spec, w); err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	b, _ := os.ReadFile(w.Path)
+	records, _ := audit.ReadAll(bytes.NewReader(b))
+	if len(records) != 1 {
+		t.Fatalf("got %d records, want 1", len(records))
+	}
+	if len(records[0].Egress) != 1 || records[0].Egress[0].Host != "formulae.brew.sh" {
+		t.Errorf("egress = %+v, want one row for formulae.brew.sh", records[0].Egress)
+	}
+}
+
 // runWrapped invokes the wrapped action in a way that mimics urfave/cli's
 // real invocation shape. We pass an empty *cli.Command because Spec.ArgsFunc
 // is the only code path that reads from it, and test specs set ArgsFunc

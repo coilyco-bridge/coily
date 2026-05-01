@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/coilysiren/coily/pkg/egress"
 	"github.com/coilysiren/coily/pkg/ops/passthrough"
 	"github.com/urfave/cli/v3"
 )
@@ -33,7 +34,14 @@ var pkgmgrBinaries = []string{
 func (r *Runner) pkgCommand() *cli.Command {
 	subs := make([]*cli.Command, 0, len(pkgmgrBinaries))
 	for _, bin := range pkgmgrBinaries {
-		subs = append(subs, passthrough.Command(bin, r.Runner, r.Audit))
+		var opts []passthrough.Option
+		// Phase 1 of issue #35 wires the egress proxy for brew only. The
+		// other 11 pkgmgrs gain enforce mode in Phase 2 once the brew
+		// tracer-bullet end-to-end is confirmed in real use.
+		if allow, ok := egress.Allowlists[bin]; ok {
+			opts = append(opts, passthrough.WithEgress(allow, egress.ModeEnforce))
+		}
+		subs = append(subs, passthrough.Command(bin, r.Runner, r.Audit, opts...))
 	}
 	return &cli.Command{
 		Name:  "pkg",

@@ -73,6 +73,33 @@ func TestExec_ResolverErrorPropagates(t *testing.T) {
 	}
 }
 
+func TestExec_EnvNilLeavesParentEnvironment(t *testing.T) {
+	t.Setenv("COILY_TEST_VAR", "from-parent")
+	var out bytes.Buffer
+	r := &shell.Runner{Stdout: &out}
+	if err := r.Exec(context.Background(), "sh", "-c", "echo $COILY_TEST_VAR"); err != nil {
+		t.Fatalf("Exec: %v", err)
+	}
+	if got := strings.TrimSpace(out.String()); got != "from-parent" {
+		t.Errorf("got %q, want from-parent (parent env should be inherited)", got)
+	}
+}
+
+func TestExec_EnvAppendsToParent(t *testing.T) {
+	t.Setenv("COILY_TEST_PARENT", "parent-value")
+	var out bytes.Buffer
+	r := &shell.Runner{
+		Stdout: &out,
+		Env:    []string{"COILY_TEST_INJECTED=injected-value"},
+	}
+	if err := r.Exec(context.Background(), "sh", "-c", "echo $COILY_TEST_PARENT/$COILY_TEST_INJECTED"); err != nil {
+		t.Fatalf("Exec: %v", err)
+	}
+	if got := strings.TrimSpace(out.String()); got != "parent-value/injected-value" {
+		t.Errorf("got %q, want parent-value/injected-value", got)
+	}
+}
+
 func TestPathResolver_ReportsMissingBinary(t *testing.T) {
 	_, err := shell.PathResolver("coily-certainly-does-not-exist-xyzzy")
 	if err == nil {

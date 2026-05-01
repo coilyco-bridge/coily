@@ -337,6 +337,47 @@ func TestWrap_PrintsStderrOnAppendFailure(t *testing.T) {
 	}
 }
 
+func TestRecord_EgressRoundTrips(t *testing.T) {
+	w := tempWriter(t)
+	rec := audit.Record{
+		Verb: "test.verb",
+		Egress: []audit.EgressRow{
+			{Host: "formulae.brew.sh", Decision: audit.EgressAllow, BytesUp: 10, BytesDown: 20, DurationMS: 3},
+			{Host: "evil.example", Decision: audit.EgressDeny},
+		},
+	}
+	if err := w.Append(rec); err != nil {
+		t.Fatalf("Append: %v", err)
+	}
+	got := read(t, w.Path)
+	if len(got) != 1 {
+		t.Fatalf("got %d records, want 1", len(got))
+	}
+	if len(got[0].Egress) != 2 {
+		t.Fatalf("got %d egress rows, want 2: %+v", len(got[0].Egress), got[0].Egress)
+	}
+	if got[0].Egress[0].Host != "formulae.brew.sh" || got[0].Egress[0].BytesUp != 10 {
+		t.Errorf("row[0] = %+v, want host=formulae.brew.sh bytes_up=10", got[0].Egress[0])
+	}
+	if got[0].Egress[1].Decision != audit.EgressDeny {
+		t.Errorf("row[1] decision = %q, want deny", got[0].Egress[1].Decision)
+	}
+}
+
+func TestRecord_EgressOmittedWhenAbsent(t *testing.T) {
+	w := tempWriter(t)
+	if err := w.Append(audit.Record{Verb: "test.verb"}); err != nil {
+		t.Fatalf("Append: %v", err)
+	}
+	body, err := os.ReadFile(w.Path)
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+	if strings.Contains(string(body), "egress") {
+		t.Errorf("egress field present when no rows; line = %q", string(body))
+	}
+}
+
 func TestReadAll_DecodesMultipleRecords(t *testing.T) {
 	input := `{"ts":1745323200,"verb":"a"}
 {"ts":1745323201,"verb":"b"}

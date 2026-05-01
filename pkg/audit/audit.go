@@ -62,7 +62,31 @@ type Record struct {
 	// op was deliberately not bound to any commit and will not appear in
 	// any trailer.
 	CommitScope string `json:"commit_scope,omitempty"`
+	// Egress carries one row per host contacted by the wrapped subprocess
+	// when the verb runs through the per-invocation HTTP CONNECT proxy
+	// (see pkg/egress). Aggregated by host: a `coily npm install` that
+	// opens 200 connections to registry.npmjs.org produces one row, not 200.
+	// Empty when the verb did not run through the proxy.
+	Egress []EgressRow `json:"egress,omitempty"`
 }
+
+// EgressRow is one (parent-invocation, host) pair from the egress proxy.
+// Decision is "allow" or "deny"; deny rows are produced when the host fails
+// the per-binary allowlist in enforce mode and the underlying CONNECT
+// returned 403 instead of being forwarded.
+type EgressRow struct {
+	Host       string `json:"host"`
+	Decision   string `json:"decision"`
+	BytesUp    int64  `json:"bytes_up"`
+	BytesDown  int64  `json:"bytes_down"`
+	DurationMS int64  `json:"duration_ms"`
+}
+
+// Egress decision values.
+const (
+	EgressAllow = "allow"
+	EgressDeny  = "deny"
+)
 
 // ShortID returns the 8-char base32 prefix of the raw UUID bytes. Used in
 // the trailer suffix. Returns empty if ID is unset or unparseable.
@@ -257,7 +281,16 @@ func (w *Writer) Close() error {
 // error is whatever fn returned, unmodified. Audit append failures are
 // written to stderr so the operator notices, but they do not mask fn's
 // error.
-func (w *Writer) Wrap(_ context.Context, base Record, fn func() error) error {
+func (w *Writer) Wrap(ctx context.Context, base Record, fn func() error) error {
+	return w.WrapHook(ctx, base, fn, nil)
+}
+
+// WrapHook is Wrap with an optional onComplete callback. The hook runs
+// after fn returns and before the record is appended; it gets a pointer
+// to the record so the caller can attach side-channel data (e.g. egress
+// rows). Decision/ExitCode/DurationMS/Error are already populated when the
+// hook fires.
+func (w *Writer) WrapHook(_ context.Context, base Record, fn func() error, onComplete func(*Record)) error {
 	start := w.now()
 	err := fn()
 	rec := base
@@ -267,6 +300,9 @@ func (w *Writer) Wrap(_ context.Context, base Record, fn func() error) error {
 	if err != nil {
 		rec.ExitCode = 1
 		rec.Error = err.Error()
+	}
+	if onComplete != nil {
+		onComplete(&rec)
 	}
 	if aerr := w.Append(rec); aerr != nil {
 		fmt.Fprintf(os.Stderr, "audit: %v\n", aerr)
