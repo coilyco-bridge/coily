@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/coilysiren/coily/pkg/lockdown"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
 )
@@ -24,11 +25,14 @@ func (r *Runner) setupCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "setup",
 		Usage: "Run the post-upgrade rituals: completion, skill symlink, and lockdown re-baseline.",
-		Description: `setup runs three idempotent steps in order:
+		Description: `setup runs four idempotent steps in order:
 
   1. coily install-completion         (refresh shell tab-completion)
   2. symlink ~/.claude/skills/coily   (point at the brew-managed skill dir)
   3. coily lockdown --recursive ...   (re-baseline workspace allow/deny lists)
+  4. ~/.claude/coily-binary-gate.sh   (user-level PreToolUse hook that
+                                       rejects dev coily binaries from any
+                                       cwd; complements per-repo lockdown)
 
 The skill symlink target is derived from the running coily binary's location
 (<bin>/../share/coily/skill). It is not user-configurable, by design.
@@ -52,6 +56,10 @@ Skips the lockdown step if the workspace does not exist.`,
 			&cli.BoolFlag{
 				Name:  "skip-lockdown",
 				Usage: "skip the lockdown re-baseline step",
+			},
+			&cli.BoolFlag{
+				Name:  "skip-user-hook",
+				Usage: "skip the user-level PreToolUse hook install",
 			},
 		},
 		Action: verb.Wrap(
@@ -98,7 +106,36 @@ func setupAction(ctx context.Context, c *cli.Command) error {
 		}
 	}
 
+	if !c.Bool("skip-user-hook") {
+		fmt.Fprintln(os.Stderr, "==> user hook")
+		if err := runUserHookStep(); err != nil {
+			return err
+		}
+	}
+
 	fmt.Fprintln(os.Stderr, "setup: done")
+	return nil
+}
+
+// runUserHookStep installs ~/.claude/coily-binary-gate.sh and patches
+// ~/.claude/settings.json to invoke it via PreToolUse. The gate rejects
+// any coily invocation that doesn't resolve to a homebrew install path,
+// catching dev binaries built from source even when invoked from a cwd
+// that has no per-repo lockdown hook.
+func runUserHookStep() error {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("setup: home dir: %w", err)
+	}
+	hookPath, changed, err := lockdown.EnsureUserHook(home)
+	if err != nil {
+		return fmt.Errorf("setup: user hook: %w", err)
+	}
+	verb := "unchanged"
+	if changed {
+		verb = "updated"
+	}
+	fmt.Fprintf(os.Stderr, "    %s (settings.json %s)\n", hookPath, verb)
 	return nil
 }
 

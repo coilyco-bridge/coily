@@ -285,7 +285,7 @@ Pass-through to yarn with argv validation + audit log.
 
 Run the post-upgrade rituals: completion, skill symlink, and lockdown re-baseline.
 
-Flags: --skip-completion, --skip-lockdown, --skip-skill, --workspace
+Flags: --skip-completion, --skip-lockdown, --skip-skill, --skip-user-hook, --workspace
 
 ## `coily ssh cat`
 
