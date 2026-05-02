@@ -8,8 +8,12 @@ name: release
 #      feat: ...  -> minor       feat!: ...   -> major  (also `BREAKING CHANGE:`)
 # 2. A tag is created and pushed.
 # 3. A GitHub Release is created with the auto-generated changelog.
-# 4. The new tarball sha256 is computed and pushed *directly* to
-#    coilysiren/homebrew-tap - no PR step. brew upgrade picks it up.
+# 4. The new tarball sha256 is computed, then a repository_dispatch is
+#    fired to coilysiren/homebrew-tap whose own bump-coily workflow
+#    rewrites Formula/coily.rb via the Contents API. The receiver lives
+#    in homebrew-tap so the commit is signed by GitHub's web-flow key
+#    (only installation-token API commits are auto-signed) and clears
+#    the signed-commits ruleset.
 #
 # Unlike repo-recall, there is no source-tree version bump: coily's
 # `main.Version` is set at build time via ldflags by the Formula, so
@@ -84,28 +88,22 @@ jobs:
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
           echo "url=$url" >> "$GITHUB_OUTPUT"
 
-      - name: Bump Formula via GitHub Contents API
+      - name: Dispatch bump to homebrew-tap
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           TAG: ${{ needs.release.outputs.tag }}
           NEW_URL: ${{ steps.sha.outputs.url }}
           NEW_SHA: ${{ steps.sha.outputs.sha }}
-        # The Contents API produces commits signed by GitHub (web-flow),
-        # which satisfies the homebrew-tap ruleset's signed-commits
-        # requirement. A direct `git push` from the runner cannot.
+        # The homebrew-tap ruleset requires signed commits. A PAT-driven
+        # `git push` or Contents-API call from this runner produces an
+        # unsigned commit and is rejected. Instead we trigger the
+        # bump-coily workflow in homebrew-tap, where the built-in
+        # GITHUB_TOKEN (an installation token) drives the Contents API
+        # and the resulting commit is web-flow-signed by GitHub.
         run: |
           set -euo pipefail
-          path=Formula/coily.rb
-          repo=coilysiren/homebrew-tap
-          tmp=$(mktemp -d)
-          gh api "repos/${repo}/contents/${path}" --jq .sha > "$tmp/sha"
-          gh api "repos/${repo}/contents/${path}" --jq .content \
-            | base64 -d > "$tmp/coily.rb"
-          sed -i "s|^  url \".*\"|  url \"${NEW_URL}\"|"       "$tmp/coily.rb"
-          sed -i "s|^  sha256 \".*\"|  sha256 \"${NEW_SHA}\"|" "$tmp/coily.rb"
-          new_b64=$(base64 -w0 < "$tmp/coily.rb")
-          gh api -X PUT "repos/${repo}/contents/${path}" \
-            -f message="coily: bump to ${TAG}" \
-            -f content="$new_b64" \
-            -f sha="$(cat "$tmp/sha")" \
-            -f branch=main
+          gh api -X POST repos/coilysiren/homebrew-tap/dispatches \
+            -f event_type=bump-coily \
+            -f "client_payload[tag]=${TAG}" \
+            -f "client_payload[url]=${NEW_URL}" \
+            -f "client_payload[sha]=${NEW_SHA}"
