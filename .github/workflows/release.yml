@@ -84,26 +84,28 @@ jobs:
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
           echo "url=$url" >> "$GITHUB_OUTPUT"
 
-      - name: Checkout homebrew-tap
-        uses: actions/checkout@v4
-        with:
-          repository: coilysiren/homebrew-tap
-          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-          path: homebrew-tap
-
-      - name: Bump Formula and push directly
+      - name: Bump Formula via GitHub Contents API
         env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           TAG: ${{ needs.release.outputs.tag }}
           NEW_URL: ${{ steps.sha.outputs.url }}
           NEW_SHA: ${{ steps.sha.outputs.sha }}
+        # The Contents API produces commits signed by GitHub (web-flow),
+        # which satisfies the homebrew-tap ruleset's signed-commits
+        # requirement. A direct `git push` from the runner cannot.
         run: |
           set -euo pipefail
-          cd homebrew-tap
-          file=Formula/coily.rb
-          sed -i "s|^  url \".*\"|  url \"${NEW_URL}\"|" "$file"
-          sed -i "s|^  sha256 \".*\"|  sha256 \"${NEW_SHA}\"|" "$file"
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$file"
-          git commit -m "coily: bump to ${TAG}"
-          git push origin HEAD:main
+          path=Formula/coily.rb
+          repo=coilysiren/homebrew-tap
+          tmp=$(mktemp -d)
+          gh api "repos/${repo}/contents/${path}" --jq .sha > "$tmp/sha"
+          gh api "repos/${repo}/contents/${path}" --jq .content \
+            | base64 -d > "$tmp/coily.rb"
+          sed -i "s|^  url \".*\"|  url \"${NEW_URL}\"|"       "$tmp/coily.rb"
+          sed -i "s|^  sha256 \".*\"|  sha256 \"${NEW_SHA}\"|" "$tmp/coily.rb"
+          new_b64=$(base64 -w0 < "$tmp/coily.rb")
+          gh api -X PUT "repos/${repo}/contents/${path}" \
+            -f message="coily: bump to ${TAG}" \
+            -f content="$new_b64" \
+            -f sha="$(cat "$tmp/sha")" \
+            -f branch=main
