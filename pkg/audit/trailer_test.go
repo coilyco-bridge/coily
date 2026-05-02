@@ -46,6 +46,19 @@ func TestRecord_Trailer_RoundTrip(t *testing.T) {
 	}
 }
 
+func TestParseTrailer_AcceptsTrailerLineSuffix(t *testing.T) {
+	ts, short, ok := audit.ParseTrailer("coily://1714435200/AGO6KBCF - coily ssh deploy sunshine")
+	if !ok {
+		t.Fatal("ParseTrailer should accept TrailerLine form")
+	}
+	if ts != 1714435200 {
+		t.Errorf("ts = %d, want 1714435200", ts)
+	}
+	if short != "AGO6KBCF" {
+		t.Errorf("short = %q, want AGO6KBCF", short)
+	}
+}
+
 func TestParseTrailer_Rejects(t *testing.T) {
 	cases := []string{
 		"",
@@ -66,5 +79,41 @@ func TestRecord_TrailerEmptyWhenNoID(t *testing.T) {
 	r := audit.Record{Timestamp: 100}
 	if r.Trailer() != "" {
 		t.Errorf("Trailer with empty ID = %q, want empty", r.Trailer())
+	}
+}
+
+func TestRecord_TrailerLine(t *testing.T) {
+	w := tempWriter(t)
+	if err := w.Append(audit.Record{
+		Verb:      "ssh.deploy",
+		Timestamp: 1714435200,
+		Argv:      []string{"/opt/homebrew/bin/coily", "ssh", "deploy", "sunshine"},
+	}); err != nil {
+		t.Fatalf("Append: %v", err)
+	}
+	records := read(t, w.Path)
+	rec := records[0]
+	line := rec.TrailerLine()
+	want := rec.Trailer() + " - coily ssh deploy sunshine"
+	if line != want {
+		t.Errorf("TrailerLine = %q, want %q", line, want)
+	}
+}
+
+func TestRecord_TrailerLine_NoArgv(t *testing.T) {
+	w := tempWriter(t)
+	if err := w.Append(audit.Record{Verb: "v", Timestamp: 1}); err != nil {
+		t.Fatalf("Append: %v", err)
+	}
+	rec := read(t, w.Path)[0]
+	if rec.TrailerLine() != rec.Trailer() {
+		t.Errorf("TrailerLine with no Argv = %q, want %q", rec.TrailerLine(), rec.Trailer())
+	}
+}
+
+func TestRecord_TrailerLineEmptyWhenNoID(t *testing.T) {
+	r := audit.Record{Timestamp: 100, Argv: []string{"coily", "x"}}
+	if r.TrailerLine() != "" {
+		t.Errorf("TrailerLine with empty ID = %q, want empty", r.TrailerLine())
 	}
 }

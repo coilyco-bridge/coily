@@ -95,7 +95,9 @@ func (r Record) ShortID() string {
 }
 
 // Trailer returns the canonical Audit-log trailer value for this record:
-// `coily://<unix-ts>/<short-id>`. Empty if ID is unset.
+// `coily://<unix-ts>/<short-id>`. Empty if ID is unset. This is the form
+// ParseTrailer round-trips; for the human-readable line that also includes
+// the argv summary, use TrailerLine.
 func (r Record) Trailer() string {
 	short := r.ShortID()
 	if short == "" {
@@ -104,14 +106,39 @@ func (r Record) Trailer() string {
 	return fmt.Sprintf("coily://%d/%s", r.Timestamp, short)
 }
 
+// TrailerLine returns the full Audit-log trailer value rendered for a
+// commit: `coily://<unix-ts>/<short-id> - <argv summary>`. The argv summary
+// is the recorded argv joined by spaces, with argv[0] reduced to its
+// basename so absolute paths to the coily binary do not leak into commit
+// history. Empty if ID is unset (matches Trailer's behavior).
+func (r Record) TrailerLine() string {
+	url := r.Trailer()
+	if url == "" {
+		return ""
+	}
+	if len(r.Argv) == 0 {
+		return url
+	}
+	parts := make([]string, len(r.Argv))
+	copy(parts, r.Argv)
+	parts[0] = filepath.Base(parts[0])
+	return url + " - " + strings.Join(parts, " ")
+}
+
 // ParseTrailer extracts the unix timestamp and short ID from a coily://
-// trailer value. Returns (ts, short, true) on a well-formed input.
+// trailer value. Returns (ts, short, true) on a well-formed input. Accepts
+// either the bare URL form (`coily://<ts>/<short>`) or the full TrailerLine
+// form with an argv summary appended (`coily://<ts>/<short> - <argv...>`);
+// the suffix after ` - ` is informational and is discarded.
 func ParseTrailer(s string) (int64, string, bool) {
 	const prefix = "coily://"
 	if !strings.HasPrefix(s, prefix) {
 		return 0, "", false
 	}
 	rest := s[len(prefix):]
+	if i := strings.Index(rest, " - "); i >= 0 {
+		rest = rest[:i]
+	}
 	slash := strings.IndexByte(rest, '/')
 	if slash <= 0 || slash == len(rest)-1 {
 		return 0, "", false

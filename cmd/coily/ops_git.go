@@ -142,7 +142,7 @@ func renderTrailerBlock(records []audit.Record) string {
 		return b.String()
 	}
 	for _, rec := range records {
-		t := rec.Trailer()
+		t := rec.TrailerLine()
 		if t == "" {
 			continue
 		}
@@ -301,7 +301,7 @@ func runTrailer(r *Runner, c *cli.Command) error {
 		emitted = records[truncated:]
 	}
 	for _, rec := range emitted {
-		t := rec.Trailer()
+		t := rec.TrailerLine()
 		if t == "" {
 			continue
 		}

@@ -2,7 +2,7 @@
 
 **What it is**: Append `Audit-log:` trailers to every commit so the audit log is cross-referenced from the git history.
 
-**Trailer shape**: `Audit-log: coily://<unix-ts>/<base32-short-id>`. The unix timestamp is the audit row's `ts`, the short ID is the first 8 chars of base32-encoded raw UUID v7 bytes from the row's `id`. URL-shaped so future tooling can render it as a link.
+**Trailer shape**: `Audit-log: coily://<unix-ts>/<base32-short-id> - <argv summary>`. The unix timestamp is the audit row's `ts`, the short ID is the first 8 chars of base32-encoded raw UUID v7 bytes from the row's `id`. URL-shaped so future tooling can render it as a link. The argv summary is the recorded `argv` joined by spaces, with `argv[0]` reduced to its basename so absolute paths to the coily binary do not leak into commit history. The summary is informational only - `ParseTrailer` and `coily git audit-show` only consume the URL portion before the ` - ` separator.
 
 **Three new subcommands**:
 
