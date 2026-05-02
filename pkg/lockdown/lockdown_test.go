@@ -248,6 +248,14 @@ func TestWriteHook_BlocksDeniedCommand(t *testing.T) {
 		{"gh pr view allowed (read)", `{"tool_input":{"command":"gh pr view 123"}}`, 0},
 		{"ls allowed", `{"tool_input":{"command":"ls -la"}}`, 0},
 		{"empty command allowed", `{"tool_input":{"command":""}}`, 0},
+		// Coily binary check: paths outside homebrew rejected, brew paths allowed.
+		{"~/go/bin/coily denied", `{"tool_input":{"command":"/Users/kai/go/bin/coily ssh"}}`, 2},
+		{"/tmp/coily denied", `{"tool_input":{"command":"/tmp/coily ssh kubectl get pods"}}`, 2},
+		{"./bin/coily denied", `{"tool_input":{"command":"./bin/coily lockdown --check"}}`, 2},
+		{"/opt/homebrew/bin/coily allowed", `{"tool_input":{"command":"/opt/homebrew/bin/coily ssh"}}`, 0},
+		{"/usr/local/bin/coily allowed", `{"tool_input":{"command":"/usr/local/bin/coily kubectl"}}`, 0},
+		{"linuxbrew coily allowed", `{"tool_input":{"command":"/home/linuxbrew/.linuxbrew/bin/coily ssh"}}`, 0},
+		{"coily denied via piped second segment", `{"tool_input":{"command":"echo go | /tmp/coily ssh"}}`, 2},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

@@ -10,11 +10,64 @@ import (
 // Lives next to settings.json under .claude/.
 const HookFileName = "lockdown-deny.sh"
 
+// CoilyAllowedPaths is the closed set of filesystem paths a `coily` invocation
+// is permitted to resolve to. Anything else (including ~/go/bin/coily,
+// /tmp/foo/coily, ./bin/coily) is rejected by the hook. The list covers
+// homebrew on Apple Silicon, homebrew on Intel macOS, and Linuxbrew on
+// Linux (kai-server). The hook follows the bin/coily symlink Brew lays
+// down rather than the Cellar realpath, because `command -v coily`
+// returns the symlink path.
+var CoilyAllowedPaths = []string{
+	"/opt/homebrew/bin/coily",              // Apple Silicon homebrew
+	"/usr/local/bin/coily",                 // Intel macOS homebrew
+	"/home/linuxbrew/.linuxbrew/bin/coily", // Linuxbrew default prefix
+}
+
 // HookSettingsPath is the value baked into settings.json's hook entry. Claude
 // Code resolves it relative to the project root (the directory containing
 // .claude/settings.json), which keeps the generated settings portable across
 // machines.
 const HookSettingsPath = ".claude/" + HookFileName
+
+// renderCoilyBinaryCheck emits the shell block that rejects coily
+// invocations outside the homebrew install paths. Lives between the env
+// strip and the deny-prefix case statement in the generated hook.
+// Catches both bare-name (`coily ...` resolved via `command -v`) and
+// explicit-path forms (any `*/coily` segment leading token).
+func renderCoilyBinaryCheck() string {
+	allowed := strings.Join(CoilyAllowedPaths, ", ")
+	var b strings.Builder
+	b.WriteString(`  # Coily binary check: reject any invocation that resolves to a coily
+  # binary outside the homebrew install paths. Catches bare-name (PATH
+  # lookup) and explicit-path forms (absolute or */coily). This is a
+  # content-based check, not a leading-token literal match, so it lives
+  # outside the case statement below.
+  seg_first=${seg%% *}
+  case "$seg_first" in
+    coily)
+      coily_path=$(command -v coily 2>/dev/null || true)
+      case "$coily_path" in
+        "") ;; # not on PATH; let bash report command-not-found
+`)
+	for _, p := range CoilyAllowedPaths {
+		fmt.Fprintf(&b, "        %q) ;;\n", p)
+	}
+	fmt.Fprintf(&b, "        *) printf 'lockdown: blocked: coily resolves to %%s, which is not a homebrew install (allowed: %s)\\n' \"$coily_path\" >&2; exit 2 ;;\n", allowed)
+	b.WriteString(`      esac
+      ;;
+    */coily)
+      case "$seg_first" in
+`)
+	for _, p := range CoilyAllowedPaths {
+		fmt.Fprintf(&b, "        %q) ;;\n", p)
+	}
+	fmt.Fprintf(&b, "        *) printf 'lockdown: blocked: coily binary at %%s is not a homebrew install (allowed: %s)\\n' \"$seg_first\" >&2; exit 2 ;;\n", allowed)
+	b.WriteString(`      esac
+      ;;
+  esac
+`)
+	return b.String()
+}
 
 // extractBashDenyPrefixes pulls the leading-token shape out of every
 // Bash(<prefix>:*) entry in the deny list. Other shapes (PowerShell,
@@ -121,7 +174,9 @@ check_segment() {
   while printf '%s' "$seg" | grep -qE '^env( +[A-Za-z_][A-Za-z0-9_]*=[^ ]+)+( +|$)'; do
     seg=$(printf '%s' "$seg" | sed -E 's/^env( +[A-Za-z_][A-Za-z0-9_]*=[^ ]+)+( +|$)//')
   done
-  case "$seg" in
+`)
+	b.WriteString(renderCoilyBinaryCheck())
+	b.WriteString(`  case "$seg" in
 `)
 	for _, p := range prefixes {
 		// case patterns: literal-quoted prefix and prefix-followed-by-space.
