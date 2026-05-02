@@ -116,3 +116,29 @@ func TestValidateGrepPattern(t *testing.T) {
 		})
 	}
 }
+
+func TestPosixShellQuote(t *testing.T) {
+	cases := []struct {
+		in, want string
+	}{
+		{"", "''"},
+		{"foo", "'foo'"},
+		{"two words", "'two words'"},
+		{"-A", "'-A'"},
+		{"{.items[*].metadata.name}", "'{.items[*].metadata.name}'"},
+		{"app=foo,env=bar", "'app=foo,env=bar'"},
+		{"a in (b,c)", "'a in (b,c)'"},
+		{"with $var", "'with $var'"},
+		{"with `backtick`", "'with `backtick`'"},
+		{"semi;colon", "'semi;colon'"},
+		{"single'quote", `'single'\''quote'`},
+		{"two''quotes", `'two'\'''\''quotes'`},
+	}
+	for _, tc := range cases {
+		t.Run(tc.in, func(t *testing.T) {
+			if got := posixShellQuote(tc.in); got != tc.want {
+				t.Errorf("posixShellQuote(%q) = %q, want %q", tc.in, got, tc.want)
+			}
+		})
+	}
+}

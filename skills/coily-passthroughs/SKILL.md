@@ -389,6 +389,10 @@ Run journalctl -u <unit> -n <lines> --no-pager on the remote.
 
 Flags: --host, --lines, --user
 
+## `coily ssh kubectl`
+
+Run `sudo k3s kubectl <args>` on kai-server.
+
 ## `coily ssh ls`
 
 Run ls -la <path>.
