@@ -28,6 +28,8 @@ on kai-server. Each subcommand is a per-game verb tree.
   coily gaming core-keeper {status,tail,start,stop,restart}
   coily gaming icarus {status,tail,start,stop,restart}
   coily gaming factorio {status,tail,start,stop,restart,update,saves,mods,players}
+                          mods has {list,sync}; sync pulls archives into mods/
+                          to match mod-list.json via the Factorio mod portal.
 
 Every leaf verb routes through pkg/ssh against kai-server (no ssh
 subprocess), with audit + policy enforcement provided by verb.Wrap.`,
