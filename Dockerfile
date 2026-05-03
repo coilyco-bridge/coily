@@ -108,97 +108,112 @@ CMD ["claude"]
 
 # ---------------------------------------------------------------------------
 # cloud: base + the infra CLIs coily wraps for ops work.
+#
+# Each tool is fetched as a pinned binary release rather than installed via
+# a third-party apt repo. That avoids "is hashicorp/tailscale/k8s/helm's
+# noble apt repo up today" as a class of CI failure, and makes the image
+# content reproducible by pinned version rather than by whatever the repo
+# serves at build time. Bump versions explicitly when a refresh is wanted.
 # ---------------------------------------------------------------------------
 FROM base AS cloud
 USER root
 ARG TARGETARCH
 
-# aws v2 (official installer; arch-aware).
+ARG GH_VERSION=2.62.0
+ARG KUBECTL_VERSION=1.31.3
+ARG HELM_VERSION=3.16.3
+ARG TERRAFORM_VERSION=1.10.0
+ARG TAILSCALE_VERSION=1.78.1
+ARG DOCKER_VERSION=27.4.0
+ARG TFLINT_VERSION=0.55.1
+ARG TFSEC_VERSION=1.28.13
+ARG GCLOUD_VERSION=502.0.0
+
+# AWS CLI v2 (official installer; bundles its own python).
 RUN set -eux; \
     case "${TARGETARCH}" in \
         amd64) AWS_ARCH=x86_64 ;; \
         arm64) AWS_ARCH=aarch64 ;; \
         *) echo "unsupported arch ${TARGETARCH}" && exit 1 ;; \
     esac; \
-    curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-${AWS_ARCH}.zip" -o /tmp/awscliv2.zip; \
-    unzip -q /tmp/awscliv2.zip -d /tmp; \
-    /tmp/aws/install; \
-    rm -rf /tmp/aws /tmp/awscliv2.zip
+    cd /tmp; \
+    curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-${AWS_ARCH}.zip" -o aws.zip; \
+    unzip -q aws.zip; \
+    ./aws/install; \
+    rm -rf aws aws.zip
 
-# Apt-repo-distributed CLIs: gh, kubectl, helm, terraform, tailscale, gcloud,
-# docker-ce-cli. Each gets its own keyring + sources.list line. Grouped into
-# one RUN to keep the layer count down.
-RUN set -eux; \
-    install -m 0755 -d /etc/apt/keyrings; \
-    \
-    # GitHub CLI
-    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-        | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg >/dev/null; \
-    chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg; \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
-        > /etc/apt/sources.list.d/github-cli.list; \
-    \
-    # Kubernetes (kubectl)
-    curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key \
-        | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg; \
-    echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /" \
-        > /etc/apt/sources.list.d/kubernetes.list; \
-    \
-    # Helm
-    curl -fsSL https://baltocdn.com/helm/signing.asc \
-        | gpg --dearmor -o /etc/apt/keyrings/helm.gpg; \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" \
-        > /etc/apt/sources.list.d/helm.list; \
-    \
-    # HashiCorp (terraform)
-    curl -fsSL https://apt.releases.hashicorp.com/gpg \
-        | gpg --dearmor -o /etc/apt/keyrings/hashicorp-archive-keyring.gpg; \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com noble main" \
-        > /etc/apt/sources.list.d/hashicorp.list; \
-    \
-    # Tailscale
-    curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/noble.noarmor.gpg \
-        -o /etc/apt/keyrings/tailscale-archive-keyring.gpg; \
-    curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/noble.tailscale-keyring.list \
-        -o /etc/apt/sources.list.d/tailscale.list; \
-    \
-    # Google Cloud SDK
-    curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg \
-        | gpg --dearmor -o /etc/apt/keyrings/cloud.google.gpg; \
-    echo "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" \
-        > /etc/apt/sources.list.d/google-cloud-sdk.list; \
-    \
-    # Docker (CLI only - the daemon is the host's concern)
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-        | gpg --dearmor -o /etc/apt/keyrings/docker.gpg; \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu noble stable" \
-        > /etc/apt/sources.list.d/docker.list; \
-    \
-    apt-get update; \
-    apt-get install -y --no-install-recommends \
-        gh \
-        kubectl \
-        helm \
-        terraform \
-        tailscale \
-        google-cloud-cli \
-        docker-ce-cli; \
-    rm -rf /var/lib/apt/lists/*
-
-# tflint + tfsec ship as single-binary GitHub releases. Pinned versions so
-# image rebuilds are reproducible.
-ARG TFLINT_VERSION=0.55.1
-ARG TFSEC_VERSION=1.28.13
+# Single-file binaries: gh, kubectl, helm, terraform, tailscale (+ tailscaled),
+# docker CLI, tflint, tfsec. Grouped into one RUN to share /tmp staging; each
+# command is `set -eux`-traced so a failure points to the specific tool.
 RUN set -eux; \
     case "${TARGETARCH}" in \
-        amd64) TFLINT_ARCH=linux_amd64; TFSEC_ARCH=linux-amd64 ;; \
-        arm64) TFLINT_ARCH=linux_arm64; TFSEC_ARCH=linux-arm64 ;; \
+        amd64) ARCH=amd64; STATIC_ARCH=x86_64 ;; \
+        arm64) ARCH=arm64; STATIC_ARCH=aarch64 ;; \
     esac; \
-    curl -fsSL "https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VERSION}/tflint_${TFLINT_ARCH}.zip" -o /tmp/tflint.zip; \
-    unzip -q /tmp/tflint.zip -d /usr/local/bin; \
-    rm /tmp/tflint.zip; \
-    curl -fsSL "https://github.com/aquasecurity/tfsec/releases/download/v${TFSEC_VERSION}/tfsec-${TFSEC_ARCH}" -o /usr/local/bin/tfsec; \
+    cd /tmp; \
+    \
+    # gh
+    curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${ARCH}.tar.gz" \
+        | tar -xz; \
+    install -m 0755 "gh_${GH_VERSION}_linux_${ARCH}/bin/gh" /usr/local/bin/gh; \
+    rm -rf "gh_${GH_VERSION}_linux_${ARCH}"; \
+    \
+    # kubectl
+    curl -fsSL "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/${ARCH}/kubectl" -o /usr/local/bin/kubectl; \
+    chmod 0755 /usr/local/bin/kubectl; \
+    \
+    # helm
+    curl -fsSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-${ARCH}.tar.gz" | tar -xz; \
+    install -m 0755 "linux-${ARCH}/helm" /usr/local/bin/helm; \
+    rm -rf "linux-${ARCH}"; \
+    \
+    # terraform
+    curl -fsSL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${ARCH}.zip" -o tf.zip; \
+    unzip -q tf.zip; \
+    install -m 0755 terraform /usr/local/bin/terraform; \
+    rm -f terraform tf.zip; \
+    \
+    # tailscale CLI + daemon. The daemon (tailscaled) only does anything
+    # useful with --cap-add=NET_ADMIN at runtime; ship it so the option
+    # exists.
+    curl -fsSL "https://pkgs.tailscale.com/stable/tailscale_${TAILSCALE_VERSION}_${ARCH}.tgz" | tar -xz; \
+    install -m 0755 "tailscale_${TAILSCALE_VERSION}_${ARCH}/tailscale" /usr/local/bin/tailscale; \
+    install -m 0755 "tailscale_${TAILSCALE_VERSION}_${ARCH}/tailscaled" /usr/local/sbin/tailscaled; \
+    rm -rf "tailscale_${TAILSCALE_VERSION}_${ARCH}"; \
+    \
+    # docker CLI only (no daemon; the daemon belongs to the host).
+    curl -fsSL "https://download.docker.com/linux/static/stable/${STATIC_ARCH}/docker-${DOCKER_VERSION}.tgz" | tar -xz; \
+    install -m 0755 docker/docker /usr/local/bin/docker; \
+    rm -rf docker; \
+    \
+    # tflint
+    curl -fsSL "https://github.com/terraform-linters/tflint/releases/download/v${TFLINT_VERSION}/tflint_linux_${ARCH}.zip" -o tflint.zip; \
+    unzip -q tflint.zip; \
+    install -m 0755 tflint /usr/local/bin/tflint; \
+    rm -f tflint tflint.zip; \
+    \
+    # tfsec
+    curl -fsSL "https://github.com/aquasecurity/tfsec/releases/download/v${TFSEC_VERSION}/tfsec-linux-${ARCH}" \
+        -o /usr/local/bin/tfsec; \
     chmod 0755 /usr/local/bin/tfsec
+
+# gcloud is the one tool with a directory-style install (libs + bundled
+# python + bin). Stage it under /opt and symlink the entrypoints.
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+        amd64) GC_ARCH=x86_64 ;; \
+        arm64) GC_ARCH=arm ;; \
+    esac; \
+    curl -fsSL "https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-${GCLOUD_VERSION}-linux-${GC_ARCH}.tar.gz" \
+        | tar -xz -C /opt; \
+    /opt/google-cloud-sdk/install.sh \
+        --quiet \
+        --usage-reporting false \
+        --path-update false \
+        --command-completion false; \
+    ln -sf /opt/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud; \
+    ln -sf /opt/google-cloud-sdk/bin/gsutil /usr/local/bin/gsutil; \
+    ln -sf /opt/google-cloud-sdk/bin/bq /usr/local/bin/bq
 
 USER coily
 
