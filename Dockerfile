@@ -80,7 +80,12 @@ RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - \
 # host install path (see SECURITY.md).
 ARG USER_UID=1000
 ARG USER_GID=1000
-RUN groupadd --gid ${USER_GID} coily \
+# Ubuntu 24.04 ships a default `ubuntu` user/group at UID/GID 1000.
+# Drop it before creating coily so the standard host UID maps cleanly to
+# our non-root user for bind-mounted workspaces.
+RUN if id -u ubuntu >/dev/null 2>&1; then userdel -r ubuntu; fi \
+    && if getent group ubuntu >/dev/null 2>&1; then groupdel ubuntu; fi \
+    && groupadd --gid ${USER_GID} coily \
     && useradd --uid ${USER_UID} --gid ${USER_GID} --create-home --shell /bin/bash coily \
     && mkdir -p /workspace \
     && chown coily:coily /workspace
