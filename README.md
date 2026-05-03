@@ -91,6 +91,27 @@ Must be run from an elevated shell (Git Bash launched via Ctrl+Shift+Enter, or a
 make deploy-server     # cross-compiles, scps to kai-server, sudo-installs
 ```
 
+### Container (`ghcr.io/coilysiren/coily`)
+
+Three layered tags, all built from one Dockerfile, multi-arch (amd64 + arm64), Claude Code pre-installed, lockdown pre-applied. Intended as a runtime for AI agents - the container *is* the harness.
+
+| Tag | Contains | Use case |
+| --- | --- | --- |
+| `:base` | coily, Claude Code, git, python3, node, ssh, jq, ripgrep | minimum agent runtime |
+| `:cloud` | base + aws, gh, kubectl, helm, terraform, tflint, tfsec, tailscale, gcloud, docker CLI | ops sessions |
+| `:full` (`:latest`) | cloud + pnpm/yarn/bun, uv/pipx/poetry, cargo, gem/bundle, go, ruby, just, task | polyglot dev |
+
+```
+docker run -it --rm \
+  -v "$PWD:/workspace" \
+  -v "$HOME/.claude:/home/coily/.claude" \
+  ghcr.io/coilysiren/coily:cloud
+```
+
+Or via VS Code Dev Containers: open the repo with the `.devcontainer/` config and it spins up `:full` with `~/.claude` mounted for auth persistence. Tailscale CLI ships in `:cloud` and up; joining a tailnet from inside the container needs `--cap-add=NET_ADMIN --device=/dev/net/tun` (commented runArgs in `.devcontainer/devcontainer.json`). Linuxbrew is intentionally absent - `apt`, `mise`, or rebuilding the image with a pinned tool are the supported alternatives.
+
+Local builds: `make docker-base` / `make docker-cloud` / `make docker-full`. The published images are tagged on every push to `main` (`:main`, `:main-base`, `:main-cloud`, `:main-full`) and on every `v*.*.*` release tag (`:latest`, `:base`, `:cloud`, `:full`, plus `:vX.Y.Z` and friends). A daily prune keeps rolling tags from accumulating.
+
 ### Dev iteration
 
 ```

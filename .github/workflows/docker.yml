@@ -1,0 +1,123 @@
+name: docker
+
+# Build and publish the three coily container variants to GHCR.
+#
+# Image: ghcr.io/coilysiren/coily
+#
+# Tagging (where <tgt> is one of base|cloud|full):
+#
+#   on push to main:
+#     :main-<tgt>, :sha-<short>-<tgt>
+#     plus the unsuffixed :main and :sha-<short> for the full variant.
+#
+#   on push of v*.*.* tag:
+#     :<tgt>, :v<X.Y.Z>-<tgt>, :v<X.Y>-<tgt>, :v<X>-<tgt>
+#     plus the unsuffixed :latest, :v<X.Y.Z>, :v<X.Y>, :v<X> for the full
+#     variant. So `docker pull ghcr.io/coilysiren/coily` (which resolves
+#     to :latest) gets the full image, while `:cloud` / `:base` are the
+#     stable per-layer tags.
+#
+# Multi-arch: linux/amd64 + linux/arm64.
+# Layer cache: GHA cache scoped per target so :base / :cloud / :full
+# don't fight over the same key.
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*.*.*"]
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - ".dockerignore"
+      - ".github/workflows/docker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/coily
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [base, cloud, full]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute tags
+        id: tags
+        env:
+          IMAGE: ${{ env.IMAGE }}
+          TARGET: ${{ matrix.target }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          short_sha="${SHA:0:7}"
+          tags=()
+
+          # Always: per-target SHA tag for traceability.
+          tags+=("${IMAGE}:sha-${short_sha}-${TARGET}")
+
+          if [[ "${REF_TYPE}" == "tag" && "${REF_NAME}" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            major="${BASH_REMATCH[1]}"
+            minor="${BASH_REMATCH[2]}"
+            tags+=("${IMAGE}:${REF_NAME}-${TARGET}")
+            tags+=("${IMAGE}:v${major}.${minor}-${TARGET}")
+            tags+=("${IMAGE}:v${major}-${TARGET}")
+            tags+=("${IMAGE}:${TARGET}")
+            if [[ "${TARGET}" == "full" ]]; then
+              tags+=("${IMAGE}:latest")
+              tags+=("${IMAGE}:${REF_NAME}")
+              tags+=("${IMAGE}:v${major}.${minor}")
+              tags+=("${IMAGE}:v${major}")
+            fi
+          elif [[ "${REF_TYPE}" == "branch" && "${REF_NAME}" == "main" ]]; then
+            tags+=("${IMAGE}:main-${TARGET}")
+            if [[ "${TARGET}" == "full" ]]; then
+              tags+=("${IMAGE}:main")
+              tags+=("${IMAGE}:sha-${short_sha}")
+            fi
+          fi
+
+          # Join with commas for the build-push-action `tags:` input.
+          IFS=,; echo "list=${tags[*]}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: ${{ matrix.target }}
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.tags.outputs.list }}
+          build-args: |
+            VERSION=${{ github.ref_type == 'tag' && github.ref_name || github.sha }}
+          cache-from: type=gha,scope=${{ matrix.target }}
+          cache-to: type=gha,scope=${{ matrix.target }},mode=max
+          provenance: false

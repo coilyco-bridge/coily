@@ -1,0 +1,34 @@
+# Build outputs
+bin/
+dist/
+
+# Editor / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+*.stackdump
+
+# Per-project lockdown output (generated, not source)
+.claude/
+
+# VCS noise
+.git/
+.gitignore
+
+# CI / docs not needed at build time
+.github/
+docs/
+test/
+*.md
+
+# Go test / coverage outputs
+*.test
+*.out
+coverage.out
+vendor/
+
+# Container infra (don't ship into the image context)
+Dockerfile
+.dockerignore
+.devcontainer/

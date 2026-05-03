@@ -34,6 +34,10 @@ help:
 	@echo "  make test             $(GO_TEST) ./..."
 	@echo "  make vet              go vet ./..."
 	@echo "  make clean            remove build outputs"
+	@echo "  make docker-base      build $(DOCKER_IMAGE):$(DOCKER_TAG)-base (minimum agent runtime)"
+	@echo "  make docker-cloud     build $(DOCKER_IMAGE):$(DOCKER_TAG)-cloud (base + aws/gh/kubectl/...)"
+	@echo "  make docker-full      build $(DOCKER_IMAGE):$(DOCKER_TAG) (cloud + every pkg manager)"
+	@echo "  make docker-shell     run an interactive bash shell in :full"
 
 .PHONY: dev
 dev:
@@ -113,3 +117,30 @@ cover:
 .PHONY: clean
 clean:
 	rm -rf bin dist
+
+# ---------------------------------------------------------------------------
+# Docker image targets. Mirror the `:base` / `:cloud` / `:full` stages in
+# the Dockerfile. Builds locally with the host arch only; multi-arch
+# publishing happens in .github/workflows/docker.yml.
+# ---------------------------------------------------------------------------
+DOCKER_IMAGE ?= coily
+DOCKER_TAG   ?= dev
+
+.PHONY: docker-base docker-cloud docker-full docker-shell
+docker-base:
+	docker build --target base -t $(DOCKER_IMAGE):$(DOCKER_TAG)-base --build-arg VERSION=$(VERSION) .
+
+docker-cloud:
+	docker build --target cloud -t $(DOCKER_IMAGE):$(DOCKER_TAG)-cloud --build-arg VERSION=$(VERSION) .
+
+docker-full:
+	docker build --target full -t $(DOCKER_IMAGE):$(DOCKER_TAG) --build-arg VERSION=$(VERSION) .
+
+# Run an interactive shell in the freshly-built :full image with the cwd
+# bind-mounted to /workspace. Useful for poking at the image without going
+# through a devcontainer.
+docker-shell: docker-full
+	docker run --rm -it \
+		-v "$$PWD:/workspace" \
+		-v "$$HOME/.claude:/home/coily/.claude" \
+		$(DOCKER_IMAGE):$(DOCKER_TAG) bash

@@ -1,0 +1,49 @@
+{
+  "name": "coily",
+
+  // Default to :full so the devcontainer covers every coily-wrapped tool.
+  // Switch to :cloud or :base by editing this line if pull time matters.
+  "image": "ghcr.io/coilysiren/coily:full",
+
+  "remoteUser": "coily",
+
+  // Bind-mount the host repo into /workspace (matches the image's WORKDIR).
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+
+  // Persist Claude Code auth across container rebuilds. Same pattern as
+  // a `docker run -v ~/.claude:/home/coily/.claude` invocation.
+  "mounts": [
+    "source=${localEnv:HOME}/.claude,target=/home/coily/.claude,type=bind,consistency=cached"
+  ],
+
+  // ANTHROPIC_API_KEY is the env path for non-interactive auth (CI, headless).
+  // Tailscale auth key is opt-in: set TS_AUTHKEY in the host env to have the
+  // container join your tailnet on first launch (requires runArgs additions
+  // below; uncomment if you actually want this).
+  "remoteEnv": {
+    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}"
+  },
+
+  // Tailscale daemon needs NET_ADMIN + a TUN device. Read-only CLI use
+  // (`tailscale status`, `tailscale ip`) works without these; uncomment
+  // the runArgs block below if you want to actually join a tailnet from
+  // inside the container.
+  //
+  // "runArgs": [
+  //   "--cap-add=NET_ADMIN",
+  //   "--device=/dev/net/tun"
+  // ],
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropic.claude-code"
+      ]
+    }
+  },
+
+  // Apply per-repo lockdown on first attach so the workspace .claude/
+  // settings.json reflects coily's deny list.
+  "postCreateCommand": "coily lockdown --apply || true"
+}

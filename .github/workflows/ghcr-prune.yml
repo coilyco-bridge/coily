@@ -1,0 +1,49 @@
+name: ghcr-prune
+
+# Daily prune of stale ghcr.io/coilysiren/coily image versions.
+#
+# Keeps:
+#   - All semver-tagged versions (v*.*.*, plus :latest, :base, :cloud, :full).
+#   - The 10 most recent :main-* and :sha-* rolling builds.
+# Deletes:
+#   - Untagged versions (orphaned manifests left behind when a rolling
+#     tag like :main is re-pushed).
+#   - Older :main-* / :sha-* versions beyond the keep window.
+#
+# Public packages have no GHCR storage cap, but rolling tags accumulate
+# untagged manifests on every push; this keeps the package list tidy.
+
+on:
+  schedule:
+    # 09:17 UTC daily. Off-the-hour to dodge runner-queue spikes.
+    - cron: "17 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  packages: write
+
+jobs:
+  prune-untagged:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete untagged versions
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: coily
+          package-type: container
+          delete-only-untagged-versions: true
+          min-versions-to-keep: 0
+
+  prune-rolling:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old :main-* and :sha-* versions
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: coily
+          package-type: container
+          # Keep the 10 most recent rolling builds across all targets,
+          # delete the rest. Anything matching v*.*.* / :latest / :base /
+          # :cloud / :full is excluded by the ignore pattern.
+          min-versions-to-keep: 10
+          ignore-versions: '^(latest|base|cloud|full|v\d+(\.\d+){0,2}(-(base|cloud|full))?)$'
