@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/coilysiren/coily/pkg/policy"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
 )
@@ -19,9 +20,13 @@ import (
 //     factorio-server-pre.sh) so a stopped server picks up the
 //     latest stable headless build before next start.
 //   - saves:   list / backup-now against the saves dir on kai-server.
-//   - mods:    list mods/ on the server. Mod sync is left out of the
-//     first cut on purpose - mod-list.json wiring lives next
-//     to whichever mod stack the server is opening on.
+//   - mods:    list mods/ on the server, or sync the mod files on
+//     disk to match mod-list.json by pulling missing /
+//     out-of-date archives from the Factorio mod portal.
+//     The sync itself runs in factorio-mods-sync.sh on
+//     kai-server (parity with update / backup-now); coily
+//     just provides the audit-logged trigger and forwards
+//     --dry-run / --mod for selective runs.
 //   - players: list whitelist + ban entries.
 //
 // Every action is a single ssh-streamed command. No subprocess fork.
@@ -161,9 +166,10 @@ nightly; this verb is for ad-hoc snapshots before risky operations.`,
 func (r *Runner) factorioModsCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "mods",
-		Usage: "Inspect the mod stack installed on the factorio server.",
+		Usage: "Inspect or sync the mod stack installed on the factorio server.",
 		Commands: []*cli.Command{
 			r.factorioModsListCommand(),
+			r.factorioModsSyncCommand(),
 		},
 	}
 }
@@ -184,6 +190,74 @@ func (r *Runner) factorioModsListCommand() *cli.Command {
 						`else echo '(no mod-list.json yet)'; fi`,
 					r.factorioServerDir(), r.factorioServerDir(),
 				)),
+			},
+			r.Audit,
+		),
+	}
+}
+
+// factorioModsSyncCommand triggers factorio-mods-sync.sh on kai-server.
+// The script reads mods/mod-list.json, queries the Factorio mod portal
+// for the latest release of each enabled non-base mod that matches the
+// installed factorio version, and writes the resulting <name>_<ver>.zip
+// archives into mods/. Auth (username + token) is read from the server's
+// player-data.json by the script - it never crosses the wire.
+//
+// --dry-run forwards through so the script can preview adds / updates /
+// removals without touching mods/. --mod scopes the sync to a single
+// mod name (still validated against mod-list.json server-side). Both
+// flags are validated by policy.ValidateArg before they reach the
+// remote shell.
+func (r *Runner) factorioModsSyncCommand() *cli.Command {
+	const script = "/home/kai/projects/infrastructure/scripts/factorio-mods-sync.sh"
+	return &cli.Command{
+		Name:  "sync",
+		Usage: "Pull the mod files in mods/ into agreement with mod-list.json.",
+		Description: `sync invokes factorio-mods-sync.sh on kai-server. The script reads
+mods/mod-list.json, fetches each enabled mod's latest release that
+matches the installed factorio major.minor from the Factorio mod
+portal API, and writes the archives into mods/. The base mod is
+always skipped (it ships with the dedicated server binary).
+
+The script is the source of truth for the sync algorithm; coily just
+provides the audit-logged trigger and forwards two flags:
+
+  --dry-run        preview the planned add / update / remove set
+                   without writing to mods/.
+  --mod <name>     scope the sync to a single mod (still validated
+                   against mod-list.json server-side).
+
+This verb does NOT restart the server. Run 'coily gaming factorio
+restart' afterwards once you are happy with the new mod set.`,
+		Flags: []cli.Flag{
+			&cli.BoolFlag{Name: "dry-run", Usage: "preview without writing to mods/"},
+			&cli.StringFlag{Name: "mod", Usage: "scope sync to a single mod name"},
+		},
+		Action: verb.Wrap(
+			verb.Spec{
+				Name: "factorio.mods.sync",
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					return map[string]string{
+						"--dry-run": fmt.Sprint(c.Bool("dry-run")),
+						"--mod":     c.String("mod"),
+					}, nil
+				},
+				Action: func(ctx context.Context, c *cli.Command) error {
+					cmd := "bash " + script
+					if c.Bool("dry-run") {
+						cmd += " --dry-run"
+					}
+					if mod := c.String("mod"); mod != "" {
+						// policy.ValidateArg has already run via verb.Wrap, but
+						// the value is interpolated into a remote shell command,
+						// so re-check the literal before sending it over.
+						if err := policy.ValidateArg("--mod", mod); err != nil {
+							return fmt.Errorf("factorio mods sync: %w", err)
+						}
+						cmd += " --mod " + mod
+					}
+					return r.factorioRemote(cmd)(ctx, c)
+				},
 			},
 			r.Audit,
 		),
