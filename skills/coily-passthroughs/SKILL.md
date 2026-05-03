@@ -111,6 +111,12 @@ Flags: --configs-dir, --target
 
 Print mod-list.json entries with their enabled flag.
 
+## `coily gaming factorio mods sync`
+
+Pull the mod files in mods/ into agreement with mod-list.json.
+
+Flags: --dry-run, --mod
+
 ## `coily gaming factorio players adminlist`
 
 Print entries from server-adminlist.json.
