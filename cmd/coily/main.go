@@ -160,6 +160,7 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.installCompletionCommand(),
 		r.setupCommand(),
 		r.gamingCommand(),
+		r.sirensDiscordOpsCommand(),
 		r.sshCommand(),
 		r.awsCommand(),
 		r.dockerCommand(),

@@ -293,6 +293,28 @@ Run the post-upgrade rituals: completion, skill symlink, and lockdown re-baselin
 
 Flags: --skip-completion, --skip-lockdown, --skip-skill, --skip-user-hook, --workspace
 
+## `coily sirens-discord-ops restart`
+
+Restart the sirens-discord-ops systemd unit.
+
+## `coily sirens-discord-ops start`
+
+Start the sirens-discord-ops systemd unit.
+
+## `coily sirens-discord-ops status`
+
+Print systemctl status sirens-discord-ops.
+
+## `coily sirens-discord-ops stop`
+
+Stop the sirens-discord-ops systemd unit.
+
+## `coily sirens-discord-ops tail`
+
+Tail sirens-discord-ops journal logs (journalctl -u sirens-discord-ops -f).
+
+Flags: --follow, --lines
+
 ## `coily ssh cat`
 
 Run cat <path>.
