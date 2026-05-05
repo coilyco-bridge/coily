@@ -6,5 +6,8 @@ import (
 )
 
 func (r *Runner) ghCommand() *cli.Command {
-	return passthrough.Command("gh", r.Runner, r.Audit, passthrough.WithSkipPolicy())
+	return passthrough.Command("gh", r.Runner, r.Audit,
+		passthrough.WithSkipPolicy(),
+		passthrough.WithVerbName("ops.gh"),
+	)
 }

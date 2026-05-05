@@ -8,7 +8,7 @@ Workspace-level conventions (git workflow, test/lint autonomy, readonly ops, wri
 
 When the session's primary cwd is **not** `/Users/kai/projects/coilysiren/coily` (check the env block, not live cwd), do not edit any file in this repo. Not source, not config, not docs, not AGENTS.md, not even a typo fix.
 
-**Instead:** open a GitHub issue with `coily gh issue create --repo coilysiren/coily ...` (or `gh issue create --repo coilysiren/coily ...` if coily isn't installed). Include enough detail to act on cold. Cross-link the originating session/PR if relevant.
+**Instead:** open a GitHub issue with `coily ops gh issue create --repo coilysiren/coily ...` (or `gh issue create --repo coilysiren/coily ...` if coily isn't installed). Include enough detail to act on cold. Cross-link the originating session/PR if relevant.
 
 **Why:** coily is the wrapper that enforces the lockdown deny list (`aws`, `kubectl`, `ssh`, `scp`). A drive-by edit from a sibling-repo session can silently weaken the wrapper - add a passthrough subcommand, relax a filter, ship it, and the next coily run passes the deny list with the new behavior. The cwd gate forces explicit intent: a coily change must happen in a session Kai consciously started for coily work.
 
@@ -16,13 +16,13 @@ This rule is stricter than the general workspace git policy. It overrides "commi
 
 ---
 
-## Default to `coily gh`, not raw `gh`
+## Default to `coily ops gh`, not raw `gh`
 
-For any GitHub op in Kai's workspace - `gh api`, `gh issue`, `gh pr`, `gh repo`, `gh search`, `gh run`, `gh workflow`, `gh release`, `gh secret` - reach for `coily gh ...` first. Same flags, same behavior, just routed through the wrapper so it gets audit-logged and obeys the lockdown deny list.
+For any GitHub op in Kai's workspace - `gh api`, `gh issue`, `gh pr`, `gh repo`, `gh search`, `gh run`, `gh workflow`, `gh release`, `gh secret` - reach for `coily ops gh ...` first. Same flags, same behavior, just routed through the wrapper so it gets audit-logged and obeys the lockdown deny list.
 
-`coily gh api` flag note: it's `--jq`, not `-q`. Otherwise the surface mirrors `gh` directly.
+`coily ops gh api` flag note: it's `--jq`, not `-q`. Otherwise the surface mirrors `gh` directly.
 
-Raw `gh` is the fallback only when coily isn't installed (CI, fresh machine pre-bootstrap). In an interactive session on Kai's hosts, `coily gh` is the default.
+Raw `gh` is the fallback only when coily isn't installed (CI, fresh machine pre-bootstrap). In an interactive session on Kai's hosts, `coily ops gh` is the default.
 
 ---
 
@@ -55,7 +55,7 @@ Every push to `main` triggers `.github/workflows/release.yml`, which fully autom
 Per the workspace "Default to proactive scheduling" rule: after pushing to `main`, schedule a wake-up to land the new binary on Kai's laptop and re-baseline the lockdown rules. The release workflow needs ~1-3 min to finish (tag + GitHub Release + tap formula push).
 
 - **Cadence**: 300-360s after push. Cache stays warm at 270s but the tap-bump can lag past that, so 300s is the floor.
-- **Verify CI green first**: `coily gh run list --repo coilysiren/coily --limit 1` should show the release run as `completed/success`. If still in progress, re-schedule once at +180s; if failed, surface the failure and stop.
+- **Verify CI green first**: `coily ops gh run list --repo coilysiren/coily --limit 1` should show the release run as `completed/success`. If still in progress, re-schedule once at +180s; if failed, surface the failure and stop.
 - **Upgrade**: `brew outdated coilysiren/tap/coily` - if upgradeable, `brew upgrade coilysiren/tap/coily`. No sudo (Homebrew installs to user-writable `/opt/homebrew`).
 - **Re-baseline lockdown** *only when the bumped commit changed `pkg/lockdown/` or `Formula/coily.rb`-relevant code*: `coily lockdown --apply --replace --recursive --path ~/projects/coilysiren`. Skip when the bump is unrelated to lockdown defaults (most patch bumps).
 - **Skip the auto-schedule** when the push is documentation-only (README, AGENTS.md, docs/) - the binary changes but nothing in it has user-visible effect.

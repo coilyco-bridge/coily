@@ -6,5 +6,7 @@ import (
 )
 
 func (r *Runner) kubectlCommand() *cli.Command {
-	return passthrough.Command("kubectl", r.Runner, r.Audit)
+	return passthrough.Command("kubectl", r.Runner, r.Audit,
+		passthrough.WithVerbName("ops.kubectl"),
+	)
 }

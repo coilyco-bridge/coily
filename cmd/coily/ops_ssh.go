@@ -24,11 +24,11 @@ import (
 //   - coily ssh ls|tree|cat|head|tail|wc|file <path>   readonly fs inspection on a validated absolute path
 //   - coily ssh grep <pattern> <path>                  fixed-string grep on a validated path
 //   - coily ssh journalctl <unit>    journalctl -u <unit> -n <N> --no-pager (adm-group read, no sudo) for a validated unit
-//   - coily ssh kubectl <args>       passthrough to `sudo k3s kubectl <args>`; argv forwards verbatim with POSIX-quoting before the join. Readonly-vs-mutator gating is enforced at the lockdown deny list, mirroring `coily kubectl`.
+//   - coily ssh kubectl <args>       passthrough to `sudo k3s kubectl <args>`; argv forwards verbatim with POSIX-quoting before the join. Readonly-vs-mutator gating is enforced at the lockdown deny list, mirroring `coily ops kubectl`.
 //
 // All but `kubectl` take fixed argv shapes; the kubectl leaf forwards
 // argv verbatim and relies on the lockdown deny list for the readonly
-// gate (same model as `coily kubectl`). Nothing inside the wrapper joins
+// gate (same model as `coily ops kubectl`). Nothing inside the wrapper joins
 // user strings into a remote shell command without POSIX single-quoting
 // each element first. For the genuinely one-off case where
 // none of the named verbs fit, drop out to raw `ssh kai@kai-server` (which

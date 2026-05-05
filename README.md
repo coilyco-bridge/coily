@@ -22,7 +22,7 @@ kubectl:
 A rejected invocation. The metacharacter never reaches `aws`:
 
 ```
-$ coily aws ssm get-parameter --name '/discord/server-id; cat /etc/passwd'
+$ coily ops aws ssm get-parameter --name '/discord/server-id; cat /etc/passwd'
 Error: policy: shell metacharacter rejected: arg name contains ";" at index 18
 ```
 
@@ -31,12 +31,12 @@ Both rows land in the audit log. `decision` distinguishes a coily-side scrub fro
 ```
 $ tail -2 ~/.coily/audit/coilysiren-coily.jsonl
 {"decision":"accept","argv":["coily","whoami"],...}
-{"decision":"reject","argv":["coily","aws","ssm","get-parameter","--name","/discord/server-id; cat /etc/passwd"],...}
+{"decision":"reject","argv":["coily","ops","aws","ssm","get-parameter","--name","/discord/server-id; cat /etc/passwd"],...}
 ```
 
 This repo exists for three reasons.
 
-1. **One audited surface for every privileged tool.** `coily aws ...`, `coily gh ...`, `coily kubectl ...`, `coily docker ...`, `coily tailscale ...`, plus every package manager nested under `coily pkg` (`coily pkg pnpm`, `coily pkg uv`, `coily pkg cargo`, `coily pkg brew`, ...) all forward verbatim to the underlying binary, gated by argv-level shell-metacharacter rejection and an audit-logged invocation. The pass-through is intentionally thin (`SkipFlagParsing`, no per-leaf subcommand modeling); the upstream tool's own `--help` is the source of truth for verb shape, and the lockdown deny list is the source of truth for read-vs-write gating.
+1. **One audited surface for every privileged tool.** External-system pass-throughs (`coily ops aws ...`, `coily ops gh ...`, `coily ops kubectl ...`) live under the `ops` group; standalone pass-throughs (`coily docker ...`, `coily tailscale ...`) plus every package manager nested under `coily pkg` (`coily pkg pnpm`, `coily pkg uv`, `coily pkg cargo`, `coily pkg brew`, ...) all forward verbatim to the underlying binary, gated by argv-level shell-metacharacter rejection and an audit-logged invocation. The pass-through is intentionally thin (`SkipFlagParsing`, no per-leaf subcommand modeling); the upstream tool's own `--help` is the source of truth for verb shape, and the lockdown deny list is the source of truth for read-vs-write gating.
 
     Package managers all live under the `pkg` namespace:
 
@@ -132,7 +132,7 @@ commands:
 - **Single binary**, single trust boundary. One entry in the Claude allowlist, `Bash(coily:*)`.
 - **Trust `$PATH` for sub-tool binaries.** coily resolves `aws` / `kubectl` / `gh` / `tailscale` etc. via `exec.LookPath`. An earlier version pinned them by sha256 from a GitHub Release and bypassed `$PATH`; the protection (against an attacker with write to a `$PATH` directory but not `$HOME`) didn't justify the release-pipeline machinery. Argv validation + audit + lockdown deny list carry the boundary instead.
 - **SDK-native for simple APIs.** ssh/scp (`golang.org/x/crypto/ssh`) and tailscale (`tailscale.com/client/tailscale`). No subprocess means no argv to a shell.
-- **Mirror the sub-CLIs exactly.** `coily aws ssm get-parameter` takes the same args as `aws ssm get-parameter`, not a reinvented interface.
+- **Mirror the sub-CLIs exactly.** `coily ops aws ssm get-parameter` takes the same args as `aws ssm get-parameter`, not a reinvented interface.
 - **Config is embedded, not loaded from disk.** Changes require rebuild + sudo install.
 - **No self-update** in v1. Updates push from the laptop via `make deploy-server`. The binary cannot rewrite itself. (See SECURITY.md for the v2 plan around adversarial-reviewed CI installs.)
 - **No `coily shell` / `coily run` escape hatch**, ever.

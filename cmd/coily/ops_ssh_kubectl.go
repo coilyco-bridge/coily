@@ -11,7 +11,7 @@ import (
 )
 
 // sshKubectlCommand wraps `sudo k3s kubectl <args>` over ssh to kai-server.
-// Mirrors the local `coily kubectl` passthrough: argv forwards verbatim,
+// Mirrors the local `coily ops kubectl` passthrough: argv forwards verbatim,
 // readonly-vs-mutator gating is enforced at the lockdown deny list (e.g.
 // Bash(coily ssh kubectl get:*) allow / Bash(coily ssh kubectl apply:*)
 // deny), not inside coily. Replaces the server-side k3s-readonly-kubectl

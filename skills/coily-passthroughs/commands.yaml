@@ -14,30 +14,35 @@ commands:
         - --since
     - path:
         - coily
-        - aws
-      summary: Pass-through to aws with argv validation + audit log.
+        - docker
+      summary: Pass-through to docker with argv validation + audit log.
     - path:
         - coily
+        - gaming
         - core-keeper
         - restart
       summary: Restart the core-keeper-server unit.
     - path:
         - coily
+        - gaming
         - core-keeper
         - start
       summary: Start the core-keeper-server unit.
     - path:
         - coily
+        - gaming
         - core-keeper
         - status
       summary: Print systemctl status core-keeper-server.
     - path:
         - coily
+        - gaming
         - core-keeper
         - stop
       summary: Stop the core-keeper-server unit.
     - path:
         - coily
+        - gaming
         - core-keeper
         - tail
       summary: Tail core-keeper-server journal logs (journalctl -u core-keeper-server -f).
@@ -46,10 +51,7 @@ commands:
         - --lines
     - path:
         - coily
-        - docker
-      summary: Pass-through to docker with argv validation + audit log.
-    - path:
-        - coily
+        - gaming
         - eco
         - mod
         - push
@@ -60,26 +62,31 @@ commands:
         - --src
     - path:
         - coily
+        - gaming
         - eco
         - restart
       summary: Restart the eco-server systemd unit.
     - path:
         - coily
+        - gaming
         - eco
         - start
       summary: Start the eco-server systemd unit.
     - path:
         - coily
+        - gaming
         - eco
         - status
       summary: Print systemctl status eco-server.
     - path:
         - coily
+        - gaming
         - eco
         - stop
       summary: Stop the eco-server systemd unit.
     - path:
         - coily
+        - gaming
         - eco
         - tail
       summary: Tail eco-server journal logs (journalctl -u eco-server -f).
@@ -88,6 +95,7 @@ commands:
         - --lines
     - path:
         - coily
+        - gaming
         - eco
         - world
         - get-seed
@@ -96,6 +104,7 @@ commands:
         - --configs-dir
     - path:
         - coily
+        - gaming
         - eco
         - world
         - randomize
@@ -104,6 +113,7 @@ commands:
         - --configs-dir
     - path:
         - coily
+        - gaming
         - eco
         - world
         - set-seed
@@ -113,6 +123,7 @@ commands:
         - --seed
     - path:
         - coily
+        - gaming
         - eco
         - world
         - snapshot
@@ -122,8 +133,128 @@ commands:
         - --target
     - path:
         - coily
-        - gh
-      summary: Pass-through to gh with argv validation + audit log.
+        - gaming
+        - factorio
+        - mods
+        - list
+      summary: Print mod-list.json entries with their enabled flag.
+    - path:
+        - coily
+        - gaming
+        - factorio
+        - mods
+        - sync
+      summary: Pull the mod files in mods/ into agreement with mod-list.json.
+      flags:
+        - --dry-run
+        - --mod
+    - path:
+        - coily
+        - gaming
+        - factorio
+        - players
+        - adminlist
+      summary: Print entries from server-adminlist.json.
+    - path:
+        - coily
+        - gaming
+        - factorio
+        - players
+        - banlist
+      summary: Print entries from server-banlist.json.
+    - path:
+        - coily
+        - gaming
+        - factorio
+        - players
+        - whitelist
+      summary: Print entries from server-whitelist.json.
+    - path:
+        - coily
+        - gaming
+        - factorio
+        - restart
+      summary: Restart the factorio-server unit.
+    - path:
+        - coily
+        - gaming
+        - factorio
+        - saves
+        - backup-now
+      summary: Trigger an immediate off-cluster snapshot of the saves dir.
+    - path:
+        - coily
+        - gaming
+        - factorio
+        - saves
+        - list
+      summary: List zip saves under the FactorioServer/saves directory.
+    - path:
+        - coily
+        - gaming
+        - factorio
+        - start
+      summary: Start the factorio-server unit.
+    - path:
+        - coily
+        - gaming
+        - factorio
+        - status
+      summary: Print systemctl status factorio-server.
+    - path:
+        - coily
+        - gaming
+        - factorio
+        - stop
+      summary: Stop the factorio-server unit.
+    - path:
+        - coily
+        - gaming
+        - factorio
+        - tail
+      summary: Tail factorio-server journal logs (journalctl -u factorio-server -f).
+      flags:
+        - --follow
+        - --lines
+    - path:
+        - coily
+        - gaming
+        - factorio
+        - update
+      summary: Run steamcmd against app 427520 to update the factorio install.
+    - path:
+        - coily
+        - gaming
+        - icarus
+        - restart
+      summary: Restart the icarus-server unit.
+    - path:
+        - coily
+        - gaming
+        - icarus
+        - start
+      summary: Start the icarus-server unit.
+    - path:
+        - coily
+        - gaming
+        - icarus
+        - status
+      summary: Print systemctl status icarus-server.
+    - path:
+        - coily
+        - gaming
+        - icarus
+        - stop
+      summary: Stop the icarus-server unit.
+    - path:
+        - coily
+        - gaming
+        - icarus
+        - tail
+      summary: Tail icarus-server journal logs (journalctl -u icarus-server -f).
+      flags:
+        - --follow
+        - --lines
     - path:
         - coily
         - git
@@ -148,43 +279,11 @@ commands:
       summary: 'prepare-commit-msg hook: append Audit-log: trailers in place.'
     - path:
         - coily
-        - icarus
-        - restart
-      summary: Restart the icarus-server unit.
-    - path:
-        - coily
-        - icarus
-        - start
-      summary: Start the icarus-server unit.
-    - path:
-        - coily
-        - icarus
-        - status
-      summary: Print systemctl status icarus-server.
-    - path:
-        - coily
-        - icarus
-        - stop
-      summary: Stop the icarus-server unit.
-    - path:
-        - coily
-        - icarus
-        - tail
-      summary: Tail icarus-server journal logs (journalctl -u icarus-server -f).
-      flags:
-        - --follow
-        - --lines
-    - path:
-        - coily
         - install-completion
       summary: Install shell tab-completion for coily.
       flags:
         - --dry-run
         - --shell
-    - path:
-        - coily
-        - kubectl
-      summary: Pass-through to kubectl with argv validation + audit log.
     - path:
         - coily
         - lockdown
@@ -220,6 +319,21 @@ commands:
       flags:
         - --limit
         - --offset
+    - path:
+        - coily
+        - ops
+        - aws
+      summary: Pass-through to aws with argv validation + audit log.
+    - path:
+        - coily
+        - ops
+        - gh
+      summary: Pass-through to gh with argv validation + audit log.
+    - path:
+        - coily
+        - ops
+        - kubectl
+      summary: Pass-through to kubectl with argv validation + audit log.
     - path:
         - coily
         - pkg
@@ -288,7 +402,36 @@ commands:
         - --skip-completion
         - --skip-lockdown
         - --skip-skill
+        - --skip-user-hook
         - --workspace
+    - path:
+        - coily
+        - sirens-discord-ops
+        - restart
+      summary: Restart the sirens-discord-ops systemd unit.
+    - path:
+        - coily
+        - sirens-discord-ops
+        - start
+      summary: Start the sirens-discord-ops systemd unit.
+    - path:
+        - coily
+        - sirens-discord-ops
+        - status
+      summary: Print systemctl status sirens-discord-ops.
+    - path:
+        - coily
+        - sirens-discord-ops
+        - stop
+      summary: Stop the sirens-discord-ops systemd unit.
+    - path:
+        - coily
+        - sirens-discord-ops
+        - tail
+      summary: Tail sirens-discord-ops journal logs (journalctl -u sirens-discord-ops -f).
+      flags:
+        - --follow
+        - --lines
     - path:
         - coily
         - ssh
@@ -437,6 +580,11 @@ commands:
         - --host
         - --lines
         - --user
+    - path:
+        - coily
+        - ssh
+        - kubectl
+      summary: Run `sudo k3s kubectl <args>` on kai-server.
     - path:
         - coily
         - ssh

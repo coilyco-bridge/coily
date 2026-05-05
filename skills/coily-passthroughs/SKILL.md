@@ -25,10 +25,6 @@ Stream audit records as JSONL.
 
 Flags: --follow, --since
 
-## `coily aws`
-
-Pass-through to aws with argv validation + audit log.
-
 ## `coily docker`
 
 Pass-through to docker with argv validation + audit log.
@@ -185,10 +181,6 @@ Tail icarus-server journal logs (journalctl -u icarus-server -f).
 
 Flags: --follow, --lines
 
-## `coily gh`
-
-Pass-through to gh with argv validation + audit log.
-
 ## `coily git audit-show`
 
 Resolve an Audit-log trailer back to its full audit record.
@@ -210,10 +202,6 @@ prepare-commit-msg hook: append Audit-log: trailers in place.
 Install shell tab-completion for coily.
 
 Flags: --dry-run, --shell
-
-## `coily kubectl`
-
-Pass-through to kubectl with argv validation + audit log.
 
 ## `coily lockdown skill`
 
@@ -238,6 +226,18 @@ GET /games/{game-id}/mods/{mod-id}
 GET /games/{game-id}/mods
 
 Flags: --limit, --offset
+
+## `coily ops aws`
+
+Pass-through to aws with argv validation + audit log.
+
+## `coily ops gh`
+
+Pass-through to gh with argv validation + audit log.
+
+## `coily ops kubectl`
+
+Pass-through to kubectl with argv validation + audit log.
 
 ## `coily pkg brew`
 

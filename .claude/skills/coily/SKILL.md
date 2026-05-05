@@ -47,8 +47,8 @@ Catalogue the hosts coily operationally fronts. At minimum:
 For each host class, the next fill should encode:
 
 - Who owns the host (Kai, kai-server-as-a-shared-resource, a friend, AWS).
-- What's destructive there. `coily ssh deploy` overwrites files on kai-server. `coily aws ssm delete-parameter` is irrecoverable at the AWS edge. `coily eco restart` is service-impacting for whoever's playing on kai-server right now.
-- What's idempotent. `coily eco status`, `coily aws sts get-caller-identity`, `coily kubectl get` are safe to repeat.
+- What's destructive there. `coily ssh deploy` overwrites files on kai-server. `coily ops aws ssm delete-parameter` is irrecoverable at the AWS edge. `coily gaming eco restart` is service-impacting for whoever's playing on kai-server right now.
+- What's idempotent. `coily gaming eco status`, `coily ops aws sts get-caller-identity`, `coily ops kubectl get` are safe to repeat.
 - Who is the operator on that host. For Kai's laptops, Kai. For kai-server, Kai or the matching ssh user. For friends' machines, the friend - and the agent running coily on Kai's behalf is *not* the friend.
 - What audit context applies. Where the row lands, what `commit_scope` it binds to, whether the audit trailer is reachable from the host that owns the affected resource.
 

@@ -23,7 +23,7 @@
 // their cost only via per-leaf readonly-vs-mutator gating, which is
 // already redundant with the lockdown deny list (Bash(kubectl get:*) allow
 // vs Bash(kubectl apply:*) deny fires before coily ever runs). The
-// remaining benefits (help mirroring, tab completion below `coily aws`)
+// remaining benefits (help mirroring, tab completion below `coily ops aws`)
 // were convenience without security value, and the cost was ~80k lines of
 // generated Go plus a weekly refresh cadence per upstream. SkipFlagParsing
 // + verb.Wrap is the same security boundary in 60 lines.
@@ -49,6 +49,7 @@ type config struct {
 	egressOn   bool
 	egressList []string
 	egressMode egress.Mode
+	verbName   string
 }
 
 // WithSkipPolicy disables the shell-metacharacter check for this binary.
@@ -80,6 +81,17 @@ func WithEgress(allowlist []string, mode egress.Mode) Option {
 	}
 }
 
+// WithVerbName overrides the dotted verb name used for audit logging.
+// The user-visible cli command name (and the binary actually executed)
+// stays as bin; only the audit verb path changes. Used to namespace
+// pass-throughs that are mounted under a parent group, e.g. `coily ops
+// aws` logs as verb "ops.aws" while still exec'ing the aws binary.
+func WithVerbName(name string) Option {
+	return func(c *config) {
+		c.verbName = name
+	}
+}
+
 // Command returns the *cli.Command for `coily <bin>`. Every argument
 // after the binary name is forwarded verbatim through the pass-through
 // pipeline (argv validation -> audit -> exec). SkipFlagParsing keeps
@@ -89,8 +101,12 @@ func Command(bin string, r *shell.Runner, w *audit.Writer, opts ...Option) *cli.
 	for _, opt := range opts {
 		opt(&cfg)
 	}
+	verbName := bin
+	if cfg.verbName != "" {
+		verbName = cfg.verbName
+	}
 	spec := verb.Spec{
-		Name: bin,
+		Name: verbName,
 		ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 			return nil, c.Args().Slice()
 		},

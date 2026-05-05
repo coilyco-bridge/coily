@@ -62,7 +62,7 @@ func TestSecurityClaim_PolicyRejectsAllShellMetacharacters(t *testing.T) {
 
 // TestSecurityClaim_NoEscapeHatchVerbs covers SECURITY.md's "No coily shell /
 // coily run escape hatch, ever. Same rule applies to remote shells: no
-// coily ssh exec, no coily kubectl exec pass-through."
+// coily ssh exec, no coily ops kubectl exec pass-through."
 //
 // Walks the registered command tree built by the production Runner and fails
 // if any forbidden name lands as a top-level verb or under ssh. (Kubectl is

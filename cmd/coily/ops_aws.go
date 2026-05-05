@@ -6,5 +6,8 @@ import (
 )
 
 func (r *Runner) awsCommand() *cli.Command {
-	return passthrough.Command("aws", r.Runner, r.Audit, passthrough.WithSkipPolicy())
+	return passthrough.Command("aws", r.Runner, r.Audit,
+		passthrough.WithSkipPolicy(),
+		passthrough.WithVerbName("ops.aws"),
+	)
 }
