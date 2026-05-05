@@ -1,6 +1,10 @@
 # Threat model: why coily exists
 
-This document captures the security rationale behind `coily`. It was written during a Claude Code session on 2026-04-21 after a real incident. A manually-edited `ClusterSecretStore` had drifted from source, silently broke ExternalSecret syncing for the entire cluster, and was only noticed when pods started hitting `CreateContainerConfigError`. The incident itself was benign drift, but it highlighted a broader question. What stops an AI agent (or an attacker via prompt injection against an AI agent) from doing something genuinely destructive?
+> coily is a CLI security boundary for privileged ops, escape-hatch-resistant and with an audit trail.
+
+That's the goal in one sentence. The rest of this document is the rationale behind each of those three properties and the design guardrails that preserve them.
+
+This document was written during a Claude Code session on 2026-04-21 after a real incident. A manually-edited `ClusterSecretStore` had drifted from source, silently broke ExternalSecret syncing for the entire cluster, and was only noticed when pods started hitting `CreateContainerConfigError`. The incident itself was benign drift, but it highlighted a broader question. What stops an AI agent (or an attacker via prompt injection against an AI agent) from doing something genuinely destructive?
 
 ## Threat model
 
@@ -104,7 +108,8 @@ Principles to preserve as features get added.
 - **Structured args only**. No subcommand takes a free-form string that is later passed to a shell. If a shell-out is absolutely necessary, the Go code uses an explicit argv list, never a composed shell string.
 - **Allowlist at the verb level**. `coily k8s restart <deployment>` exists. `coily k8s exec` does not. If a new verb is needed, it's a code change in `coily`, reviewed, committed, built, installed. That review step is the human gate.
 - **Append-only audit log** outside the working tree (e.g. `/var/log/coily/audit.jsonl`), writable by the coily process user only. Every invocation logged with timestamp, argv, effective verb, exit code.
-- **No `coily shell` / `coily run` escape hatch**, ever. The moment one exists, the whole boundary collapses.
+- **No `coily shell` / `coily run` escape hatch**, ever. The moment one exists, the whole boundary collapses. Same rule applies to remote shells: no `coily ssh exec`, no `coily kubectl exec` pass-through. Where free-form remote shell is genuinely needed, the answer is to drop out to raw `ssh` and let the lockdown deny rule force an explicit override, not to wrap a free-form exec inside a coily verb. Named verbs (`coily ssh systemctl status <unit>`, `coily ssh deploy <name>`) cover the legitimate cases without restoring the escape.
+- **Every audit row binds to a real repo, no opt-out.** The `--commit-scope` flag (or `$COILY_COMMIT_SCOPE`) is required and cannot be set to `-`, `none`, or `off` (`ErrOptOutRejected`). Default `auto` resolves to `git rev-parse --show-toplevel` of cwd. Verbs that genuinely have no repo to bind to set `verb.Spec.SkipScope = true` at the definition site, so the choice is auditable from source rather than papered over by a per-call flag. The provenance contract is what makes the `Audit-log:` commit trailers a chain of trust instead of a soft hint.
 
 ## Open questions
 
@@ -139,3 +144,18 @@ For completeness, the rules currently in `~/.claude/settings.json` (as of 2026-0
 **Deny (write/update/delete + pod-exec)**: `kubectl apply`, `create`, `delete`, `patch`, `replace`, `edit`, `label`, `annotate`, `scale`, `autoscale`, `set`, `taint`, `cordon`, `uncordon`, `drain`, `expose`, `run`, `rollout undo/pause/resume`, `exec`, `port-forward`, `cp`, `attach`, `proxy`.
 
 These stay in place as the first fence. `coily` is the second fence. The goal is defense in depth, not either/or.
+
+## Known boundary holes
+
+Real findings that bound where the boundary actually enforces. New entries land here when the prose-vs-runtime gap is discovered.
+
+- **Claude Desktop on Windows does not enforce the Bash deny list.** Verified 2026-04-23 on Claude Code v2.1.119. Identical repo and `.claude/settings.json` produce different behavior depending on host. The CLI (`claude` in Git Bash) honors `Bash(python:*)` denies; Claude Code inside Claude Desktop (MSIX-packaged agent mode) shows the deny rule loaded under `/permissions` but runs the Bash tool without consulting it. `PowerShell` denies still fire in both hosts because they use a different matcher. Operational implication: lockdown is **CLI-only enforcement** for Bash rules. Agent sessions running from Claude Desktop on Windows effectively run with Bash permissions wide open. Prefer the CLI for any agent work that depends on lockdown for safety.
+
+## Anti-signals
+
+Phrases that survived previous design rounds because nobody tested them. Codified here so the next round is faster.
+
+- **"It's a security boundary because it's plumbed through the gate"** is false unless the gate itself is verified. Plumbing-through is a property of users of the gate, not a property of the gate. A new feature that calls `policy.ValidateArg` does not become part of the boundary just by virtue of the call.
+- **"X is an off-host shadow"** is false unless X carries the full record. A summary stream (verb + counts + exit code) is a detection signal, not a shadow. The two have different forensic properties: a shadow lets you reconstruct what happened, a detection signal lets you know that something happened. Don't conflate them in prose.
+- **"Drop the feature, then build the replacement"** inverts the right order. If the dropped feature was on the boundary, the boundary degrades during the gap. Build (or accept the loss of) the replacement first, then drop. Otherwise the security claim regresses for every day of the gap.
+- **Doc claims must match runtime artifacts.** The security prose in this file describes runtime properties. When prose and runtime drift (a feature shipping less than the prose says), the boundary description silently overstates what's enforced. The `TestSecurityClaims` test in `test/security_claims_test.go` walks each load-bearing claim in this file and asserts it against the actual runtime, so prose-runtime drift surfaces as a test failure rather than as a forensic surprise.
