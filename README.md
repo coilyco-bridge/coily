@@ -1,5 +1,7 @@
 # coily
 
+🛡️ coily is a CLI security boundary for privileged ops, 🔒 escape-hatch-resistant and with an 📜 audit trail.
+
 Operator CLI for Kai's homelab (kai-server, coilysiren k3s cluster, and associated AWS/Tailscale resources).
 
 A successful read against three different tools, unified into one yaml shape:
