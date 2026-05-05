@@ -103,134 +103,166 @@ type findingArgs struct {
 	Slug      string
 }
 
+// fln/fpf wrap fmt.Fprintln/Fprintf so the walkthrough generators can
+// emit text without each call site having to discard the unused error
+// return. errcheck stays satisfied by the explicit `_, _ =` here.
+func fln(w io.Writer, args ...any) { _, _ = fmt.Fprintln(w, args...) }
+func fpf(w io.Writer, format string, args ...any) {
+	_, _ = fmt.Fprintf(w, format, args...)
+}
+
 func printFindingWalkthrough(w io.Writer, a findingArgs) error {
 	slug := a.Slug
 	if slug == "" {
 		slug = "<short-kebab-slug>"
 	}
 	area := verbToSkillArea(a.Verb)
-	areaPath := filepath.Join(a.SkillsDir, area)
-	findingFile := filepath.Join(areaPath, "findings", a.Today+"-"+slug+".md")
+	findingFile := filepath.Join(a.SkillsDir, area, "findings", a.Today+"-"+slug+".md")
 
-	fmt.Fprintln(w, "coily audit finding - walkthrough")
-	fmt.Fprintln(w, "=================================")
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, "You (the agent) have been told a row in the audit log is a violation.")
-	fmt.Fprintln(w, "Your job is to write a finding file that records the observation. You")
-	fmt.Fprintln(w, "are NOT promoting it to a rule, NOT editing any SKILL.md, NOT changing")
-	fmt.Fprintln(w, "code. One file, then stop. Steps below.")
-	fmt.Fprintln(w)
+	wtIntro(w)
+	wtBackground(w)
+	wtStep1Locate(w, a)
+	wtStep2PickArea(w, a, area)
+	wtStep3Write(w, a, slug, findingFile)
+	wtStep4Forward(w)
+	wtStep5Stop(w)
+	wtReferences(w, a)
+	return nil
+}
 
-	fmt.Fprintln(w, "Background")
-	fmt.Fprintln(w, "----------")
-	fmt.Fprintln(w, "coily is the operator CLI for Kai's homelab. Every invocation lands one")
-	fmt.Fprintln(w, "JSONL row in the audit log. A `finding` is a write-once markdown file")
-	fmt.Fprintln(w, "that records something the audit log surfaced - a denial that should")
-	fmt.Fprintln(w, "not have been needed, an accept that should have been a denial, or a")
-	fmt.Fprintln(w, "near-miss the gate caught but the threat model missed. Findings live")
-	fmt.Fprintln(w, "next to the relevant `coily-<area>-meta` skill in a `findings/`")
-	fmt.Fprintln(w, "subdirectory. They feed the meta-improvement loop; they are not the")
-	fmt.Fprintln(w, "loop. See coily-meta-improvement/SKILL.md if you want the full picture.")
-	fmt.Fprintln(w)
+func wtIntro(w io.Writer) {
+	fln(w, "coily audit finding - walkthrough")
+	fln(w, "=================================")
+	fln(w)
+	fln(w, "You (the agent) have been told a row in the audit log is a violation.")
+	fln(w, "Your job is to write a finding file that records the observation. You")
+	fln(w, "are NOT promoting it to a rule, NOT editing any SKILL.md, NOT changing")
+	fln(w, "code. One file, then stop. Steps below.")
+	fln(w)
+}
 
-	fmt.Fprintln(w, "Step 1 - Locate the audit row")
-	fmt.Fprintln(w, "-----------------------------")
-	fmt.Fprintln(w, "Audit log path:", a.AuditPath)
-	fmt.Fprintln(w)
+func wtBackground(w io.Writer) {
+	fln(w, "Background")
+	fln(w, "----------")
+	fln(w, "coily is the operator CLI for Kai's homelab. Every invocation lands one")
+	fln(w, "JSONL row in the audit log. A `finding` is a write-once markdown file")
+	fln(w, "that records something the audit log surfaced - a denial that should")
+	fln(w, "not have been needed, an accept that should have been a denial, or a")
+	fln(w, "near-miss the gate caught but the threat model missed. Findings live")
+	fln(w, "next to the relevant `coily-<area>-meta` skill in a `findings/`")
+	fln(w, "subdirectory. They feed the meta-improvement loop; they are not the")
+	fln(w, "loop. See coily-meta-improvement/SKILL.md if you want the full picture.")
+	fln(w)
+}
+
+func wtStep1Locate(w io.Writer, a findingArgs) {
+	fln(w, "Step 1 - Locate the audit row")
+	fln(w, "-----------------------------")
+	fln(w, "Audit log path:", a.AuditPath)
+	fln(w)
 	switch {
 	case a.ID != "":
-		fmt.Fprintf(w, "    coily audit tail | jq 'select(.id == \"%s\")'\n", a.ID)
+		fpf(w, "    coily audit tail | jq 'select(.id == \"%s\")'\n", a.ID)
 	case a.TS != "":
-		fmt.Fprintf(w, "    coily audit tail --since=%s | jq 'select(.ts == %s)'\n", a.TS, a.TS)
+		fpf(w, "    coily audit tail --since=%s | jq 'select(.ts == %s)'\n", a.TS, a.TS)
 	default:
-		fmt.Fprintln(w, "    coily audit tail --since=24h | jq 'select(.decision == \"reject\")'")
-		fmt.Fprintln(w, "    # or: coily audit tail | jq 'select(.id == \"<id>\")' if you have an id")
+		fln(w, "    coily audit tail --since=24h | jq 'select(.decision == \"reject\")'")
+		fln(w, "    # or: coily audit tail | jq 'select(.id == \"<id>\")' if you have an id")
 	}
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, "Capture the row's: id, ts, verb, argv, decision, exit_code, error.")
-	fmt.Fprintln(w, "These are the concrete facts the finding cites. Do not paraphrase them.")
-	fmt.Fprintln(w)
+	fln(w)
+	fln(w, "Capture the row's: id, ts, verb, argv, decision, exit_code, error.")
+	fln(w, "These are the concrete facts the finding cites. Do not paraphrase them.")
+	fln(w)
+}
 
-	fmt.Fprintln(w, "Step 2 - Pick the skill area")
-	fmt.Fprintln(w, "----------------------------")
-	fmt.Fprintln(w, "The verb in the audit row maps to one `coily-<area>-meta` skill. Use")
-	fmt.Fprintln(w, "the prefix table below; if the row spans multiple verbs (a cross-")
-	fmt.Fprintln(w, "cutting concern), use coily-shared-meta. If the row is about the")
-	fmt.Fprintln(w, "security boundary itself - the gate, the audit row format, the")
-	fmt.Fprintln(w, "scope binding - use coily-security-boundary-discipline.")
-	fmt.Fprintln(w)
+func wtStep2PickArea(w io.Writer, a findingArgs, area string) {
+	fln(w, "Step 2 - Pick the skill area")
+	fln(w, "----------------------------")
+	fln(w, "The verb in the audit row maps to one `coily-<area>-meta` skill. Use")
+	fln(w, "the prefix table below; if the row spans multiple verbs (a cross-")
+	fln(w, "cutting concern), use coily-shared-meta. If the row is about the")
+	fln(w, "security boundary itself - the gate, the audit row format, the")
+	fln(w, "scope binding - use coily-security-boundary-discipline.")
+	fln(w)
 	for _, line := range verbAreaTable() {
-		fmt.Fprintln(w, "    "+line)
+		fln(w, "    "+line)
 	}
-	fmt.Fprintln(w)
+	fln(w)
 	if a.Verb != "" {
-		fmt.Fprintf(w, "Suggested area for verb %q: %s\n", a.Verb, area)
+		fpf(w, "Suggested area for verb %q: %s\n", a.Verb, area)
 	} else {
-		fmt.Fprintln(w, "Pass --verb <verb> on a future invocation to get a resolved area name.")
+		fln(w, "Pass --verb <verb> on a future invocation to get a resolved area name.")
 	}
 	if dirs := discoverMetaSkills(a.SkillsDir); len(dirs) > 0 {
-		fmt.Fprintln(w)
-		fmt.Fprintln(w, "Areas that already have findings/ siblings on this host:")
+		fln(w)
+		fln(w, "Areas that already have findings/ siblings on this host:")
 		for _, d := range dirs {
-			fmt.Fprintln(w, "    "+d)
+			fln(w, "    "+d)
 		}
 	}
-	fmt.Fprintln(w)
+	fln(w)
+}
 
-	fmt.Fprintln(w, "Step 3 - Write the file")
-	fmt.Fprintln(w, "-----------------------")
-	fmt.Fprintln(w, "Path:")
-	fmt.Fprintln(w, "    "+findingFile)
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, "Date is today (UTC). Slug is a short kebab-case noun phrase that names")
-	fmt.Fprintln(w, "the shape of the violation, not the verb. Examples from existing")
-	fmt.Fprintln(w, "findings: read-only-audit-without-gate, claude-bypasses-coily-gh-wrapper,")
-	fmt.Fprintln(w, "scope-required-from-non-git-cwd. Bad slugs: aws-bug, gh-issue, found-it.")
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, "Template (write this file verbatim; replace bracketed placeholders):")
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, findingTemplate(a.Today, slug))
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, "Section discipline:")
-	fmt.Fprintln(w, "  - What was observed: concrete and scoped to ONE shape. Cite the audit")
-	fmt.Fprintln(w, "    row's ts/id/verb/argv. \"coily ops aws s3 ls against bucket X passed")
-	fmt.Fprintln(w, "    argv-gate-free on YYYY-MM-DD\" - not \"coily ops aws is broken.\"")
-	fmt.Fprintln(w, "  - Why it slipped: what gap in the gate, the audit, the docs, or the")
-	fmt.Fprintln(w, "    threat model let this through. If you don't know, say so honestly")
-	fmt.Fprintln(w, "    and stop - the human can fill in the gap before the file is finished.")
-	fmt.Fprintln(w, "  - Rule it produced: the rule or anti-signal as a one-line claim. May")
-	fmt.Fprintln(w, "    be empty if this finding is data, not a rule. Do not invent rules to")
-	fmt.Fprintln(w, "    fill the section.")
-	fmt.Fprintln(w)
+func wtStep3Write(w io.Writer, a findingArgs, slug, findingFile string) {
+	fln(w, "Step 3 - Write the file")
+	fln(w, "-----------------------")
+	fln(w, "Path:")
+	fln(w, "    "+findingFile)
+	fln(w)
+	fln(w, "Date is today (UTC). Slug is a short kebab-case noun phrase that names")
+	fln(w, "the shape of the violation, not the verb. Examples from existing")
+	fln(w, "findings: read-only-audit-without-gate, claude-bypasses-coily-gh-wrapper,")
+	fln(w, "scope-required-from-non-git-cwd. Bad slugs: aws-bug, gh-issue, found-it.")
+	fln(w)
+	fln(w, "Template (write this file verbatim; replace bracketed placeholders):")
+	fln(w)
+	fln(w, findingTemplate(a.Today, slug))
+	fln(w)
+	fln(w, "Section discipline:")
+	fln(w, "  - What was observed: concrete and scoped to ONE shape. Cite the audit")
+	fln(w, "    row's ts/id/verb/argv. \"coily ops aws s3 ls against bucket X passed")
+	fln(w, "    argv-gate-free on YYYY-MM-DD\" - not \"coily ops aws is broken.\"")
+	fln(w, "  - Why it slipped: what gap in the gate, the audit, the docs, or the")
+	fln(w, "    threat model let this through. If you don't know, say so honestly")
+	fln(w, "    and stop - the human can fill in the gap before the file is finished.")
+	fln(w, "  - Rule it produced: the rule or anti-signal as a one-line claim. May")
+	fln(w, "    be empty if this finding is data, not a rule. Do not invent rules to")
+	fln(w, "    fill the section.")
+	fln(w)
+}
 
-	fmt.Fprintln(w, "Step 4 - File the forward action (conditional)")
-	fmt.Fprintln(w, "----------------------------------------------")
-	fmt.Fprintln(w, "If the finding implies a code change, a doc change, or a sequencing")
-	fmt.Fprintln(w, "rule addition, file it as a GitHub issue on coilysiren/coily and put")
-	fmt.Fprintln(w, "the URL in the frontmatter's `promoted_to.issue` slot. The issue is")
-	fmt.Fprintln(w, "the source of truth for what happens next - not the finding, not the")
-	fmt.Fprintln(w, "SKILL.md. A finding without a forward action is still valid: it can")
-	fmt.Fprintln(w, "be evidence for an existing rule or a documented near-miss.")
-	fmt.Fprintln(w)
-	fmt.Fprintln(w, "    coily ops gh issue create --repo coilysiren/coily \\")
-	fmt.Fprintln(w, "        --title '<one-line summary>' --body-file <path-to-issue-body.md>")
-	fmt.Fprintln(w)
+func wtStep4Forward(w io.Writer) {
+	fln(w, "Step 4 - File the forward action (conditional)")
+	fln(w, "----------------------------------------------")
+	fln(w, "If the finding implies a code change, a doc change, or a sequencing")
+	fln(w, "rule addition, file it as a GitHub issue on coilysiren/coily and put")
+	fln(w, "the URL in the frontmatter's `promoted_to.issue` slot. The issue is")
+	fln(w, "the source of truth for what happens next - not the finding, not the")
+	fln(w, "SKILL.md. A finding without a forward action is still valid: it can")
+	fln(w, "be evidence for an existing rule or a documented near-miss.")
+	fln(w)
+	fln(w, "    coily ops gh issue create --repo coilysiren/coily \\")
+	fln(w, "        --title '<one-line summary>' --body-file <path-to-issue-body.md>")
+	fln(w)
+}
 
-	fmt.Fprintln(w, "Step 5 - Stop")
-	fmt.Fprintln(w, "-------------")
-	fmt.Fprintln(w, "Findings are write-once. Do not edit after creation. Do not promote")
-	fmt.Fprintln(w, "the finding to an anti-signal or sequencing rule in any SKILL.md - that")
-	fmt.Fprintln(w, "step happens in a separate review, by a human or a later agent, with")
-	fmt.Fprintln(w, "the finding as the evidence pin. Your boundary ends at Step 4.")
-	fmt.Fprintln(w)
+func wtStep5Stop(w io.Writer) {
+	fln(w, "Step 5 - Stop")
+	fln(w, "-------------")
+	fln(w, "Findings are write-once. Do not edit after creation. Do not promote")
+	fln(w, "the finding to an anti-signal or sequencing rule in any SKILL.md - that")
+	fln(w, "step happens in a separate review, by a human or a later agent, with")
+	fln(w, "the finding as the evidence pin. Your boundary ends at Step 4.")
+	fln(w)
+}
 
-	fmt.Fprintln(w, "References")
-	fmt.Fprintln(w, "----------")
-	fmt.Fprintln(w, "    audit log:        ", a.AuditPath)
-	fmt.Fprintln(w, "    skills directory: ", a.SkillsDir)
-	fmt.Fprintln(w, "    loop docs:        ", filepath.Join(a.SkillsDir, "coily-meta-improvement", "SKILL.md"))
-	fmt.Fprintln(w, "    authoring docs:   ", filepath.Join(a.SkillsDir, "coily-skill-authoring", "SKILL.md"))
-	return nil
+func wtReferences(w io.Writer, a findingArgs) {
+	fln(w, "References")
+	fln(w, "----------")
+	fln(w, "    audit log:        ", a.AuditPath)
+	fln(w, "    skills directory: ", a.SkillsDir)
+	fln(w, "    loop docs:        ", filepath.Join(a.SkillsDir, "coily-meta-improvement", "SKILL.md"))
+	fln(w, "    authoring docs:   ", filepath.Join(a.SkillsDir, "coily-skill-authoring", "SKILL.md"))
 }
 
 func findingTemplate(date, slug string) string {
@@ -261,6 +293,32 @@ func findingTemplate(date, slug string) string {
 	}, "\n")
 }
 
+// verbAreaMap is the verb-prefix -> meta-skill lookup. Map literal rather
+// than a switch so adding a verb prefix does not push gocyclo over its
+// per-function limit, and so the table stays in one place next to
+// verbAreaTable (which renders the same data for the agent).
+var verbAreaMap = map[string]string{
+	"aws":         "coily-ops-aws-meta",
+	"gh":          "coily-ops-gh-meta",
+	"kubectl":     "coily-ops-kubectl-meta",
+	"docker":      "coily-docker-meta",
+	"tailscale":   "coily-tailscale-meta",
+	"modio":       "coily-modio-meta",
+	"trello":      "coily-trello-meta",
+	"git":         "coily-git-meta",
+	"ssh":         "coily-ssh-meta",
+	"lockdown":    "coily-lockdown-meta",
+	"audit":       "coily-audit-meta",
+	"pkg":         "coily-pkg-meta",
+	"repo":        "coily-repo-meta",
+	"eco":         "coily-gaming-eco-meta",
+	"factorio":    "coily-gaming-factorio-meta",
+	"icarus":      "coily-gaming-icarus-meta",
+	"core_keeper": "coily-gaming-core-keeper-meta",
+	"corekeeper":  "coily-gaming-core-keeper-meta",
+	"sirens":      "coily-sirens-discord-ops-meta",
+}
+
 // verbToSkillArea maps an audit-row verb to the `coily-<area>-meta` skill
 // directory most likely to host the finding. Best-effort prefix match;
 // when the verb does not map cleanly the caller is told to use
@@ -277,43 +335,8 @@ func verbToSkillArea(v string) string {
 	if i := strings.IndexAny(v, ".-"); i > 0 {
 		head = v[:i]
 	}
-	switch head {
-	case "aws":
-		return "coily-ops-aws-meta"
-	case "gh":
-		return "coily-ops-gh-meta"
-	case "kubectl":
-		return "coily-ops-kubectl-meta"
-	case "docker":
-		return "coily-docker-meta"
-	case "tailscale":
-		return "coily-tailscale-meta"
-	case "modio":
-		return "coily-modio-meta"
-	case "trello":
-		return "coily-trello-meta"
-	case "git":
-		return "coily-git-meta"
-	case "ssh":
-		return "coily-ssh-meta"
-	case "lockdown":
-		return "coily-lockdown-meta"
-	case "audit":
-		return "coily-audit-meta"
-	case "pkg":
-		return "coily-pkg-meta"
-	case "repo":
-		return "coily-repo-meta"
-	case "eco":
-		return "coily-gaming-eco-meta"
-	case "factorio":
-		return "coily-gaming-factorio-meta"
-	case "icarus":
-		return "coily-gaming-icarus-meta"
-	case "core_keeper", "corekeeper":
-		return "coily-gaming-core-keeper-meta"
-	case "sirens":
-		return "coily-sirens-discord-ops-meta"
+	if area, ok := verbAreaMap[head]; ok {
+		return area
 	}
 	return "coily-shared-meta"
 }
