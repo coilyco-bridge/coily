@@ -492,7 +492,8 @@ func findRecordByShortID(path string, ts int64, short string) (*audit.Record, er
 }
 
 // writeRecordsYAML emits each record as a `trailer:` + `record:` block,
-// matching the shape documented in docs/features.
+// matching the trailer shape carried by audit.Record's Trailer/TrailerLine
+// helpers (see pkg/audit).
 func writeRecordsYAML(w io.Writer, records []audit.Record) error {
 	for _, rec := range records {
 		view := map[string]any{
