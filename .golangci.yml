@@ -46,7 +46,6 @@ linters:
     - bodyclose
     - errorlint
     - exhaustive
-    - goconst
     - nilerr
     - nilnil
     - predeclared
@@ -65,9 +64,14 @@ linters:
       statements: 50
     nestif:
       min-complexity: 5
-    goconst:
-      min-len: 5
-      min-occurrences: 3
+    # goconst was disabled because in this codebase the strings it flagged
+    # were flag-name map keys ("--host", "--user", "--since") used to build
+    # audit-log argv summaries, and config-shape keys ("hooks", "command",
+    # "Bash") used to construct settings.json payloads. Both are at the
+    # boundary between Go code and an external string contract; pulling
+    # them into a constant adds an indirection without making the literal
+    # safer to change. Re-enable if the codebase grows truly-magic strings
+    # (sentinel values, protocol tokens) that goconst would catch.
     gosec:
       excludes:
         # G204 fires on every exec.CommandContext(ctx, bin, argv...) even with
