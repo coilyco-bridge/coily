@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -68,5 +70,74 @@ func TestVerbToSkillArea_PrefixMapping(t *testing.T) {
 		if got := verbToSkillArea(verb); got != want {
 			t.Errorf("verbToSkillArea(%q) = %q, want %q", verb, got, want)
 		}
+	}
+}
+
+// TestVerbAreaMap_TargetsExistOnDisk catches drift between the static
+// verb -> meta-skill table and the actual `coily-<area>-meta` directories
+// shipped in the repo. The walkthrough is only useful if every area name
+// it suggests is a real path the agent can write into; without this test
+// a renamed or removed skill would silently send agents to a missing
+// directory.
+//
+// Skips when run outside a coily checkout (e.g. an installed-binary
+// smoke test) - detected by the absence of `.claude/skills/`. In CI the
+// directory is always present, so the assertion fires there.
+func TestVerbAreaMap_TargetsExistOnDisk(t *testing.T) {
+	skillsDir := findRepoSkillsDir(t)
+	if skillsDir == "" {
+		t.Skip(".claude/skills/ not found above test cwd; running outside a checkout")
+	}
+
+	// Every value in the lookup map must be a real directory.
+	for prefix, area := range verbAreaMap {
+		if info, err := os.Stat(filepath.Join(skillsDir, area)); err != nil || !info.IsDir() {
+			t.Errorf("verbAreaMap[%q] = %q but %s is not a directory: %v",
+				prefix, area, filepath.Join(skillsDir, area), err)
+		}
+	}
+
+	// The agent-visible table renders the same data plus the two
+	// fallbacks (coily-shared-meta, coily-security-boundary-discipline).
+	// Parse the right-hand side of each `prefix -> area` line and check
+	// the same property. Catches drift between map and table too.
+	for _, line := range verbAreaTable() {
+		i := strings.Index(line, "->")
+		if i < 0 {
+			t.Errorf("verbAreaTable entry missing arrow: %q", line)
+			continue
+		}
+		// Right-hand side may have trailing parenthetical commentary
+		// ("coily-shared-meta (cross-cutting)"). Take the first token.
+		rhs := strings.TrimSpace(line[i+2:])
+		area := strings.Fields(rhs)[0]
+		if info, err := os.Stat(filepath.Join(skillsDir, area)); err != nil || !info.IsDir() {
+			t.Errorf("verbAreaTable points at %q but %s is not a directory: %v",
+				area, filepath.Join(skillsDir, area), err)
+		}
+	}
+}
+
+// findRepoSkillsDir walks up from the test's cwd looking for a
+// `.claude/skills/` directory. Returns "" if none is found before the
+// filesystem root. Mirrors detectSkillsDir's runtime logic but without
+// the home-dir fallback - a unit test should only validate the in-tree
+// skills layout, not whatever the host happens to have installed.
+func findRepoSkillsDir(t *testing.T) string {
+	t.Helper()
+	dir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("getwd: %v", err)
+	}
+	for {
+		candidate := filepath.Join(dir, ".claude", "skills")
+		if info, err := os.Stat(candidate); err == nil && info.IsDir() {
+			return candidate
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return ""
+		}
+		dir = parent
 	}
 }
