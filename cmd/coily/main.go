@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/coilysiren/coily/pkg/exitcode"
-	"github.com/coilysiren/coily/pkg/telemetry"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
@@ -19,15 +18,8 @@ import (
 var Version = "dev"
 
 func main() {
-	if err := telemetry.Init(Version); err != nil {
-		fmt.Fprintln(os.Stderr, "coily:", err)
-	}
 	r := NewRunner()
 	err := run(r, os.Args)
-	if err != nil {
-		telemetry.CaptureError(err)
-	}
-	telemetry.Flush(2 * time.Second)
 	if err != nil {
 		rc := classifyExit(err)
 		emitErrorEnvelope(os.Stderr, err, rc, r.Cfg.Audit.LogPath)

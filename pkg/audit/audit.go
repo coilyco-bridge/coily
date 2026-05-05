@@ -222,10 +222,6 @@ type Writer struct {
 	MaxAgeDays int
 	// Compress gzips rotated files.
 	Compress bool
-	// OnRecord, if set, is invoked after each record is successfully
-	// appended. Used by the CLI to forward invocation summaries to Sentry
-	// without taking a dependency from pkg/audit onto sentry-go.
-	OnRecord func(Record)
 
 	mu  sync.Mutex
 	log *lumberjack.Logger
@@ -333,9 +329,6 @@ func (w *Writer) WrapHook(_ context.Context, base Record, fn func() error, onCom
 	}
 	if aerr := w.Append(rec); aerr != nil {
 		fmt.Fprintf(os.Stderr, "audit: %v\n", aerr)
-	}
-	if w.OnRecord != nil {
-		w.OnRecord(rec)
 	}
 	return err
 }
