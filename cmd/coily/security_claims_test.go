@@ -186,13 +186,16 @@ func recordedSubcommands(c *cli.Command) []string {
 	return out
 }
 
-// TestSecurityClaim_LockdownDeniesKubectlExec verifies the deny list shipped
-// in pkg/lockdown/defaults.yaml covers kubectl exec, which is the closest
-// equivalent to a remote shell on the cluster. The kubectl pass-through in
-// coily does not model subverbs (it forwards the entire kubectl surface), so
-// kubectl exec is gated by lockdown rather than by a structural absence in
-// the tree.
-func TestSecurityClaim_LockdownDeniesKubectlExec(t *testing.T) {
+// TestSecurityClaim_LockdownDeniesBareKubectlAndAwsAndGh verifies the deny
+// list shipped in pkg/lockdown/defaults.yaml covers bare invocation of
+// kubectl, aws, and gh - the three privileged-op binaries that route
+// through coily ops. The previous design enumerated read-verb allows and
+// write-verb denies separately because Claude Code's Bash(prefix:*) syntax
+// cannot pattern-match `aws * describe-*`; the current design inverts the
+// allowlist and denies the bare binaries entirely so every call lands in
+// the audit log. kubectl exec, kubectl run, and the rest are covered
+// transitively by Bash(kubectl:*).
+func TestSecurityClaim_LockdownDeniesBareKubectlAndAwsAndGh(t *testing.T) {
 	// LoadDefaults parses pkg/lockdown/defaults.yaml (embedded). Asserting
 	// against the parsed struct (rather than substring-matching the raw
 	// file) means a typo in the file blows up here as a parse error rather
@@ -202,19 +205,30 @@ func TestSecurityClaim_LockdownDeniesKubectlExec(t *testing.T) {
 		t.Fatalf("lockdown.LoadDefaults: %v", err)
 	}
 	wantDenies := []string{
-		"Bash(kubectl exec:*)",
-		"Bash(kubectl run:*)",
+		"Bash(kubectl:*)",
+		"Bash(aws:*)",
+		"Bash(gh:*)",
+	}
+	denySet := map[string]bool{}
+	for _, deny := range d.Deny {
+		denySet[deny] = true
 	}
 	for _, want := range wantDenies {
-		found := false
-		for _, deny := range d.Deny {
-			if strings.Contains(deny, strings.TrimSuffix(strings.TrimPrefix(want, "Bash("), ":*)")) {
-				found = true
-				break
-			}
+		if !denySet[want] {
+			t.Errorf("lockdown defaults missing %q; the inversion routes every call through coily ops", want)
 		}
-		if !found {
-			t.Errorf("lockdown defaults missing %q; SECURITY.md says first fence denies these", want)
+	}
+
+	// Belt-and-suspenders: assert no enumerated read-verb allow leaked back
+	// in. The whole point of the inversion is "no aws / kubectl / gh
+	// allows," and a strayed `Bash(aws sts get-caller-identity:*)` would
+	// silently re-open the ergonomics shortcut without re-opening the
+	// design conversation.
+	for _, allow := range d.Allow {
+		for _, prefix := range []string{"Bash(aws ", "Bash(kubectl ", "Bash(gh "} {
+			if strings.HasPrefix(allow, prefix) {
+				t.Errorf("lockdown defaults allow %q; the inversion forbids enumerated %s reads", allow, prefix)
+			}
 		}
 	}
 }

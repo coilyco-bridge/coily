@@ -36,13 +36,12 @@ func TestLoadDefaults_DeniesDangerousBase(t *testing.T) {
 	d, _ := lockdown.LoadDefaults()
 	mustDeny := []string{
 		"Bash(python:*)", "Bash(bash:*)",
-		"Bash(kubectl apply:*)", "Bash(kubectl delete:*)",
-		// aws/gh are not bare-denied (read verbs are explicitly allowed
-		// above); the deny list enumerates the destructive write surface
-		// that has to flow through coily for argv validation + audit.
-		"Bash(aws s3 cp:*)", "Bash(aws ec2 terminate-instances:*)",
-		"Bash(aws ssm get-parameter:*)", "Bash(aws lambda invoke:*)",
-		"Bash(gh pr merge:*)", "Bash(gh secret set:*)", "Bash(gh api:*)",
+		// aws/kubectl/gh are denied wholesale: every call routes through
+		// coily ops <bin>, which is the audit + argv-validation chokepoint.
+		// The previous design enumerated read-verb allows + write-verb
+		// denies, which only existed because Claude Code's prefix-only
+		// permission syntax could not match `aws * describe-*` generically.
+		"Bash(aws:*)", "Bash(kubectl:*)", "Bash(gh:*)",
 	}
 	for _, rule := range mustDeny {
 		if !contains(d.Deny, rule) {
@@ -188,7 +187,7 @@ func TestRenderHookScript_PassesShellSyntaxCheck(t *testing.T) {
 		t.Error("hook script missing /bin/sh shebang")
 	}
 	// Must mention at least one well-known deny prefix.
-	for _, want := range []string{"aws", "kubectl apply", "docker", "ssh"} {
+	for _, want := range []string{"aws", "kubectl", "docker", "ssh"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("hook script missing deny prefix %q", want)
 		}
@@ -243,9 +242,11 @@ func TestWriteHook_BlocksDeniedCommand(t *testing.T) {
 		{"env-prefixed aws s3 cp denied", `{"tool_input":{"command":"env AWS_PROFILE=x aws s3 cp foo s3://b/x"}}`, 2},
 		{"gh pr merge denied", `{"tool_input":{"command":"gh pr merge 123"}}`, 2},
 		{"gh api denied", `{"tool_input":{"command":"gh api repos/foo/bar"}}`, 2},
-		// Read verbs that bypass coily by design.
-		{"aws s3 ls allowed (read)", `{"tool_input":{"command":"aws s3 ls"}}`, 0},
-		{"gh pr view allowed (read)", `{"tool_input":{"command":"gh pr view 123"}}`, 0},
+		// Inverted reads: bare aws/kubectl/gh now route through coily.
+		{"aws s3 ls denied (route via coily)", `{"tool_input":{"command":"aws s3 ls"}}`, 2},
+		{"aws sts get-caller-identity denied", `{"tool_input":{"command":"aws sts get-caller-identity"}}`, 2},
+		{"kubectl get denied (route via coily)", `{"tool_input":{"command":"kubectl get pods"}}`, 2},
+		{"gh pr view denied (route via coily)", `{"tool_input":{"command":"gh pr view 123"}}`, 2},
 		{"ls allowed", `{"tool_input":{"command":"ls -la"}}`, 0},
 		{"empty command allowed", `{"tool_input":{"command":""}}`, 0},
 		// Coily binary check: paths outside homebrew rejected, brew paths allowed.

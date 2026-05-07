@@ -73,8 +73,8 @@ Denylist rules still bound the damage at the Bash layer, but the agent has more 
 
 The structural fix is to invert the list. Instead of enumerating every way to run a dangerous primitive (impossible), enumerate the small set of safe operations and block everything else.
 
-- **Deny broadly.** Every execution-family CLI. The scripting interpreters (python, ruby, perl, deno, node), `go run`, the shells (sh, bash, zsh, plus Windows cmd / powershell / pwsh), Windows scripting hosts and LOLBAS binaries (wscript, cscript, mshta, rundll32, regsvr32), build runners (`make`, package manager scripts), and the direct write verbs on `kubectl`, `helm`, `terraform`, `aws`, `gcloud`, `docker run`. Also deny broad `ssh` except to named hosts. The non-Bash `PowerShell` tool that Claude Code exposes on Windows is denied wholesale, the same way MCP tools are, since it bypasses the Bash prefix matcher entirely.
-- **Allow narrowly.** `coily *`, plus read-only tools (ls, grep, cat, git log/diff/status, `kubectl get/describe/logs`), plus editing within explicit directories.
+- **Deny broadly.** Every execution-family CLI. The scripting interpreters (python, ruby, perl, deno, node), `go run`, the shells (sh, bash, zsh, plus Windows cmd / powershell / pwsh), Windows scripting hosts and LOLBAS binaries (wscript, cscript, mshta, rundll32, regsvr32), build runners (`make`, package manager scripts), and `kubectl`, `helm`, `terraform`, `aws`, `gcloud`, `gh`, `docker` wholesale. Also deny broad `ssh` except to named hosts. The non-Bash `PowerShell` tool that Claude Code exposes on Windows is denied wholesale, the same way MCP tools are, since it bypasses the Bash prefix matcher entirely.
+- **Allow narrowly.** `coily *`, plus read-only utilities (ls, grep, cat, git log/diff/status), plus editing within explicit directories. The previous design enumerated read-verb allows for `aws`, `kubectl`, and `gh` (~170 lines) because Claude Code's `Bash(prefix:*)` syntax cannot pattern-match `aws * describe-*`. The current design inverts that: bare invocation of those binaries is denied entirely, and every call (read or write) routes through `coily ops <bin>`. The audit log becomes the system-of-record for the privileged-op surface, and adding a new safe shape never requires editing the lockdown file.
 
 Then `coily` becomes the kernel boundary. Because it's a Go binary the agent cannot edit at runtime (installed from a separate build, not run from source), and because it takes structured flag arguments rather than raw strings, it can:
 
@@ -137,13 +137,13 @@ Status as of 2026-04-21: Kai wants this but is not setting up codex / gemini tod
 
 ## Reference: current Claude Code deny rules
 
-For completeness, the rules currently in `~/.claude/settings.json` (as of 2026-04-21).
+The canonical list lives in `pkg/lockdown/defaults.yaml` and is embedded into the binary at build time. `coily lockdown --apply` writes it into a repo's `.claude/settings.json`.
 
-**Allow (read + refresh)**: `kubectl get`, `describe`, `logs`, `explain`, `top`, `cluster-info`, `api-resources`, `api-versions`, `version`, `auth can-i`, `diff`, `config view/get-contexts/current-context`, `rollout status/history/restart`.
+**Allow (top of the list)**: `coily *`, plus the read-only utilities (ls, cat, head, tail, wc, file, stat, grep, rg, find, tree), plus the read-only git shapes (status, log, diff, show, blame, branch, remote, ls-files, rev-parse, config --get).
 
-**Deny (write/update/delete + pod-exec)**: `kubectl apply`, `create`, `delete`, `patch`, `replace`, `edit`, `label`, `annotate`, `scale`, `autoscale`, `set`, `taint`, `cordon`, `uncordon`, `drain`, `expose`, `run`, `rollout undo/pause/resume`, `exec`, `port-forward`, `cp`, `attach`, `proxy`.
+**Deny (privileged-op binaries, wholesale)**: `aws`, `kubectl`, `gh`, `docker`, `tailscale`, `helm`, `terraform`, `gcloud`, `tflint`, `tfsec`, plus broad `ssh` / `scp` / `rsync`. Every call routes through `coily ops <bin>` (for aws / kubectl / gh) or the matching coily verb. Plus the execution-family blocks (scripting interpreters, shells, Windows scripting hosts, build runners, package managers, the non-Bash `PowerShell` tool).
 
-These stay in place as the first fence. `coily` is the second fence. The goal is defense in depth, not either/or.
+The first fence is the `~/.claude/settings.json` deny list. `coily` is the second fence: argv validation + audit + (for kubectl) context routing. The goal is defense in depth, not either/or.
 
 ## Known boundary holes
 
