@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/coilysiren/coily/pkg/ops/trello"
+	"github.com/coilysiren/coily/cmd/coily/trello"
 	"github.com/urfave/cli/v3"
 )
 
