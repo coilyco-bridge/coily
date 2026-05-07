@@ -23,7 +23,46 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
+	"time"
+
+	"github.com/coilysiren/coily/pkg/ttlcache"
 )
+
+// gitToplevelCache memoizes (cwd -> toplevel) resolutions across coily
+// invocations. Every non-SkipScope verb calls Resolve twice (once for
+// repoRoot, once for commit-scope) and the answer is stable per-cwd, so
+// caching cuts the per-invocation `git rev-parse` spawn count to zero on
+// the warm path. TTL is 5 minutes: short enough that switching repos is
+// reflected promptly, long enough to cover a steady stream of coily calls
+// from the same shell.
+//
+// Lazy init via sync.Once so the cache directory is read from
+// $COILY_CACHE_DIR (or $HOME/.coily/cache) at first use, not at package
+// load. That lets tests override the env var with t.Setenv and still
+// exercise scope.Resolve. If neither env var nor $HOME is set the cache
+// is rooted at /tmp, where writes are still safe but entries won't
+// survive across reboots - acceptable for a perf hint.
+var (
+	gitToplevelCache     *ttlcache.Cache
+	gitToplevelCacheOnce sync.Once
+	gitToplevelCacheTTL  = 5 * time.Minute
+)
+
+func toplevelCache() *ttlcache.Cache {
+	gitToplevelCacheOnce.Do(func() {
+		dir := os.Getenv("COILY_CACHE_DIR")
+		if dir == "" {
+			home, err := os.UserHomeDir()
+			if err != nil || home == "" {
+				home = os.TempDir()
+			}
+			dir = filepath.Join(home, ".coily", "cache")
+		}
+		gitToplevelCache = ttlcache.New(filepath.Join(dir, "git-toplevel"))
+	})
+	return gitToplevelCache
+}
 
 // ErrNotInRepo is returned when --commit-scope=auto is requested but cwd
 // is not inside a git repo. Caller is expected to pass --commit-scope
@@ -65,6 +104,10 @@ func Resolve(flagValue, envFallback, cwd string) (string, error) {
 }
 
 func gitToplevel(cwd string) (string, error) {
+	cache := toplevelCache()
+	if v, ok := cache.Get(cwd); ok {
+		return string(v), nil
+	}
 	cmd := exec.Command("git", "-C", cwd, "rev-parse", "--show-toplevel")
 	out, err := cmd.Output()
 	if err != nil {
@@ -74,6 +117,7 @@ func gitToplevel(cwd string) (string, error) {
 	if top == "" {
 		return "", ErrNotInRepo
 	}
+	_ = cache.Set(cwd, []byte(top), gitToplevelCacheTTL) // perf hint, not load-bearing
 	return top, nil
 }
 
