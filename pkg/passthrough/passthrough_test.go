@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/coilysiren/coily/pkg/audit"
-	"github.com/coilysiren/coily/pkg/ops/passthrough"
+	"github.com/coilysiren/coily/pkg/passthrough"
 	"github.com/coilysiren/coily/pkg/shell"
 )
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/coilysiren/coily/pkg/egress"
-	"github.com/coilysiren/coily/pkg/ops/passthrough"
+	"github.com/coilysiren/coily/pkg/passthrough"
 	"github.com/urfave/cli/v3"
 )
 
