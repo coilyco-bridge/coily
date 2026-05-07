@@ -27,10 +27,6 @@ shell-metacharacter rejection and audit logging.
   coily ops kubectl <args>  passthrough to kubectl
 
 Game-server pass-throughs live under coily gaming instead.`,
-		Commands: []*cli.Command{
-			r.awsCommand(),
-			r.ghCommand(),
-			r.kubectlCommand(),
-		},
+		Commands: r.passthroughCommands(ptOps),
 	}
 }

@@ -143,7 +143,8 @@ func run(r *Runner, argv []string) error {
 // builtInCommands returns the prod-build verbs in registration order. Each
 // verb file contributes one builder method; this list is the single place
 // they are wired in. Adding a verb means writing the file and appending its
-// builder here.
+// builder here. Top-level pass-throughs come from ptTopLevel in
+// passthroughs.go - those don't get their own per-binary file.
 func (r *Runner) builtInCommands() []*cli.Command {
 	cmds := []*cli.Command{
 		r.versionCommand(),
@@ -155,13 +156,12 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.opsCommand(),
 		r.sirensDiscordOpsCommand(),
 		r.sshCommand(),
-		r.dockerCommand(),
-		r.tailscaleCommand(),
 		r.modioCommand(),
 		r.trelloCommand(),
 		r.auditCommand(),
 		r.gitCommand(),
 		r.pkgCommand(),
 	}
+	cmds = append(cmds, r.passthroughCommands(ptTopLevel)...)
 	return cmds
 }
