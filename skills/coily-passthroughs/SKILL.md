@@ -295,9 +295,9 @@ Pass-through to yarn with argv validation + audit log.
 
 ## `coily setup`
 
-Run the post-upgrade rituals: completion, skill symlink, and lockdown re-baseline.
+Run the post-upgrade rituals: completion, lockdown re-baseline, and user hook.
 
-Flags: --skip-completion, --skip-lockdown, --skip-skill, --skip-user-hook, --workspace
+Flags: --skip-completion, --skip-lockdown, --skip-user-hook, --workspace
 
 ## `coily sirens-discord-ops restart`
 

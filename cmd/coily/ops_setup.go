@@ -13,29 +13,26 @@ import (
 )
 
 // setupCommand runs the post-upgrade rituals brew's sandbox blocks from
-// post_install: tab-completion, the skill symlink, and a workspace-wide
-// lockdown re-baseline. Idempotent; safe to run any time.
+// post_install: tab-completion, lockdown re-baseline, and the user-level
+// PreToolUse hook. Idempotent; safe to run any time.
 //
-// The skill symlink target is hardcoded to <coily-binary>/../share/coily/skill,
-// which is where the brew formula stages skill/. That path is not user-supplied,
-// so an agent inside lockdown that runs `coily setup` cannot redirect the
-// skill to an attacker-chosen location - the threat model that keeps
-// install-skill out of prod is preserved.
+// The coily-passthroughs skill is no longer installed from here. It is a
+// generated artifact that lives at coily/skills/coily-passthroughs/ in the
+// source tree and is symlinked into ~/.claude/skills/ by
+// coilyco-ai/setup.sh, alongside every other authored skill. That keeps
+// "where do my skills come from?" answerable in one place
+// (coilyco-ai/.claude/skills/) instead of two.
 func (r *Runner) setupCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "setup",
-		Usage: "Run the post-upgrade rituals: completion, skill symlink, and lockdown re-baseline.",
-		Description: `setup runs four idempotent steps in order:
+		Usage: "Run the post-upgrade rituals: completion, lockdown re-baseline, and user hook.",
+		Description: `setup runs three idempotent steps in order:
 
   1. coily install-completion         (refresh shell tab-completion)
-  2. symlink ~/.claude/skills/coily   (point at the brew-managed skill dir)
-  3. coily lockdown --recursive ...   (re-baseline workspace allow/deny lists)
-  4. ~/.claude/coily-binary-gate.sh   (user-level PreToolUse hook that
+  2. coily lockdown --recursive ...   (re-baseline workspace allow/deny lists)
+  3. ~/.claude/coily-binary-gate.sh   (user-level PreToolUse hook that
                                        rejects dev coily binaries from any
                                        cwd; complements per-repo lockdown)
-
-The skill symlink target is derived from the running coily binary's location
-(<bin>/../share/coily/skill). It is not user-configurable, by design.
 
 Pass --workspace to override the lockdown root (default: ~/projects/coilysiren).
 Skips the lockdown step if the workspace does not exist.`,
@@ -48,10 +45,6 @@ Skips the lockdown step if the workspace does not exist.`,
 			&cli.BoolFlag{
 				Name:  "skip-completion",
 				Usage: "skip the install-completion step",
-			},
-			&cli.BoolFlag{
-				Name:  "skip-skill",
-				Usage: "skip the skill-symlink step",
 			},
 			&cli.BoolFlag{
 				Name:  "skip-lockdown",
@@ -89,13 +82,6 @@ func setupAction(ctx context.Context, c *cli.Command) error {
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
 			return fmt.Errorf("setup: install-completion: %w", err)
-		}
-	}
-
-	if !c.Bool("skip-skill") {
-		fmt.Fprintln(os.Stderr, "==> skill symlink")
-		if err := installSkillSymlink(self); err != nil {
-			return fmt.Errorf("setup: skill symlink: %w", err)
 		}
 	}
 
@@ -165,48 +151,5 @@ func runLockdownStep(ctx context.Context, self, workspace string) error {
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("setup: lockdown: %w", err)
 	}
-	return nil
-}
-
-// installSkillSymlink points ~/.claude/skills/coily at the
-// coily-passthroughs skill dir staged next to the coily binary
-// (<bin>/../share/coily/skills/coily-passthroughs). Brew formulas under
-// coilysiren/homebrew-tap stage skills/coily-passthroughs/ into that path.
-// On hosts where the staged path is missing (running from a source
-// checkout, or older brew install before the rename), the step skips
-// with a warning rather than failing the whole setup.
-func installSkillSymlink(selfPath string) error {
-	binDir := filepath.Dir(selfPath)
-	src := filepath.Join(binDir, "..", "share", "coily", "skills", "coily-passthroughs")
-	src, err := filepath.Abs(src)
-	if err != nil {
-		return fmt.Errorf("resolve skill path: %w", err)
-	}
-	if _, statErr := os.Stat(filepath.Join(src, "SKILL.md")); statErr != nil {
-		// Skip with a warning rather than fail the whole `coily setup` run:
-		// a source-checkout build won't have the brew-staged share/ tree,
-		// and an older brew install may pre-date the coily-passthroughs
-		// rename. Either case is recoverable; setup's other steps still want
-		// to run.
-		fmt.Fprintf(os.Stderr, "    skipped: skill not found at %s (%v)\n", src, statErr)
-		return nil //nolint:nilerr // intentional: missing staged skill is non-fatal
-	}
-
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return fmt.Errorf("home dir: %w", err)
-	}
-	skillsDir := filepath.Join(home, ".claude", "skills")
-	if err := os.MkdirAll(skillsDir, 0o755); err != nil {
-		return fmt.Errorf("mkdir %s: %w", skillsDir, err)
-	}
-	dst := filepath.Join(skillsDir, "coily")
-	if err := os.RemoveAll(dst); err != nil {
-		return fmt.Errorf("remove existing %s: %w", dst, err)
-	}
-	if err := os.Symlink(src, dst); err != nil {
-		return fmt.Errorf("symlink: %w", err)
-	}
-	fmt.Fprintf(os.Stderr, "    %s -> %s\n", dst, src)
 	return nil
 }
