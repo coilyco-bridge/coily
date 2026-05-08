@@ -23,7 +23,7 @@ func (r *Runner) opsCommand() *cli.Command {
 		r.glamaCommand(),
 		r.discordCommand(),
 		r.sentryCommand(),
-		r.trelloapiCommand(),
+		r.trelloCommand(),
 	)
 	return &cli.Command{
 		Name:  "ops",
@@ -39,11 +39,11 @@ CLI pass-throughs:
 
 REST wrappers (one operation per subcommand, generated from each
 service's OpenAPI spec by scripts/openapi-to-coily.py):
-  coily ops modio       mod.io v1 (Eco mods)
-  coily ops glama       Glama MCP directory
-  coily ops discord     Discord HTTP API (bot auth)
-  coily ops sentry      Sentry Public API
-  coily ops trello-api  Trello REST API
+  coily ops modio    mod.io v1 (Eco mods)
+  coily ops glama    Glama MCP directory
+  coily ops discord  Discord HTTP API (bot auth)
+  coily ops sentry   Sentry Public API
+  coily ops trello   Trello REST API (key+token auth)
 
 Game-server pass-throughs live under coily gaming instead.`,
 		Commands: cmds,

@@ -157,7 +157,6 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.sirensDiscordOpsCommand(),
 		r.sshCommand(),
 		r.skillsmpCommand(),
-		r.trelloCommand(),
 		r.auditCommand(),
 		r.gitCommand(),
 		r.pkgCommand(),
