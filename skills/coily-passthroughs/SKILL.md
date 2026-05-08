@@ -1403,6 +1403,20 @@ PATCH /webhooks/{webhook_id}/{webhook_token}/messages/{message_id}
 
 Flags: --body, --thread_id, --with_components
 
+## `coily ops forgejo admin auth list`
+
+List forgejo auth sources.
+
+## `coily ops forgejo admin user list`
+
+List forgejo users.
+
+## `coily ops forgejo doctor check`
+
+Run a forgejo doctor check (readonly; --fix not exposed).
+
+Flags: --run
+
 ## `coily ops gh`
 
 Pass-through to gh with argv validation + audit log.

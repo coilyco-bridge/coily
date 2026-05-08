@@ -25,6 +25,7 @@ func (r *Runner) opsCommand() *cli.Command {
 		r.discordCommand(),
 		r.sentryCommand(),
 		r.trelloCommand(),
+		r.forgejoCommand(),
 	)
 	return &cli.Command{
 		Name:  "ops",
