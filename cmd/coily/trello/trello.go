@@ -1,16 +1,24 @@
 // Package trello wraps the message-ops Trello CLI scripts (status, update,
-// create) so coily can drive Kai's recruiter pipeline through the audit log.
+// create, sort) so coily can drive Kai's recruiter pipeline through the audit
+// log.
 //
-// The underlying tooling is a Node project at ~/projects/coilysiren/message-ops
-// invoked via `npm run trello:<verb>`. The checkout path is resolved from the
-// --dir flag, then $COILY_MESSAGE_OPS_DIR, then the workspace default
-// ~/projects/coilysiren/message-ops. npm is resolved via $PATH like every
+// The underlying tooling is a Node project at ~/projects/coilysiren/message-ops.
+// The checkout path is resolved from the --dir flag, then
+// $COILY_MESSAGE_OPS_DIR, then the workspace default
+// ~/projects/coilysiren/message-ops. node is resolved via $PATH like every
 // other binary coily shells out to.
 //
-// Argv is forwarded verbatim through `npm --prefix <dir> run trello:<verb> --`
-// so the underlying scripts see the same flags they would from a direct shell
-// invocation. Every flag value still passes through coily's policy gate, so
-// shell metacharacters in (e.g.) a --comment will be rejected up-front.
+// Argv is forwarded by invoking `node <dir>/scripts/trello/<verb>.js <args...>`
+// directly. Earlier versions used `npm --prefix <dir> run trello:<verb> -- ...`,
+// but `npm run` collapses argv quoting on the way through, so multi-word string
+// flags like `--label-on "🟡 their court"` arrived at the script word-split.
+// Direct node invocation preserves Go's argv shape end-to-end.
+//
+// Policy: argv to these subcommands skips the shell-metacharacter check
+// (SkipPolicy: true). The argv goes straight through execve to node and is
+// not re-shelled; Trello label names contain parens (e.g. "👻 ghosted (needs
+// nudge)") and natural-language comments routinely contain semicolons. The
+// audit log and the lockdown deny list still cover the boundary.
 package trello
 
 import (
@@ -63,7 +71,8 @@ func sortCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 		},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "trello.sort",
+				Name:       "trello.sort",
+				SkipPolicy: true,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					args := map[string]string{
 						"--dir":   c.String("dir"),
@@ -79,7 +88,7 @@ func sortCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if c.Bool("dry") {
 						scriptArgs = append(scriptArgs, "--dry")
 					}
-					return runScript(ctx, r, c, "trello:sort", scriptArgs)
+					return runScript(ctx, r, c, "sort", scriptArgs)
 				},
 			},
 			w,
@@ -96,12 +105,13 @@ func statusCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 		},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "trello.status",
+				Name:       "trello.status",
+				SkipPolicy: true,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return statusArgs(c), c.Args().Slice()
 				},
 				Action: func(ctx context.Context, c *cli.Command) error {
-					return runScript(ctx, r, c, "trello:status", nil)
+					return runScript(ctx, r, c, "status", nil)
 				},
 			},
 			w,
@@ -127,7 +137,8 @@ func updateCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 		},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "trello.update",
+				Name:       "trello.update",
+				SkipPolicy: true,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return updateArgs(c), c.Args().Slice()
 				},
@@ -135,7 +146,7 @@ func updateCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if c.Args().Len() < 1 {
 						return fmt.Errorf("trello update: need <cardId> as first positional arg")
 					}
-					return runScript(ctx, r, c, "trello:update", buildUpdateScriptArgs(c))
+					return runScript(ctx, r, c, "update", buildUpdateScriptArgs(c))
 				},
 			},
 			w,
@@ -156,7 +167,8 @@ func createCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 		},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "trello.create",
+				Name:       "trello.create",
+				SkipPolicy: true,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return createArgs(c), c.Args().Slice()
 				},
@@ -164,7 +176,7 @@ func createCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if !c.IsSet("list") || !c.IsSet("name") {
 						return fmt.Errorf("trello create: --list and --name are required")
 					}
-					return runScript(ctx, r, c, "trello:create", buildCreateScriptArgs(c))
+					return runScript(ctx, r, c, "create", buildCreateScriptArgs(c))
 				},
 			},
 			w,
@@ -252,24 +264,26 @@ func buildUpdateScriptArgs(c *cli.Command) []string {
 	return out
 }
 
-// runScript invokes `npm --prefix <dir> run <npmScript> -- <scriptArgs>`. When
-// scriptArgs is nil, any positional args from the cli.Command are forwarded
-// verbatim instead. The double-dash is what tells npm to hand the rest of
-// argv to the underlying node script unchanged.
-func runScript(ctx context.Context, r *shell.Runner, c *cli.Command, npmScript string, scriptArgs []string) error {
+// runScript invokes `node <dir>/scripts/trello/<verb>.js <scriptArgs...>`
+// directly, bypassing `npm run`. npm collapses argv quoting on the way through,
+// which word-splits multi-word string flags (every Trello label has a space).
+// Going straight to node preserves Go's argv shape end-to-end. When scriptArgs
+// is nil, any positional args from the cli.Command are forwarded verbatim.
+func runScript(ctx context.Context, r *shell.Runner, c *cli.Command, verb string, scriptArgs []string) error {
 	dir, err := resolveDir(c)
 	if err != nil {
 		return err
 	}
-	argv := []string{"--prefix", dir, "run", npmScript}
+	scriptPath := filepath.Join(dir, "scripts", "trello", verb+".js")
+	if _, err := os.Stat(scriptPath); err != nil {
+		return fmt.Errorf("trello: script %s not found: %w", scriptPath, err)
+	}
+	argv := []string{scriptPath}
 	if scriptArgs == nil {
 		scriptArgs = c.Args().Slice()
 	}
-	if len(scriptArgs) > 0 {
-		argv = append(argv, "--")
-		argv = append(argv, scriptArgs...)
-	}
-	return r.Exec(ctx, "npm", argv...)
+	argv = append(argv, scriptArgs...)
+	return r.Exec(ctx, "node", argv...)
 }
 
 // resolveDir picks the message-ops checkout in --dir > $COILY_MESSAGE_OPS_DIR
