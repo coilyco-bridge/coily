@@ -203,6 +203,30 @@ Flags: --max, --scope, --since
 
 prepare-commit-msg hook: append Audit-log: trailers in place.
 
+## `coily glama attributes`
+
+GET /v1/attributes - the curated attribute vocabulary.
+
+## `coily glama instances`
+
+GET /v1/instances - hosted MCP server instances (bearer auth).
+
+## `coily glama servers get`
+
+GET /v1/servers/{namespace}/{slug}
+
+## `coily glama servers list`
+
+GET /v1/servers - paginated directory listing.
+
+Flags: --after, --first, --query
+
+## `coily glama telemetry usage`
+
+POST /v1/telemetry/usage - send tool-usage data.
+
+Flags: --body
+
 ## `coily install-completion`
 
 Install shell tab-completion for coily.
