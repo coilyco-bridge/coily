@@ -95,18 +95,18 @@ func kindFor(err error, rc int) string {
 // dependencies through a real cli.Command tree.
 func run(r *Runner, argv []string) error {
 	builtIns := r.builtInCommands()
+	repoCfg, execCmd := r.loadRepoExecCommand()
 
-	reserved := map[string]bool{}
-	for _, c := range builtIns {
-		reserved[c.Name] = true
+	all := append([]*cli.Command{}, builtIns...)
+	if execCmd != nil {
+		all = append(all, execCmd)
 	}
-	repoCfg, repoCmds := r.loadRepoCommands(reserved)
 
 	cmd := &cli.Command{
 		Name:                  "coily",
 		Usage:                 "Operator CLI for Kai's homelab.",
 		Version:               Version,
-		Commands:              append(append([]*cli.Command{}, builtIns...), repoCmds...),
+		Commands:              all,
 		EnableShellCompletion: true,
 		// Default urfave/cli ExitErrHandler calls os.Exit(1) directly,
 		// short-circuiting our coded-exit + yaml-envelope handling in
@@ -134,11 +134,11 @@ func run(r *Runner, argv []string) error {
 		},
 		Action: func(_ context.Context, c *cli.Command) error {
 			if c.Bool("list") {
-				listCommand(builtIns, repoCmds, repoCfg)
+				listCommand(builtIns, execCmd, repoCfg)
 				return nil
 			}
 			if c.Bool("tree") {
-				treeCommand(builtIns, repoCmds, repoCfg)
+				treeCommand(builtIns, execCmd, repoCfg)
 				return nil
 			}
 			return cli.ShowAppHelp(c)

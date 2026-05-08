@@ -110,7 +110,7 @@ Resolved via `$PATH` like any other binary. coily used to ship a manifest of pin
 
 ## Per-repo commands (`.coily/coily.yaml`)
 
-Each repo can drop a `coily.yaml` inside a `.coily/` overlay directory at its root to declare the dev commands an operator (human or agent) should run from that tree. `coily test`, `coily lint`, `coily build`. This replaces per-repo Makefiles and `pyinvoke` tasks without widening the security boundary.
+Each repo can drop a `coily.yaml` inside a `.coily/` overlay directory at its root to declare the dev commands an operator (human or agent) should run from that tree. `coily exec test`, `coily exec lint`, `coily exec build`. This replaces per-repo Makefiles and `pyinvoke` tasks without widening the security boundary.
 
 ```yaml
 commands:
@@ -121,10 +121,10 @@ commands:
 ```
 
 - `coily` walks up from the cwd to discover `.coily/coily.yaml`. Run from a subdirectory and it still finds the root. `$COILY_REPO_CONFIG` overrides the walk. A pre-overlay `coily.yaml` at the repo root errors with a pointer at the new path.
-- `coily --list` prints built-ins and repo commands, grouped. `coily <cmd> --help` shows what a repo command expands to.
+- `coily --list` prints built-ins and repo commands, grouped. `coily exec <cmd> --help` shows what a repo command expands to.
 - Every declared token plus any user-supplied extras pass through `policy.ValidateArg`. Shell metacharacters are rejected at load time and at invocation. No carve-outs.
 - Audit records use verb `repo.<cmd>`. Same log file as privileged ops.
-- Repo commands that collide with a built-in (`aws`, `kubectl`, etc.) are skipped with a stderr warning. Built-ins always win.
+- Repo commands sit under `coily exec`, so they cannot shadow built-ins like `aws` or `kubectl`. Pick any name your repo wants.
 - Binaries are resolved via `$PATH`. Repo-level dev tools vary per repo. Their authenticity is the repo's problem, not coily's.
 
 ## Architectural decisions

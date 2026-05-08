@@ -7,8 +7,8 @@
 #     No shell metacharacters anywhere. Pipes, redirects, and $(subshells)
 #     are rejected at load time.
 #   - Extra positional args appended at invocation are validated the same way.
-#   - Repo commands cannot shadow a built-in verb; collisions are skipped with
-#     a warning on stderr.
+#   - Repo commands are invoked as `coily exec <name>`, so they cannot
+#     collide with or shadow built-in verbs.
 #
 # Commands that need shell features (heredocs, pipes, env munging) live in a
 # dedicated script file that these commands exec by name.
