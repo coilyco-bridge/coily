@@ -209,10 +209,6 @@ Install shell tab-completion for coily.
 
 Flags: --dry-run, --shell
 
-## `coily linkedin`
-
-Pass-through to linkedin with argv validation + audit log.
-
 ## `coily lockdown skill`
 
 Regenerate the coily-passthroughs skill from the in-process command tree.

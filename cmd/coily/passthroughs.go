@@ -25,18 +25,11 @@ import (
 // Egress, when true, opts the wrapper into the per-binary egress allowlist
 // in pkg/egress. Today only brew has an entry; the other package managers
 // gain enforce mode in Phase 2 of issue #35.
-//
-// RejectArgvPatterns mirrors passthrough.WithRejectArgvPatterns: each
-// pattern is a slice of literal leading non-flag tokens that the wrapper
-// will refuse by default. Override is COILY_<BIN>_ALLOW_WRITES=1.
-// Today only linkedin uses this, to refuse the destructive verbs by
-// default since LinkedIn account bans are write-driven.
 type ptEntry struct {
-	Bin                string
-	SkipPolicy         bool
-	VerbName           string
-	Egress             bool
-	RejectArgvPatterns [][]string
+	Bin        string
+	SkipPolicy bool
+	VerbName   string
+	Egress     bool
 }
 
 // ptOps is the pass-through set mounted under `coily ops <bin>`. Cloud +
@@ -55,34 +48,6 @@ var ptOps = []ptEntry{
 var ptTopLevel = []ptEntry{
 	{Bin: "docker"},
 	{Bin: "tailscale", SkipPolicy: true},
-	{
-		Bin:        "linkedin",
-		SkipPolicy: true,
-		// LinkedIn write verbs are blocked by default. Account bans are
-		// write-driven (auto-messages, auto-connects, auto-posts trigger
-		// fast bans via user spam reports), and the broker holds
-		// session credentials off-host, so an unintended write costs
-		// real account state. Reads (person fetch, message get, post
-		// fetch, etc.) stay open. Override per invocation with
-		// COILY_LINKEDIN_ALLOW_WRITES=1.
-		//
-		// workflow run is blocked because the action graph is in a
-		// JSON file passed via --file or stdin and can hide any of the
-		// blocked verbs inside; a surface-level argv check would pass
-		// but the graph could send messages or create posts. Block at
-		// the surface in v1; graph-aware parsing is a future option.
-		RejectArgvPatterns: [][]string{
-			{"message", "send"},
-			{"connection", "send"},
-			{"connection", "remove"},
-			{"connection", "withdraw"},
-			{"post", "create"},
-			{"post", "react"},
-			{"post", "comment"},
-			{"navigator", "message", "send"},
-			{"workflow", "run"},
-		},
-	},
 }
 
 // ptPkg is the package-manager set mounted under `coily pkg <bin>`. Order
@@ -125,9 +90,6 @@ func (r *Runner) passthroughCommand(e ptEntry) *cli.Command {
 		if allow, ok := egress.Allowlists[e.Bin]; ok {
 			opts = append(opts, passthrough.WithEgress(allow, egress.ModeEnforce))
 		}
-	}
-	if len(e.RejectArgvPatterns) > 0 {
-		opts = append(opts, passthrough.WithRejectArgvPatterns(e.RejectArgvPatterns))
 	}
 	return passthrough.Command(e.Bin, r.Runner, r.Audit, opts...)
 }
