@@ -149,6 +149,19 @@ exit 0
 `
 }
 
+// wrapperRecovery maps a denied bare-binary leading-token to the coily
+// wrapper that should be used instead. When a deny rule fires for a binary
+// with a wrapper, the deny message names the wrapper as the recovery path
+// per AGENTS.md "opaque errors are design smells - recovery messages should
+// name the command or skill Kai can dictate next." Issue #61.
+var wrapperRecovery = map[string]string{
+	"gh":        "coily ops gh",
+	"aws":       "coily ops aws",
+	"kubectl":   "coily ops kubectl",
+	"docker":    "coily docker",
+	"tailscale": "coily tailscale",
+}
+
 // renderDenyPrefixCase emits the case statement that matches each deny
 // prefix as the segment's leading token (with or without trailing args).
 func renderDenyPrefixCase(prefixes []string) string {
@@ -157,8 +170,12 @@ func renderDenyPrefixCase(prefixes []string) string {
 	for _, p := range prefixes {
 		// case patterns: literal-quoted prefix and prefix-followed-by-space.
 		// POSIX sh interprets "..." as literal in case patterns.
-		fmt.Fprintf(&b, "    %q|%q*) printf 'lockdown: blocked by deny rule: %s\\n' >&2; exit 2 ;;\n",
-			p, p+" ", p)
+		msg := fmt.Sprintf("lockdown: blocked by deny rule: %s", p)
+		if rec, ok := wrapperRecovery[p]; ok {
+			msg = fmt.Sprintf("%s. Recovery: use `%s ...` (audited wrapper).", msg, rec)
+		}
+		fmt.Fprintf(&b, "    %q|%q*) printf '%s\\n' >&2; exit 2 ;;\n",
+			p, p+" ", msg)
 	}
 	b.WriteString("  esac\n")
 	return b.String()

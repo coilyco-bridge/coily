@@ -194,6 +194,26 @@ func TestRenderHookScript_PassesShellSyntaxCheck(t *testing.T) {
 	}
 }
 
+func TestRenderHookScript_NamesCoilyWrapperOnDeny(t *testing.T) {
+	d, _ := lockdown.LoadDefaults()
+	body, err := lockdown.RenderHookScript(d)
+	if err != nil {
+		t.Fatalf("RenderHookScript: %v", err)
+	}
+	// Issue #61: deny-rule message must name `coily ops <bin>` as the
+	// recovery path for the wrapped binaries the agent reaches for most.
+	for prefix, recovery := range map[string]string{
+		"gh":      "coily ops gh",
+		"aws":     "coily ops aws",
+		"kubectl": "coily ops kubectl",
+	} {
+		want := "blocked by deny rule: " + prefix + ". Recovery: use `" + recovery
+		if !strings.Contains(body, want) {
+			t.Errorf("hook script for %q missing recovery hint %q", prefix, want)
+		}
+	}
+}
+
 func TestWriteHook_Executable(t *testing.T) {
 	d, _ := lockdown.LoadDefaults()
 	target := filepath.Join(t.TempDir(), ".claude", "settings.json")
