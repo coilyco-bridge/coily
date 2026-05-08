@@ -15,7 +15,11 @@ package main
 // that live in another file.
 
 import (
+	"encoding/json"
 	"errors"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -169,6 +173,127 @@ func TestSecurityClaim_VerbWrapIsTheChokepoint(t *testing.T) {
 // auditing what the test file covers.
 func TestSecurityClaim_NoDevModeBypassInProdBuilds(t *testing.T) {
 	t.Skip("Build-tag separation is enforced by the build system, not by a runtime test.")
+}
+
+// TestSecurityClaim_UserBinaryGateUnconditional covers the SECURITY.md
+// claim that the user-level coily-binary-gate hook fires for every Bash
+// PreToolUse event - including cron-spawned local-agent sessions.
+//
+// Two concrete checks back the claim:
+//
+//  1. The settings.json entry written by EnsureUserHook registers a
+//     PreToolUse Bash matcher with no transcript_path / time-of-day /
+//     other conditional skip. The companion UserPromptSubmit cron-bypass
+//     fix (2026-05-08) must not have leaked into this entry.
+//  2. The hook script body itself does not early-return on a
+//     transcript_path or local-agent-mode marker. If a future change
+//     adds such a skip, this test catches it.
+//
+// What this does NOT cover: whether Claude Code Desktop / cron-spawned
+// agent sessions actually invoke the user-level hooks at all. That is
+// runtime behavior of an external harness; the operational verification
+// step is documented in issue #66 and lives outside the unit test.
+// Issue #66.
+func TestSecurityClaim_UserBinaryGateUnconditional(t *testing.T) {
+	home := t.TempDir()
+	hookPath, _, err := lockdown.EnsureUserHook(home)
+	if err != nil {
+		t.Fatalf("EnsureUserHook: %v", err)
+	}
+
+	// (1) settings.json entry: matcher = "Bash" with no conditional fields.
+	settingsPath := filepath.Join(home, ".claude", "settings.json")
+	raw, err := os.ReadFile(settingsPath)
+	if err != nil {
+		t.Fatalf("read settings: %v", err)
+	}
+	var root map[string]any
+	if err := json.Unmarshal(raw, &root); err != nil {
+		t.Fatalf("parse settings: %v", err)
+	}
+	hooks, _ := root["hooks"].(map[string]any)
+	preToolUse, _ := hooks["PreToolUse"].([]any)
+	var ourEntry map[string]any
+	for _, e := range preToolUse {
+		m, ok := e.(map[string]any)
+		if !ok {
+			continue
+		}
+		inner, _ := m["hooks"].([]any)
+		for _, h := range inner {
+			hm, _ := h.(map[string]any)
+			if marker, _ := hm["_coily"].(string); marker == lockdown.UserHookSettingsKey {
+				ourEntry = m
+				break
+			}
+		}
+	}
+	if ourEntry == nil {
+		t.Fatalf("user-level coily-binary-gate hook not registered; got settings: %s", string(raw))
+	}
+	if matcher, _ := ourEntry["matcher"].(string); matcher != "Bash" {
+		t.Errorf("hook matcher = %q, want %q (cron sessions need the same Bash gate)", matcher, "Bash")
+	}
+	// Any field beyond matcher/hooks would be a conditional that could
+	// silently exclude cron-spawned sessions. The schema today is
+	// {matcher, hooks} only; surface unexpected keys here so a future
+	// schema-extension that adds (e.g.) a "when" clause has to be reviewed.
+	for k := range ourEntry {
+		if k != "matcher" && k != "hooks" {
+			t.Errorf("user-level hook entry carries unexpected field %q; conditional fields could exclude cron sessions", k)
+		}
+	}
+
+	// (2) Hook script body: no transcript_path / local-agent skip.
+	body, err := os.ReadFile(hookPath)
+	if err != nil {
+		t.Fatalf("read hook: %v", err)
+	}
+	for _, marker := range []string{
+		"transcript_path",
+		"local-agent-mode-sessions",
+		"late-ok",
+	} {
+		if strings.Contains(string(body), marker) {
+			t.Errorf("hook script contains %q; the binary gate must fire unconditionally for cron sessions", marker)
+		}
+	}
+}
+
+// TestSecurityClaim_UserBinaryGateBlocksDevCoilyForCronStdin pins the
+// runtime behavior of the user-level hook against synthetic stdin shaped
+// like a cron-spawned session's PreToolUse event. The harness passes the
+// transcript path in `transcript_path`; the hook ignores that field and
+// still rejects a dev coily binary.
+//
+// Companion to TestSecurityClaim_UserBinaryGateUnconditional: the prior
+// test asserts the hook is registered without a skip, this one asserts
+// the hook actually rejects a forbidden invocation when the input shape
+// looks cron-spawned. Issue #66.
+func TestSecurityClaim_UserBinaryGateBlocksDevCoilyForCronStdin(t *testing.T) {
+	if _, err := exec.LookPath("sh"); err != nil {
+		t.Skip("/bin/sh not available")
+	}
+	home := t.TempDir()
+	hookPath, _, err := lockdown.EnsureUserHook(home)
+	if err != nil {
+		t.Fatalf("EnsureUserHook: %v", err)
+	}
+
+	// Cron-style PreToolUse stdin: includes transcript_path under the
+	// cron-spawned local-agent-mode-sessions tree. The hook must ignore
+	// that field and reject the dev coily.
+	stdin := `{"transcript_path":"/local-agent-mode-sessions/abc123/t.jsonl",` +
+		`"tool_input":{"command":"/Users/someone/go/bin/coily version"}}`
+	cmd := exec.Command("sh", hookPath) //nolint:gosec // hookPath is generated under t.TempDir
+	cmd.Stdin = strings.NewReader(stdin)
+	out, err := cmd.CombinedOutput()
+	if err == nil {
+		t.Fatalf("hook accepted dev coily for cron-style stdin; output: %s", out)
+	}
+	if !strings.Contains(string(out), "lockdown: blocked") {
+		t.Errorf("hook output does not name lockdown block; got: %s", out)
+	}
 }
 
 // recordedSubcommands is a debug helper used by t.Logf in failures so the
