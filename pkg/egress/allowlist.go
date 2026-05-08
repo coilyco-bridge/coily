@@ -12,6 +12,7 @@ var Allowlists = map[string][]string{
 		"ghcr.io",
 		"objects.githubusercontent.com",
 		"github.com",
+		"codeload.github.com",
 		"raw.githubusercontent.com",
 	},
 }
