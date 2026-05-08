@@ -32,6 +32,8 @@ package passthrough
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/coilysiren/coily/pkg/audit"
 	"github.com/coilysiren/coily/pkg/egress"
@@ -45,11 +47,12 @@ import (
 type Option func(*config)
 
 type config struct {
-	skipPolicy bool
-	egressOn   bool
-	egressList []string
-	egressMode egress.Mode
-	verbName   string
+	skipPolicy         bool
+	egressOn           bool
+	egressList         []string
+	egressMode         egress.Mode
+	verbName           string
+	rejectArgvPatterns [][]string
 }
 
 // WithSkipPolicy disables the shell-metacharacter check for this binary.
@@ -79,6 +82,27 @@ func WithEgress(allowlist []string, mode egress.Mode) Option {
 		c.egressList = allowlist
 		c.egressMode = mode
 	}
+}
+
+// WithRejectArgvPatterns refuses invocations whose leading non-flag argv
+// tokens match any of the given patterns. Each pattern is a slice of
+// literal tokens (no globs); the invocation is rejected if the first
+// len(pattern) non-flag tokens of argv equal the pattern verbatim.
+//
+// Override env var COILY_<BIN>_ALLOW_WRITES=1 (uppercased bin name)
+// disables the block for the current invocation. The override is
+// verbose on purpose - it's the dictatable "I meant to do this" gesture
+// and it shows up alongside the binary name in shell history. Rejection
+// surfaces an error naming the override env var so the agent can
+// course-correct without re-reading docs.
+//
+// Used by `coily linkedin` to refuse the destructive verbs by default
+// (message send, connection send, post create, etc.) since LinkedIn
+// account bans are write-driven and the broker holds session
+// credentials off-host. Other binaries can opt in if their write
+// surface is similarly load-bearing.
+func WithRejectArgvPatterns(patterns [][]string) Option {
+	return func(c *config) { c.rejectArgvPatterns = patterns }
 }
 
 // WithVerbName overrides the dotted verb name used for audit logging.
@@ -118,12 +142,73 @@ func Command(bin string, r *shell.Runner, w *audit.Writer, opts ...Option) *cli.
 	if cfg.egressOn {
 		spec.Action, spec.OnComplete = withEgressAction(bin, r, cfg.egressList, cfg.egressMode)
 	}
+	if len(cfg.rejectArgvPatterns) > 0 {
+		spec.Action = withArgvReject(bin, cfg.rejectArgvPatterns, spec.Action)
+	}
 	return &cli.Command{
 		Name:            bin,
 		Usage:           fmt.Sprintf("Pass-through to %s with argv validation + audit log.", bin),
 		SkipFlagParsing: true,
 		Action:          verb.Wrap(spec, w),
 	}
+}
+
+// withArgvReject wraps an action with a leading-argv pattern check. If
+// the first len(pattern) non-flag tokens equal any pattern, the action
+// returns an error naming the override env var. The override env var is
+// COILY_<BIN>_ALLOW_WRITES=1 (uppercased bin), checked at invocation
+// time so shell-export persistence works.
+//
+// Wraps the outermost layer so rejection happens before any egress
+// proxy starts (no point in spinning up a proxy for an invocation
+// we're about to reject).
+func withArgvReject(bin string, patterns [][]string, inner cli.ActionFunc) cli.ActionFunc {
+	overrideEnv := "COILY_" + strings.ToUpper(bin) + "_ALLOW_WRITES"
+	return func(ctx context.Context, c *cli.Command) error {
+		args := c.Args().Slice()
+		for _, p := range patterns {
+			if argvMatchesPattern(args, p) {
+				if os.Getenv(overrideEnv) == "1" {
+					break
+				}
+				return fmt.Errorf(
+					"%s: argv pattern %q is blocked by default; set %s=1 to override",
+					bin, strings.Join(p, " "), overrideEnv,
+				)
+			}
+		}
+		return inner(ctx, c)
+	}
+}
+
+// argvMatchesPattern reports whether the leading non-flag tokens of args
+// equal pattern verbatim. Flag-shaped tokens (starting with "-") are
+// skipped during the leading-token scan, so global flags before the verb
+// (e.g. `linkedin --no-color message send ...`) don't break matching.
+// Flag values that don't start with "-" can still confuse the scan; for
+// the linkedin surface that's not a problem in practice (verbs come
+// first), but binaries with `--key value` global flags need patterns
+// chosen with that in mind.
+func argvMatchesPattern(args, pattern []string) bool {
+	leading := make([]string, 0, len(pattern))
+	for _, a := range args {
+		if strings.HasPrefix(a, "-") {
+			continue
+		}
+		leading = append(leading, a)
+		if len(leading) == len(pattern) {
+			break
+		}
+	}
+	if len(leading) != len(pattern) {
+		return false
+	}
+	for i, p := range pattern {
+		if leading[i] != p {
+			return false
+		}
+	}
+	return true
 }
 
 // withEgressAction wraps the standard exec action to start a per-invocation

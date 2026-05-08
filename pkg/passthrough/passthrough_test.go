@@ -203,3 +203,158 @@ func TestCommand_RejectsShellMetacharacters(t *testing.T) {
 		t.Errorf("audit row missing reject decision; got %q", string(body))
 	}
 }
+
+// TestCommand_WithRejectArgvPatterns covers the argv-pattern write-block
+// used by `coily linkedin`. Three subcases:
+//
+//   - pattern matches, no override env: invocation rejected, error names
+//     the override env var, audit row records decision=reject.
+//   - pattern matches, override env=1: invocation succeeds, audit row
+//     records decision=accept.
+//   - pattern doesn't match (a read shape): invocation succeeds, audit
+//     row records decision=accept.
+//
+// The override env var is COILY_<BIN>_ALLOW_WRITES with bin uppercased.
+// Test uses "linkedin" so the env var is COILY_LINKEDIN_ALLOW_WRITES.
+func TestCommand_WithRejectArgvPatterns(t *testing.T) {
+	patterns := [][]string{
+		{"message", "send"},
+		{"post", "create"},
+	}
+
+	t.Run("rejects matching pattern without override", func(t *testing.T) {
+		t.Setenv("COILY_LINKEDIN_ALLOW_WRITES", "")
+
+		dir := t.TempDir()
+		logPath := filepath.Join(dir, "audit.jsonl")
+		w := audit.NewWriter(logPath)
+		if err := w.Preflight(); err != nil {
+			t.Fatalf("audit preflight: %v", err)
+		}
+		var stdout bytes.Buffer
+		resolveCalls := 0
+		r := &shell.Runner{
+			Stdout: &stdout,
+			Stderr: os.Stderr,
+			Resolve: func(_ string) (string, error) {
+				resolveCalls++
+				return "/bin/echo", nil
+			},
+		}
+
+		cmd := passthrough.Command("linkedin", r, w,
+			passthrough.WithSkipPolicy(),
+			passthrough.WithRejectArgvPatterns(patterns),
+		)
+		argv := []string{"coily-test", "message", "send", "https://example", "hi"}
+		err := cmd.Run(context.Background(), argv)
+		if err == nil {
+			t.Fatal("expected reject error, got nil")
+		}
+		if !strings.Contains(err.Error(), "COILY_LINKEDIN_ALLOW_WRITES") {
+			t.Errorf("error %q does not name the override env var", err)
+		}
+		if resolveCalls != 0 {
+			t.Errorf("resolver called %d times; reject must fire before exec", resolveCalls)
+		}
+		// Audit row captures the action error in `error` and the verb name,
+		// but `decision` stays accept - the gate (lockdown + argv policy)
+		// did pass; the argv-pattern reject lives one layer down. Asserting
+		// the error text + verb tag is enough to prove the gate fired.
+		body, _ := os.ReadFile(logPath)
+		if !strings.Contains(string(body), `"verb":"linkedin"`) {
+			t.Errorf("audit row missing verb=linkedin; got %q", string(body))
+		}
+		if !strings.Contains(string(body), "COILY_LINKEDIN_ALLOW_WRITES") {
+			t.Errorf("audit row missing override-env reference in error field; got %q", string(body))
+		}
+	})
+
+	t.Run("override env permits matching pattern", func(t *testing.T) {
+		t.Setenv("COILY_LINKEDIN_ALLOW_WRITES", "1")
+
+		dir := t.TempDir()
+		logPath := filepath.Join(dir, "audit.jsonl")
+		w := audit.NewWriter(logPath)
+		if err := w.Preflight(); err != nil {
+			t.Fatalf("audit preflight: %v", err)
+		}
+		var stdout bytes.Buffer
+		r := &shell.Runner{
+			Stdout:  &stdout,
+			Stderr:  os.Stderr,
+			Resolve: func(_ string) (string, error) { return "/bin/echo", nil },
+		}
+
+		cmd := passthrough.Command("linkedin", r, w,
+			passthrough.WithSkipPolicy(),
+			passthrough.WithRejectArgvPatterns(patterns),
+		)
+		argv := []string{"coily-test", "post", "create", "hello world"}
+		if err := cmd.Run(context.Background(), argv); err != nil {
+			t.Fatalf("Run with override: %v", err)
+		}
+		body, _ := os.ReadFile(logPath)
+		if !strings.Contains(string(body), `"decision":"accept"`) {
+			t.Errorf("audit row missing accept decision under override; got %q", string(body))
+		}
+	})
+
+	t.Run("non-matching pattern passes without override", func(t *testing.T) {
+		t.Setenv("COILY_LINKEDIN_ALLOW_WRITES", "")
+
+		dir := t.TempDir()
+		logPath := filepath.Join(dir, "audit.jsonl")
+		w := audit.NewWriter(logPath)
+		if err := w.Preflight(); err != nil {
+			t.Fatalf("audit preflight: %v", err)
+		}
+		var stdout bytes.Buffer
+		r := &shell.Runner{
+			Stdout:  &stdout,
+			Stderr:  os.Stderr,
+			Resolve: func(_ string) (string, error) { return "/bin/echo", nil },
+		}
+
+		cmd := passthrough.Command("linkedin", r, w,
+			passthrough.WithSkipPolicy(),
+			passthrough.WithRejectArgvPatterns(patterns),
+		)
+		// "message get" is a read; not in patterns.
+		argv := []string{"coily-test", "message", "get", "https://example"}
+		if err := cmd.Run(context.Background(), argv); err != nil {
+			t.Fatalf("Run for read shape: %v", err)
+		}
+		body, _ := os.ReadFile(logPath)
+		if !strings.Contains(string(body), `"decision":"accept"`) {
+			t.Errorf("audit row missing accept decision for read shape; got %q", string(body))
+		}
+	})
+
+	t.Run("flag-shaped tokens are skipped during pattern match", func(t *testing.T) {
+		t.Setenv("COILY_LINKEDIN_ALLOW_WRITES", "")
+
+		dir := t.TempDir()
+		logPath := filepath.Join(dir, "audit.jsonl")
+		w := audit.NewWriter(logPath)
+		if err := w.Preflight(); err != nil {
+			t.Fatalf("audit preflight: %v", err)
+		}
+		r := &shell.Runner{
+			Stdout:  &bytes.Buffer{},
+			Stderr:  os.Stderr,
+			Resolve: func(_ string) (string, error) { return "/bin/echo", nil },
+		}
+
+		cmd := passthrough.Command("linkedin", r, w,
+			passthrough.WithSkipPolicy(),
+			passthrough.WithRejectArgvPatterns(patterns),
+		)
+		// Leading flag should not derail the leading-non-flag scan.
+		argv := []string{"coily-test", "--no-color", "message", "send", "https://example", "hi"}
+		err := cmd.Run(context.Background(), argv)
+		if err == nil {
+			t.Fatal("expected reject for write verb after leading flag, got nil")
+		}
+	})
+}

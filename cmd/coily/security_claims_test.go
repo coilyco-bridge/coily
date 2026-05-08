@@ -233,3 +233,46 @@ func TestSecurityClaim_LockdownDeniesBareKubectlAndAwsAndGh(t *testing.T) {
 		}
 	}
 }
+
+// TestSecurityClaim_LinkedinWriteVerbsAreBlocked pins the argv-pattern
+// reject set for `coily linkedin`. LinkedIn account bans are write-driven
+// (auto-messages, auto-connects, auto-posts trigger fast bans via spam
+// reports) and the broker holds session credentials off-host, so an
+// unintended write costs real account state. The wrapper refuses these
+// verbs by default; override is COILY_LINKEDIN_ALLOW_WRITES=1.
+//
+// Asserts against the registry rather than runtime so a typo or accidental
+// drop of a write pattern blows up here.
+func TestSecurityClaim_LinkedinWriteVerbsAreBlocked(t *testing.T) {
+	var linkedin *ptEntry
+	for i := range ptTopLevel {
+		if ptTopLevel[i].Bin == "linkedin" {
+			linkedin = &ptTopLevel[i]
+			break
+		}
+	}
+	if linkedin == nil {
+		t.Fatal("ptTopLevel missing linkedin entry; the wrapper is gone, write-block coverage is gone with it")
+	}
+	wantPatterns := [][]string{
+		{"message", "send"},
+		{"connection", "send"},
+		{"connection", "remove"},
+		{"connection", "withdraw"},
+		{"post", "create"},
+		{"post", "react"},
+		{"post", "comment"},
+		{"navigator", "message", "send"},
+		{"workflow", "run"},
+	}
+	have := map[string]bool{}
+	for _, p := range linkedin.RejectArgvPatterns {
+		have[strings.Join(p, " ")] = true
+	}
+	for _, want := range wantPatterns {
+		key := strings.Join(want, " ")
+		if !have[key] {
+			t.Errorf("linkedin write-block missing %q; account bans are write-driven, this gate is load-bearing", key)
+		}
+	}
+}
