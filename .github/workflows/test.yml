@@ -32,9 +32,14 @@ jobs:
         run: go test ./...
 
       - name: golangci-lint
+        # Version-pinned to match the brew-installed binary on Kai's laptop
+        # (issue #54). Local and CI must run the same lint version so
+        # "the lint passes" means the same thing in both contexts; otherwise
+        # the strict "never --no-verify" policy disagrees with CI. Bump in
+        # lockstep with the brew formula.
         uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.11.4
+          version: v2.12.2
 
       - name: regenerate coily-passthroughs skill and assert no diff
         run: |
