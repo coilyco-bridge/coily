@@ -97,10 +97,11 @@ func run(r *Runner, argv []string) error {
 	builtIns := r.builtInCommands()
 	repoCfg, execCmd := r.loadRepoExecCommand()
 
+	// execCmd is always non-nil: loadRepoExecCommand returns a stub `exec`
+	// command with a UserError Action when no .coily/coily.yaml is in scope,
+	// so the verb is unconditionally visible in --help and --tree.
 	all := append([]*cli.Command{}, builtIns...)
-	if execCmd != nil {
-		all = append(all, execCmd)
-	}
+	all = append(all, execCmd)
 
 	cmd := &cli.Command{
 		Name:                  "coily",

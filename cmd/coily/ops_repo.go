@@ -16,19 +16,35 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// loadRepoExecCommand discovers coily.yaml relative to cwd and returns the
-// loaded *repocfg.Config (or nil when no config was found) along with an
-// `exec` cli.Command whose subcommands are the entries from coily.yaml. A
-// missing config returns (nil, nil); the caller skips wiring `exec` in that
-// case so it does not appear as a no-op verb in --help.
+// loadRepoExecCommand discovers coily.yaml relative to cwd and always returns
+// an `exec` cli.Command so the verb is unconditionally visible in --help and
+// --tree. The returned *repocfg.Config is nil when no config was found, in
+// which case `exec` has no subcommands and its Action returns a UserError
+// naming the recovery. Callers wire the returned command into the root
+// command tree unconditionally.
 func (r *Runner) loadRepoExecCommand() (*repocfg.Config, *cli.Command) {
 	cfg, err := repocfg.LoadDefault()
-	if err != nil {
-		if errors.Is(err, repocfg.ErrNoConfig) {
-			return nil, nil
-		}
+	if err != nil && !errors.Is(err, repocfg.ErrNoConfig) {
 		fmt.Fprintf(os.Stderr, "coily: repo config error: %v\n", err)
-		return nil, nil
+		cfg = nil
+	}
+	if cfg == nil {
+		return nil, &cli.Command{
+			Name:     "exec",
+			Usage:    "Run a named command from .coily/coily.yaml (no config found in cwd)",
+			Category: "repo",
+			Description: "Run a per-repo command declared in .coily/coily.yaml. " +
+				"Discovery walks from cwd up to the filesystem root looking for " +
+				".coily/coily.yaml. No config was found from the current cwd. " +
+				"Create one in the target repo, or cd into a repo that has one, " +
+				"then retry.",
+			Action: func(_ context.Context, _ *cli.Command) error {
+				cwd, _ := os.Getwd()
+				return exitcode.New(exitcode.UserError, "repo_no_config",
+					fmt.Errorf("no .coily/coily.yaml found from cwd (%s) up to filesystem root", cwd),
+					"create .coily/coily.yaml in the target repo (or cd into a repo that has one) and retry")
+			},
+		}
 	}
 	subs := make([]*cli.Command, 0, len(cfg.Commands))
 	for _, rc := range cfg.Commands {
@@ -129,14 +145,17 @@ func (r *Runner) buildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) *cli.
 }
 
 // listCommand renders the built-in and repo command inventory in one shot.
-// Same output for --list on the root command; see main.go.
+// Same output for --list on the root command; see main.go. The `exec` verb
+// is always present in the built-in list (see loadRepoExecCommand); the repo
+// section underneath enumerates whatever subcommands the discovered
+// .coily/coily.yaml declares.
 func listCommand(builtIns []*cli.Command, exec *cli.Command, repoCfg *repocfg.Config) {
 	fmt.Println("Built-in commands:")
 	printCmdGroup(builtIns)
 	fmt.Println()
 	if repoCfg == nil {
 		fmt.Println("Repo commands (coily exec <name>):")
-		fmt.Println("  (no coily.yaml found in the current directory or any parent)")
+		fmt.Println("  (no .coily/coily.yaml found from cwd; coily exec is wired but has no subcommands)")
 		return
 	}
 	fmt.Printf("Repo commands from %s (coily exec <name>):\n", repoCfg.Path)
@@ -156,7 +175,7 @@ func treeCommand(builtIns []*cli.Command, exec *cli.Command, repoCfg *repocfg.Co
 	fmt.Println()
 	if repoCfg == nil {
 		fmt.Println("Repo commands (coily exec <name>):")
-		fmt.Println("  (no coily.yaml found in the current directory or any parent)")
+		fmt.Println("  (no .coily/coily.yaml found from cwd; coily exec is wired but has no subcommands)")
 		return
 	}
 	fmt.Printf("Repo commands from %s (coily exec <name>):\n", repoCfg.Path)
