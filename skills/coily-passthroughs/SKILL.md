@@ -321,6 +321,16 @@ Tail sirens-discord-ops journal logs (journalctl -u sirens-discord-ops -f).
 
 Flags: --follow, --lines
 
+## `coily skillsmp ai-search`
+
+GET /ai-search - semantic search across skills.
+
+## `coily skillsmp search`
+
+GET /search - keyword search across skills.
+
+Flags: --limit, --page, --sort-by
+
 ## `coily ssh cat`
 
 Run cat <path>.
