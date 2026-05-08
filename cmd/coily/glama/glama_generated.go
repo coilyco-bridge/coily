@@ -34,7 +34,7 @@ const (
 	ssmAPIKey   = "/glama/api-key" //nolint:gosec // SSM path, not a credential
 )
 
-// Command returns the cli.Command tree for `coily ops glama`.
+// Command returns the cli.Command tree for `coily pkg glama`.
 func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  "glama",

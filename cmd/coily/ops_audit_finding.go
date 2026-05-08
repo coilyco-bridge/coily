@@ -316,7 +316,6 @@ var verbAreaMap = map[string]string{
 	"icarus":      "coily-gaming-icarus-meta",
 	"core_keeper": "coily-gaming-core-keeper-meta",
 	"corekeeper":  "coily-gaming-core-keeper-meta",
-	"sirens":      "coily-sirens-discord-ops-meta",
 }
 
 // verbToSkillArea maps an audit-row verb to the `coily-<area>-meta` skill
@@ -359,7 +358,6 @@ func verbAreaTable() []string {
 		"eco.*       -> coily-gaming-eco-meta",
 		"factorio.*  -> coily-gaming-factorio-meta",
 		"icarus.*    -> coily-gaming-icarus-meta",
-		"sirens.*    -> coily-sirens-discord-ops-meta",
 		"<other>     -> coily-shared-meta (cross-cutting)",
 		"<security>  -> coily-security-boundary-discipline (gate/audit/scope itself)",
 	}

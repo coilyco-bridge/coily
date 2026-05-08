@@ -1391,28 +1391,6 @@ Flags: --body, --thread_id, --with_components
 
 Pass-through to gh with argv validation + audit log.
 
-## `coily ops glama instances get-v1-instances`
-
-Hosted MCP server instances
-
-## `coily ops glama servers get-v1-attributes`
-
-MCP server attributes
-
-## `coily ops glama servers get-v1-servers`
-
-GET /v1/servers
-
-Flags: --after, --first, --query
-
-## `coily ops glama servers get-v1-servers-by-namespace-by-slug`
-
-Retrieve the MCP server details by its unique identifier.
-
-## `coily ops glama telemetry post-v1-telemetry-usage`
-
-Send MCP tool usage data to the server.
-
 ## `coily ops kubectl`
 
 Pass-through to kubectl with argv validation + audit log.
@@ -3009,6 +2987,28 @@ Pass-through to cargo with argv validation + audit log.
 
 Pass-through to gem with argv validation + audit log.
 
+## `coily pkg glama instances get-v1-instances`
+
+Hosted MCP server instances
+
+## `coily pkg glama servers get-v1-attributes`
+
+MCP server attributes
+
+## `coily pkg glama servers get-v1-servers`
+
+GET /v1/servers
+
+Flags: --after, --first, --query
+
+## `coily pkg glama servers get-v1-servers-by-namespace-by-slug`
+
+Retrieve the MCP server details by its unique identifier.
+
+## `coily pkg glama telemetry post-v1-telemetry-usage`
+
+Send MCP tool usage data to the server.
+
 ## `coily pkg npm`
 
 Pass-through to npm with argv validation + audit log.
@@ -3029,6 +3029,16 @@ Pass-through to pnpm with argv validation + audit log.
 
 Pass-through to poetry with argv validation + audit log.
 
+## `coily pkg skillsmp ai-search`
+
+GET /ai-search - semantic search across skills.
+
+## `coily pkg skillsmp search`
+
+GET /search - keyword search across skills.
+
+Flags: --limit, --page, --sort-by
+
 ## `coily pkg uv`
 
 Pass-through to uv with argv validation + audit log.
@@ -3042,38 +3052,6 @@ Pass-through to yarn with argv validation + audit log.
 Run the post-upgrade rituals: completion, lockdown re-baseline, and user hook.
 
 Flags: --skip-completion, --skip-lockdown, --skip-user-hook, --workspace
-
-## `coily sirens-discord-ops restart`
-
-Restart the sirens-discord-ops systemd unit.
-
-## `coily sirens-discord-ops start`
-
-Start the sirens-discord-ops systemd unit.
-
-## `coily sirens-discord-ops status`
-
-Print systemctl status sirens-discord-ops.
-
-## `coily sirens-discord-ops stop`
-
-Stop the sirens-discord-ops systemd unit.
-
-## `coily sirens-discord-ops tail`
-
-Tail sirens-discord-ops journal logs (journalctl -u sirens-discord-ops -f).
-
-Flags: --follow, --lines
-
-## `coily skillsmp ai-search`
-
-GET /ai-search - semantic search across skills.
-
-## `coily skillsmp search`
-
-GET /search - keyword search across skills.
-
-Flags: --limit, --page, --sort-by
 
 ## `coily ssh cat`
 

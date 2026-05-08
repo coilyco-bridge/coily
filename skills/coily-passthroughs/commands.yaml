@@ -2,6 +2,16 @@ commands:
     - path:
         - coily
         - audit
+        - finding
+      summary: Walk an agent through writing a finding about a flagged audit event.
+      flags:
+        - --id
+        - --slug
+        - --ts
+        - --verb
+    - path:
+        - coily
+        - audit
         - path
       summary: Print the resolved audit log path and exit.
     - path:
@@ -294,36 +304,1962 @@ commands:
         - --out
     - path:
         - coily
-        - modio
-        - mods
-        - comments
-      summary: GET /games/{game-id}/mods/{mod-id}/comments
-    - path:
-        - coily
-        - modio
-        - mods
-        - files
-      summary: GET /games/{game-id}/mods/{mod-id}/files
-    - path:
-        - coily
-        - modio
-        - mods
-        - get
-      summary: GET /games/{game-id}/mods/{mod-id}
-    - path:
-        - coily
-        - modio
-        - mods
-        - list
-      summary: GET /games/{game-id}/mods
-      flags:
-        - --limit
-        - --offset
-    - path:
-        - coily
         - ops
         - aws
       summary: Pass-through to aws with argv validation + audit log.
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - applications-get-activity-instance
+      summary: GET /applications/{application_id}/activity-instances/{instance_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - bulk-set-application-commands
+      summary: PUT /applications/{application_id}/commands
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - bulk-set-guild-application-commands
+      summary: PUT /applications/{application_id}/guilds/{guild_id}/commands
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - consume-entitlement
+      summary: POST /applications/{application_id}/entitlements/{entitlement_id}/consume
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - create-application-command
+      summary: POST /applications/{application_id}/commands
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - create-application-emoji
+      summary: POST /applications/{application_id}/emojis
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - create-entitlement
+      summary: POST /applications/{application_id}/entitlements
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - create-guild-application-command
+      summary: POST /applications/{application_id}/guilds/{guild_id}/commands
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - delete-application-command
+      summary: DELETE /applications/{application_id}/commands/{command_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - delete-application-emoji
+      summary: DELETE /applications/{application_id}/emojis/{emoji_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - delete-entitlement
+      summary: DELETE /applications/{application_id}/entitlements/{entitlement_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - delete-guild-application-command
+      summary: DELETE /applications/{application_id}/guilds/{guild_id}/commands/{command_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - get-application
+      summary: GET /applications/{application_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - get-application-command
+      summary: GET /applications/{application_id}/commands/{command_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - get-application-emoji
+      summary: GET /applications/{application_id}/emojis/{emoji_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - get-application-role-connections-metadata
+      summary: GET /applications/{application_id}/role-connections/metadata
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - get-entitlement
+      summary: GET /applications/{application_id}/entitlements/{entitlement_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - get-entitlements
+      summary: GET /applications/{application_id}/entitlements
+      flags:
+        - --after
+        - --before
+        - --exclude_deleted
+        - --exclude_ended
+        - --guild_id
+        - --limit
+        - --only_active
+        - --sku_ids
+        - --user_id
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - get-guild-application-command
+      summary: GET /applications/{application_id}/guilds/{guild_id}/commands/{command_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - get-guild-application-command-permissions
+      summary: GET /applications/{application_id}/guilds/{guild_id}/commands/{command_id}/permissions
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - get-my-application
+      summary: GET /applications/@me
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - list-application-commands
+      summary: GET /applications/{application_id}/commands
+      flags:
+        - --with_localizations
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - list-application-emojis
+      summary: GET /applications/{application_id}/emojis
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - list-guild-application-command-permissions
+      summary: GET /applications/{application_id}/guilds/{guild_id}/commands/permissions
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - list-guild-application-commands
+      summary: GET /applications/{application_id}/guilds/{guild_id}/commands
+      flags:
+        - --with_localizations
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - set-guild-application-command-permissions
+      summary: PUT /applications/{application_id}/guilds/{guild_id}/commands/{command_id}/permissions
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - update-application
+      summary: PATCH /applications/{application_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - update-application-command
+      summary: PATCH /applications/{application_id}/commands/{command_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - update-application-emoji
+      summary: PATCH /applications/{application_id}/emojis/{emoji_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - update-application-role-connections-metadata
+      summary: PUT /applications/{application_id}/role-connections/metadata
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - update-guild-application-command
+      summary: PATCH /applications/{application_id}/guilds/{guild_id}/commands/{command_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - update-my-application
+      summary: PATCH /applications/@me
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - applications
+        - upload-application-attachment
+      summary: POST /applications/{application_id}/attachment
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - add-group-dm-user
+      summary: PUT /channels/{channel_id}/recipients/{user_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - add-my-message-reaction
+      summary: PUT /channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/@me
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - add-thread-member
+      summary: PUT /channels/{channel_id}/thread-members/{user_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - bulk-delete-messages
+      summary: POST /channels/{channel_id}/messages/bulk-delete
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - create-channel-invite
+      summary: POST /channels/{channel_id}/invites
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - create-message
+      summary: POST /channels/{channel_id}/messages
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - create-pin
+      summary: PUT /channels/{channel_id}/messages/pins/{message_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - create-thread
+      summary: POST /channels/{channel_id}/threads
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - create-thread-from-message
+      summary: POST /channels/{channel_id}/messages/{message_id}/threads
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - create-webhook
+      summary: POST /channels/{channel_id}/webhooks
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - crosspost-message
+      summary: POST /channels/{channel_id}/messages/{message_id}/crosspost
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - delete-all-message-reactions
+      summary: DELETE /channels/{channel_id}/messages/{message_id}/reactions
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - delete-all-message-reactions-by-emoji
+      summary: DELETE /channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - delete-channel
+      summary: DELETE /channels/{channel_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - delete-channel-permission-overwrite
+      summary: DELETE /channels/{channel_id}/permissions/{overwrite_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - delete-group-dm-user
+      summary: DELETE /channels/{channel_id}/recipients/{user_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - delete-message
+      summary: DELETE /channels/{channel_id}/messages/{message_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - delete-my-message-reaction
+      summary: DELETE /channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/@me
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - delete-pin
+      summary: DELETE /channels/{channel_id}/messages/pins/{message_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - delete-thread-member
+      summary: DELETE /channels/{channel_id}/thread-members/{user_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - delete-user-message-reaction
+      summary: DELETE /channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}/{user_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - deprecated-create-pin
+      summary: PUT /channels/{channel_id}/pins/{message_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - deprecated-delete-pin
+      summary: DELETE /channels/{channel_id}/pins/{message_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - deprecated-list-pins
+      summary: GET /channels/{channel_id}/pins
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - follow-channel
+      summary: POST /channels/{channel_id}/followers
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - get-answer-voters
+      summary: GET /channels/{channel_id}/polls/{message_id}/answers/{answer_id}
+      flags:
+        - --after
+        - --limit
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - get-channel
+      summary: GET /channels/{channel_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - get-message
+      summary: GET /channels/{channel_id}/messages/{message_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - get-thread-member
+      summary: GET /channels/{channel_id}/thread-members/{user_id}
+      flags:
+        - --with_member
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - join-thread
+      summary: PUT /channels/{channel_id}/thread-members/@me
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - leave-thread
+      summary: DELETE /channels/{channel_id}/thread-members/@me
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - list-channel-invites
+      summary: GET /channels/{channel_id}/invites
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - list-channel-webhooks
+      summary: GET /channels/{channel_id}/webhooks
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - list-message-reactions-by-emoji
+      summary: GET /channels/{channel_id}/messages/{message_id}/reactions/{emoji_name}
+      flags:
+        - --after
+        - --limit
+        - --type
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - list-messages
+      summary: GET /channels/{channel_id}/messages
+      flags:
+        - --after
+        - --around
+        - --before
+        - --limit
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - list-my-private-archived-threads
+      summary: GET /channels/{channel_id}/users/@me/threads/archived/private
+      flags:
+        - --before
+        - --limit
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - list-pins
+      summary: GET /channels/{channel_id}/messages/pins
+      flags:
+        - --before
+        - --limit
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - list-private-archived-threads
+      summary: GET /channels/{channel_id}/threads/archived/private
+      flags:
+        - --before
+        - --limit
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - list-public-archived-threads
+      summary: GET /channels/{channel_id}/threads/archived/public
+      flags:
+        - --before
+        - --limit
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - list-thread-members
+      summary: GET /channels/{channel_id}/thread-members
+      flags:
+        - --after
+        - --limit
+        - --with_member
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - poll-expire
+      summary: POST /channels/{channel_id}/polls/{message_id}/expire
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - send-soundboard-sound
+      summary: POST /channels/{channel_id}/send-soundboard-sound
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - set-channel-permission-overwrite
+      summary: PUT /channels/{channel_id}/permissions/{overwrite_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - thread-search
+      summary: GET /channels/{channel_id}/threads/search
+      flags:
+        - --archived
+        - --limit
+        - --max_id
+        - --min_id
+        - --name
+        - --offset
+        - --slop
+        - --sort_by
+        - --sort_order
+        - --tag
+        - --tag_setting
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - trigger-typing-indicator
+      summary: POST /channels/{channel_id}/typing
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - update-channel
+      summary: PATCH /channels/{channel_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - update-message
+      summary: PATCH /channels/{channel_id}/messages/{message_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - channels
+        - update-voice-channel-status
+      summary: Set a voice channel's status.
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - gateway
+        - get-bot-gateway
+      summary: GET /gateway/bot
+    - path:
+        - coily
+        - ops
+        - discord
+        - gateway
+        - get-gateway
+      summary: GET /gateway
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - action-guild-join-request
+      summary: Approve or reject guild join request
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - add-guild-member
+      summary: PUT /guilds/{guild_id}/members/{user_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - add-guild-member-role
+      summary: PUT /guilds/{guild_id}/members/{user_id}/roles/{role_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - ban-user-from-guild
+      summary: PUT /guilds/{guild_id}/bans/{user_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - bulk-ban-users-from-guild
+      summary: POST /guilds/{guild_id}/bulk-ban
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - bulk-update-guild-channels
+      summary: PATCH /guilds/{guild_id}/channels
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - bulk-update-guild-roles
+      summary: PATCH /guilds/{guild_id}/roles
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - create-auto-moderation-rule
+      summary: POST /guilds/{guild_id}/auto-moderation/rules
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - create-guild-channel
+      summary: POST /guilds/{guild_id}/channels
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - create-guild-emoji
+      summary: POST /guilds/{guild_id}/emojis
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - create-guild-role
+      summary: POST /guilds/{guild_id}/roles
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - create-guild-scheduled-event
+      summary: POST /guilds/{guild_id}/scheduled-events
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - create-guild-soundboard-sound
+      summary: POST /guilds/{guild_id}/soundboard-sounds
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - create-guild-sticker
+      summary: POST /guilds/{guild_id}/stickers
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - create-guild-template
+      summary: POST /guilds/{guild_id}/templates
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - delete-auto-moderation-rule
+      summary: DELETE /guilds/{guild_id}/auto-moderation/rules/{rule_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - delete-guild-emoji
+      summary: DELETE /guilds/{guild_id}/emojis/{emoji_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - delete-guild-integration
+      summary: DELETE /guilds/{guild_id}/integrations/{integration_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - delete-guild-member
+      summary: DELETE /guilds/{guild_id}/members/{user_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - delete-guild-member-role
+      summary: DELETE /guilds/{guild_id}/members/{user_id}/roles/{role_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - delete-guild-role
+      summary: DELETE /guilds/{guild_id}/roles/{role_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - delete-guild-scheduled-event
+      summary: DELETE /guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - delete-guild-soundboard-sound
+      summary: DELETE /guilds/{guild_id}/soundboard-sounds/{sound_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - delete-guild-sticker
+      summary: DELETE /guilds/{guild_id}/stickers/{sticker_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - delete-guild-template
+      summary: DELETE /guilds/{guild_id}/templates/{code}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-active-guild-threads
+      summary: GET /guilds/{guild_id}/threads/active
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-auto-moderation-rule
+      summary: GET /guilds/{guild_id}/auto-moderation/rules/{rule_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild
+      summary: GET /guilds/{guild_id}
+      flags:
+        - --with_counts
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-ban
+      summary: GET /guilds/{guild_id}/bans/{user_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-emoji
+      summary: GET /guilds/{guild_id}/emojis/{emoji_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-join-requests
+      summary: List join requests for guild, optionally filtered by application status
+      flags:
+        - --after
+        - --before
+        - --limit
+        - --status
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-member
+      summary: GET /guilds/{guild_id}/members/{user_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-new-member-welcome
+      summary: GET /guilds/{guild_id}/new-member-welcome
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-preview
+      summary: GET /guilds/{guild_id}/preview
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-role
+      summary: GET /guilds/{guild_id}/roles/{role_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-scheduled-event
+      summary: GET /guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}
+      flags:
+        - --with_user_count
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-soundboard-sound
+      summary: GET /guilds/{guild_id}/soundboard-sounds/{sound_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-sticker
+      summary: GET /guilds/{guild_id}/stickers/{sticker_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-template
+      summary: GET /guilds/templates/{code}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-vanity-url
+      summary: GET /guilds/{guild_id}/vanity-url
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-webhooks
+      summary: GET /guilds/{guild_id}/webhooks
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-welcome-screen
+      summary: GET /guilds/{guild_id}/welcome-screen
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-widget
+      summary: GET /guilds/{guild_id}/widget.json
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-widget-png
+      summary: GET /guilds/{guild_id}/widget.png
+      flags:
+        - --style
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guild-widget-settings
+      summary: GET /guilds/{guild_id}/widget
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-guilds-onboarding
+      summary: GET /guilds/{guild_id}/onboarding
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-self-voice-state
+      summary: GET /guilds/{guild_id}/voice-states/@me
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - get-voice-state
+      summary: GET /guilds/{guild_id}/voice-states/{user_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - guild-role-member-counts
+      summary: GET /guilds/{guild_id}/roles/member-counts
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - guild-search
+      summary: GET /guilds/{guild_id}/messages/search
+      flags:
+        - --attachment_extension
+        - --attachment_filename
+        - --author_id
+        - --author_type
+        - --channel_id
+        - --content
+        - --embed_provider
+        - --embed_type
+        - --has
+        - --include_nsfw
+        - --limit
+        - --link_hostname
+        - --max_id
+        - --mention_everyone
+        - --mentions
+        - --mentions_role_id
+        - --min_id
+        - --offset
+        - --pinned
+        - --replied_to_message_id
+        - --replied_to_user_id
+        - --slop
+        - --sort_by
+        - --sort_order
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-auto-moderation-rules
+      summary: GET /guilds/{guild_id}/auto-moderation/rules
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-audit-log-entries
+      summary: GET /guilds/{guild_id}/audit-logs
+      flags:
+        - --action_type
+        - --after
+        - --before
+        - --limit
+        - --target_id
+        - --user_id
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-bans
+      summary: GET /guilds/{guild_id}/bans
+      flags:
+        - --after
+        - --before
+        - --limit
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-channels
+      summary: GET /guilds/{guild_id}/channels
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-emojis
+      summary: GET /guilds/{guild_id}/emojis
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-integrations
+      summary: GET /guilds/{guild_id}/integrations
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-invites
+      summary: GET /guilds/{guild_id}/invites
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-members
+      summary: GET /guilds/{guild_id}/members
+      flags:
+        - --after
+        - --limit
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-roles
+      summary: GET /guilds/{guild_id}/roles
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-scheduled-event-users
+      summary: GET /guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}/users
+      flags:
+        - --after
+        - --before
+        - --limit
+        - --with_member
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-scheduled-events
+      summary: GET /guilds/{guild_id}/scheduled-events
+      flags:
+        - --with_user_count
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-soundboard-sounds
+      summary: GET /guilds/{guild_id}/soundboard-sounds
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-stickers
+      summary: GET /guilds/{guild_id}/stickers
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-templates
+      summary: GET /guilds/{guild_id}/templates
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - list-guild-voice-regions
+      summary: GET /guilds/{guild_id}/regions
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - preview-prune-guild
+      summary: GET /guilds/{guild_id}/prune
+      flags:
+        - --days
+        - --include_roles
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - prune-guild
+      summary: POST /guilds/{guild_id}/prune
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - put-guilds-onboarding
+      summary: PUT /guilds/{guild_id}/onboarding
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - search-guild-members
+      summary: GET /guilds/{guild_id}/members/search
+      flags:
+        - --limit
+        - --query
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - sync-guild-template
+      summary: PUT /guilds/{guild_id}/templates/{code}
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - unban-user-from-guild
+      summary: DELETE /guilds/{guild_id}/bans/{user_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-auto-moderation-rule
+      summary: PATCH /guilds/{guild_id}/auto-moderation/rules/{rule_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-guild
+      summary: PATCH /guilds/{guild_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-guild-emoji
+      summary: PATCH /guilds/{guild_id}/emojis/{emoji_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-guild-member
+      summary: PATCH /guilds/{guild_id}/members/{user_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-guild-role
+      summary: PATCH /guilds/{guild_id}/roles/{role_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-guild-scheduled-event
+      summary: PATCH /guilds/{guild_id}/scheduled-events/{guild_scheduled_event_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-guild-soundboard-sound
+      summary: PATCH /guilds/{guild_id}/soundboard-sounds/{sound_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-guild-sticker
+      summary: PATCH /guilds/{guild_id}/stickers/{sticker_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-guild-template
+      summary: PATCH /guilds/{guild_id}/templates/{code}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-guild-welcome-screen
+      summary: PATCH /guilds/{guild_id}/welcome-screen
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-guild-widget-settings
+      summary: PATCH /guilds/{guild_id}/widget
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-my-guild-member
+      summary: PATCH /guilds/{guild_id}/members/@me
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-self-voice-state
+      summary: PATCH /guilds/{guild_id}/voice-states/@me
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - guilds
+        - update-voice-state
+      summary: PATCH /guilds/{guild_id}/voice-states/{user_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - interactions
+        - create-interaction-response
+      summary: POST /interactions/{interaction_id}/{interaction_token}/callback
+      flags:
+        - --body
+        - --with_response
+    - path:
+        - coily
+        - ops
+        - discord
+        - invites
+        - get-invite-target-users
+      summary: Get the target users for an invite.
+    - path:
+        - coily
+        - ops
+        - discord
+        - invites
+        - get-invite-target-users-job-status
+      summary: Get the target users job status for an invite.
+    - path:
+        - coily
+        - ops
+        - discord
+        - invites
+        - invite-resolve
+      summary: GET /invites/{code}
+      flags:
+        - --guild_scheduled_event_id
+        - --with_counts
+    - path:
+        - coily
+        - ops
+        - discord
+        - invites
+        - invite-revoke
+      summary: DELETE /invites/{code}
+    - path:
+        - coily
+        - ops
+        - discord
+        - invites
+        - update-invite-target-users
+      summary: Update the target users for an existing invite.
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - add-lobby-member
+      summary: PUT /lobbies/{lobby_id}/members/{user_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - bulk-update-lobby-members
+      summary: POST /lobbies/{lobby_id}/members/bulk
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - create-linked-lobby-guild-invite-for-self
+      summary: POST /lobbies/{lobby_id}/members/@me/invites
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - create-linked-lobby-guild-invite-for-user
+      summary: POST /lobbies/{lobby_id}/members/{user_id}/invites
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - create-lobby
+      summary: POST /lobbies
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - create-lobby-message
+      summary: POST /lobbies/{lobby_id}/messages
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - create-or-join-lobby
+      summary: PUT /lobbies
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - delete-lobby-member
+      summary: DELETE /lobbies/{lobby_id}/members/{user_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - edit-lobby
+      summary: PATCH /lobbies/{lobby_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - edit-lobby-channel-link
+      summary: PATCH /lobbies/{lobby_id}/channel-linking
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - get-lobby
+      summary: GET /lobbies/{lobby_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - get-lobby-messages
+      summary: GET /lobbies/{lobby_id}/messages
+      flags:
+        - --limit
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - leave-lobby
+      summary: DELETE /lobbies/{lobby_id}/members/@me
+    - path:
+        - coily
+        - ops
+        - discord
+        - lobbies
+        - update-lobby-message-external-moderation-metadata
+      summary: Update the external moderation metadata for a lobby message.
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - oauth2
+        - get-my-oauth2-application
+      summary: GET /oauth2/applications/@me
+    - path:
+        - coily
+        - ops
+        - discord
+        - oauth2
+        - get-my-oauth2-authorization
+      summary: GET /oauth2/@me
+    - path:
+        - coily
+        - ops
+        - discord
+        - oauth2
+        - get-openid-connect-userinfo
+      summary: GET /oauth2/userinfo
+    - path:
+        - coily
+        - ops
+        - discord
+        - oauth2
+        - get-public-keys
+      summary: GET /oauth2/keys
+    - path:
+        - coily
+        - ops
+        - discord
+        - partner-sdk
+        - bot-partner-sdk-token
+      summary: POST /partner-sdk/token/bot
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - partner-sdk
+        - bot-partner-sdk-unmerge-provisional-account
+      summary: POST /partner-sdk/provisional-accounts/unmerge/bot
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - partner-sdk
+        - partner-sdk-token
+      summary: POST /partner-sdk/token
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - partner-sdk
+        - partner-sdk-unmerge-provisional-account
+      summary: POST /partner-sdk/provisional-accounts/unmerge
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - partner-sdk
+        - update-user-message-external-moderation-metadata
+      summary: Update the external moderation metadata for a user message (DM).
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - soundboard-default-sounds
+        - get-soundboard-default-sounds
+      summary: GET /soundboard-default-sounds
+    - path:
+        - coily
+        - ops
+        - discord
+        - stage-instances
+        - create-stage-instance
+      summary: POST /stage-instances
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - stage-instances
+        - delete-stage-instance
+      summary: DELETE /stage-instances/{channel_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - stage-instances
+        - get-stage-instance
+      summary: GET /stage-instances/{channel_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - stage-instances
+        - update-stage-instance
+      summary: PATCH /stage-instances/{channel_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - sticker-packs
+        - get-sticker-pack
+      summary: GET /sticker-packs/{pack_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - sticker-packs
+        - list-sticker-packs
+      summary: GET /sticker-packs
+    - path:
+        - coily
+        - ops
+        - discord
+        - stickers
+        - get-sticker
+      summary: GET /stickers/{sticker_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - users
+        - create-dm
+      summary: POST /users/@me/channels
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - users
+        - delete-application-user-role-connection
+      summary: DELETE /users/@me/applications/{application_id}/role-connection
+    - path:
+        - coily
+        - ops
+        - discord
+        - users
+        - get-application-user-role-connection
+      summary: GET /users/@me/applications/{application_id}/role-connection
+    - path:
+        - coily
+        - ops
+        - discord
+        - users
+        - get-current-user-application-entitlements
+      summary: GET /users/@me/applications/{application_id}/entitlements
+      flags:
+        - --exclude_consumed
+        - --sku_ids
+    - path:
+        - coily
+        - ops
+        - discord
+        - users
+        - get-my-guild-member
+      summary: GET /users/@me/guilds/{guild_id}/member
+    - path:
+        - coily
+        - ops
+        - discord
+        - users
+        - get-my-user
+      summary: GET /users/@me
+    - path:
+        - coily
+        - ops
+        - discord
+        - users
+        - get-user
+      summary: GET /users/{user_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - users
+        - leave-guild
+      summary: DELETE /users/@me/guilds/{guild_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - users
+        - list-my-connections
+      summary: GET /users/@me/connections
+    - path:
+        - coily
+        - ops
+        - discord
+        - users
+        - list-my-guilds
+      summary: GET /users/@me/guilds
+      flags:
+        - --after
+        - --before
+        - --limit
+        - --with_counts
+    - path:
+        - coily
+        - ops
+        - discord
+        - users
+        - update-application-user-role-connection
+      summary: PUT /users/@me/applications/{application_id}/role-connection
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - users
+        - update-my-user
+      summary: PATCH /users/@me
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - voice
+        - list-voice-regions
+      summary: GET /voice/regions
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - delete-original-webhook-message
+      summary: DELETE /webhooks/{webhook_id}/{webhook_token}/messages/@original
+      flags:
+        - --thread_id
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - delete-webhook
+      summary: DELETE /webhooks/{webhook_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - delete-webhook-by-token
+      summary: DELETE /webhooks/{webhook_id}/{webhook_token}
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - delete-webhook-message
+      summary: DELETE /webhooks/{webhook_id}/{webhook_token}/messages/{message_id}
+      flags:
+        - --thread_id
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - execute-github-compatible-webhook
+      summary: POST /webhooks/{webhook_id}/{webhook_token}/github
+      flags:
+        - --body
+        - --thread_id
+        - --wait
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - execute-slack-compatible-webhook
+      summary: POST /webhooks/{webhook_id}/{webhook_token}/slack
+      flags:
+        - --body
+        - --thread_id
+        - --wait
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - execute-webhook
+      summary: POST /webhooks/{webhook_id}/{webhook_token}
+      flags:
+        - --body
+        - --thread_id
+        - --wait
+        - --with_components
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - get-original-webhook-message
+      summary: GET /webhooks/{webhook_id}/{webhook_token}/messages/@original
+      flags:
+        - --thread_id
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - get-webhook
+      summary: GET /webhooks/{webhook_id}
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - get-webhook-by-token
+      summary: GET /webhooks/{webhook_id}/{webhook_token}
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - get-webhook-message
+      summary: GET /webhooks/{webhook_id}/{webhook_token}/messages/{message_id}
+      flags:
+        - --thread_id
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - update-original-webhook-message
+      summary: PATCH /webhooks/{webhook_id}/{webhook_token}/messages/@original
+      flags:
+        - --body
+        - --thread_id
+        - --with_components
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - update-webhook
+      summary: PATCH /webhooks/{webhook_id}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - update-webhook-by-token
+      summary: PATCH /webhooks/{webhook_id}/{webhook_token}
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - discord
+        - webhooks
+        - update-webhook-message
+      summary: PATCH /webhooks/{webhook_id}/{webhook_token}/messages/{message_id}
+      flags:
+        - --body
+        - --thread_id
+        - --with_components
     - path:
         - coily
         - ops
@@ -334,6 +2270,2829 @@ commands:
         - ops
         - kubectl
       summary: Pass-through to kubectl with argv validation + audit log.
+    - path:
+        - coily
+        - ops
+        - modio
+        - mods
+        - comments
+      summary: GET /games/{game-id}/mods/{mod-id}/comments
+    - path:
+        - coily
+        - ops
+        - modio
+        - mods
+        - files
+      summary: GET /games/{game-id}/mods/{mod-id}/files
+    - path:
+        - coily
+        - ops
+        - modio
+        - mods
+        - get
+      summary: GET /games/{game-id}/mods/{mod-id}
+    - path:
+        - coily
+        - ops
+        - modio
+        - mods
+        - list
+      summary: GET /games/{game-id}/mods
+      flags:
+        - --limit
+        - --offset
+    - path:
+        - coily
+        - ops
+        - sentry
+        - events
+        - bulk-mutate-a-list-of-issues
+      summary: Bulk mutate various attributes on issues. The list of issues to modify is given through the `id` query parameter. It is…
+      flags:
+        - --body
+        - --id
+        - --status
+    - path:
+        - coily
+        - ops
+        - sentry
+        - events
+        - bulk-remove-a-list-of-issues
+      summary: Permanently remove the given issues. The list of issues to modify is given through the `id` query parameter. It is repe…
+      flags:
+        - --id
+    - path:
+        - coily
+        - ops
+        - sentry
+        - events
+        - list-a-project-s-issues
+      summary: '**Deprecated**: This endpoint has been replaced with the [Organization Issues endpoint](/api/events/list-an-organizatio…'
+      flags:
+        - --hashes
+        - --query
+        - --shortIdLookup
+        - --statsPeriod
+    - path:
+        - coily
+        - ops
+        - sentry
+        - events
+        - list-a-tag-s-values-related-to-an-issue
+      summary: Returns details for given tag key related to an issue. When [paginated](/api/pagination) can return at most 1000 values.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - events
+        - list-an-issue-s-hashes
+      summary: This endpoint lists an issue's hashes, which are the generated checksums used to aggregate individual events.
+      flags:
+        - --full
+    - path:
+        - coily
+        - ops
+        - sentry
+        - events
+        - remove-an-issue
+      summary: Removes an individual issue.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - events
+        - retrieve-an-event-for-a-project
+      summary: Return details on an individual event.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - events
+        - retrieve-an-issue
+      summary: Return details on an individual issue. This returns the basic stats for the issue (title, last seen, first seen), some…
+      flags:
+        - --collapse
+    - path:
+        - coily
+        - ops
+        - sentry
+        - events
+        - update-an-issue
+      summary: Updates an individual issue's attributes. Only the attributes submitted are modified.
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - sentry
+        - integration
+        - create-or-update-an-external-issue
+      summary: Create or update an external issue from an integration platform integration.
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - sentry
+        - integration
+        - delete-an-external-issue
+      summary: Delete an external issue.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - integration
+        - list-an-organization-s-integration-platform-installations
+      summary: Return a list of integration platform installations for a given organization.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - organizations
+        - list-an-organization-s-repositories
+      summary: Return a list of version control repositories for a given organization.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - delete-a-specific-project-s-debug-information-file
+      summary: Delete a debug information file for a given project.
+      flags:
+        - --id
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - disable-spike-protection
+      summary: Disables Spike Protection feature for some of the projects within the organization.
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - enable-spike-protection
+      summary: Enables Spike Protection feature for some of the projects within the organization.
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - list-a-project-s-debug-information-files
+      summary: Retrieve a list of debug information files for a given project.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - list-a-project-s-service-hooks
+      summary: Return a list of service hooks bound to a project.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - list-a-project-s-user-feedback
+      summary: Return a list of user feedback items within this project. *This list does not include submissions from the [User Feedba…
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - list-a-project-s-users
+      summary: Return a list of users seen within this project.
+      flags:
+        - --query
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - list-a-tag-s-values
+      summary: Return a list of values associated with this key. The `query` parameter can be used to to perform a 'contains' match on…
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - register-a-new-service-hook
+      summary: 'Register a new service hook on a project. Events include: - event.alert: An alert is generated for an event (via rules)…'
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - remove-a-service-hook
+      summary: Remove a service hook.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - retrieve-a-service-hook
+      summary: Return a service hook bound to a project.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - retrieve-event-counts-for-a-project
+      summary: Caution This endpoint may change in the future without notice.
+      flags:
+        - --resolution
+        - --since
+        - --stat
+        - --until
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - submit-user-feedback
+      summary: '*This endpoint is DEPRECATED. We document it here for older SDKs and users who are still migrating to the [User Feedbac…'
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - update-a-service-hook
+      summary: Update a service hook.
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - sentry
+        - projects
+        - upload-a-new-file
+      summary: Upload a new debug information file for the given release. Unlike other API requests, files must be uploaded using the…
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - create-a-new-release-for-an-organization
+      summary: Create a new release for the given organization. Releases are used by Sentry to improve its error reporting abilities b…
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - delete-a-project-release-s-file
+      summary: Delete a file for a given release.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - delete-an-organization-release-s-file
+      summary: Delete a file for a given release.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - list-a-project-release-s-commits
+      summary: List a project release's commits.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - list-a-project-s-release-files
+      summary: Return a list of files for a given release.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - list-an-organization-release-s-commits
+      summary: List an organization release's commits.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - list-an-organization-s-release-files
+      summary: Return a list of files for a given release.
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - list-an-organization-s-releases
+      summary: Return a list of releases for a given organization.
+      flags:
+        - --query
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - retrieve-a-project-release-s-file
+      summary: Retrieve a file for a given release.
+      flags:
+        - --download
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - retrieve-an-organization-release-s-file
+      summary: Retrieve a file for a given release.
+      flags:
+        - --download
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - retrieve-files-changed-in-a-release-s-commits
+      summary: Retrieve files changed in a release's commits
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - update-a-project-release-file
+      summary: Update a project release file.
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - update-an-organization-release-file
+      summary: Update an organization release file.
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - upload-a-new-organization-release-file
+      summary: Upload a new file for the given release. Unlike other API requests, files must be uploaded using the traditional multip…
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - sentry
+        - releases
+        - upload-a-new-project-release-file
+      summary: Upload a new file for the given release. Unlike other API requests, files must be uploaded using the traditional multip…
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - delete-actions-id
+      summary: Delete an Action
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - delete-actions-idaction-reactions-id
+      summary: Delete Action's Reaction
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - get-actions-id
+      summary: Get an Action
+      flags:
+        - --display
+        - --entities
+        - --fields
+        - --member
+        - --memberCreator
+        - --memberCreator_fields
+        - --member_fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - get-actions-id-board
+      summary: Get the Board for an Action
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - get-actions-id-card
+      summary: Get the Card for an Action
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - get-actions-id-field
+      summary: Get a specific field on an Action
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - get-actions-id-list
+      summary: Get the List for an Action
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - get-actions-id-member
+      summary: Get the Member of an Action
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - get-actions-id-membercreator
+      summary: Get the Member Creator of an Action
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - get-actions-id-organization
+      summary: Get the Organization of an Action
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - get-actions-idaction-reactions
+      summary: Get Action's Reactions
+      flags:
+        - --emoji
+        - --member
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - get-actions-idaction-reactions-id
+      summary: Get Action's Reaction
+      flags:
+        - --emoji
+        - --member
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - get-actions-idaction-reactionsummary
+      summary: List Action's summary of Reactions
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - post-actions-idaction-reactions
+      summary: Create Reaction for Action
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - put-actions-id
+      summary: Update an Action
+      flags:
+        - --text
+    - path:
+        - coily
+        - ops
+        - trello
+        - actions
+        - put-actions-id-text
+      summary: Update a Comment Action
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - applications
+        - applications-key-compliance
+      summary: Get Application's compliance data
+    - path:
+        - coily
+        - ops
+        - trello
+        - batch
+        - get-batch
+      summary: Batch Requests
+      flags:
+        - --urls
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - boards-id-checklists
+      summary: Get Checklists on a Board
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - boardsidmembersidmember
+      summary: Remove Member from Board
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - delete-boards-id
+      summary: Delete a Board
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-board-id-plugins
+      summary: Get Power-Ups on a Board
+      flags:
+        - --filter
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-boards-id
+      summary: Get a Board
+      flags:
+        - --actions
+        - --boardStars
+        - --card_pluginData
+        - --cards
+        - --checklists
+        - --customFields
+        - --fields
+        - --labels
+        - --lists
+        - --members
+        - --memberships
+        - --myPrefs
+        - --organization
+        - --organization_pluginData
+        - --pluginData
+        - --tags
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-boards-id-actions
+      summary: Get Actions of a Board
+      flags:
+        - --before
+        - --fields
+        - --filter
+        - --format
+        - --idModels
+        - --limit
+        - --member
+        - --memberCreator
+        - --memberCreator_fields
+        - --member_fields
+        - --page
+        - --reactions
+        - --since
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-boards-id-boardplugins
+      summary: Get Enabled Power-Ups on Board
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-boards-id-boardstars
+      summary: Get boardStars on a Board
+      flags:
+        - --filter
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-boards-id-cards
+      summary: Get Cards on a Board
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-boards-id-cards-filter
+      summary: Get filtered Cards on a Board
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-boards-id-customfields
+      summary: Get Custom Fields for Board
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-boards-id-field
+      summary: Get a field on a Board
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-boards-id-labels
+      summary: Get Labels on a Board
+      flags:
+        - --fields
+        - --limit
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-boards-id-lists
+      summary: Get Lists on a Board
+      flags:
+        - --card_fields
+        - --cards
+        - --fields
+        - --filter
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-boards-id-lists-filter
+      summary: Get filtered Lists on a Board
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-boards-id-members
+      summary: Get the Members of a Board
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - get-boards-id-memberships
+      summary: Get Memberships of a Board
+      flags:
+        - --activity
+        - --filter
+        - --member
+        - --member_fields
+        - --orgMemberType
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - post-boards
+      summary: Create a Board
+      flags:
+        - --defaultLabels
+        - --defaultLists
+        - --desc
+        - --idBoardSource
+        - --idOrganization
+        - --keepFromSource
+        - --name
+        - --powerUps
+        - --prefs_background
+        - --prefs_cardAging
+        - --prefs_cardCovers
+        - --prefs_comments
+        - --prefs_invitations
+        - --prefs_permissionLevel
+        - --prefs_selfJoin
+        - --prefs_voting
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - post-boards-id-calendarkey-generate
+      summary: Create a calendarKey for a Board
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - post-boards-id-emailkey-generate
+      summary: Create a emailKey for a Board
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - post-boards-id-idtags
+      summary: Create a Tag for a Board
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - post-boards-id-labels
+      summary: Create a Label on a Board
+      flags:
+        - --color
+        - --name
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - post-boards-id-lists
+      summary: Create a List on a Board
+      flags:
+        - --name
+        - --pos
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - post-boards-id-markedasviewed
+      summary: Mark Board as viewed
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - put-boards-id
+      summary: Update a Board
+      flags:
+        - --closed
+        - --desc
+        - --idOrganization
+        - --name
+        - --prefs/background
+        - --prefs/calendarFeedEnabled
+        - --prefs/cardAging
+        - --prefs/cardCovers
+        - --prefs/comments
+        - --prefs/hideVotes
+        - --prefs/invitations
+        - --prefs/permissionLevel
+        - --prefs/selfJoin
+        - --prefs/voting
+        - --subscribed
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - put-boards-id-members
+      summary: Invite Member to Board via email
+      flags:
+        - --body
+        - --email
+        - --type
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - put-boards-id-members-idmember
+      summary: Add a Member to a Board
+      flags:
+        - --allowBillableGuest
+        - --type
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - put-boards-id-memberships-idmembership
+      summary: Update Membership of Member on a Board
+      flags:
+        - --member_fields
+        - --type
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - put-boards-id-my-prefs-showsidebar
+      summary: Update showSidebar Pref on a Board
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - put-boards-id-my-prefs-showsidebaractivity
+      summary: Update showSidebarActivity Pref on a Board
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - put-boards-id-my-prefs-showsidebarboardactions
+      summary: Update showSidebarBoardActions Pref on a Board
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - put-boards-id-my-prefs-showsidebarmembers
+      summary: Update showSidebarMembers Pref on a Board
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - put-boards-id-myprefs-emailposition
+      summary: Update emailPosition Pref on a Board
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - boards
+        - put-boards-id-myprefs-idemaillist
+      summary: Update idEmailList Pref on a Board
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - cardsidmembersvoted-1
+      summary: Add Member vote to Card
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - delete-cards-id
+      summary: Delete a Card
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - delete-cards-id-actions-id-comments
+      summary: Delete a comment on a Card
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - delete-cards-id-checkitem-idcheckitem
+      summary: Delete checkItem on a Card
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - delete-cards-id-checklists-idchecklist
+      summary: Delete a Checklist on a Card
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - delete-cards-id-idlabels-idlabel
+      summary: Remove a Label from a Card
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - delete-cards-id-membersvoted-idmember
+      summary: Remove a Member's Vote on a Card
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - delete-cards-id-stickers-idsticker
+      summary: Delete a Sticker on a Card
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - delete-id-idmembers-idmember
+      summary: Remove a Member from a Card
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - deleted-cards-id-attachments-idattachment
+      summary: Delete an Attachment on a Card
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id
+      summary: Get a Card
+      flags:
+        - --actions
+        - --attachment_fields
+        - --attachments
+        - --board
+        - --board_fields
+        - --checkItemStates
+        - --checklist_fields
+        - --checklists
+        - --customFieldItems
+        - --fields
+        - --list
+        - --memberVoted_fields
+        - --member_fields
+        - --members
+        - --membersVoted
+        - --pluginData
+        - --sticker_fields
+        - --stickers
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-actions
+      summary: Get Actions on a Card
+      flags:
+        - --filter
+        - --page
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-attachments
+      summary: Get Attachments on a Card
+      flags:
+        - --fields
+        - --filter
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-attachments-idattachment
+      summary: Get an Attachment on a Card
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-board
+      summary: Get the Board the Card is on
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-checkitem-idcheckitem
+      summary: Get checkItem on a Card
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-checkitemstates
+      summary: Get checkItems on a Card
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-checklists
+      summary: Get Checklists on a Card
+      flags:
+        - --checkItem_fields
+        - --checkItems
+        - --fields
+        - --filter
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-customfielditems
+      summary: Get Custom Field Items for a Card
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-field
+      summary: Get a field on a Card
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-list
+      summary: Get the List of a Card
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-members
+      summary: Get the Members of a Card
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-membersvoted
+      summary: Get Members who have voted on a Card
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-plugindata
+      summary: Get pluginData on a Card
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-stickers
+      summary: Get Stickers on a Card
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - get-cards-id-stickers-idsticker
+      summary: Get a Sticker on a Card
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - post-cards
+      summary: Create a new Card
+      flags:
+        - --address
+        - --cardRole
+        - --coordinates
+        - --desc
+        - --due
+        - --dueComplete
+        - --fileSource
+        - --idCardSource
+        - --idLabels
+        - --idList
+        - --idMembers
+        - --keepFromSource
+        - --locationName
+        - --mimeType
+        - --name
+        - --pos
+        - --start
+        - --urlSource
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - post-cards-id-actions-comments
+      summary: Add a new comment to a Card
+      flags:
+        - --text
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - post-cards-id-attachments
+      summary: Create Attachment On Card
+      flags:
+        - --file
+        - --mimeType
+        - --name
+        - --setCover
+        - --url
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - post-cards-id-checklists
+      summary: Create Checklist on a Card
+      flags:
+        - --idChecklistSource
+        - --name
+        - --pos
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - post-cards-id-idlabels
+      summary: Add a Label to a Card
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - post-cards-id-idmembers
+      summary: Add a Member to a Card
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - post-cards-id-labels
+      summary: Create a new Label on a Card
+      flags:
+        - --color
+        - --name
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - post-cards-id-markassociatednotificationsread
+      summary: Mark a Card's Notifications as read
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - post-cards-id-stickers
+      summary: Add a Sticker to a Card
+      flags:
+        - --image
+        - --left
+        - --rotate
+        - --top
+        - --zIndex
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - put-cards-id
+      summary: Update a Card
+      flags:
+        - --address
+        - --closed
+        - --coordinates
+        - --cover
+        - --desc
+        - --due
+        - --dueComplete
+        - --idAttachmentCover
+        - --idBoard
+        - --idLabels
+        - --idList
+        - --idMembers
+        - --locationName
+        - --name
+        - --pos
+        - --start
+        - --subscribed
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - put-cards-id-actions-idaction-comments
+      summary: Update Comment Action on a Card
+      flags:
+        - --text
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - put-cards-id-checkitem-idcheckitem
+      summary: Update a checkItem on a Card
+      flags:
+        - --due
+        - --dueReminder
+        - --idChecklist
+        - --idMember
+        - --name
+        - --pos
+        - --state
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - put-cards-id-stickers-idsticker
+      summary: Update a Sticker on a Card
+      flags:
+        - --left
+        - --rotate
+        - --top
+        - --zIndex
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - put-cards-idcard-checklist-idchecklist-checkitem-idcheckitem
+      summary: Update Checkitem on Checklist on Card
+      flags:
+        - --pos
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - put-cards-idcard-customfield-idcustomfield-item
+      summary: Update Custom Field item on Card
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - trello
+        - cards
+        - put-cards-idcard-customfields
+      summary: Update Multiple Custom Field items on Card
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - trello
+        - checklists
+        - delete-checklists-id
+      summary: Delete a Checklist
+    - path:
+        - coily
+        - ops
+        - trello
+        - checklists
+        - delete-checklists-id-checkitems-idcheckitem
+      summary: Delete Checkitem from Checklist
+    - path:
+        - coily
+        - ops
+        - trello
+        - checklists
+        - get-checklists-id
+      summary: Get a Checklist
+      flags:
+        - --cards
+        - --checkItem_fields
+        - --checkItems
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - checklists
+        - get-checklists-id-board
+      summary: Get the Board the Checklist is on
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - checklists
+        - get-checklists-id-cards
+      summary: Get the Card a Checklist is on
+    - path:
+        - coily
+        - ops
+        - trello
+        - checklists
+        - get-checklists-id-checkitems
+      summary: Get Checkitems on a Checklist
+      flags:
+        - --fields
+        - --filter
+    - path:
+        - coily
+        - ops
+        - trello
+        - checklists
+        - get-checklists-id-checkitems-idcheckitem
+      summary: Get a Checkitem on a Checklist
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - checklists
+        - get-checklists-id-field
+      summary: Get field on a Checklist
+    - path:
+        - coily
+        - ops
+        - trello
+        - checklists
+        - post-checklists
+      summary: Create a Checklist
+      flags:
+        - --idCard
+        - --idChecklistSource
+        - --name
+        - --pos
+    - path:
+        - coily
+        - ops
+        - trello
+        - checklists
+        - post-checklists-id-checkitems
+      summary: Create Checkitem on Checklist
+      flags:
+        - --checked
+        - --due
+        - --dueReminder
+        - --idMember
+        - --name
+        - --pos
+    - path:
+        - coily
+        - ops
+        - trello
+        - checklists
+        - put-checklists-id-field
+      summary: Update field on a Checklist
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - checklists
+        - put-checlists-id
+      summary: Update a Checklist
+      flags:
+        - --name
+        - --pos
+    - path:
+        - coily
+        - ops
+        - trello
+        - custom-fields
+        - delete-customfields-id
+      summary: Delete a Custom Field definition
+    - path:
+        - coily
+        - ops
+        - trello
+        - custom-fields
+        - delete-customfields-options-idcustomfieldoption
+      summary: Delete Option of Custom Field dropdown
+    - path:
+        - coily
+        - ops
+        - trello
+        - custom-fields
+        - get-customfields-id
+      summary: Get a Custom Field
+    - path:
+        - coily
+        - ops
+        - trello
+        - custom-fields
+        - get-customfields-id-options
+      summary: Add Option to Custom Field dropdown
+    - path:
+        - coily
+        - ops
+        - trello
+        - custom-fields
+        - get-customfields-options-idcustomfieldoption
+      summary: Get Option of Custom Field dropdown
+    - path:
+        - coily
+        - ops
+        - trello
+        - custom-fields
+        - post-customfields
+      summary: Create a new Custom Field on a Board
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - trello
+        - custom-fields
+        - post-customfields-id-options
+      summary: Get Options of Custom Field drop down
+    - path:
+        - coily
+        - ops
+        - trello
+        - custom-fields
+        - put-customfields-id
+      summary: Update a Custom Field definition
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - trello
+        - emoji
+        - emoji
+      summary: List available Emoji
+      flags:
+        - --locale
+        - --spritesheets
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - delete-enterprises-id-organizations-idorg
+      summary: Delete an Organization from an Enterprise.
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - enterprises-id-members-id-member-deactivated
+      summary: Deactivate a Member of an Enterprise.
+      flags:
+        - --board_fields
+        - --fields
+        - --organization_fields
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - enterprises-id-organizations-idmember
+      summary: Remove a Member as admin from Enterprise.
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - get-enterprises-id
+      summary: Get an Enterprise
+      flags:
+        - --fields
+        - --member_count
+        - --member_fields
+        - --member_filter
+        - --member_sort
+        - --member_sortBy
+        - --member_sortOrder
+        - --member_startIndex
+        - --members
+        - --organization_fields
+        - --organization_memberships
+        - --organization_paid_accounts
+        - --organizations
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - get-enterprises-id-admins
+      summary: Get Enterprise admin Members
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - get-enterprises-id-auditlog
+      summary: Get auditlog data for an Enterprise
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - get-enterprises-id-claimable-organizations
+      summary: Get ClaimableOrganizations of an Enterprise
+      flags:
+        - --activeSince
+        - --cursor
+        - --inactiveSince
+        - --limit
+        - --name
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - get-enterprises-id-members
+      summary: Get Members of Enterprise
+      flags:
+        - --board_fields
+        - --count
+        - --fields
+        - --filter
+        - --organization_fields
+        - --sort
+        - --sortBy
+        - --sortOrder
+        - --startIndex
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - get-enterprises-id-members-idmember
+      summary: Get a Member of Enterprise
+      flags:
+        - --board_fields
+        - --fields
+        - --organization_fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - get-enterprises-id-organizations
+      summary: Get Organizations of an Enterprise
+      flags:
+        - --count
+        - --fields
+        - --filter
+        - --startIndex
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - get-enterprises-id-organizations-bulk-id-organizations
+      summary: Bulk accept a set of organizations to an Enterprise.
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - get-enterprises-id-pending-organizations
+      summary: Get PendingOrganizations of an Enterprise
+      flags:
+        - --activeSince
+        - --inactiveSince
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - get-enterprises-id-signupurl
+      summary: Get signupUrl for Enterprise
+      flags:
+        - --authenticate
+        - --confirmationAccepted
+        - --returnUrl
+        - --tosAccepted
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - get-enterprises-id-transferrable-bulk-id-organizations
+      summary: Get a bulk list of organizations that can be transferred to an enterprise.
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - get-enterprises-id-transferrable-organization-id-organization
+      summary: Get whether an organization can be transferred to an enterprise.
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - get-users-id
+      summary: Get Users of an Enterprise
+      flags:
+        - --activeSince
+        - --admin
+        - --collaborator
+        - --cursor
+        - --deactivated
+        - --inactiveSince
+        - --licensed
+        - --managed
+        - --search
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - post-enterprises-id-tokens
+      summary: Create an auth Token for an Enterprise.
+      flags:
+        - --expiration
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - put-enterprises-id-admins-idmember
+      summary: Update Member to be admin of Enterprise
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - put-enterprises-id-enterprise-join-request-bulk
+      summary: Decline enterpriseJoinRequests from one organization or a bulk list of organizations.
+      flags:
+        - --idOrganizations
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - put-enterprises-id-members-idmember-licensed
+      summary: Update a Member's licensed status
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - enterprises
+        - put-enterprises-id-organizations
+      summary: Transfer an Organization to an Enterprise.
+      flags:
+        - --idOrganization
+    - path:
+        - coily
+        - ops
+        - trello
+        - labels
+        - delete-labels-id
+      summary: Delete a Label
+    - path:
+        - coily
+        - ops
+        - trello
+        - labels
+        - get-labels-id
+      summary: Get a Label
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - labels
+        - post-labels
+      summary: Create a Label
+      flags:
+        - --color
+        - --idBoard
+        - --name
+    - path:
+        - coily
+        - ops
+        - trello
+        - labels
+        - put-labels-id
+      summary: Update a Label
+      flags:
+        - --color
+        - --name
+    - path:
+        - coily
+        - ops
+        - trello
+        - labels
+        - put-labels-id-field
+      summary: Update a field on a label
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - lists
+        - get-lists-id
+      summary: Get a List
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - lists
+        - get-lists-id-actions
+      summary: Get Actions for a List
+      flags:
+        - --filter
+    - path:
+        - coily
+        - ops
+        - trello
+        - lists
+        - get-lists-id-board
+      summary: Get the Board a List is on
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - lists
+        - get-lists-id-cards
+      summary: Get Cards in a List
+    - path:
+        - coily
+        - ops
+        - trello
+        - lists
+        - post-lists
+      summary: Create a new List
+      flags:
+        - --idBoard
+        - --idListSource
+        - --name
+        - --pos
+    - path:
+        - coily
+        - ops
+        - trello
+        - lists
+        - post-lists-id-archiveallcards
+      summary: Archive all Cards in List
+    - path:
+        - coily
+        - ops
+        - trello
+        - lists
+        - post-lists-id-moveallcards
+      summary: Move all Cards in List
+      flags:
+        - --idBoard
+        - --idList
+    - path:
+        - coily
+        - ops
+        - trello
+        - lists
+        - put-id-idboard
+      summary: Move List to Board
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - lists
+        - put-lists-id
+      summary: Update a List
+      flags:
+        - --closed
+        - --idBoard
+        - --name
+        - --pos
+        - --subscribed
+    - path:
+        - coily
+        - ops
+        - trello
+        - lists
+        - put-lists-id-closed
+      summary: Archive or unarchive a list
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - lists
+        - put-lists-id-field
+      summary: Update a field on a List
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - delete-members-id-boardbackgrounds-idbackground
+      summary: Delete a Member's custom Board background
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - delete-members-id-boardstars-idstar
+      summary: Delete Star for Board
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - delete-members-id-customboardbackgrounds-idbackground
+      summary: Delete custom Board Background of Member
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - delete-members-id-customstickers-idsticker
+      summary: Delete a Member's custom Sticker
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - delete-members-id-savedsearches-idsearch
+      summary: Delete a saved search
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id
+      summary: Get a Member
+      flags:
+        - --actions
+        - --boardBackgrounds
+        - --boardStars
+        - --boards
+        - --boardsInvited
+        - --boardsInvited_fields
+        - --cards
+        - --customBoardBackgrounds
+        - --customEmoji
+        - --customStickers
+        - --fields
+        - --notifications
+        - --organization_fields
+        - --organization_paid_account
+        - --organizations
+        - --organizationsInvited
+        - --organizationsInvited_fields
+        - --paid_account
+        - --savedSearches
+        - --tokens
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-actions
+      summary: Get a Member's Actions
+      flags:
+        - --filter
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-boardbackgrounds
+      summary: Get Member's custom Board backgrounds
+      flags:
+        - --filter
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-boardbackgrounds-idbackground
+      summary: Get a boardBackground of a Member
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-boards
+      summary: Get Boards that Member belongs to
+      flags:
+        - --fields
+        - --filter
+        - --lists
+        - --organization
+        - --organization_fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-boardsinvited
+      summary: Get Boards the Member has been invited to
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-boardstars
+      summary: Get a Member's boardStars
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-boardstars-idstar
+      summary: Get a boardStar of Member
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-cards
+      summary: Get Cards the Member is on
+      flags:
+        - --filter
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-customboardbackgrounds
+      summary: Get a Member's custom Board Backgrounds
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-customboardbackgrounds-idbackground
+      summary: Get custom Board Background of Member
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-customemoji
+      summary: Get a Member's customEmojis
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-customstickers
+      summary: Get Member's custom Stickers
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-customstickers-idsticker
+      summary: Get a Member's custom Sticker
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-field
+      summary: Get a field on a Member
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-notification-channel-settings
+      summary: Get a Member's notification channel settings
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-notification-channel-settings-channel
+      summary: Get blocked notification keys of Member on this channel
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-notifications
+      summary: Get Member's Notifications
+      flags:
+        - --before
+        - --display
+        - --entities
+        - --fields
+        - --filter
+        - --limit
+        - --memberCreator
+        - --memberCreator_fields
+        - --page
+        - --read_filter
+        - --since
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-organizations
+      summary: Get Member's Organizations
+      flags:
+        - --fields
+        - --filter
+        - --paid_account
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-organizationsinvited
+      summary: Get Organizations a Member has been invited to
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-savedsearches
+      summary: Get Member's saved searched
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-savedsearches-idsearch
+      summary: Get a saved search
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - get-members-id-tokens
+      summary: Get Member's Tokens
+      flags:
+        - --webhooks
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - membersidavatar
+      summary: Create Avatar for Member
+      flags:
+        - --file
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - membersidcustomboardbackgrounds-1
+      summary: Create a new custom Board Background
+      flags:
+        - --file
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - membersidcustomemojiidemoji
+      summary: Get a Member's custom Emoji
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - post-members-id-boardbackgrounds-1
+      summary: Upload new boardBackground for Member
+      flags:
+        - --file
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - post-members-id-boardstars
+      summary: Create Star for Board
+      flags:
+        - --idBoard
+        - --pos
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - post-members-id-customemoji
+      summary: Create custom Emoji for Member
+      flags:
+        - --file
+        - --name
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - post-members-id-customstickers
+      summary: Create custom Sticker for Member
+      flags:
+        - --file
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - post-members-id-onetimemessagesdismissed
+      summary: Dismiss a message for Member
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - post-members-id-savedsearches
+      summary: Create saved Search for Member
+      flags:
+        - --name
+        - --pos
+        - --query
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - put-members-id
+      summary: Update a Member
+      flags:
+        - --avatarSource
+        - --bio
+        - --fullName
+        - --initials
+        - --prefs/colorBlind
+        - --prefs/locale
+        - --prefs/minutesBetweenSummaries
+        - --username
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - put-members-id-boardbackgrounds-idbackground
+      summary: Update a Member's custom Board background
+      flags:
+        - --brightness
+        - --tile
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - put-members-id-boardstars-idstar
+      summary: Update the position of a boardStar of Member
+      flags:
+        - --pos
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - put-members-id-customboardbackgrounds-idbackground
+      summary: Update custom Board Background of Member
+      flags:
+        - --brightness
+        - --tile
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - put-members-id-notification-channel-settings-channel-blocked-keys
+      summary: Update blocked notification keys of Member on a channel
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - put-members-id-notification-channel-settings-channel-blocked-keys-put
+      summary: Update blocked notification keys of Member on a channel
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - put-members-id-notification-channel-settings-channel-blocked-keys-put3
+      summary: Update blocked notification keys of Member on a channel
+    - path:
+        - coily
+        - ops
+        - trello
+        - members
+        - put-members-id-savedsearches-idsearch
+      summary: Update a saved search
+      flags:
+        - --name
+        - --pos
+        - --query
+    - path:
+        - coily
+        - ops
+        - trello
+        - notifications
+        - get-notifications-id
+      summary: Get a Notification
+      flags:
+        - --board
+        - --board_fields
+        - --card
+        - --card_fields
+        - --display
+        - --entities
+        - --fields
+        - --list
+        - --member
+        - --memberCreator
+        - --memberCreator_fields
+        - --member_fields
+        - --organization
+        - --organization_fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - notifications
+        - get-notifications-id-board
+      summary: Get the Board a Notification is on
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - notifications
+        - get-notifications-id-card
+      summary: Get the Card a Notification is on
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - notifications
+        - get-notifications-id-field
+      summary: Get a field of a Notification
+    - path:
+        - coily
+        - ops
+        - trello
+        - notifications
+        - get-notifications-id-list
+      summary: Get the List a Notification is on
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - notifications
+        - get-notifications-id-membercreator
+      summary: Get the Member who created the Notification
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - notifications
+        - get-notifications-id-organization
+      summary: Get a Notification's associated Organization
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - notifications
+        - notificationsidmember
+      summary: Get the Member a Notification is about (not the creator)
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - notifications
+        - post-notifications-all-read
+      summary: Mark all Notifications as read
+      flags:
+        - --ids
+        - --read
+    - path:
+        - coily
+        - ops
+        - trello
+        - notifications
+        - put-notifications-id
+      summary: Update a Notification's read status
+      flags:
+        - --unread
+    - path:
+        - coily
+        - ops
+        - trello
+        - notifications
+        - put-notifications-id-unread
+      summary: Update Notification's read status
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - delete-organizations-id
+      summary: Delete an Organization
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - delete-organizations-id-logo
+      summary: Delete Logo for Organization
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - delete-organizations-id-members
+      summary: Remove a Member from an Organization
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - delete-organizations-id-prefs-associateddomain
+      summary: Remove the associated Google Apps domain from a Workspace
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - delete-organizations-id-prefs-orginviterestrict
+      summary: Delete the email domain restriction on who can be invited to the Workspace
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - delete-organizations-id-tags-idtag
+      summary: Delete an Organization's Tag
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - get-organizations-id
+      summary: Get an Organization
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - get-organizations-id-actions
+      summary: Get Actions for Organization
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - get-organizations-id-boards
+      summary: Get Boards in an Organization
+      flags:
+        - --fields
+        - --filter
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - get-organizations-id-exports
+      summary: Retrieve Organization's Exports
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - get-organizations-id-field
+      summary: Get field on Organization
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - get-organizations-id-members
+      summary: Get the Members of an Organization
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - get-organizations-id-memberships
+      summary: Get Memberships of an Organization
+      flags:
+        - --filter
+        - --member
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - get-organizations-id-memberships-idmembership
+      summary: Get a Membership of an Organization
+      flags:
+        - --member
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - get-organizations-id-newbillableguests-idboard
+      summary: Get Organizations new billable guests
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - get-organizations-id-plugindata
+      summary: Get the pluginData Scoped to Organization
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - get-organizations-id-tags
+      summary: Get Tags of an Organization
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - organizations-id-members-idmember-all
+      summary: Remove a Member from an Organization and all Organization Boards
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - post-organizations
+      summary: Create a new Organization
+      flags:
+        - --desc
+        - --displayName
+        - --name
+        - --website
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - post-organizations-id-exports
+      summary: Create Export for Organizations
+      flags:
+        - --attachments
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - post-organizations-id-logo
+      summary: Update logo for an Organization
+      flags:
+        - --file
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - post-organizations-id-tags
+      summary: Create a Tag in Organization
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - put-organizations-id
+      summary: Update an Organization
+      flags:
+        - --desc
+        - --displayName
+        - --name
+        - --prefs/associatedDomain
+        - --prefs/boardVisibilityRestrict/org
+        - --prefs/boardVisibilityRestrict/private
+        - --prefs/boardVisibilityRestrict/public
+        - --prefs/externalMembersDisabled
+        - --prefs/googleAppsVersion
+        - --prefs/orgInviteRestrict
+        - --prefs/permissionLevel
+        - --website
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - put-organizations-id-members
+      summary: Update an Organization's Members
+      flags:
+        - --email
+        - --fullName
+        - --type
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - put-organizations-id-members-idmember
+      summary: Update a Member of an Organization
+      flags:
+        - --type
+    - path:
+        - coily
+        - ops
+        - trello
+        - organizations
+        - put-organizations-id-members-idmember-deactivated
+      summary: Deactivate or reactivate a member of an Organization
+      flags:
+        - --value
+    - path:
+        - coily
+        - ops
+        - trello
+        - plugins
+        - get-plugins-id
+      summary: Get a Plugin
+    - path:
+        - coily
+        - ops
+        - trello
+        - plugins
+        - get-plugins-id-compliance-memberprivacy
+      summary: Get Plugin's Member privacy compliance
+    - path:
+        - coily
+        - ops
+        - trello
+        - plugins
+        - post-plugins-idplugin-listing
+      summary: Create a Listing for Plugin
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - trello
+        - plugins
+        - put-plugins-id
+      summary: Update a Plugin
+    - path:
+        - coily
+        - ops
+        - trello
+        - plugins
+        - put-plugins-idplugin-listings-idlisting
+      summary: Updating Plugin's Listing
+      flags:
+        - --body
+    - path:
+        - coily
+        - ops
+        - trello
+        - search
+        - get-search
+      summary: Search Trello
+      flags:
+        - --board_fields
+        - --board_organization
+        - --boards_limit
+        - --card_attachments
+        - --card_board
+        - --card_fields
+        - --card_list
+        - --card_members
+        - --card_stickers
+        - --cards_limit
+        - --cards_page
+        - --idBoards
+        - --idCards
+        - --idOrganizations
+        - --member_fields
+        - --members_limit
+        - --modelTypes
+        - --organization_fields
+        - --organizations_limit
+        - --partial
+        - --query
+    - path:
+        - coily
+        - ops
+        - trello
+        - search
+        - get-search-members
+      summary: Search for Members
+      flags:
+        - --idBoard
+        - --idOrganization
+        - --limit
+        - --onlyOrgMembers
+        - --query
+    - path:
+        - coily
+        - ops
+        - trello
+        - tokens
+        - delete-token
+      summary: Delete a Token
+    - path:
+        - coily
+        - ops
+        - trello
+        - tokens
+        - delete-tokens-token-webhooks-idwebhook
+      summary: Delete a Webhook created by Token
+    - path:
+        - coily
+        - ops
+        - trello
+        - tokens
+        - get-tokens-token
+      summary: Get a Token
+      flags:
+        - --fields
+        - --webhooks
+    - path:
+        - coily
+        - ops
+        - trello
+        - tokens
+        - get-tokens-token-member
+      summary: Get Token's Member
+      flags:
+        - --fields
+    - path:
+        - coily
+        - ops
+        - trello
+        - tokens
+        - get-tokens-token-webhooks
+      summary: Get Webhooks for Token
+    - path:
+        - coily
+        - ops
+        - trello
+        - tokens
+        - get-tokens-token-webhooks-idwebhook
+      summary: Get a Webhook belonging to a Token
+    - path:
+        - coily
+        - ops
+        - trello
+        - tokens
+        - post-tokens-token-webhooks
+      summary: Create Webhooks for Token
+      flags:
+        - --callbackURL
+        - --description
+        - --idModel
+    - path:
+        - coily
+        - ops
+        - trello
+        - tokens
+        - tokenstokenwebhooks-1
+      summary: Update a Webhook created by Token
+      flags:
+        - --callbackURL
+        - --description
+        - --idModel
+    - path:
+        - coily
+        - ops
+        - trello
+        - webhooks
+        - delete-webhooks-id
+      summary: Delete a Webhook
+    - path:
+        - coily
+        - ops
+        - trello
+        - webhooks
+        - get-webhooks-id
+      summary: Get a Webhook
+    - path:
+        - coily
+        - ops
+        - trello
+        - webhooks
+        - post-webhooks
+      summary: Create a Webhook
+      flags:
+        - --active
+        - --callbackURL
+        - --description
+        - --idModel
+    - path:
+        - coily
+        - ops
+        - trello
+        - webhooks
+        - put-webhooks-id
+      summary: Update a Webhook
+      flags:
+        - --active
+        - --callbackURL
+        - --description
+        - --idModel
+    - path:
+        - coily
+        - ops
+        - trello
+        - webhooks
+        - webhooksidfield
+      summary: Get a field on a Webhook
     - path:
         - coily
         - pkg
@@ -362,6 +5121,45 @@ commands:
     - path:
         - coily
         - pkg
+        - glama
+        - instances
+        - get-v1-instances
+      summary: Hosted MCP server instances
+    - path:
+        - coily
+        - pkg
+        - glama
+        - servers
+        - get-v1-attributes
+      summary: MCP server attributes
+    - path:
+        - coily
+        - pkg
+        - glama
+        - servers
+        - get-v1-servers
+      summary: GET /v1/servers
+      flags:
+        - --after
+        - --first
+        - --query
+    - path:
+        - coily
+        - pkg
+        - glama
+        - servers
+        - get-v1-servers-by-namespace-by-slug
+      summary: Retrieve the MCP server details by its unique identifier.
+    - path:
+        - coily
+        - pkg
+        - glama
+        - telemetry
+        - post-v1-telemetry-usage
+      summary: Send MCP tool usage data to the server.
+    - path:
+        - coily
+        - pkg
         - npm
       summary: Pass-through to npm with argv validation + audit log.
     - path:
@@ -387,6 +5185,22 @@ commands:
     - path:
         - coily
         - pkg
+        - skillsmp
+        - ai-search
+      summary: GET /ai-search - semantic search across skills.
+    - path:
+        - coily
+        - pkg
+        - skillsmp
+        - search
+      summary: GET /search - keyword search across skills.
+      flags:
+        - --limit
+        - --page
+        - --sort-by
+    - path:
+        - coily
+        - pkg
         - uv
       summary: Pass-through to uv with argv validation + audit log.
     - path:
@@ -397,41 +5211,12 @@ commands:
     - path:
         - coily
         - setup
-      summary: 'Run the post-upgrade rituals: completion, skill symlink, and lockdown re-baseline.'
+      summary: 'Run the post-upgrade rituals: completion, lockdown re-baseline, and user hook.'
       flags:
         - --skip-completion
         - --skip-lockdown
-        - --skip-skill
         - --skip-user-hook
         - --workspace
-    - path:
-        - coily
-        - sirens-discord-ops
-        - restart
-      summary: Restart the sirens-discord-ops systemd unit.
-    - path:
-        - coily
-        - sirens-discord-ops
-        - start
-      summary: Start the sirens-discord-ops systemd unit.
-    - path:
-        - coily
-        - sirens-discord-ops
-        - status
-      summary: Print systemctl status sirens-discord-ops.
-    - path:
-        - coily
-        - sirens-discord-ops
-        - stop
-      summary: Stop the sirens-discord-ops systemd unit.
-    - path:
-        - coily
-        - sirens-discord-ops
-        - tail
-      summary: Tail sirens-discord-ops journal logs (journalctl -u sirens-discord-ops -f).
-      flags:
-        - --follow
-        - --lines
     - path:
         - coily
         - ssh
@@ -692,48 +5477,6 @@ commands:
         - coily
         - tailscale
       summary: Pass-through to tailscale with argv validation + audit log.
-    - path:
-        - coily
-        - trello
-        - create
-      summary: Create a new Trello card.
-      flags:
-        - --desc
-        - --dir
-        - --label
-        - --list
-        - --name
-    - path:
-        - coily
-        - trello
-        - sort
-      summary: Sort each list so cards with the given label rise to the top.
-      flags:
-        - --dir
-        - --dry
-        - --label
-    - path:
-        - coily
-        - trello
-        - status
-      summary: List Trello cards with their list, labels, and last activity.
-      flags:
-        - --dir
-    - path:
-        - coily
-        - trello
-        - update
-      summary: Mutate one Trello card (move list, toggle labels, append a comment, rename, close/reopen).
-      flags:
-        - --close
-        - --comment
-        - --desc
-        - --dir
-        - --label-off
-        - --label-on
-        - --list
-        - --name
-        - --reopen
     - path:
         - coily
         - version

@@ -61,7 +61,6 @@ func TestVerbToSkillArea_PrefixMapping(t *testing.T) {
 		"kubectl":                   "coily-ops-kubectl-meta",
 		"docker":                    "coily-docker-meta",
 		"eco.status":                "coily-gaming-eco-meta",
-		"sirens.discord.ops":        "coily-sirens-discord-ops-meta",
 		"audit.path":                "coily-audit-meta",
 		"some-unknown-verb":         "coily-shared-meta",
 		"completely.unknown.string": "coily-shared-meta",

@@ -17,7 +17,7 @@ The hosts coily operationally fronts. Each host has an owner, a destructive surf
 |---|---|---|---|---|
 | Operator laptop (Mac) | Operator | Verbs invoked here that mutate remote state. | `coily ops aws sts get-caller-identity`, `coily ops kubectl get`, `coily audit *`, `coily ops gh` reads. | Local `~/.coily/audit/<owner>-<repo>.jsonl` on the laptop. |
 | Operator laptop (Windows) | Operator | Same as Mac. | Same as Mac. | Local `%USERPROFILE%\.coily\audit\...` on the Windows host. |
-| kai-server (homelab) | Kai (or matching ssh user) | `coily ssh deploy`, `coily gaming * restart/stop`, `coily sirens-discord-ops restart`. Service-impacting for whoever is using the server. | `coily gaming * status`, `coily ssh kubectl get`, journalctl tails. | On the originating laptop, not on kai-server. The verb runs on kai-server via the ssh transport but is initiated from a laptop. |
+| kai-server (homelab) | Kai (or matching ssh user) | `coily ssh deploy`, `coily gaming * restart/stop`, `coily ssh systemctl restart <unit>`. Service-impacting for whoever is using the server. | `coily gaming * status`, `coily ssh kubectl get`, journalctl tails. | On the originating laptop, not on kai-server. The verb runs on kai-server via the ssh transport but is initiated from a laptop. |
 | Friend's machine | The friend | Whatever coily verb runs there from the friend's own laptop. | Whatever the friend's coily reads. | On the friend's laptop. Not on Kai's. |
 | AWS / GitHub / mod.io / Trello / Discord | The respective service | `coily ops aws delete-*`, `coily ops gh repo delete`, etc. | Reads, list operations. | On the laptop that initiated. |
 

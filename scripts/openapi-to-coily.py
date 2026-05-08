@@ -26,6 +26,7 @@ Usage:
     --base-url https://glama.ai/api/mcp \\
     --auth-mode bearer-when-required \\
     --ssm-param /glama/api-key \\
+    --mount pkg \\
     --out cmd/coily/glama/glama.go
 """
 
@@ -234,7 +235,7 @@ const (
 {ssm_consts}
 )
 
-// Command returns the cli.Command tree for `coily ops {pkg}`.
+// Command returns the cli.Command tree for `coily {mount} {pkg}`.
 func Command(r *shell.Runner, w *audit.Writer) *cli.Command {{
 \treturn &cli.Command{{
 \t\tName:  "{pkg}",
@@ -566,6 +567,11 @@ def main() -> None:
         default="",
     )
     ap.add_argument("--out", required=True)
+    ap.add_argument(
+        "--mount",
+        default="ops",
+        help="top-level coily group the wrapper mounts under (e.g. `ops` or `pkg`); affects only the doc comment.",
+    )
     args = ap.parse_args()
 
     spec = load_spec(args.spec)
@@ -670,6 +676,7 @@ def main() -> None:
 
     out = HEADER.format(
         pkg=args.pkg,
+        mount=args.mount,
         title=title,
         base_url=args.base_url,
         spec_url=args.spec,

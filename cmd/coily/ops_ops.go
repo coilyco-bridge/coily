@@ -4,23 +4,24 @@ import "github.com/urfave/cli/v3"
 
 // opsCommand is the umbrella for external-system integrations: CLI
 // pass-throughs (aws, gh, kubectl) plus REST API wrappers (modio,
-// glama, discord, sentry, trello-api). Collapses them under one named
+// discord, sentry, trello-api). Collapses them under one named
 // group so the top-level surface stays small enough to describe in one
 // breath, and so the group name itself signals "this is the
 // privileged-op gate."
 //
 // Game-server pass-throughs live under `gaming` instead - server admin
-// is a different mental category.
+// is a different mental category. Package-directory wrappers (glama,
+// skillsmp) live under `pkg` - they are catalog/discovery surfaces, not
+// privileged ops.
 //
 // Audit verb names live under "ops.<area>" so the log reflects the
 // user-visible path. CLI pass-throughs use "ops.<bin>" (e.g. "ops.aws"),
-// REST wrappers use "ops.<pkg>.<group>.<op>" (e.g. "ops.glama.servers
-// .get-v1-servers").
+// REST wrappers use "ops.<pkg>.<group>.<op>" (e.g. "ops.modio.games
+// .get-games").
 func (r *Runner) opsCommand() *cli.Command {
 	cmds := r.passthroughCommands(ptOps)
 	cmds = append(cmds,
 		r.modioCommand(),
-		r.glamaCommand(),
 		r.discordCommand(),
 		r.sentryCommand(),
 		r.trelloCommand(),
@@ -40,12 +41,12 @@ CLI pass-throughs:
 REST wrappers (one operation per subcommand, generated from each
 service's OpenAPI spec by scripts/openapi-to-coily.py):
   coily ops modio    mod.io v1 (Eco mods)
-  coily ops glama    Glama MCP directory
   coily ops discord  Discord HTTP API (bot auth)
   coily ops sentry   Sentry Public API
   coily ops trello   Trello REST API (key+token auth)
 
-Game-server pass-throughs live under coily gaming instead.`,
+Game-server pass-throughs live under coily gaming instead.
+Package-directory wrappers (glama, skillsmp) live under coily pkg.`,
 		Commands: cmds,
 	}
 }

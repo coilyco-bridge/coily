@@ -35,7 +35,7 @@ const (
 	httpTimeout    = 30 * time.Second
 )
 
-// Command returns the cli.Command tree for `coily skillsmp`.
+// Command returns the cli.Command tree for `coily pkg skillsmp`.
 func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  "skillsmp",
@@ -119,7 +119,7 @@ func aiSearchCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 }
 
 // requireQuery joins all positional args with a space so a multi-word
-// natural-language query works without quoting (`coily skillsmp ai-search
+// natural-language query works without quoting (`coily pkg skillsmp ai-search
 // parse edifact files`). Empty positional list is an error.
 func requireQuery(c *cli.Command) (string, error) {
 	args := c.Args().Slice()
