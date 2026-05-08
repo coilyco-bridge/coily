@@ -4,15 +4,25 @@ Workspace-level conventions (git workflow, test/lint autonomy, readonly ops, wri
 
 ---
 
-## Editing coily from other repos: forbidden, file an issue
+## Editing coily from any session
 
-When the session's primary cwd is **not** `/Users/kai/projects/coilysiren/coily` (check the env block, not live cwd), do not edit any file in this repo. Not source, not config, not docs, not AGENTS.md, not even a typo fix.
+Edit coily from whichever session you're in. The prior cwd-gate ("forbidden from sibling sessions, file an issue instead") is retired. The global commit-msg hook (every commit closes a same-repo issue) plus the brew pipeline give the same accountability without forcing a context switch. File the issue first with `coily ops gh issue create --repo coilysiren/coily ...`, commit referencing it, push, ride the pipeline.
 
-**Instead:** open a GitHub issue with `coily ops gh issue create --repo coilysiren/coily ...` (or `gh issue create --repo coilysiren/coily ...` if coily isn't installed). Include enough detail to act on cold. Cross-link the originating session/PR if relevant.
+When sibling-repo work is blocked by a coily gap (missing subcommand, broken wrapper, policy false-positive, argv-mangling bug, deny-list miss), this is the **fix-coily-first** discipline: pivot here, make the smallest fix that unblocks the original task, commit to `main`, push, wait for the brew bump (~5 min), `brew upgrade coilysiren/tap/coily`, then return to the original repo. Every coily blocker becomes an audited coily fix, and the next op of the same shape inherits it.
 
-**Why:** coily is the wrapper that enforces the lockdown deny list (`aws`, `kubectl`, `ssh`, `scp`). A drive-by edit from a sibling-repo session can silently weaken the wrapper - add a passthrough subcommand, relax a filter, ship it, and the next coily run passes the deny list with the new behavior. The cwd gate forces explicit intent: a coily change must happen in a session Kai consciously started for coily work.
+**Time-critical exception:** if the original task is genuinely time-critical (live incident, deadline-bound interview reply), do the object-level work first via Kai's hands and file the coily fix as the immediate follow-up.
 
-This rule is stricter than the general workspace git policy. It overrides "commit directly to main" for this one repo.
+---
+
+## Never bypass the brew pipeline
+
+The brew-installed binary IS the contract. **Do not run a locally-built coily against any real target.** No `go install ./cmd/coily && /Users/kai/go/bin/coily ...`, no `PATH=/Users/kai/go/bin:$PATH coily ...`, no `cp` into the Cellar.
+
+The brew release pipeline is what `coily lockdown` trusts. Bypassing puts an unaudited binary in the path of privileged ops (ssh to kai-server, AWS calls, kubectl writes). Lockdown's argv validation and audit-log writes only fire on the brew-installed binary; a `go install`'d copy passes the same name check but has whatever local source you just compiled, including unreviewed changes.
+
+This is a security boundary, not a hygiene preference. Mechanical denies for this specific shape live in `~/.claude/settings.json` (`Bash(*go/bin/coily*)`, `Bash(PATH=*coily*)`, etc.); this rule covers the broader pattern those denies don't catch.
+
+If you find yourself reaching for a `PATH=` prepend or a `cp` into the Cellar to make a tool work right now, **stop**. The right move is either (a) wait for the release, (b) work around the missing capability through a different tool, or (c) ship a smaller, faster change that goes through the pipeline.
 
 ---
 
