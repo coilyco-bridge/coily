@@ -142,6 +142,13 @@ deny:
   # tailscale. All ops go through coily tailscale.
   - Bash(tailscale:*)
 
+  # linkedin (third-party SaaS broker via @linkedapi/linkedin-cli). All ops
+  # go through `coily linkedin` so reads, writes, and broker-credential use
+  # all hit the audit log. Writes can get a LinkedIn account banned, so the
+  # audit trail is load-bearing. The cwd-gate-style `--allow-writes` argv
+  # block on write verbs is layered separately in pkg/passthrough.
+  - Bash(linkedin:*)
+
   # ssh/scp/rsync broad. Named-host access goes through coily (eco, k8s).
   - Bash(ssh:*)
   - Bash(scp:*)

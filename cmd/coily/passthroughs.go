@@ -48,6 +48,7 @@ var ptOps = []ptEntry{
 var ptTopLevel = []ptEntry{
 	{Bin: "docker"},
 	{Bin: "tailscale", SkipPolicy: true},
+	{Bin: "linkedin", SkipPolicy: true},
 }
 
 // ptPkg is the package-manager set mounted under `coily pkg <bin>`. Order

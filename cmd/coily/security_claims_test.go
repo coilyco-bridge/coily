@@ -208,6 +208,7 @@ func TestSecurityClaim_LockdownDeniesBareKubectlAndAwsAndGh(t *testing.T) {
 		"Bash(kubectl:*)",
 		"Bash(aws:*)",
 		"Bash(gh:*)",
+		"Bash(linkedin:*)",
 	}
 	denySet := map[string]bool{}
 	for _, deny := range d.Deny {
