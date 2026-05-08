@@ -115,7 +115,11 @@ func run(r *Runner, argv []string) error {
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:  "list",
-				Usage: "print every command coily can run (built-in + repo) and exit",
+				Usage: "print every top-level command coily can run (built-in + repo) and exit",
+			},
+			&cli.BoolFlag{
+				Name:  "tree",
+				Usage: "print the full command tree (every subcommand, recursively) and exit",
 			},
 			&cli.StringFlag{
 				Name: verb.CommitScopeFlag,
@@ -131,6 +135,10 @@ func run(r *Runner, argv []string) error {
 		Action: func(_ context.Context, c *cli.Command) error {
 			if c.Bool("list") {
 				listCommand(builtIns, repoCmds, repoCfg)
+				return nil
+			}
+			if c.Bool("tree") {
+				treeCommand(builtIns, repoCmds, repoCfg)
 				return nil
 			}
 			return cli.ShowAppHelp(c)

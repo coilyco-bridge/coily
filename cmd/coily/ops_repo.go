@@ -99,6 +99,42 @@ func listCommand(builtIns, repo []*cli.Command, repoCfg *repocfg.Config) {
 	printCmdGroup(repo)
 }
 
+// treeCommand renders every coily command and subcommand recursively.
+// Same surfaces as --list, but walks the full subcommand tree instead of
+// stopping at the top level.
+func treeCommand(builtIns, repo []*cli.Command, repoCfg *repocfg.Config) {
+	fmt.Println("Built-in commands:")
+	printCmdTree(builtIns, "  ")
+	fmt.Println()
+	if repoCfg == nil {
+		fmt.Println("Repo commands:")
+		fmt.Println("  (no coily.yaml found in the current directory or any parent)")
+		return
+	}
+	fmt.Printf("Repo commands (from %s):\n", repoCfg.Path)
+	if len(repo) == 0 {
+		fmt.Println("  (none; every entry shadowed a built-in)")
+		return
+	}
+	printCmdTree(repo, "  ")
+}
+
+func printCmdTree(cmds []*cli.Command, indent string) {
+	for _, c := range cmds {
+		if c.Hidden {
+			continue
+		}
+		if c.Usage != "" {
+			fmt.Printf("%s%s  %s\n", indent, c.Name, c.Usage)
+		} else {
+			fmt.Printf("%s%s\n", indent, c.Name)
+		}
+		if len(c.Commands) > 0 {
+			printCmdTree(c.Commands, indent+"  ")
+		}
+	}
+}
+
 func printCmdGroup(cmds []*cli.Command) {
 	width := 0
 	for _, c := range cmds {
