@@ -44,15 +44,23 @@ type Record struct {
 	// ID is a UUID v7 (time-ordered) populated on Append if unset. Used as
 	// the stable identifier in commit trailers (`coily://<ts>/<short>`),
 	// where short is the first 8 base32 chars of the raw bytes.
-	ID         string   `json:"id,omitempty"`
-	Timestamp  int64    `json:"ts"`
-	Version    string   `json:"version,omitempty"`
-	Decision   string   `json:"decision"`
-	Verb       string   `json:"verb"`
-	Argv       []string `json:"argv"`
-	ExitCode   int      `json:"exit_code"`
-	Error      string   `json:"error,omitempty"`
-	DurationMS int64    `json:"duration_ms,omitempty"`
+	ID        string   `json:"id,omitempty"`
+	Timestamp int64    `json:"ts"`
+	Version   string   `json:"version,omitempty"`
+	Decision  string   `json:"decision"`
+	Verb      string   `json:"verb"`
+	Argv      []string `json:"argv"`
+	ExitCode  int      `json:"exit_code"`
+	Error     string   `json:"error,omitempty"`
+	// StderrTail is a bounded last-N-bytes capture of the wrapped tool's
+	// stderr, populated by pass-through verbs on non-zero exit so the audit
+	// row carries enough context to reconstruct what the tool said. Bare
+	// "exit status 1" is the failure mode this fixes (issue #63). Bounded
+	// at MaxStderrTailBytes to keep rows small. Empty when the verb did
+	// not run a captured subprocess, when exit was zero, or when the
+	// subprocess wrote nothing to stderr.
+	StderrTail string `json:"stderr_tail,omitempty"`
+	DurationMS int64  `json:"duration_ms,omitempty"`
 	// RepoRoot is git rev-parse --show-toplevel of cwd at invocation time,
 	// or empty if cwd was not inside a git repo. Forensic only: tells the
 	// reader where the operator actually was, independent of CommitScope.
@@ -87,6 +95,12 @@ const (
 	EgressAllow = "allow"
 	EgressDeny  = "deny"
 )
+
+// MaxStderrTailBytes caps Record.StderrTail so the audit row stays small
+// even when a wrapped tool spews. 2 KiB is enough to carry the last few
+// lines of a typical stderr (kubectl error, aws sdk error, gh API error)
+// without bloating each line of the JSONL log.
+const MaxStderrTailBytes = 2048
 
 // ShortID returns the 8-char base32 prefix of the raw UUID bytes. Used in
 // the trailer suffix. Returns empty if ID is unset or unparseable.

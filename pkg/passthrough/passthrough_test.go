@@ -11,6 +11,7 @@ import (
 	"github.com/coilysiren/coily/pkg/audit"
 	"github.com/coilysiren/coily/pkg/passthrough"
 	"github.com/coilysiren/coily/pkg/shell"
+	"github.com/urfave/cli/v3"
 )
 
 // TestCommand_ForwardsArgvVerbatim_AllBinaries pins the per-binary
@@ -123,6 +124,80 @@ func TestCommand_ForwardsArgvVerbatim(t *testing.T) {
 	}
 	if !strings.Contains(string(body), `"verb":"pnpm"`) {
 		t.Errorf("audit row missing verb=pnpm; got %q", string(body))
+	}
+}
+
+// TestCommand_CapturesStderrTailOnFailure pins issue #63: pass-through
+// failures must carry the wrapped tool's stderr in the audit row, not just
+// the bare Go process-exit string. Uses /bin/sh as the stand-in to write
+// to stderr and exit non-zero; the audit row's stderr_tail field carries
+// the captured slice.
+func TestCommand_CapturesStderrTailOnFailure(t *testing.T) {
+	dir := t.TempDir()
+	logPath := filepath.Join(dir, "audit.jsonl")
+	w := audit.NewWriter(logPath)
+	if err := w.Preflight(); err != nil {
+		t.Fatalf("audit preflight: %v", err)
+	}
+
+	var capturedErr bytes.Buffer
+	r := &shell.Runner{
+		Stdout:  os.Stdout,
+		Stderr:  &capturedErr,
+		Resolve: func(_ string) (string, error) { return "/bin/sh", nil },
+	}
+
+	cmd := passthrough.Command("kubectl", r, w, passthrough.WithSkipPolicy())
+	cmd.ExitErrHandler = func(_ context.Context, _ *cli.Command, _ error) {}
+	const sentinel = "Error from server (Forbidden): pods is forbidden"
+	argv := []string{"coily-test", "-c", "printf '%s\\n' '" + sentinel + "' >&2; exit 1"}
+	if err := cmd.Run(context.Background(), argv); err == nil {
+		t.Fatalf("Run: expected non-nil error from exit-1 subprocess")
+	}
+
+	if !strings.Contains(capturedErr.String(), sentinel) {
+		t.Errorf("stderr stream missing %q; got %q", sentinel, capturedErr.String())
+	}
+
+	body, err := os.ReadFile(logPath)
+	if err != nil {
+		t.Fatalf("read audit: %v", err)
+	}
+	if !strings.Contains(string(body), `"stderr_tail"`) {
+		t.Errorf("audit row missing stderr_tail field; got %q", string(body))
+	}
+	if !strings.Contains(string(body), sentinel) {
+		t.Errorf("audit row stderr_tail missing %q; got %q", sentinel, string(body))
+	}
+}
+
+// TestCommand_OmitsStderrTailOnSuccess pins the inverse: a successful
+// pass-through must not bloat the audit row with whatever the tool happened
+// to write to stderr (progress bars, info logs, deprecation warnings).
+func TestCommand_OmitsStderrTailOnSuccess(t *testing.T) {
+	dir := t.TempDir()
+	logPath := filepath.Join(dir, "audit.jsonl")
+	w := audit.NewWriter(logPath)
+	if err := w.Preflight(); err != nil {
+		t.Fatalf("audit preflight: %v", err)
+	}
+
+	r := &shell.Runner{
+		Stdout:  os.Stdout,
+		Stderr:  os.Stderr,
+		Resolve: func(_ string) (string, error) { return "/bin/sh", nil },
+	}
+	cmd := passthrough.Command("kubectl", r, w, passthrough.WithSkipPolicy())
+	argv := []string{"coily-test", "-c", "printf 'noise\\n' >&2; exit 0"}
+	if err := cmd.Run(context.Background(), argv); err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	body, err := os.ReadFile(logPath)
+	if err != nil {
+		t.Fatalf("read audit: %v", err)
+	}
+	if strings.Contains(string(body), `"stderr_tail"`) {
+		t.Errorf("audit row carries stderr_tail on success; got %q", string(body))
 	}
 }
 

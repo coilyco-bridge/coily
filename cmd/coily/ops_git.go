@@ -511,6 +511,7 @@ func writeRecordsYAML(w io.Writer, records []audit.Record) error {
 				"commit_scope": rec.CommitScope,
 				"version":      rec.Version,
 				"error":        rec.Error,
+				"stderr_tail":  rec.StderrTail,
 			},
 		}
 		out, err := yaml.Marshal(view)

@@ -32,6 +32,8 @@ package passthrough
 import (
 	"context"
 	"fmt"
+	"io"
+	"strings"
 
 	"github.com/coilysiren/coily/pkg/audit"
 	"github.com/coilysiren/coily/pkg/egress"
@@ -110,13 +112,12 @@ func Command(bin string, r *shell.Runner, w *audit.Writer, opts ...Option) *cli.
 		ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 			return nil, c.Args().Slice()
 		},
-		Action: func(ctx context.Context, c *cli.Command) error {
-			return r.Exec(ctx, bin, c.Args().Slice()...)
-		},
 		SkipPolicy: cfg.skipPolicy,
 	}
 	if cfg.egressOn {
 		spec.Action, spec.OnComplete = withEgressAction(bin, r, cfg.egressList, cfg.egressMode)
+	} else {
+		spec.Action, spec.OnComplete = withStderrTail(bin, r)
 	}
 	return &cli.Command{
 		Name:            bin,
@@ -126,12 +127,44 @@ func Command(bin string, r *shell.Runner, w *audit.Writer, opts ...Option) *cli.
 	}
 }
 
+// withStderrTail wraps the standard exec action so the wrapped tool's
+// stderr is tee'd into a bounded ring buffer. On non-zero exit the captured
+// tail is attached to the audit record via OnComplete. Issue #63: without
+// this, kubectl/aws/gh failures in the audit log collapse to bare
+// "exit status 1" and the operator/forensic reader can't tell what
+// actually went wrong.
+func withStderrTail(bin string, base *shell.Runner) (cli.ActionFunc, func(*audit.Record)) {
+	tail := newTailBuffer(audit.MaxStderrTailBytes)
+	action := func(ctx context.Context, c *cli.Command) error {
+		shadow := *base
+		// Tee stderr through the tail buffer while still streaming to the
+		// caller's terminal. Falls back to just the tail buffer when the
+		// runner has no stderr writer (test contexts).
+		if base.Stderr != nil {
+			shadow.Stderr = io.MultiWriter(base.Stderr, tail)
+		} else {
+			shadow.Stderr = tail
+		}
+		return shadow.Exec(ctx, bin, c.Args().Slice()...)
+	}
+	hook := func(rec *audit.Record) {
+		if rec.ExitCode == 0 {
+			return
+		}
+		if s := strings.TrimSpace(tail.String()); s != "" {
+			rec.StderrTail = s
+		}
+	}
+	return action, hook
+}
+
 // withEgressAction wraps the standard exec action to start a per-invocation
 // proxy, inject HTTPS_PROXY/HTTP_PROXY into a per-call shadow Runner so
 // concurrent commands stay independent, and surface the collected rows
 // through OnComplete.
 func withEgressAction(bin string, base *shell.Runner, allowlist []string, mode egress.Mode) (cli.ActionFunc, func(*audit.Record)) {
 	var rows []audit.EgressRow
+	tail := newTailBuffer(audit.MaxStderrTailBytes)
 	action := func(ctx context.Context, c *cli.Command) error {
 		p := egress.New(allowlist, mode)
 		proxyURL, err := p.Start(ctx)
@@ -147,6 +180,11 @@ func withEgressAction(bin string, base *shell.Runner, allowlist []string, mode e
 			"https_proxy="+proxyURL,
 			"http_proxy="+proxyURL,
 		)
+		if base.Stderr != nil {
+			shadow.Stderr = io.MultiWriter(base.Stderr, tail)
+		} else {
+			shadow.Stderr = tail
+		}
 		execErr := shadow.Exec(ctx, bin, c.Args().Slice()...)
 		rows = p.Stop()
 		return execErr
@@ -155,6 +193,43 @@ func withEgressAction(bin string, base *shell.Runner, allowlist []string, mode e
 		if len(rows) > 0 {
 			rec.Egress = rows
 		}
+		if rec.ExitCode != 0 {
+			if s := strings.TrimSpace(tail.String()); s != "" {
+				rec.StderrTail = s
+			}
+		}
 	}
 	return action, hook
+}
+
+// tailBuffer is a fixed-size last-N-bytes ring. Writes never block and never
+// error. After N total bytes, older bytes are dropped to keep the buffer
+// bounded. String() returns the current contents in write order.
+type tailBuffer struct {
+	cap int
+	buf []byte
+}
+
+func newTailBuffer(capBytes int) *tailBuffer {
+	return &tailBuffer{cap: capBytes}
+}
+
+func (t *tailBuffer) Write(p []byte) (int, error) {
+	n := len(p)
+	if t.cap <= 0 {
+		return n, nil
+	}
+	if len(p) >= t.cap {
+		t.buf = append(t.buf[:0], p[len(p)-t.cap:]...)
+		return n, nil
+	}
+	t.buf = append(t.buf, p...)
+	if over := len(t.buf) - t.cap; over > 0 {
+		t.buf = t.buf[over:]
+	}
+	return n, nil
+}
+
+func (t *tailBuffer) String() string {
+	return string(t.buf)
 }
