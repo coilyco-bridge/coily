@@ -190,6 +190,99 @@ func WriteHook(settingsPath string, d *Defaults) (string, bool, error) {
 	return hookPath, existed, nil
 }
 
+// MergeDenyInto reasserts the canonical deny list at an ancestor settings
+// file - the recursion-root case where a parent directory's
+// settings.local.json carries broad allows that would otherwise shadow
+// per-repo deny rules below it. Claude Code applies deny ahead of allow
+// within a single file, so injecting the canonical deny list into the
+// ancestor file neutralizes the shadowing without touching the user's
+// existing allow rules.
+//
+// If the file does not exist, it is created with just the deny list and
+// no allow list. If it does exist, its existing top-level keys are
+// preserved and `permissions.deny` becomes the union of existing deny
+// entries and d.Deny. `permissions.allow` is left untouched. Returns
+// (mutated, error) where mutated is true iff the file's effective
+// content changed.
+func MergeDenyInto(targetPath string, d *Defaults) (bool, error) {
+	root := map[string]any{}
+	existed := false
+	if raw, err := os.ReadFile(targetPath); err == nil {
+		existed = true
+		if len(raw) > 0 {
+			if err := json.Unmarshal(raw, &root); err != nil {
+				return false, fmt.Errorf("lockdown: parse %s: %w", targetPath, err)
+			}
+		}
+	} else if !os.IsNotExist(err) {
+		return false, fmt.Errorf("lockdown: read %s: %w", targetPath, err)
+	}
+
+	perms, _ := root["permissions"].(map[string]any)
+	if perms == nil {
+		perms = map[string]any{}
+	}
+
+	existingDeny := toStringSliceAny(perms["deny"])
+	merged := uniqueSorted(append(append([]string(nil), existingDeny...), d.Deny...))
+
+	// uniqueSorted returns nil for empty; never relevant here since d.Deny is
+	// non-empty by construction, but keep the type stable as []string for the
+	// equality check below.
+	if merged == nil {
+		merged = []string{}
+	}
+
+	if existed && stringSliceEqual(existingDeny, merged) {
+		return false, nil
+	}
+
+	perms["deny"] = merged
+	root["permissions"] = perms
+
+	encoded, err := json.MarshalIndent(root, "", "  ")
+	if err != nil {
+		return false, fmt.Errorf("lockdown: marshal %s: %w", targetPath, err)
+	}
+	if err := os.MkdirAll(filepath.Dir(targetPath), 0o750); err != nil {
+		return false, fmt.Errorf("lockdown: mkdir %s: %w", filepath.Dir(targetPath), err)
+	}
+	if err := os.WriteFile(targetPath, encoded, 0o600); err != nil {
+		return false, fmt.Errorf("lockdown: write %s: %w", targetPath, err)
+	}
+	return true, nil
+}
+
+func toStringSliceAny(v any) []string {
+	arr, ok := v.([]any)
+	if !ok {
+		return nil
+	}
+	out := make([]string, 0, len(arr))
+	for _, x := range arr {
+		if s, ok := x.(string); ok {
+			out = append(out, s)
+		}
+	}
+	return out
+}
+
+func stringSliceEqual(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	as := append([]string(nil), a...)
+	bs := append([]string(nil), b...)
+	sort.Strings(as)
+	sort.Strings(bs)
+	for i := range as {
+		if as[i] != bs[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // TargetPath returns the settings file path under dir. If local is true,
 // uses settings.local.json. Otherwise settings.json.
 func TargetPath(dir string, local bool) string {

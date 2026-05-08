@@ -148,6 +148,73 @@ func TestLockdown_RecursiveNoReposErrors(t *testing.T) {
 	}
 }
 
+// TestLockdown_RecursiveReassertsAncestorDeny exercises the
+// recursion-root reassertion path. Reproduces the shape of the
+// 2026-05-08 finding: parent dir carries a broad allow that shadows
+// child-repo deny rules; --recursive --apply must merge the canonical
+// deny into the parent so deny-beats-allow neutralizes the shadow.
+func TestLockdown_RecursiveReassertsAncestorDeny(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, ".claude"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	parentSettings := filepath.Join(root, ".claude", "settings.local.json")
+	original := `{
+  "permissions": {
+    "allow": ["Bash(gh issue *)"]
+  }
+}`
+	if err := os.WriteFile(parentSettings, []byte(original), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	repo := filepath.Join(root, "child-repo")
+	if err := os.MkdirAll(filepath.Join(repo, ".git"), 0o750); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := runLockdownFlags(t, root, true, false, true); err != nil {
+		t.Fatalf("recursive apply errored: %v", err)
+	}
+
+	got, err := os.ReadFile(parentSettings)
+	if err != nil {
+		t.Fatalf("read parent settings: %v", err)
+	}
+	body := string(got)
+	if !strings.Contains(body, "Bash(gh issue *)") {
+		t.Errorf("user allow was dropped from ancestor; got: %s", body)
+	}
+	if !strings.Contains(body, "Bash(gh:*)") {
+		t.Errorf("canonical deny not merged into ancestor; got: %s", body)
+	}
+}
+
+// TestLockdown_RecursiveDryRunDoesNotTouchAncestor proves the
+// reassertion is gated on --apply.
+func TestLockdown_RecursiveDryRunDoesNotTouchAncestor(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, ".claude"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	parentSettings := filepath.Join(root, ".claude", "settings.local.json")
+	original := `{"permissions":{"allow":["Bash(gh issue *)"]}}`
+	if err := os.WriteFile(parentSettings, []byte(original), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	repo := filepath.Join(root, "child-repo")
+	if err := os.MkdirAll(filepath.Join(repo, ".git"), 0o750); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := runLockdownFlags(t, root, false, false, true); err != nil {
+		t.Fatalf("dry-run errored: %v", err)
+	}
+	got, _ := os.ReadFile(parentSettings)
+	if string(got) != original {
+		t.Errorf("dry-run mutated ancestor settings file: got %q", string(got))
+	}
+}
+
 func TestLockdown_ApplyReplaceOverwrites(t *testing.T) {
 	dir := t.TempDir()
 	target := filepath.Join(dir, ".claude", "settings.json")

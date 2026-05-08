@@ -286,6 +286,147 @@ func must[T any](v T, err error) T {
 	return v
 }
 
+func TestMergeDenyInto_CreatesFileWithCanonicalDeny(t *testing.T) {
+	dir := t.TempDir()
+	target := filepath.Join(dir, ".claude", "settings.local.json")
+	d, _ := lockdown.LoadDefaults()
+
+	mutated, err := lockdown.MergeDenyInto(target, d)
+	if err != nil {
+		t.Fatalf("MergeDenyInto: %v", err)
+	}
+	if !mutated {
+		t.Errorf("expected mutated=true on fresh create")
+	}
+	raw, err := os.ReadFile(target)
+	if err != nil {
+		t.Fatalf("read back: %v", err)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(raw, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	perms, _ := got["permissions"].(map[string]any)
+	if perms == nil {
+		t.Fatalf("permissions key missing: %s", string(raw))
+	}
+	if !contains(toStringSlice(perms["deny"]), "Bash(gh:*)") {
+		t.Errorf("deny list missing canonical Bash(gh:*); got %v", perms["deny"])
+	}
+	if perms["allow"] != nil {
+		t.Errorf("allow should be absent on fresh create; got %v", perms["allow"])
+	}
+}
+
+func TestMergeDenyInto_PreservesAllowAndExtraKeys(t *testing.T) {
+	dir := t.TempDir()
+	target := filepath.Join(dir, ".claude", "settings.local.json")
+	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	original := []byte(`{
+  "permissions": {
+    "allow": ["Bash(gh issue *)", "Bash(jq:*)"],
+    "deny": ["Bash(rm -rf:*)"]
+  },
+  "env": {"FOO": "bar"}
+}`)
+	if err := os.WriteFile(target, original, 0o600); err != nil {
+		t.Fatalf("seed write: %v", err)
+	}
+	d, _ := lockdown.LoadDefaults()
+
+	mutated, err := lockdown.MergeDenyInto(target, d)
+	if err != nil {
+		t.Fatalf("MergeDenyInto: %v", err)
+	}
+	if !mutated {
+		t.Errorf("expected mutated=true when canonical denies absent")
+	}
+
+	raw, _ := os.ReadFile(target)
+	var got map[string]any
+	if err := json.Unmarshal(raw, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	perms, _ := got["permissions"].(map[string]any)
+	if perms == nil {
+		t.Fatalf("permissions missing: %s", string(raw))
+	}
+
+	allow := toStringSlice(perms["allow"])
+	if !contains(allow, "Bash(gh issue *)") || !contains(allow, "Bash(jq:*)") {
+		t.Errorf("allow not preserved verbatim; got %v", allow)
+	}
+
+	deny := toStringSlice(perms["deny"])
+	if !contains(deny, "Bash(gh:*)") {
+		t.Errorf("canonical Bash(gh:*) not merged into deny; got %v", deny)
+	}
+	if !contains(deny, "Bash(rm -rf:*)") {
+		t.Errorf("pre-existing user deny entry dropped; got %v", deny)
+	}
+
+	env, _ := got["env"].(map[string]any)
+	if env == nil || env["FOO"] != "bar" {
+		t.Errorf("top-level env key not preserved; got %v", got["env"])
+	}
+}
+
+func TestMergeDenyInto_NoOpWhenAlreadyCovered(t *testing.T) {
+	dir := t.TempDir()
+	target := filepath.Join(dir, ".claude", "settings.local.json")
+	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	d, _ := lockdown.LoadDefaults()
+
+	if _, err := lockdown.MergeDenyInto(target, d); err != nil {
+		t.Fatalf("first MergeDenyInto: %v", err)
+	}
+
+	mutated, err := lockdown.MergeDenyInto(target, d)
+	if err != nil {
+		t.Fatalf("second MergeDenyInto: %v", err)
+	}
+	if mutated {
+		t.Errorf("expected mutated=false on second call (idempotent)")
+	}
+}
+
+func TestMergeDenyInto_DenyBeatsExistingAllowSemantics(t *testing.T) {
+	// Document the load-bearing assumption: Claude Code applies deny ahead
+	// of allow within a single settings file, so merging the canonical
+	// deny into a file that allow-lists `Bash(gh issue *)` produces a
+	// state where the allow stays present (we don't touch it) but the
+	// deny would override it at runtime. This test only proves the file
+	// state - the runtime semantics live in Claude Code itself.
+	dir := t.TempDir()
+	target := filepath.Join(dir, ".claude", "settings.local.json")
+	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	if err := os.WriteFile(target, []byte(`{"permissions":{"allow":["Bash(gh issue *)"]}}`), 0o600); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	d, _ := lockdown.LoadDefaults()
+	if _, err := lockdown.MergeDenyInto(target, d); err != nil {
+		t.Fatalf("MergeDenyInto: %v", err)
+	}
+	raw, _ := os.ReadFile(target)
+	var got map[string]any
+	_ = json.Unmarshal(raw, &got)
+	perms, _ := got["permissions"].(map[string]any)
+	allow := toStringSlice(perms["allow"])
+	deny := toStringSlice(perms["deny"])
+	if !contains(allow, "Bash(gh issue *)") {
+		t.Errorf("user allow entry was removed; got %v", allow)
+	}
+	if !contains(deny, "Bash(gh:*)") {
+		t.Errorf("canonical deny not present alongside user allow; got %v", deny)
+	}
+}
+
 func TestTargetPath_LocalToggle(t *testing.T) {
 	if got := lockdown.TargetPath("/tmp/a", false); !strings.HasSuffix(got, "/settings.json") {
 		t.Errorf("TargetPath(false) = %q", got)

@@ -101,7 +101,9 @@ Three modes, by blast radius:
   coily lockdown --apply --replace  Overwrite an existing settings file.
 
 Pass --recursive to walk up to 4 directories below --path and lock down each
-discovered git repo.`,
+discovered git repo. With --apply, --recursive also merges the canonical
+deny list into <path>/.claude/settings.local.json so a session started at
+the recursion root cannot shadow per-repo deny rules with a broader allow.`,
 		Commands: []*cli.Command{
 			r.lockdownSkillCommand(),
 		},
@@ -181,6 +183,44 @@ func lockdownAction(_ context.Context, c *cli.Command) error {
 		if err := lockdownOne(dir, local, apply, replace, d); err != nil {
 			return err
 		}
+	}
+
+	if recursive {
+		if err := reassertAncestor(root, apply, d); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// reassertAncestor merges the canonical deny list into the recursion
+// root's .claude/settings.local.json. Closes the gap surfaced by
+// 2026-05-08 finding parent-dir-allowlist-overrides-per-repo-gh-lockdown:
+// when Claude Code starts a session at a multi-repo parent, broad allow
+// rules in the parent's settings.local.json shadow every per-repo deny
+// below it. Re-asserting the deny at the parent (where Claude Code
+// applies deny-before-allow within a file) neutralizes the shadow.
+//
+// Conservative on purpose: dry-run reports the shadow, --apply merges
+// denies into the existing file and preserves any user-added allow
+// entries. Never replaces or removes user content.
+func reassertAncestor(root string, apply bool, d *lockdown.Defaults) error {
+	target := lockdown.TargetPath(root, true)
+	disp := displayPath(target)
+
+	if !apply {
+		fmt.Fprintf(os.Stderr, "%s: would merge canonical deny list (recursion-root reassertion)\n", disp)
+		return nil
+	}
+
+	mutated, err := lockdown.MergeDenyInto(target, d)
+	if err != nil {
+		return err
+	}
+	if mutated {
+		fmt.Fprintf(os.Stderr, "%s: merged canonical deny list (recursion-root reassertion)\n", disp)
+	} else {
+		fmt.Fprintf(os.Stderr, "%s: deny list already covers canonical denies (no change)\n", disp)
 	}
 	return nil
 }
