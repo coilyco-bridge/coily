@@ -48,6 +48,8 @@ This repo exists for three reasons.
     ```
 
     Same audit row, same metacharacter rejection. Nothing the upstream tool understands is reshaped on the way through.
+
+    `coily brew` is a separate top-level verb (not a pass-through) for the four mutating brew subcommands (`install`, `uninstall`, `upgrade`, `reinstall`). It scopes formulae to the `coilysiren/tap/*` namespace by default and requires `--allow-untapped` for anything outside, since `brew install` runs arbitrary formula build code. Use `coily pkg brew` for read-only verbs (`search`, `info`, `list`) - those are unscoped by design.
 2. **Safety boundary for AI agents.** Claude Code's `deny: "Bash(kubectl delete:*)"` rule is prefix-matched, so every one of these gets past it:
 
     ```

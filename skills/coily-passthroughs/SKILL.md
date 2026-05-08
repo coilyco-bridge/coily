@@ -31,6 +31,22 @@ Stream audit records as JSONL.
 
 Flags: --follow, --since
 
+## `coily brew install`
+
+brew install, scoped to coilysiren/tap/* unless --allow-untapped is set.
+
+## `coily brew reinstall`
+
+brew reinstall, scoped to coilysiren/tap/* unless --allow-untapped is set.
+
+## `coily brew uninstall`
+
+brew uninstall, scoped to coilysiren/tap/* unless --allow-untapped is set.
+
+## `coily brew upgrade`
+
+brew upgrade, scoped to coilysiren/tap/* unless --allow-untapped is set.
+
 ## `coily docker`
 
 Pass-through to docker with argv validation + audit log.

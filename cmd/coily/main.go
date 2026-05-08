@@ -166,6 +166,7 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.auditCommand(),
 		r.gitCommand(),
 		r.pkgCommand(),
+		r.brewCommand(),
 	}
 	cmds = append(cmds, r.passthroughCommands(ptTopLevel)...)
 	return cmds
