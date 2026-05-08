@@ -5,8 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/coilysiren/coily/pkg/audit"
+	"github.com/coilysiren/coily/pkg/exitcode"
+	"github.com/coilysiren/coily/pkg/gittree"
 	"github.com/coilysiren/coily/pkg/repocfg"
 	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
@@ -48,29 +52,72 @@ func (r *Runner) loadRepoExecCommand() (*repocfg.Config, *cli.Command) {
 // buildRepoCommand turns one repocfg.Command into a cli.Command whose Action
 // exec's the declared argv plus any user-supplied positional args. Everything
 // runs through verb.Wrap so policy validation and audit logging apply.
+//
+// Repo verbs are gated on a clean+synced working tree. The gate refuses the
+// invocation when uncommitted changes, untracked files, a detached HEAD, a
+// branch with no upstream, or a behind-upstream state would prevent the
+// audit row from being reconstructed from git history alone. The
+// --audit-override-dirty flag bypasses the gate but tags the audit row with
+// audit_override=true and captures the porcelain status snapshot. Built-in
+// verbs are unaffected: their behavior is baked into the homebrew-released
+// binary and reproducible from the version trailer in the audit row.
 func (r *Runner) buildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) *cli.Command {
 	usage := rc.Description
 	if usage == "" {
 		usage = "Repo command: " + strings.Join(rc.Argv, " ")
 	}
+	// repoRoot is the parent of .coily/, derived from the discovered config
+	// path. cfg.Path looks like <repoRoot>/.coily/coily.yaml.
+	repoRoot := filepath.Dir(filepath.Dir(cfg.Path))
+	verbName := "repo." + rc.Name
+	var dirtyState *gittree.State
 	return &cli.Command{
 		Name:      rc.Name,
 		Usage:     usage,
 		ArgsUsage: "[-- extra args]",
 		Description: fmt.Sprintf(
 			"Per-repo command loaded from %s.\nExpands to: %s\n\nExtra positional args are appended and validated against the same "+
-				"shell-metacharacter rules as privileged verbs.",
+				"shell-metacharacter rules as privileged verbs.\n\nRepo verbs require a clean working tree and a synced upstream branch "+
+				"so the audit log can be reconstructed from git history. Use "+
+				"--audit-override-dirty for genuine emergencies; the override is "+
+				"recorded in the audit row.",
 			cfg.Path, strings.Join(rc.Argv, " "),
 		),
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "repo." + rc.Name,
+				Name: verbName,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					positional := append([]string{}, rc.Argv...)
 					positional = append(positional, c.Args().Slice()...)
 					return nil, positional
 				},
+				OnComplete: func(rec *audit.Record) {
+					if dirtyState == nil {
+						return
+					}
+					rec.AuditOverride = true
+					rec.WorkingTreeStatus = dirtyState.Status
+				},
 				Action: func(ctx context.Context, c *cli.Command) error {
+					override := false
+					if root := c.Root(); root != nil {
+						override = root.Bool("audit-override-dirty")
+					}
+					state, err := gittree.CheckClean(repoRoot)
+					if err != nil {
+						return exitcode.New(exitcode.Internal, "gittree_error", err,
+							"coily could not evaluate the repo verb gate; run `git status` "+
+								"to confirm the repo is in a sane state, then retry")
+					}
+					if !state.Clean {
+						if !override {
+							return exitcode.New(exitcode.PolicyDenied, "repo_verb_dirty",
+								errors.New(state.FormatRefusal(verbName)),
+								"commit/push the outstanding work and retry, or pass "+
+									"--audit-override-dirty for a genuine emergency")
+						}
+						dirtyState = state
+					}
 					argv := append([]string{}, rc.Argv[1:]...)
 					argv = append(argv, c.Args().Slice()...)
 					return r.Runner.Exec(ctx, rc.Argv[0], argv...)

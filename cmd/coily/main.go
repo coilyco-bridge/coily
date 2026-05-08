@@ -121,6 +121,14 @@ func run(r *Runner, argv []string) error {
 				Name:  "tree",
 				Usage: "print the full command tree (every subcommand, recursively) and exit",
 			},
+			&cli.BoolFlag{
+				Name: "audit-override-dirty",
+				Usage: "bypass the clean+synced gate on repo verbs declared in " +
+					".coily/coily.yaml. Tags the audit row with audit_override=true " +
+					"and captures the working tree status. For genuine emergencies " +
+					"only: the gate exists so audit rows can be reconstructed from " +
+					"git history.",
+			},
 			&cli.StringFlag{
 				Name: verb.CommitScopeFlag,
 				Usage: "bind audit rows to a commit scope. " +

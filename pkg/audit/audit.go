@@ -70,6 +70,16 @@ type Record struct {
 	// op was deliberately not bound to any commit and will not appear in
 	// any trailer.
 	CommitScope string `json:"commit_scope,omitempty"`
+	// AuditOverride is set true when a repo verb ran with
+	// --audit-override-dirty: the clean+synced gate refused but the
+	// operator forced through. Companion field WorkingTreeStatus carries
+	// the porcelain snapshot at refusal time so the run can still be
+	// reconstructed after the fact.
+	AuditOverride bool `json:"audit_override,omitempty"`
+	// WorkingTreeStatus is the truncated `git status --porcelain` output
+	// captured when a repo verb ran with --audit-override-dirty. Empty for
+	// every other audit row.
+	WorkingTreeStatus string `json:"working_tree_status,omitempty"`
 	// Egress carries one row per host contacted by the wrapped subprocess
 	// when the verb runs through the per-invocation HTTP CONNECT proxy
 	// (see pkg/egress). Aggregated by host: a `coily npm install` that

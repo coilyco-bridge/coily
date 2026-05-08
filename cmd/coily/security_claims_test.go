@@ -23,10 +23,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/coilysiren/coily/pkg/audit"
 	"github.com/coilysiren/coily/pkg/config"
+	"github.com/coilysiren/coily/pkg/gittree"
 	"github.com/coilysiren/coily/pkg/lockdown"
 	"github.com/coilysiren/coily/pkg/policy"
+	"github.com/coilysiren/coily/pkg/repocfg"
 	"github.com/coilysiren/coily/pkg/scope"
+	"github.com/coilysiren/coily/pkg/shell"
 	"github.com/urfave/cli/v3"
 )
 
@@ -294,6 +298,179 @@ func TestSecurityClaim_UserBinaryGateBlocksDevCoilyForCronStdin(t *testing.T) {
 	if !strings.Contains(string(out), "lockdown: blocked") {
 		t.Errorf("hook output does not name lockdown block; got: %s", out)
 	}
+}
+
+// TestSecurityClaim_repo_verbs_require_clean_tree covers SECURITY.md's
+// claim that .coily/coily.yaml repo verbs refuse to run when the working
+// tree is dirty / behind upstream / on a branch with no upstream. The
+// gate exists so an audit row for a repo verb can be reconstructed from
+// git history alone, closing the off-host shadow that local script edits
+// would otherwise create.
+//
+// Drives the gate end-to-end: build a tiny repo, drop a coily.yaml with a
+// no-op verb, run the verb under buildRepoCommand. Asserts:
+//
+//  1. Clean repo: the verb runs and the audit row carries no override.
+//  2. Dirty repo without --audit-override-dirty: refusal with PolicyDenied.
+//  3. Dirty repo with --audit-override-dirty: the verb runs and the audit
+//     row is tagged audit_override=true with the porcelain status captured.
+func TestSecurityClaim_repo_verbs_require_clean_tree(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not on PATH")
+	}
+	if _, err := exec.LookPath("true"); err != nil {
+		t.Skip("/usr/bin/true not on PATH")
+	}
+
+	repoRoot, _ := initSecurityClaimRepo(t)
+	cfgDir := filepath.Join(repoRoot, ".coily")
+	if err := os.MkdirAll(cfgDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	cfgPath := filepath.Join(cfgDir, "coily.yaml")
+	if err := os.WriteFile(cfgPath, []byte("commands:\n  noop: true\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	// Commit the coily.yaml so the tree is clean.
+	mustGitForClaim(t, repoRoot, "add", ".coily/coily.yaml")
+	mustGitForClaim(t, repoRoot, "commit", "-m", "add coily.yaml")
+	mustGitForClaim(t, repoRoot, "push")
+	if st, err := gittree.CheckClean(repoRoot); err != nil || !st.Clean {
+		t.Fatalf("baseline clean check failed: state=%+v err=%v", st, err)
+	}
+
+	cfg, err := repocfg.Load(cfgPath)
+	if err != nil {
+		t.Fatalf("repocfg.Load: %v", err)
+	}
+	if len(cfg.Commands) != 1 {
+		t.Fatalf("want 1 command in coily.yaml, got %d", len(cfg.Commands))
+	}
+
+	// (1) Clean tree: verb runs, audit row not tagged.
+	r := newSecurityClaimRunnerWithAudit(t)
+	cmd := r.buildRepoCommand(cfg, cfg.Commands[0])
+	root := wrapInRoot(cmd)
+	if err := root.Run(t.Context(), []string{"coily", "noop"}); err != nil {
+		t.Fatalf("clean-tree run: %v", err)
+	}
+	rec := lastAuditRecord(t, r.Audit.Path)
+	if rec.AuditOverride {
+		t.Errorf("clean run tagged audit_override=true unexpectedly")
+	}
+	if rec.WorkingTreeStatus != "" {
+		t.Errorf("clean run captured WorkingTreeStatus=%q", rec.WorkingTreeStatus)
+	}
+
+	// (2) Dirty tree, no override: refusal.
+	if err := os.WriteFile(filepath.Join(repoRoot, "dirt.txt"), []byte("x\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	r = newSecurityClaimRunnerWithAudit(t)
+	cmd = r.buildRepoCommand(cfg, cfg.Commands[0])
+	root = wrapInRoot(cmd)
+	err = root.Run(t.Context(), []string{"coily", "noop"})
+	if err == nil {
+		t.Fatal("dirty run without override returned nil; expected PolicyDenied")
+	}
+	if k := errKind(err); k != "repo_verb_dirty" {
+		t.Errorf("dirty refusal kind = %q, want repo_verb_dirty (err=%v)", k, err)
+	}
+
+	// (3) Dirty tree with override: runs, audit row tagged.
+	r = newSecurityClaimRunnerWithAudit(t)
+	cmd = r.buildRepoCommand(cfg, cfg.Commands[0])
+	root = wrapInRoot(cmd)
+	if err := root.Run(t.Context(), []string{"coily", "--audit-override-dirty", "noop"}); err != nil {
+		t.Fatalf("dirty run with override: %v", err)
+	}
+	rec = lastAuditRecord(t, r.Audit.Path)
+	if !rec.AuditOverride {
+		t.Errorf("override run did not tag audit_override=true; rec=%+v", rec)
+	}
+	if !strings.Contains(rec.WorkingTreeStatus, "dirt.txt") {
+		t.Errorf("override run did not capture porcelain status mentioning dirt.txt; got %q", rec.WorkingTreeStatus)
+	}
+}
+
+func errKind(err error) string {
+	type kinder interface{ Kind() string }
+	var k kinder
+	if errors.As(err, &k) {
+		return k.Kind()
+	}
+	return ""
+}
+
+func wrapInRoot(child *cli.Command) *cli.Command {
+	return &cli.Command{
+		Name: "coily",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{Name: "audit-override-dirty"},
+		},
+		Commands: []*cli.Command{child},
+	}
+}
+
+func newSecurityClaimRunnerWithAudit(t *testing.T) *Runner {
+	t.Helper()
+	dir := t.TempDir()
+	aw := audit.NewWriter(filepath.Join(dir, "audit.jsonl"))
+	t.Cleanup(func() { _ = aw.Close() })
+	return &Runner{
+		Cfg:    &config.Config{},
+		Runner: &shell.Runner{Stdout: os.Stdout, Stderr: os.Stderr, Stdin: os.Stdin},
+		Audit:  aw,
+	}
+}
+
+func initSecurityClaimRepo(t *testing.T) (workdir, upstream string) {
+	t.Helper()
+	root := t.TempDir()
+	workdir = filepath.Join(root, "work")
+	upstream = filepath.Join(root, "upstream.git")
+	if err := os.Mkdir(workdir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	mustGitForClaim(t, root, "init", "--bare", "--initial-branch=main", upstream)
+	mustGitForClaim(t, workdir, "init", "--initial-branch=main")
+	mustGitForClaim(t, workdir, "config", "user.email", "test@example.com")
+	mustGitForClaim(t, workdir, "config", "user.name", "test")
+	mustGitForClaim(t, workdir, "config", "commit.gpgsign", "false")
+	if err := os.WriteFile(filepath.Join(workdir, "README"), []byte("hi\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	mustGitForClaim(t, workdir, "add", "README")
+	mustGitForClaim(t, workdir, "commit", "-m", "init")
+	mustGitForClaim(t, workdir, "remote", "add", "origin", upstream)
+	mustGitForClaim(t, workdir, "push", "-u", "origin", "main")
+	return workdir, upstream
+}
+
+func mustGitForClaim(t *testing.T, cwd string, args ...string) {
+	t.Helper()
+	cmd := exec.Command("git", append([]string{"-C", cwd}, args...)...)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("git %s: %v\n%s", strings.Join(args, " "), err, out)
+	}
+}
+
+func lastAuditRecord(t *testing.T, path string) audit.Record {
+	t.Helper()
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatalf("open audit log: %v", err)
+	}
+	defer f.Close()
+	recs, err := audit.ReadAll(f)
+	if err != nil {
+		t.Fatalf("ReadAll: %v", err)
+	}
+	if len(recs) == 0 {
+		t.Fatalf("audit log empty")
+	}
+	return recs[len(recs)-1]
 }
 
 // recordedSubcommands is a debug helper used by t.Logf in failures so the
