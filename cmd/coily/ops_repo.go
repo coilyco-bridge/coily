@@ -121,7 +121,7 @@ func treeCommand(builtIns, repo []*cli.Command, repoCfg *repocfg.Config) {
 
 func printCmdTree(cmds []*cli.Command, indent string) {
 	for _, c := range cmds {
-		if c.Hidden {
+		if c.Hidden || c.Name == "help" {
 			continue
 		}
 		if c.Usage != "" {
