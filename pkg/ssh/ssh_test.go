@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"golang.org/x/crypto/ssh"
 
@@ -152,6 +153,55 @@ func TestContextCanceled_BeforeDial(t *testing.T) {
 		if !strings.Contains(err.Error(), "canceled") {
 			t.Fatalf("err = %v, want context.Canceled", err)
 		}
+	}
+}
+
+// TestErrNoAuth_NamesRecovery pins issue #62: the no-auth-available
+// error must name the dictatable next step (`ssh-add ~/.ssh/<key>`) so
+// the operator can act without external knowledge.
+func TestErrNoAuth_NamesRecovery(t *testing.T) {
+	msg := coilyssh.ErrNoAuth.Error()
+	for _, want := range []string{"ssh-add", "ssh.key_path"} {
+		if !strings.Contains(msg, want) {
+			t.Errorf("ErrNoAuth missing %q; got %q", want, msg)
+		}
+	}
+}
+
+// TestDialError_TranslatesCommonShapes pins issue #62: a real tcp dial
+// against an unreachable host surfaces a translated error that names
+// what the operator should check next, not just the crypto/ssh idiom.
+func TestDialError_TranslatesCommonShapes(t *testing.T) {
+	keyPath := writeValidKey(t)
+	c := &coilyssh.Client{
+		KeyPath:        keyPath,
+		KnownHostsPath: writeEmptyKnownHosts(t),
+		DialTimeout:    100 * time.Millisecond,
+	}
+
+	cases := []struct {
+		name    string
+		host    string
+		wantSub string
+	}{
+		// Connection refused: localhost:1 has no listener.
+		{"refused", "127.0.0.1:1", "sshd is not listening"},
+		// No such host: invalid TLD never resolves.
+		{"nxdomain", "this-host-does-not-exist.invalid:22", "DNS lookup failed"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, _, err := c.Run(context.Background(), tc.host, "kai", "true")
+			if err == nil {
+				t.Fatalf("expected error dialing %s", tc.host)
+			}
+			if !strings.Contains(err.Error(), tc.wantSub) {
+				t.Errorf("err = %v, want substring %q", err, tc.wantSub)
+			}
+			if !strings.Contains(err.Error(), "Recovery") {
+				t.Errorf("err = %v, want a Recovery: hint", err)
+			}
+		})
 	}
 }
 

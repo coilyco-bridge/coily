@@ -43,8 +43,10 @@ const DefaultDialTimeout = 30 * time.Second
 const DefaultPort = "22"
 
 // ErrNoAuth is returned when neither ssh-agent nor a private key file
-// can supply a usable signer.
-var ErrNoAuth = errors.New("ssh: no authentication method available (ssh-agent unreachable and no key path)")
+// can supply a usable signer. Message names the recovery path per
+// AGENTS.md "opaque errors are design smells - recovery messages should
+// name the dictatable next step." Issue #62.
+var ErrNoAuth = errors.New("ssh: no authentication method available (ssh-agent unreachable and no key path). Recovery: run `ssh-add ~/.ssh/<key>` to load a key into the agent, or set ssh.key_path in coily config")
 
 // ErrNoKnownHosts is returned when ~/.ssh/known_hosts cannot be read.
 // Failing closed here is the point. ssh.InsecureIgnoreHostKey is never
@@ -289,14 +291,56 @@ func (c *Client) dial(ctx context.Context, host, user string) (*ssh.Client, erro
 	d := net.Dialer{Timeout: cfg.Timeout}
 	tcp, err := d.DialContext(ctx, "tcp", addr)
 	if err != nil {
-		return nil, fmt.Errorf("ssh: tcp dial %s: %w", addr, err)
+		return nil, translateDialError(addr, err)
 	}
 	sshConn, chans, reqs, err := ssh.NewClientConn(tcp, addr, cfg)
 	if err != nil {
 		_ = tcp.Close()
-		return nil, fmt.Errorf("ssh: handshake %s: %w", addr, err)
+		return nil, translateHandshakeError(addr, err)
 	}
 	return ssh.NewClient(sshConn, chans, reqs), nil
+}
+
+// translateDialError wraps a TCP dial failure with an actionable hint
+// when the underlying error matches a common shape. Issue #62: the raw
+// crypto/ssh idiom names the cause but not the next step. Falls through
+// verbatim when the shape is unrecognized so debugging info is preserved.
+func translateDialError(addr string, err error) error {
+	msg := err.Error()
+	switch {
+	case strings.Contains(msg, "no such host"):
+		return fmt.Errorf("ssh: tcp dial %s: %w. Recovery: DNS lookup failed; check tailscale connection or /etc/hosts entry for the host", addr, err)
+	case strings.Contains(msg, "connection refused"):
+		return fmt.Errorf("ssh: tcp dial %s: %w. Recovery: remote port reachable but sshd is not listening; check `sudo systemctl status ssh` on the remote", addr, err)
+	case strings.Contains(msg, "i/o timeout") || strings.Contains(msg, "deadline exceeded"):
+		return fmt.Errorf("ssh: tcp dial %s: %w. Recovery: host unreachable within timeout; check tailscale connection (`tailscale status`) or VPN", addr, err)
+	case strings.Contains(msg, "network is unreachable"):
+		return fmt.Errorf("ssh: tcp dial %s: %w. Recovery: no network route to host; check tailscale or local network", addr, err)
+	}
+	return fmt.Errorf("ssh: tcp dial %s: %w", addr, err)
+}
+
+// translateHandshakeError wraps an SSH handshake failure with an
+// actionable hint. The most common shape on Kai's hosts is auth
+// rejection from a stale or unloaded key.
+func translateHandshakeError(addr string, err error) error {
+	msg := err.Error()
+	switch {
+	case strings.Contains(msg, "unable to authenticate") || strings.Contains(msg, "no supported methods remain"):
+		return fmt.Errorf("ssh: handshake %s: %w. Recovery: server rejected every offered key; verify the right key is loaded with `ssh-add -l`, or set ssh.key_path in coily config", addr, err)
+	case strings.Contains(msg, "key mismatch") || strings.Contains(msg, "host key"):
+		return fmt.Errorf("ssh: handshake %s: %w. Recovery: known_hosts entry does not match the server's offered key; if the host genuinely changed, remove the stale line with `ssh-keygen -R %s`", addr, err, hostFromAddr(addr))
+	}
+	return fmt.Errorf("ssh: handshake %s: %w", addr, err)
+}
+
+// hostFromAddr strips the :port suffix so a Recovery hint can name the
+// `ssh-keygen -R <host>` form the operator actually types.
+func hostFromAddr(addr string) string {
+	if i := strings.LastIndex(addr, ":"); i >= 0 && !strings.Contains(addr, "]") {
+		return addr[:i]
+	}
+	return addr
 }
 
 func (c *Client) dialTimeout(ctx context.Context) time.Duration {
