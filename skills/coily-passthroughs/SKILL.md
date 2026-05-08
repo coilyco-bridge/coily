@@ -3157,7 +3157,7 @@ Flags: --host, --lines, --user
 
 ## `coily ssh kubectl`
 
-Run `sudo k3s kubectl <args>` on kai-server.
+Run `k3s kubectl <args>` on kai-server.
 
 ## `coily ssh ls`
 

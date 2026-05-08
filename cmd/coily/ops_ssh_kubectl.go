@@ -10,12 +10,17 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// sshKubectlCommand wraps `sudo k3s kubectl <args>` over ssh to kai-server.
+// sshKubectlCommand wraps `k3s kubectl <args>` over ssh to kai-server.
 // Mirrors the local `coily ops kubectl` passthrough: argv forwards verbatim,
 // readonly-vs-mutator gating is enforced at the lockdown deny list (e.g.
 // Bash(coily ssh kubectl get:*) allow / Bash(coily ssh kubectl apply:*)
 // deny), not inside coily. Replaces the server-side k3s-readonly-kubectl
 // wrapper.
+//
+// No sudo prefix: /etc/rancher/k3s/k3s.yaml is mode 644 on kai-server, so
+// k3s kubectl reads it directly. The previous sudo wrap broke every
+// non-interactive call because remote sudo required a password the
+// wrapper couldn't supply. Issue #56.
 //
 // SkipFlagParsing is on so kubectl's own flags (-A, -n, -o, --context, ...)
 // flow through verbatim. That means the standard sshHostUserFlags() pair
@@ -32,7 +37,7 @@ import (
 func (r *Runner) sshKubectlCommand() *cli.Command {
 	return &cli.Command{
 		Name:            "kubectl",
-		Usage:           "Run `sudo k3s kubectl <args>` on kai-server.",
+		Usage:           "Run `k3s kubectl <args>` on kai-server.",
 		ArgsUsage:       "[kubectl args...]",
 		SkipFlagParsing: true,
 		Action: verb.Wrap(
@@ -51,16 +56,25 @@ func (r *Runner) sshKubectlCommand() *cli.Command {
 					if len(args) == 0 {
 						return fmt.Errorf("ssh kubectl: need at least one kubectl arg")
 					}
-					parts := []string{"sudo", "k3s", "kubectl"}
-					for _, a := range args {
-						parts = append(parts, posixShellQuote(a))
-					}
-					return r.SSH.Stream(ctx, host, user, strings.Join(parts, " "), os.Stdout, os.Stderr)
+					return r.SSH.Stream(ctx, host, user, renderSSHKubectlCmd(args), os.Stdout, os.Stderr)
 				},
 			},
 			r.Audit,
 		),
 	}
+}
+
+// renderSSHKubectlCmd assembles the remote command string sent to
+// kai-server. Pulled out as a helper so the no-sudo property (issue #56)
+// is unit-testable without spinning up an ssh fake. The command is just
+// `k3s kubectl <quoted args...>` - no sudo, since the kubeconfig is
+// world-readable on kai-server.
+func renderSSHKubectlCmd(args []string) string {
+	parts := []string{"k3s", "kubectl"}
+	for _, a := range args {
+		parts = append(parts, posixShellQuote(a))
+	}
+	return strings.Join(parts, " ")
 }
 
 // posixShellQuote wraps s in POSIX single quotes. Embedded single quotes
