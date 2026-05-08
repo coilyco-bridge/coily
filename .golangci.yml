@@ -120,7 +120,7 @@ linters:
   exclusions:
     rules:
       # Generated files: mostly mechanical, skip most checks.
-      - path: "generated\\.go$"
+      - path: "_generated\\.go$"
         linters:
           - cyclop
           - funlen
@@ -131,6 +131,10 @@ linters:
           - goconst
           - dupl
           - unparam
+          - unused
+          - misspell
+          - errorlint
+          - staticcheck
       # Tests: relaxed complexity, long table-driven cases are fine.
       - path: "_test\\.go$"
         linters:

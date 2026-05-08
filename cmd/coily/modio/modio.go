@@ -40,7 +40,7 @@ const (
 	httpTimeout    = 30 * time.Second
 )
 
-// Command returns the cli.Command tree for `coily modio`. The strict
+// Command returns the cli.Command tree for `coily ops modio`. The strict
 // shell.Runner is reused for the SSM fetch so the api-key call goes
 // through the same pinned-tool path as everything else.
 func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
@@ -83,7 +83,7 @@ func modsList(r *shell.Runner, w *audit.Writer) *cli.Command {
 		},
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "modio.mods.list",
+				Name: "ops.modio.mods.list",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
 						"--game-id": fmt.Sprint(gameID(c)),
@@ -113,7 +113,7 @@ func modsGet(r *shell.Runner, w *audit.Writer) *cli.Command {
 		ArgsUsage: "<mod-id>",
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "modio.mods.get",
+				Name: "ops.modio.mods.get",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--game-id": fmt.Sprint(gameID(c))}, c.Args().Slice()
 				},
@@ -138,7 +138,7 @@ func modsFiles(r *shell.Runner, w *audit.Writer) *cli.Command {
 		ArgsUsage: "<mod-id>",
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "modio.mods.files",
+				Name: "ops.modio.mods.files",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--game-id": fmt.Sprint(gameID(c))}, c.Args().Slice()
 				},
@@ -163,7 +163,7 @@ func modsComments(r *shell.Runner, w *audit.Writer) *cli.Command {
 		ArgsUsage: "<mod-id>",
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: "modio.mods.comments",
+				Name: "ops.modio.mods.comments",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--game-id": fmt.Sprint(gameID(c))}, c.Args().Slice()
 				},
@@ -182,7 +182,7 @@ func modsComments(r *shell.Runner, w *audit.Writer) *cli.Command {
 }
 
 // gameID resolves --game-id from the leaf or, if unset, walks up to the
-// root `coily modio` command. Default 6.
+// root `coily ops modio` command. Default 6.
 func gameID(c *cli.Command) int {
 	if g := c.Int("game-id"); g != 0 {
 		return g
