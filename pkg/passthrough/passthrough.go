@@ -47,11 +47,12 @@ import (
 type Option func(*config)
 
 type config struct {
-	skipPolicy bool
-	egressOn   bool
-	egressList []string
-	egressMode egress.Mode
-	verbName   string
+	skipPolicy    bool
+	egressOn      bool
+	egressList    []string
+	egressMode    egress.Mode
+	verbName      string
+	scopeArgvHint func(argv []string) string
 }
 
 // WithSkipPolicy disables the shell-metacharacter check for this binary.
@@ -94,6 +95,19 @@ func WithVerbName(name string) Option {
 	}
 }
 
+// WithScopeArgvHint installs a fallback --commit-scope resolver that runs
+// only when the operator did not set --commit-scope (or COILY_COMMIT_SCOPE)
+// explicitly. The hook receives the verb's argv and returns an absolute
+// path or "" to decline. Used by `coily ops gh` to default the audit
+// scope to ~/projects/coilysiren/<name> when --repo coilysiren/<name>
+// is on the command line, so the agent does not have to also pass
+// --commit-scope from outside a git repo.
+func WithScopeArgvHint(fn func(argv []string) string) Option {
+	return func(c *config) {
+		c.scopeArgvHint = fn
+	}
+}
+
 // Command returns the *cli.Command for `coily <bin>`. Every argument
 // after the binary name is forwarded verbatim through the pass-through
 // pipeline (argv validation -> audit -> exec). SkipFlagParsing keeps
@@ -112,7 +126,8 @@ func Command(bin string, r *shell.Runner, w *audit.Writer, opts ...Option) *cli.
 		ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 			return nil, c.Args().Slice()
 		},
-		SkipPolicy: cfg.skipPolicy,
+		SkipPolicy:          cfg.skipPolicy,
+		CommitScopeArgvHint: cfg.scopeArgvHint,
 	}
 	if cfg.egressOn {
 		spec.Action, spec.OnComplete = withEgressAction(bin, r, cfg.egressList, cfg.egressMode)

@@ -207,6 +207,63 @@ func TestWrap_CommitScopeOverrideBypassesFlagResolution(t *testing.T) {
 	}
 }
 
+// TestWrap_CommitScopeArgvHintFiresWhenFlagUnset proves the argv hook
+// sets the audit row's commit-scope when neither --commit-scope nor
+// $COILY_COMMIT_SCOPE was set explicitly. Used by `coily ops gh` to
+// derive the scope from --repo coilysiren/<name> without forcing the
+// operator to thread --commit-scope through every invocation.
+func TestWrap_CommitScopeArgvHintFiresWhenFlagUnset(t *testing.T) {
+	t.Setenv("COILY_COMMIT_SCOPE", "")
+	w := newTestWriter(t)
+	hinted := "/var/empty/hinted-by-argv"
+	spec := verb.Spec{
+		Name: "test.ro",
+		CommitScopeArgvHint: func(_ []string) string {
+			return hinted
+		},
+		Action: func(_ context.Context, _ *cli.Command) error { return nil },
+	}
+	if err := runWrapped(t, spec, w); err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	b, _ := os.ReadFile(w.Path)
+	records, _ := audit.ReadAll(bytes.NewReader(b))
+	if len(records) != 1 {
+		t.Fatalf("got %d records, want 1", len(records))
+	}
+	if records[0].CommitScope != hinted {
+		t.Errorf("commit_scope = %q, want %q", records[0].CommitScope, hinted)
+	}
+}
+
+// TestWrap_CommitScopeArgvHintLosesToEnv proves that a hint declines to
+// override an explicit $COILY_COMMIT_SCOPE. The hint is a fallback, not a
+// preempt, and operator-set values must always win.
+func TestWrap_CommitScopeArgvHintLosesToEnv(t *testing.T) {
+	envScope := "/var/empty/from-env"
+	t.Setenv("COILY_COMMIT_SCOPE", envScope)
+	w := newTestWriter(t)
+	spec := verb.Spec{
+		Name: "test.ro",
+		CommitScopeArgvHint: func(_ []string) string {
+			t.Error("hint should not fire when COILY_COMMIT_SCOPE is set")
+			return "/var/empty/should-not-be-used"
+		},
+		Action: func(_ context.Context, _ *cli.Command) error { return nil },
+	}
+	if err := runWrapped(t, spec, w); err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	b, _ := os.ReadFile(w.Path)
+	records, _ := audit.ReadAll(bytes.NewReader(b))
+	if len(records) != 1 {
+		t.Fatalf("got %d records, want 1", len(records))
+	}
+	if records[0].CommitScope != envScope {
+		t.Errorf("commit_scope = %q, want %q", records[0].CommitScope, envScope)
+	}
+}
+
 // runWrapped invokes the wrapped action in a way that mimics urfave/cli's
 // real invocation shape. We pass an empty *cli.Command because Spec.ArgsFunc
 // is the only code path that reads from it, and test specs set ArgsFunc

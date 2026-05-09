@@ -76,6 +76,16 @@ type Spec struct {
 	// operator runs `coily exec` one directory above the target). Ignored
 	// when SkipScope is true.
 	CommitScopeOverride string
+
+	// CommitScopeArgvHint, when set, runs as a fallback resolver before
+	// scope.Resolve and only when neither --commit-scope (still at "auto")
+	// nor $COILY_COMMIT_SCOPE was set explicitly. Receives the verb's argv;
+	// returning a non-empty path becomes the resolved commit-scope. Used by
+	// `coily ops gh` to default the scope to ~/projects/coilysiren/<name>
+	// when the user passed --repo coilysiren/<name>. Loses to
+	// CommitScopeOverride and to any explicit flag/env value. Ignored when
+	// SkipScope is true.
+	CommitScopeArgvHint func(argv []string) string
 }
 
 // Wrap returns a cli.ActionFunc that runs the full coily verb pipeline.
@@ -126,7 +136,9 @@ func Wrap(spec Spec, writer *audit.Writer) cli.ActionFunc {
 // so a misconfigured shell fails loud before fn runs. Honors
 // spec.CommitScopeOverride when set so verbs that pre-compute their
 // commit-scope (notably `coily exec` from a direct-child match) can bind
-// the audit row to a path that is not cwd's git toplevel.
+// the audit row to a path that is not cwd's git toplevel. argv is the full
+// os.Args captured by Wrap and is fed to spec.CommitScopeArgvHint when
+// neither --commit-scope nor $COILY_COMMIT_SCOPE was set explicitly.
 func buildBaseRecord(spec Spec, argv []string, cmd *cli.Command) (audit.Record, error) {
 	cwd := scope.CWD()
 	repoRoot, _ := scope.Resolve("auto", "", cwd) // forensic-only, ignore error
@@ -151,6 +163,11 @@ func buildBaseRecord(spec Spec, argv []string, cmd *cli.Command) (audit.Record, 
 	}
 	flagVal := root.String(CommitScopeFlag)
 	envVal := os.Getenv("COILY_COMMIT_SCOPE")
+	if (flagVal == "" || flagVal == "auto") && envVal == "" && spec.CommitScopeArgvHint != nil {
+		if hint := spec.CommitScopeArgvHint(argv); hint != "" {
+			flagVal = hint
+		}
+	}
 	commitScope, err := scope.Resolve(flagVal, envVal, cwd)
 	if err != nil {
 		return audit.Record{}, err

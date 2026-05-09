@@ -1,6 +1,10 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/coilysiren/coily/pkg/egress"
 	"github.com/coilysiren/coily/pkg/passthrough"
 	"github.com/urfave/cli/v3"
@@ -25,11 +29,17 @@ import (
 // Egress, when true, opts the wrapper into the per-binary egress allowlist
 // in pkg/egress. Today only brew has an entry; the other package managers
 // gain enforce mode in Phase 2 of issue #35.
+//
+// ScopeArgvHint, when non-nil, installs a fallback --commit-scope resolver
+// that fires when the operator did not set the flag (or env var) and the
+// verb's argv carries enough information to pick a sensible default. Today
+// only `ops gh` uses this, to derive the scope from --repo coilysiren/<name>.
 type ptEntry struct {
-	Bin        string
-	SkipPolicy bool
-	VerbName   string
-	Egress     bool
+	Bin           string
+	SkipPolicy    bool
+	VerbName      string
+	Egress        bool
+	ScopeArgvHint func(argv []string) string
 }
 
 // ptOps is the pass-through set mounted under `coily ops <bin>`. Cloud +
@@ -38,7 +48,7 @@ type ptEntry struct {
 // user-visible path.
 var ptOps = []ptEntry{
 	{Bin: "aws", SkipPolicy: true, VerbName: "ops.aws"},
-	{Bin: "gh", SkipPolicy: true, VerbName: "ops.gh"},
+	{Bin: "gh", SkipPolicy: true, VerbName: "ops.gh", ScopeArgvHint: ghRepoScopeHint},
 	{Bin: "kubectl", VerbName: "ops.kubectl"},
 }
 
@@ -91,7 +101,61 @@ func (r *Runner) passthroughCommand(e ptEntry) *cli.Command {
 			opts = append(opts, passthrough.WithEgress(allow, egress.ModeEnforce))
 		}
 	}
+	if e.ScopeArgvHint != nil {
+		opts = append(opts, passthrough.WithScopeArgvHint(e.ScopeArgvHint))
+	}
 	return passthrough.Command(e.Bin, r.Runner, r.Audit, opts...)
+}
+
+// ghRepoScopeHint reads --repo coilysiren/<name> out of `coily ops gh` argv
+// and returns ~/projects/coilysiren/<name> when that local clone exists and
+// is a real git repo. Returns "" otherwise (including when --repo names a
+// non-coilysiren owner: those clones may live elsewhere or not at all, and
+// silently binding the audit row to a same-name coilysiren clone would be a
+// surprise). Recognized argv shapes: `--repo X/Y`, `--repo=X/Y`, `-R X/Y`,
+// `-R=X/Y`. The function ignores positional argv beyond gh subcommands
+// (gh's --repo is a top-level flag inherited by every subcommand, so the
+// scan order does not matter).
+func ghRepoScopeHint(argv []string) string {
+	owner, name := parseGhRepoFlag(argv)
+	if owner != "coilysiren" || name == "" {
+		return ""
+	}
+	home, err := os.UserHomeDir()
+	if err != nil || home == "" {
+		return ""
+	}
+	candidate := filepath.Join(home, "projects", "coilysiren", name)
+	if fi, err := os.Stat(filepath.Join(candidate, ".git")); err != nil || fi == nil {
+		return ""
+	}
+	return candidate
+}
+
+func parseGhRepoFlag(argv []string) (owner, name string) {
+	for i := 0; i < len(argv); i++ {
+		tok := argv[i]
+		var raw string
+		switch {
+		case tok == "--repo" || tok == "-R":
+			if i+1 >= len(argv) {
+				return "", ""
+			}
+			raw = argv[i+1]
+		case strings.HasPrefix(tok, "--repo="):
+			raw = strings.TrimPrefix(tok, "--repo=")
+		case strings.HasPrefix(tok, "-R="):
+			raw = strings.TrimPrefix(tok, "-R=")
+		default:
+			continue
+		}
+		o, n, ok := strings.Cut(raw, "/")
+		if !ok {
+			return "", ""
+		}
+		return o, n
+	}
+	return "", ""
 }
 
 // passthroughCommands is the slice form: build one cli.Command per entry,
