@@ -7,7 +7,7 @@
 // string flags; request bodies arrive via --body (literal | @file | -).
 // Responses stream to stdout pretty-printed (JSON) or verbatim (other).
 //
-// Trello key+token auth from AWS SSM at /trello/api-key (key) and /trello/api-token (token), appended as query parameters.
+// Trello key+token auth from AWS SSM at /trello/api-key (key) and /trello/token (token), appended as query parameters.
 package trello
 
 import (
@@ -31,8 +31,8 @@ import (
 const (
 	apiBase     = "https://api.trello.com/1"
 	httpTimeout = 60 * time.Second
-	ssmAPIKey   = "/trello/api-key"   //nolint:gosec // SSM path, not a credential
-	ssmAPIToken = "/trello/api-token" //nolint:gosec // SSM path, not a credential
+	ssmAPIKey   = "/trello/api-key" //nolint:gosec // SSM path, not a credential
+	ssmAPIToken = "/trello/token"   //nolint:gosec // SSM path, not a credential
 )
 
 // Command returns the cli.Command tree for `coily ops trello`.

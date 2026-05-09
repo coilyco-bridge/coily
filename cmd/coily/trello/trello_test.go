@@ -16,7 +16,7 @@ func TestSSMParamPaths(t *testing.T) {
 	if ssmAPIKey != "/trello/api-key" {
 		t.Errorf("ssmAPIKey = %q", ssmAPIKey)
 	}
-	if ssmAPIToken != "/trello/api-token" {
+	if ssmAPIToken != "/trello/token" {
 		t.Errorf("ssmAPIToken = %q", ssmAPIToken)
 	}
 }
