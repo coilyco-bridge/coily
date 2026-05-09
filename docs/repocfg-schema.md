@@ -1,0 +1,103 @@
+# Repo config schema (`.coily/coily.yaml`)
+
+Per-repo command allowlist loaded by `pkg/repocfg` when coily is invoked anywhere inside a checkout. Each entry becomes a top-level verb invokable as `coily exec <name>`. The schema is intentionally tiny so the security boundary stays auditable in a single read of the loader.
+
+This doc is the canonical reference for what may appear in a `.coily/coily.yaml`. It pairs with `pkg/repocfg/repocfg.go` (loader) and `SECURITY.md` (security story).
+
+## Allowed shape
+
+```yaml
+commands:
+  <name>:
+    run: <command line>
+    description: <free-form string, optional>
+  <name>: <command line>   # shorthand for {run: ...}
+```
+
+That is the entire schema. Two top-level forms (`commands` only), two command-form variants (string scalar, or `{run, description}` mapping), three command keys total (`run`, `description`, plus the implicit map key as the verb name).
+
+## Top-level keys
+
+* `commands` - **required** - map of `<name> -> <command-spec>`. The only allowed top-level key. Empty (`commands: {}`) is valid for repos that exist only so the lockdown discipline applies uniformly across `coilysiren/*` (e.g., `homebrew-tap`, `coilysiren`).
+
+Anything else at the top level is currently ignored silently by `yaml.v3`. Schema enforcement that rejects unknown keys is tracked in [#105](https://github.com/coilysiren/coily/issues/105).
+
+## Command names (map keys)
+
+Validated by `validateName` in `repocfg.go`:
+
+* Must be non-empty.
+* Allowed characters: `a-z`, `0-9`, `-`.
+* Cannot start or end with `-`.
+* No uppercase, underscores, dots, slashes, or unicode.
+
+Names collide-check against built-in coily verbs at registration time (`coily exec` namespacing prevents shadowing built-ins).
+
+## Command spec
+
+A command value may be either a string scalar or a mapping.
+
+### String form
+
+```yaml
+commands:
+  test: go test ./...
+```
+
+The whole string is the `run` line. No description. Used by `coily/.coily/coily.yaml` for the simplest cases.
+
+### Mapping form
+
+```yaml
+commands:
+  test:
+    run: go test ./...
+    description: Run the unit test suite.
+```
+
+Allowed keys, both decoded through a typed struct:
+
+* `run` - **required** - the command line. Parsed via `strings.Fields` (whitespace-split, no shell parsing). Empty `run` rejects the load.
+* `description` - **optional** - free-form string shown in `coily --list` and help output.
+
+Anything else inside the mapping is currently ignored silently by `yaml.v3`. See [#105](https://github.com/coilysiren/coily/issues/105).
+
+## Argv validation
+
+The `run` line is split by whitespace, never by a shell. Every resulting token (and every user-supplied extra appended at invocation time) is checked against `policy.ValidateArg`, which rejects shell metacharacters: `$ ; & | < > ( ) { } \` plus newline, carriage return, tab. Pipes, redirects, and `$(subshells)` fail at load time, not at invocation.
+
+If a repo command needs a shell pipeline, the answer is a wrapper script committed under the repo, not an escape hatch in the schema. See `coilyco-ai/.coily/coily.yaml` for the pattern: a `daily-*-auth` entry runs `bash scripts/refresh-daily-auth.sh <name>` rather than encoding the shell logic inline.
+
+## Discovery
+
+* `Filename` = `coily.yaml`
+* `LocalDirName` = `.coily`
+* Canonical location is `<repo>/.coily/coily.yaml`. The legacy `<repo>/coily.yaml` form is rejected with `ErrLegacyLocation` pointing at the new home.
+* `Discover` walks up from the cwd looking for `.coily/coily.yaml`.
+* `DiscoverChildren` (used by `coily exec` when no ancestor config exists) scans direct child directories one level down.
+* `$COILY_REPO_CONFIG` overrides discovery with an absolute path. Test-only escape hatch.
+
+## Survey results (2026-05-08)
+
+Walked all `.coily/coily.yaml` files under `~/projects/coilysiren/`:
+
+```
+backend, coily, coilyco-ai, coilysiren, eco-cycle-prep, eco-jobs-tracker,
+eco-mcp-app, eco-mods-public, eco-telemetry, factorio-mods, galaxy-gen,
+gauntlet, homebrew-tap, infrastructure, message-ops, otel-a2a-relay,
+repo-recall, sirens-discord-ops, website
+```
+
+19 files total. **No drift observed:**
+
+* Every file uses only `commands` at the top level.
+* Every command entry uses only `run` and `description` (or the string-scalar shorthand).
+* Every command name conforms to `[a-z0-9-]`.
+* Two repos (`coilysiren`) have empty `commands: {}` by design.
+
+The de facto schema and the loader's accepted schema agree. No legacy keys, no typos, no aspirational fields.
+
+## Out of scope for this doc
+
+* Runtime enforcement of unknown-key rejection. Tracked separately in [#105](https://github.com/coilysiren/coily/issues/105).
+* Schema versioning. The schema is small enough that a flag day works if it ever needs to grow.
