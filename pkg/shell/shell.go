@@ -66,6 +66,19 @@ func (r *Runner) resolver() Resolver {
 // Exec runs bin with argv, streaming stdin/stdout/stderr through the Runner's
 // fields. Returns the underlying exec error on failure.
 func (r *Runner) Exec(ctx context.Context, bin string, argv ...string) error {
+	return r.execIn(ctx, "", bin, argv...)
+}
+
+// ExecIn is like Exec but runs the child with cmd.Dir set to dir. Used by
+// coily exec when the matched coily.yaml lives in a direct child of cwd:
+// the declared argv references paths relative to the child repo, so the
+// child must run there, not from cwd. dir is not validated; callers
+// ensure it points at a real directory.
+func (r *Runner) ExecIn(ctx context.Context, dir, bin string, argv ...string) error {
+	return r.execIn(ctx, dir, bin, argv...)
+}
+
+func (r *Runner) execIn(ctx context.Context, dir, bin string, argv ...string) error {
 	if bin == "" {
 		return ErrEmptyBinary
 	}
@@ -77,6 +90,9 @@ func (r *Runner) Exec(ctx context.Context, bin string, argv ...string) error {
 	cmd.Stdout = r.Stdout
 	cmd.Stderr = r.Stderr
 	cmd.Stdin = r.Stdin
+	if dir != "" {
+		cmd.Dir = dir
+	}
 	if r.Env != nil {
 		cmd.Env = append(os.Environ(), r.Env...)
 	}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -97,6 +98,32 @@ func TestExec_EnvAppendsToParent(t *testing.T) {
 	}
 	if got := strings.TrimSpace(out.String()); got != "parent-value/injected-value" {
 		t.Errorf("got %q, want parent-value/injected-value", got)
+	}
+}
+
+func TestExecIn_RunsInDirectory(t *testing.T) {
+	// ExecIn forces cmd.Dir so the child process resolves relative paths
+	// against the caller-supplied directory rather than cwd. Used by
+	// `coily exec` discovered-from-child verbs to run a child repo's
+	// declared argv from that repo's root.
+	dir := t.TempDir()
+	var out bytes.Buffer
+	r := &shell.Runner{Stdout: &out}
+	if err := r.ExecIn(context.Background(), dir, "pwd"); err != nil {
+		t.Fatalf("ExecIn: %v", err)
+	}
+	got := strings.TrimSpace(out.String())
+	gotR, _ := filepath.EvalSymlinks(got)
+	wantR, _ := filepath.EvalSymlinks(dir)
+	if gotR != wantR {
+		t.Errorf("pwd = %q, want %q", got, dir)
+	}
+}
+
+func TestExecIn_EmptyBinaryErrors(t *testing.T) {
+	r := &shell.Runner{}
+	if err := r.ExecIn(context.Background(), t.TempDir(), ""); !errors.Is(err, shell.ErrEmptyBinary) {
+		t.Errorf("err = %v, want ErrEmptyBinary", err)
 	}
 }
 

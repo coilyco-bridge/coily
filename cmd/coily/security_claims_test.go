@@ -322,7 +322,7 @@ func TestSecurityClaim_repo_verbs_require_clean_tree(t *testing.T) {
 		t.Skip("/usr/bin/true not on PATH")
 	}
 
-	repoRoot, _ := initSecurityClaimRepo(t)
+	repoRoot := initSecurityClaimRepo(t)
 	cfgDir := filepath.Join(repoRoot, ".coily")
 	if err := os.MkdirAll(cfgDir, 0o755); err != nil {
 		t.Fatal(err)
@@ -424,11 +424,11 @@ func newSecurityClaimRunnerWithAudit(t *testing.T) *Runner {
 	}
 }
 
-func initSecurityClaimRepo(t *testing.T) (workdir, upstream string) {
+func initSecurityClaimRepo(t *testing.T) string {
 	t.Helper()
 	root := t.TempDir()
-	workdir = filepath.Join(root, "work")
-	upstream = filepath.Join(root, "upstream.git")
+	workdir := filepath.Join(root, "work")
+	upstream := filepath.Join(root, "upstream.git")
 	if err := os.Mkdir(workdir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -444,7 +444,7 @@ func initSecurityClaimRepo(t *testing.T) (workdir, upstream string) {
 	mustGitForClaim(t, workdir, "commit", "-m", "init")
 	mustGitForClaim(t, workdir, "remote", "add", "origin", upstream)
 	mustGitForClaim(t, workdir, "push", "-u", "origin", "main")
-	return workdir, upstream
+	return workdir
 }
 
 func mustGitForClaim(t *testing.T, cwd string, args ...string) {

@@ -132,6 +132,59 @@ func isFile(path string) (bool, error) {
 	return false, fmt.Errorf("repocfg: stat %s: %w", path, err)
 }
 
+// DiscoverChildren scans direct children of parentDir for a
+// ./.coily/coily.yaml overlay, loads each one, and returns the resulting
+// Configs sorted by Path. Best-effort by design: a child whose .coily/
+// directory is unreadable or whose coily.yaml fails to parse is skipped
+// silently rather than failing the whole scan, because the caller's intent
+// is fallback discovery for a parent directory that itself has no config
+// and may sit above a mix of repos and unrelated directories. Hidden
+// entries (names beginning with ".") are skipped. Symlinks are followed
+// at the .coily/coily.yaml stat step.
+//
+// Used by `coily exec` when no ancestor coily.yaml is found: instead of
+// refusing to run, the verb collects child configs so the operator can
+// invoke a command declared in a sibling repo (e.g. `coily exec
+// daily-social` from one directory above coilyco-ai). The legacy
+// repo-root coily.yaml form is intentionally ignored here; child
+// discovery is opt-in via the .coily/ overlay.
+func DiscoverChildren(parentDir string) ([]*Config, error) {
+	abs, err := filepath.Abs(parentDir)
+	if err != nil {
+		return nil, fmt.Errorf("repocfg: abs %s: %w", parentDir, err)
+	}
+	entries, err := os.ReadDir(abs)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("repocfg: readdir %s: %w", abs, err)
+	}
+	var configs []*Config
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		if strings.HasPrefix(e.Name(), ".") {
+			continue
+		}
+		candidate := filepath.Join(abs, e.Name(), LocalDirName, Filename)
+		ok, statErr := isFile(candidate)
+		if statErr != nil || !ok {
+			continue
+		}
+		cfg, loadErr := Load(candidate)
+		if loadErr != nil {
+			continue
+		}
+		configs = append(configs, cfg)
+	}
+	sort.Slice(configs, func(i, j int) bool {
+		return configs[i].Path < configs[j].Path
+	})
+	return configs, nil
+}
+
 // LoadDefault resolves the config path from $COILY_REPO_CONFIG or by walking
 // up from the current working directory, then parses it. Returns nil,
 // ErrNoConfig when no config is found. All other errors are parsing or

@@ -68,6 +68,14 @@ type Spec struct {
 	// ExitCode / DurationMS / Error are already set when OnComplete runs;
 	// mutating them is not the contract.
 	OnComplete func(*audit.Record)
+
+	// CommitScopeOverride, when non-empty, replaces flag/env resolution and
+	// uses this absolute path as the audit row's commit-scope. Set by `coily
+	// exec` discovered-from-child verbs so audit rows bind to the matched
+	// child repo, not cwd's git toplevel (which often is not a repo when the
+	// operator runs `coily exec` one directory above the target). Ignored
+	// when SkipScope is true.
+	CommitScopeOverride string
 }
 
 // Wrap returns a cli.ActionFunc that runs the full coily verb pipeline.
@@ -95,7 +103,7 @@ func Wrap(spec Spec, writer *audit.Writer) cli.ActionFunc {
 			}
 		}
 
-		base, scopeErr := buildBaseRecord(spec.Name, argv, cmd, spec.SkipScope)
+		base, scopeErr := buildBaseRecord(spec, argv, cmd)
 		if scopeErr != nil {
 			coded := exitcode.New(exitcode.Generic, "scope_unresolved", scopeErr,
 				"set --commit-scope=<repo-path> or COILY_COMMIT_SCOPE=<repo-path>; "+
@@ -115,15 +123,26 @@ func Wrap(spec Spec, writer *audit.Writer) cli.ActionFunc {
 
 // buildBaseRecord composes the per-invocation Record that writer.Wrap will
 // fill in with Decision/ExitCode/DurationMS. Resolves --commit-scope here
-// so a misconfigured shell fails loud before fn runs.
-func buildBaseRecord(verbName string, argv []string, cmd *cli.Command, skipScope bool) (audit.Record, error) {
+// so a misconfigured shell fails loud before fn runs. Honors
+// spec.CommitScopeOverride when set so verbs that pre-compute their
+// commit-scope (notably `coily exec` from a direct-child match) can bind
+// the audit row to a path that is not cwd's git toplevel.
+func buildBaseRecord(spec Spec, argv []string, cmd *cli.Command) (audit.Record, error) {
 	cwd := scope.CWD()
 	repoRoot, _ := scope.Resolve("auto", "", cwd) // forensic-only, ignore error
-	if skipScope {
+	if spec.SkipScope {
 		return audit.Record{
-			Verb:     verbName,
+			Verb:     spec.Name,
 			Argv:     argv,
 			RepoRoot: repoRoot,
+		}, nil
+	}
+	if spec.CommitScopeOverride != "" {
+		return audit.Record{
+			Verb:        spec.Name,
+			Argv:        argv,
+			RepoRoot:    repoRoot,
+			CommitScope: spec.CommitScopeOverride,
 		}, nil
 	}
 	root := cmd
@@ -137,7 +156,7 @@ func buildBaseRecord(verbName string, argv []string, cmd *cli.Command, skipScope
 		return audit.Record{}, err
 	}
 	return audit.Record{
-		Verb:        verbName,
+		Verb:        spec.Name,
 		Argv:        argv,
 		RepoRoot:    repoRoot,
 		CommitScope: commitScope,

@@ -181,6 +181,116 @@ func TestDiscover_ReturnsErrNoConfig(t *testing.T) {
 	}
 }
 
+func TestDiscoverChildren_FindsOverlayInChild(t *testing.T) {
+	// Layout: /parent/child/.coily/coily.yaml. Discovery from parent finds it.
+	parent := t.TempDir()
+	childOverlay := filepath.Join(parent, "child", repocfg.LocalDirName)
+	if err := os.MkdirAll(childOverlay, 0o700); err != nil {
+		t.Fatalf("mkdir child overlay: %v", err)
+	}
+	writeConfig(t, childOverlay, "commands: {test: go test ./...}\n")
+	configs, err := repocfg.DiscoverChildren(parent)
+	if err != nil {
+		t.Fatalf("DiscoverChildren: %v", err)
+	}
+	if len(configs) != 1 {
+		t.Fatalf("len(configs) = %d, want 1", len(configs))
+	}
+	if configs[0].Commands[0].Name != "test" {
+		t.Errorf("got %q, want test", configs[0].Commands[0].Name)
+	}
+}
+
+func TestDiscoverChildren_SkipsLegacyRootForm(t *testing.T) {
+	// A legacy /parent/child/coily.yaml (no .coily/ overlay) is intentionally
+	// ignored. Child discovery is opt-in via the .coily/ overlay so unrelated
+	// repos that happen to predate the migration don't get pulled in.
+	parent := t.TempDir()
+	childRoot := filepath.Join(parent, "legacy-child")
+	if err := os.MkdirAll(childRoot, 0o700); err != nil {
+		t.Fatalf("mkdir legacy child: %v", err)
+	}
+	writeConfig(t, childRoot, "commands: {test: go test}\n")
+	configs, err := repocfg.DiscoverChildren(parent)
+	if err != nil {
+		t.Fatalf("DiscoverChildren: %v", err)
+	}
+	if len(configs) != 0 {
+		t.Errorf("len(configs) = %d, want 0 (legacy form must be ignored)", len(configs))
+	}
+}
+
+func TestDiscoverChildren_SkipsHiddenAndUnconfiguredChildren(t *testing.T) {
+	// Hidden entries (.git, .vscode) are skipped. Children without a
+	// .coily/coily.yaml are skipped. Files at parent level are skipped.
+	parent := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(parent, ".git"), 0o700); err != nil {
+		t.Fatalf("mkdir .git: %v", err)
+	}
+	if err := os.MkdirAll(filepath.Join(parent, "no-config"), 0o700); err != nil {
+		t.Fatalf("mkdir no-config: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(parent, "stray-file.txt"), []byte("x"), 0o600); err != nil {
+		t.Fatalf("write file: %v", err)
+	}
+	configs, err := repocfg.DiscoverChildren(parent)
+	if err != nil {
+		t.Fatalf("DiscoverChildren: %v", err)
+	}
+	if len(configs) != 0 {
+		t.Errorf("len(configs) = %d, want 0", len(configs))
+	}
+}
+
+func TestDiscoverChildren_SkipsMalformedChild(t *testing.T) {
+	// A child whose coily.yaml fails to parse must not abort the whole scan.
+	// The good child is still returned.
+	parent := t.TempDir()
+	bad := filepath.Join(parent, "bad", repocfg.LocalDirName)
+	good := filepath.Join(parent, "good", repocfg.LocalDirName)
+	if err := os.MkdirAll(bad, 0o700); err != nil {
+		t.Fatalf("mkdir bad: %v", err)
+	}
+	if err := os.MkdirAll(good, 0o700); err != nil {
+		t.Fatalf("mkdir good: %v", err)
+	}
+	writeConfig(t, bad, "commands: {oops: 'echo hi; rm -rf /'}\n")
+	writeConfig(t, good, "commands: {test: go test}\n")
+	configs, err := repocfg.DiscoverChildren(parent)
+	if err != nil {
+		t.Fatalf("DiscoverChildren: %v", err)
+	}
+	if len(configs) != 1 {
+		t.Fatalf("len(configs) = %d, want 1 (bad child must be silently skipped)", len(configs))
+	}
+	if configs[0].Commands[0].Name != "test" {
+		t.Errorf("got %q, want test", configs[0].Commands[0].Name)
+	}
+}
+
+func TestDiscoverChildren_SortedByPath(t *testing.T) {
+	parent := t.TempDir()
+	for _, name := range []string{"zebra", "apple", "mango"} {
+		dir := filepath.Join(parent, name, repocfg.LocalDirName)
+		if err := os.MkdirAll(dir, 0o700); err != nil {
+			t.Fatalf("mkdir %s: %v", name, err)
+		}
+		writeConfig(t, dir, "commands: {test: go test}\n")
+	}
+	configs, err := repocfg.DiscoverChildren(parent)
+	if err != nil {
+		t.Fatalf("DiscoverChildren: %v", err)
+	}
+	if len(configs) != 3 {
+		t.Fatalf("len(configs) = %d, want 3", len(configs))
+	}
+	for i := 1; i < len(configs); i++ {
+		if configs[i-1].Path >= configs[i].Path {
+			t.Errorf("configs not sorted: %s >= %s", configs[i-1].Path, configs[i].Path)
+		}
+	}
+}
+
 func TestLoadDefault_UsesEnvOverride(t *testing.T) {
 	dir := t.TempDir()
 	path := writeConfig(t, dir, "commands: {test: go test}\n")

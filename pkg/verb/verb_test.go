@@ -181,6 +181,32 @@ func TestWrap_OnCompleteMutatesRecord(t *testing.T) {
 	}
 }
 
+func TestWrap_CommitScopeOverrideBypassesFlagResolution(t *testing.T) {
+	// CommitScopeOverride pins the audit row's commit-scope to a caller-
+	// supplied path. Used by `coily exec` discovered-from-child verbs to
+	// bind audits to the matched child repo, not cwd's git toplevel
+	// (which often is not a repo). Setting a bogus override that wouldn't
+	// resolve through gitToplevel proves it bypasses the auto path.
+	w := newTestWriter(t)
+	override := "/var/empty/not-a-repo"
+	spec := verb.Spec{
+		Name:                "test.ro",
+		CommitScopeOverride: override,
+		Action:              func(_ context.Context, _ *cli.Command) error { return nil },
+	}
+	if err := runWrapped(t, spec, w); err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	b, _ := os.ReadFile(w.Path)
+	records, _ := audit.ReadAll(bytes.NewReader(b))
+	if len(records) != 1 {
+		t.Fatalf("got %d records, want 1", len(records))
+	}
+	if records[0].CommitScope != override {
+		t.Errorf("commit_scope = %q, want %q", records[0].CommitScope, override)
+	}
+}
+
 // runWrapped invokes the wrapped action in a way that mimics urfave/cli's
 // real invocation shape. We pass an empty *cli.Command because Spec.ArgsFunc
 // is the only code path that reads from it, and test specs set ArgsFunc

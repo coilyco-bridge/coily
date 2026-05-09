@@ -95,7 +95,7 @@ func kindFor(err error, rc int) string {
 // dependencies through a real cli.Command tree.
 func run(r *Runner, argv []string) error {
 	builtIns := r.builtInCommands()
-	repoCfg, execCmd := r.loadRepoExecCommand()
+	repoResult, execCmd := r.loadRepoExecCommand()
 
 	// execCmd is always non-nil: loadRepoExecCommand returns a stub `exec`
 	// command with a UserError Action when no .coily/coily.yaml is in scope,
@@ -143,11 +143,11 @@ func run(r *Runner, argv []string) error {
 		},
 		Action: func(_ context.Context, c *cli.Command) error {
 			if c.Bool("list") {
-				listCommand(builtIns, execCmd, repoCfg)
+				listCommand(builtIns, execCmd, repoResult)
 				return nil
 			}
 			if c.Bool("tree") {
-				treeCommand(builtIns, execCmd, repoCfg)
+				treeCommand(builtIns, execCmd, repoResult)
 				return nil
 			}
 			return cli.ShowAppHelp(c)
