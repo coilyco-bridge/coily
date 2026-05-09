@@ -65,8 +65,11 @@ type Defaults struct {
 	Deny  []string `yaml:"deny" json:"-"`
 }
 
-// Settings is the subset of Claude Code settings we manipulate. Other keys
-// in an existing settings file are preserved via rawSettings below.
+// Settings is the subset of Claude Code settings we manipulate directly.
+// In an existing settings file, BuildPlan replaces permissions wholesale
+// and replaces the hooks.PreToolUse Bash matcher entry, but leaves every
+// other top-level key (and every other PreToolUse matcher / hook event)
+// untouched.
 type Settings struct {
 	Permissions Permissions `json:"permissions"`
 }
@@ -97,11 +100,18 @@ type Plan struct {
 // BuildPlan computes what the target settings file should look like after
 // applying the defaults. Does not touch disk.
 //
-// The plan's After is always the canonical defaults rendered as JSON,
-// independent of whatever is already on disk. The merge behavior that used
-// to live here is gone: the CLI either bootstraps a fresh file (refusing if
-// one exists) or overwrites with --replace. Existed and Before are still
-// populated so callers can show a diff.
+// Fresh-file path (no existing file): the After contains only the canonical
+// permissions and hooks keys.
+//
+// Existing-file path: the After preserves every top-level key from the
+// existing file, replaces permissions wholesale with the canonical allow +
+// deny lists, and under hooks.PreToolUse swaps in (or appends) the
+// canonical Bash matcher entry while leaving any other PreToolUse matchers
+// and any other hook events (PostToolUse, SessionStart, ...) untouched.
+//
+// An existing file that does not parse as JSON is a hard error: BuildPlan
+// cannot safely merge into an opaque blob. Operators recover by deleting
+// the file (which becomes a fresh bootstrap).
 func BuildPlan(targetPath string, d *Defaults) (*Plan, error) {
 	plan := &Plan{TargetPath: targetPath}
 
@@ -116,29 +126,35 @@ func BuildPlan(targetPath string, d *Defaults) (*Plan, error) {
 		return nil, fmt.Errorf("lockdown: read %s: %w", targetPath, err)
 	}
 
-	out := map[string]any{
-		"permissions": map[string]any{
-			"allow": uniqueSorted(append([]string(nil), d.Allow...)),
-			"deny":  uniqueSorted(append([]string(nil), d.Deny...)),
-		},
-		// PreToolUse Bash hook is the Desktop-side enforcement path; the
-		// built-in deny matcher is silently bypassed there. On the CLI the
-		// matcher is the primary gate and this hook is defense-in-depth.
-		// Two independent enforcement layers, neither depends on the other.
-		"hooks": map[string]any{
-			"PreToolUse": []any{
-				map[string]any{
-					"matcher": "Bash",
-					"hooks": []any{
-						map[string]any{
-							"type":    "command",
-							"command": HookSettingsPath,
-						},
-					},
-				},
+	canonicalPerms := map[string]any{
+		"allow": uniqueSorted(append([]string(nil), d.Allow...)),
+		"deny":  uniqueSorted(append([]string(nil), d.Deny...)),
+	}
+	// PreToolUse Bash hook is the Desktop-side enforcement path; the
+	// built-in deny matcher is silently bypassed there. On the CLI the
+	// matcher is the primary gate and this hook is defense-in-depth.
+	// Two independent enforcement layers, neither depends on the other.
+	canonicalBashHook := map[string]any{
+		"matcher": "Bash",
+		"hooks": []any{
+			map[string]any{
+				"type":    "command",
+				"command": HookSettingsPath,
 			},
 		},
 	}
+
+	var out map[string]any
+	if plan.Existed && len(raw) > 0 {
+		if err := json.Unmarshal(raw, &out); err != nil {
+			return nil, fmt.Errorf("lockdown: parse existing %s: %w", targetPath, err)
+		}
+	}
+	if out == nil {
+		out = map[string]any{}
+	}
+	out["permissions"] = canonicalPerms
+	out["hooks"] = mergeBashHook(out["hooks"], canonicalBashHook)
 
 	encoded, err := json.MarshalIndent(out, "", "  ")
 	if err != nil {
@@ -146,6 +162,46 @@ func BuildPlan(targetPath string, d *Defaults) (*Plan, error) {
 	}
 	plan.After = encoded
 	return plan, nil
+}
+
+// mergeBashHook returns a hooks-shaped map with the canonical Bash matcher
+// entry installed under PreToolUse. Other PreToolUse matchers are
+// preserved in place; other top-level hook events (PostToolUse,
+// SessionStart, etc.) carry through untouched.
+//
+// If the existing PreToolUse already has an entry whose matcher is "Bash",
+// that entry is replaced in place so the slice ordering of unrelated
+// matchers is stable. Otherwise the canonical Bash entry is appended.
+//
+// If the existing hooks value is the wrong shape (not a map, or PreToolUse
+// is not a slice), the malformed slot is replaced wholesale with a fresh
+// PreToolUse containing only the canonical Bash entry. The rest of the
+// hooks map (other top-level events) is preserved when possible.
+func mergeBashHook(existing any, canonicalBash map[string]any) map[string]any {
+	out := map[string]any{}
+	if m, ok := existing.(map[string]any); ok {
+		for k, v := range m {
+			out[k] = v
+		}
+	}
+	pre, ok := out["PreToolUse"].([]any)
+	if !ok {
+		out["PreToolUse"] = []any{canonicalBash}
+		return out
+	}
+	for i, entry := range pre {
+		em, ok := entry.(map[string]any)
+		if !ok {
+			continue
+		}
+		if matcher, _ := em["matcher"].(string); matcher == "Bash" {
+			pre[i] = canonicalBash
+			out["PreToolUse"] = pre
+			return out
+		}
+	}
+	out["PreToolUse"] = append(pre, canonicalBash)
+	return out
 }
 
 // Write applies the plan to disk. Caller should have shown the plan first

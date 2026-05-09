@@ -109,7 +109,13 @@ func TestBuildPlan_NewFileGetsFullDefaults(t *testing.T) {
 	}
 }
 
-func TestBuildPlan_ExistingFileReportsExistedWithoutMerging(t *testing.T) {
+func TestBuildPlan_ExistingFilePreservesNonManagedTopLevelKeys(t *testing.T) {
+	// Regression for #103. Permissions are still replaced wholesale with
+	// the canonical defaults, but every other top-level key from the
+	// existing file must carry through. The pre-#103 implementation built
+	// a fresh map containing only permissions and hooks, which clobbered
+	// hand-curated keys like enabledPlugins, model, and viewMode at
+	// ~/.claude/settings.json on every `lockdown --apply --replace`.
 	d, _ := lockdown.LoadDefaults()
 	dir := t.TempDir()
 	target := filepath.Join(dir, "settings.json")
@@ -118,7 +124,12 @@ func TestBuildPlan_ExistingFileReportsExistedWithoutMerging(t *testing.T) {
 			"allow": []any{"Bash(custom-tool:*)"},
 			"deny":  []any{"Bash(npm run dangerous:*)"},
 		},
-		"someOtherKey": "preserved",
+		"enabledPlugins":           map[string]any{"foo@bar": true},
+		"extraKnownMarketplaces":   map[string]any{"x": map[string]any{"source": "y"}},
+		"model":                    "claude-opus-4-7",
+		"effortLevel":              "high",
+		"viewMode":                 "compact",
+		"skipAutoPermissionPrompt": true,
 	}
 	raw, _ := json.Marshal(existing)
 	if err := os.WriteFile(target, raw, 0o600); err != nil {
@@ -132,32 +143,184 @@ func TestBuildPlan_ExistingFileReportsExistedWithoutMerging(t *testing.T) {
 		t.Error("plan.Existed is false for an existing target")
 	}
 	var after map[string]any
-	_ = json.Unmarshal(plan.After, &after)
+	if err := json.Unmarshal(plan.After, &after); err != nil {
+		t.Fatalf("unmarshal After: %v", err)
+	}
+
+	// Permissions still get the canonical-replacement contract.
 	allow := toStringSlice(after["permissions"].(map[string]any)["allow"])
 	if contains(allow, "Bash(custom-tool:*)") {
-		t.Error("merge happened: custom allow entry leaked into After (silent merge is gone)")
-	}
-	if _, ok := after["someOtherKey"]; ok {
-		t.Error("merge happened: unrelated top-level key leaked into After")
+		t.Error("custom allow entry leaked into After (permissions should be canonical-replaced)")
 	}
 	if !contains(allow, "Bash(coily:*)") {
 		t.Error("default allow entry is missing")
 	}
+
+	// Every other top-level key from the existing file must carry through.
+	for _, key := range []string{
+		"enabledPlugins",
+		"extraKnownMarketplaces",
+		"model",
+		"effortLevel",
+		"viewMode",
+		"skipAutoPermissionPrompt",
+	} {
+		if _, ok := after[key]; !ok {
+			t.Errorf("non-managed top-level key %q was clobbered (regression for #103)", key)
+		}
+	}
+	if got, _ := after["model"].(string); got != "claude-opus-4-7" {
+		t.Errorf("model value mutated: got %q", got)
+	}
 }
 
-func TestBuildPlan_ExistingFileWithBadJSONIsAccepted(t *testing.T) {
-	// BuildPlan no longer parses the existing file, only reads it for the
-	// Before diff. Bad JSON is no longer fatal here. The CLI's --apply path
-	// is what refuses to clobber.
+func TestBuildPlan_ExistingFileWithBadJSONErrors(t *testing.T) {
+	// Post-#103 contract: BuildPlan parses the existing file so it can
+	// merge non-managed top-level keys back in. An unparseable existing
+	// file is a hard error - the alternative (silently treat as fresh
+	// bootstrap) would clobber the operator's actual settings the moment
+	// the file went temporarily corrupt. Recovery is to delete the file
+	// and re-run.
 	d, _ := lockdown.LoadDefaults()
 	target := filepath.Join(t.TempDir(), "settings.json")
 	_ = os.WriteFile(target, []byte("this is not json"), 0o600)
+	if _, err := lockdown.BuildPlan(target, d); err == nil {
+		t.Error("BuildPlan accepted opaque existing file; want error")
+	}
+}
+
+func TestBuildPlan_ExistingFilePreservesPostToolUseHookEvent(t *testing.T) {
+	// Regression for #103. PostToolUse and any other hook event must be
+	// left untouched - lockdown's contract is only over PreToolUse Bash.
+	d, _ := lockdown.LoadDefaults()
+	target := filepath.Join(t.TempDir(), "settings.json")
+	existing := map[string]any{
+		"hooks": map[string]any{
+			"PostToolUse": []any{
+				map[string]any{
+					"matcher": "Edit",
+					"hooks": []any{
+						map[string]any{"type": "command", "command": "/usr/local/bin/skill-rebuild"},
+					},
+				},
+			},
+		},
+	}
+	raw, _ := json.Marshal(existing)
+	if err := os.WriteFile(target, raw, 0o600); err != nil {
+		t.Fatal(err)
+	}
 	plan, err := lockdown.BuildPlan(target, d)
 	if err != nil {
-		t.Errorf("BuildPlan errored on opaque existing file: %v", err)
+		t.Fatalf("BuildPlan: %v", err)
 	}
-	if !plan.Existed {
-		t.Error("plan.Existed should be true")
+	var after map[string]any
+	if err := json.Unmarshal(plan.After, &after); err != nil {
+		t.Fatalf("unmarshal After: %v", err)
+	}
+	hooks, _ := after["hooks"].(map[string]any)
+	if _, ok := hooks["PostToolUse"]; !ok {
+		t.Error("PostToolUse hook event was clobbered")
+	}
+	pre, _ := hooks["PreToolUse"].([]any)
+	if len(pre) == 0 {
+		t.Fatal("PreToolUse Bash hook was not installed")
+	}
+}
+
+func TestBuildPlan_ExistingFilePreservesNonBashPreToolUseMatchers(t *testing.T) {
+	// Within PreToolUse, only the Bash matcher entry is lockdown's
+	// surface. Other matchers (e.g. Edit, MultiEdit, Write) must carry
+	// through unchanged.
+	d, _ := lockdown.LoadDefaults()
+	target := filepath.Join(t.TempDir(), "settings.json")
+	existing := map[string]any{
+		"hooks": map[string]any{
+			"PreToolUse": []any{
+				map[string]any{
+					"matcher": "Edit",
+					"hooks": []any{
+						map[string]any{"type": "command", "command": "/usr/local/bin/edit-guard"},
+					},
+				},
+				map[string]any{
+					"matcher": "Bash",
+					"hooks": []any{
+						map[string]any{"type": "command", "command": "/some/old/path"},
+					},
+				},
+			},
+		},
+	}
+	raw, _ := json.Marshal(existing)
+	if err := os.WriteFile(target, raw, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	plan, err := lockdown.BuildPlan(target, d)
+	if err != nil {
+		t.Fatalf("BuildPlan: %v", err)
+	}
+	var after map[string]any
+	if err := json.Unmarshal(plan.After, &after); err != nil {
+		t.Fatalf("unmarshal After: %v", err)
+	}
+	pre := after["hooks"].(map[string]any)["PreToolUse"].([]any)
+	if len(pre) != 2 {
+		t.Fatalf("PreToolUse length = %d, want 2 (Edit kept, Bash swapped in place)", len(pre))
+	}
+	if pre[0].(map[string]any)["matcher"] != "Edit" {
+		t.Errorf("Edit matcher was reordered or replaced; got %v", pre[0])
+	}
+	bashEntry := pre[1].(map[string]any)
+	if bashEntry["matcher"] != "Bash" {
+		t.Errorf("Bash matcher slot has wrong matcher; got %v", bashEntry)
+	}
+	bashHooks, _ := bashEntry["hooks"].([]any)
+	if len(bashHooks) != 1 {
+		t.Fatalf("Bash hooks length = %d, want 1", len(bashHooks))
+	}
+	if cmd, _ := bashHooks[0].(map[string]any)["command"].(string); cmd == "/some/old/path" {
+		t.Error("old Bash hook command was not replaced with canonical path")
+	}
+}
+
+func TestBuildPlan_ExistingFileAppendsBashWhenMissing(t *testing.T) {
+	// PreToolUse exists with non-Bash matchers but no Bash matcher: the
+	// canonical Bash entry must be appended (not silently dropped).
+	d, _ := lockdown.LoadDefaults()
+	target := filepath.Join(t.TempDir(), "settings.json")
+	existing := map[string]any{
+		"hooks": map[string]any{
+			"PreToolUse": []any{
+				map[string]any{
+					"matcher": "Edit",
+					"hooks": []any{
+						map[string]any{"type": "command", "command": "/usr/local/bin/edit-guard"},
+					},
+				},
+			},
+		},
+	}
+	raw, _ := json.Marshal(existing)
+	if err := os.WriteFile(target, raw, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	plan, err := lockdown.BuildPlan(target, d)
+	if err != nil {
+		t.Fatalf("BuildPlan: %v", err)
+	}
+	var after map[string]any
+	_ = json.Unmarshal(plan.After, &after)
+	pre := after["hooks"].(map[string]any)["PreToolUse"].([]any)
+	if len(pre) != 2 {
+		t.Fatalf("PreToolUse length = %d, want 2 (Edit kept, Bash appended)", len(pre))
+	}
+	matchers := []string{}
+	for _, e := range pre {
+		matchers = append(matchers, e.(map[string]any)["matcher"].(string))
+	}
+	if !contains(matchers, "Bash") {
+		t.Errorf("canonical Bash matcher was not appended; got %v", matchers)
 	}
 }
 
