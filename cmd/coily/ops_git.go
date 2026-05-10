@@ -339,6 +339,16 @@ func resolveSince(raw, repoPath string) (int64, error) {
 	return n, nil
 }
 
+// scopeMatches returns true when a recorded commit-scope is the filter
+// scope itself or any descendant directory. The boundary check prevents
+// "/foo" from matching "/foobar".
+func scopeMatches(recScope, filterScope string) bool {
+	if recScope == filterScope {
+		return true
+	}
+	return strings.HasPrefix(recScope, filterScope+string(filepath.Separator))
+}
+
 func loadAuditRecords(path, scopePath string, since int64) ([]audit.Record, error) {
 	f, err := os.Open(path) //nolint:gosec // resolved via pkg/config; reading is the point
 	if err != nil {
@@ -360,7 +370,7 @@ func loadAuditRecords(path, scopePath string, since int64) ([]audit.Record, erro
 		if rec.Timestamp < since {
 			continue
 		}
-		if filepath.Clean(rec.CommitScope) != scopePath {
+		if !scopeMatches(filepath.Clean(rec.CommitScope), scopePath) {
 			continue
 		}
 		if rec.Decision != audit.DecisionAccept {

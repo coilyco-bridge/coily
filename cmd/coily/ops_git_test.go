@@ -93,6 +93,38 @@ func TestLoadAuditRecords_FiltersByScopeAndSince(t *testing.T) {
 	}
 }
 
+func TestLoadAuditRecords_ScopeMatchesDescendants(t *testing.T) {
+	parent := "/repo"
+	path := seedAuditLog(t, []audit.Record{
+		{Verb: "self", Timestamp: 100, CommitScope: "/repo", Decision: audit.DecisionAccept},
+		{Verb: "child", Timestamp: 101, CommitScope: "/repo/a", Decision: audit.DecisionAccept},
+		{Verb: "grandchild", Timestamp: 102, CommitScope: "/repo/a/b", Decision: audit.DecisionAccept},
+		{Verb: "sibling-prefix", Timestamp: 103, CommitScope: "/repobar", Decision: audit.DecisionAccept},
+		{Verb: "unrelated", Timestamp: 104, CommitScope: "/other", Decision: audit.DecisionAccept},
+	})
+	got, err := loadAuditRecords(path, parent, 0)
+	if err != nil {
+		t.Fatalf("loadAuditRecords: %v", err)
+	}
+	if len(got) != 3 {
+		t.Fatalf("got %d records, want 3: %+v", len(got), got)
+	}
+	verbs := map[string]bool{}
+	for _, r := range got {
+		verbs[r.Verb] = true
+	}
+	for _, want := range []string{"self", "child", "grandchild"} {
+		if !verbs[want] {
+			t.Errorf("missing verb %q in %+v", want, verbs)
+		}
+	}
+	for _, bad := range []string{"sibling-prefix", "unrelated"} {
+		if verbs[bad] {
+			t.Errorf("unexpected verb %q in %+v", bad, verbs)
+		}
+	}
+}
+
 func TestLoadAuditRecords_MissingFileIsEmpty(t *testing.T) {
 	got, err := loadAuditRecords(filepath.Join(t.TempDir(), "nope.jsonl"), "/x", 0)
 	if err != nil {
