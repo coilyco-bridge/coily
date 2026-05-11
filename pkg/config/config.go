@@ -46,6 +46,8 @@ func defaults() Config {
 	}
 }
 
+// Config is the merged result of the three layered config sources. Loaded
+// holds the moment Load returned, so callers can decide whether to refresh.
 type Config struct {
 	KaiServer KaiServer `yaml:"kai_server"`
 	Audit     Audit     `yaml:"audit"`
@@ -73,6 +75,8 @@ type Factorio struct {
 	ServerDir string `yaml:"server_dir"`
 }
 
+// KaiServer is the connection config for the home server that `coily ssh`
+// and the gaming/eco/factorio verbs target.
 type KaiServer struct {
 	TailscaleHost string `yaml:"tailscale_host"`
 	SSHUser       string `yaml:"ssh_user"`
@@ -84,6 +88,8 @@ type KaiServer struct {
 	SSHKeyPath string `yaml:"ssh_key_path"`
 }
 
+// Audit controls where the JSONL audit log lives and how lumberjack rotates
+// it. LogPath defaults to ~/.coily/audit/coily.jsonl when left blank.
 type Audit struct {
 	LogPath    string `yaml:"log_path"`
 	MaxSizeMB  int    `yaml:"max_size_mb"`
@@ -92,6 +98,8 @@ type Audit struct {
 	Compress   bool   `yaml:"compress"`
 }
 
+// AWS holds the named profile that `coily ops aws` passes through to the
+// underlying aws CLI. Empty falls back to the aws CLI's own resolution.
 type AWS struct {
 	Profile string `yaml:"profile"`
 }

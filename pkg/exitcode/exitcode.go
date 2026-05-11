@@ -64,10 +64,20 @@ type CodedError struct {
 	Hint string
 }
 
-func (e *CodedError) Error() string    { return e.Err.Error() }
-func (e *CodedError) Code() int        { return e.C }
-func (e *CodedError) Kind() string     { return e.K }
-func (e *CodedError) Unwrap() error    { return e.Err }
+// Error returns the wrapped error's message.
+func (e *CodedError) Error() string { return e.Err.Error() }
+
+// Code returns the numeric exit code coily should exit with.
+func (e *CodedError) Code() int { return e.C }
+
+// Kind returns the lowercase stable token written into the yaml error envelope.
+func (e *CodedError) Kind() string { return e.K }
+
+// Unwrap returns the underlying cause for errors.Is / errors.As.
+func (e *CodedError) Unwrap() error { return e.Err }
+
+// HintText returns the optional one-line recovery hint shown to the user
+// alongside the error envelope. Empty when no hint was attached.
 func (e *CodedError) HintText() string { return e.Hint }
 
 // New tags an error with a code and kind.

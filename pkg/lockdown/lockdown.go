@@ -60,6 +60,8 @@ func validateShellSyntax(body string) error {
 //go:embed defaults.yaml
 var defaultsYAML []byte
 
+// Defaults is the parsed allow / deny list pair that BuildPlan writes into
+// the target settings file. Loaded from defaults.yaml via LoadDefaults.
 type Defaults struct {
 	Allow []string `yaml:"allow" json:"-"`
 	Deny  []string `yaml:"deny" json:"-"`
@@ -74,6 +76,8 @@ type Settings struct {
 	Permissions Permissions `json:"permissions"`
 }
 
+// Permissions is the on-disk shape of the Claude Code settings
+// permissions block (allow / deny rule strings).
 type Permissions struct {
 	Allow []string `json:"allow,omitempty"`
 	Deny  []string `json:"deny,omitempty"`

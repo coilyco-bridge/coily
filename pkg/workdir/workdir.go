@@ -31,11 +31,17 @@ const OverrideEnv = "COILY_PRIMARY_DIR"
 // gate behavior on confidence should branch on this.
 type Source string
 
+// Signal labels for Result.Source, in detection-precedence order.
 const (
-	SourceEnv        Source = "env"
-	SourceGit        Source = "git"
+	// SourceEnv means $COILY_PRIMARY_DIR forced the answer.
+	SourceEnv Source = "env"
+	// SourceGit means the nearest ancestor with a .git entry won.
+	SourceGit Source = "git"
+	// SourceCoilysiren means the first path segment under
+	// ~/projects/coilysiren/ won.
 	SourceCoilysiren Source = "coilysiren"
-	SourceCWD        Source = "cwd"
+	// SourceCWD means no other signal matched and cwd was returned verbatim.
+	SourceCWD Source = "cwd"
 )
 
 // Result is what Detect returns. Path is always absolute and cleaned.
