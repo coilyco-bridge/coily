@@ -69,3 +69,9 @@ Per the workspace "Default to proactive scheduling" rule: after pushing to `main
 - **Upgrade**: `brew outdated coilysiren/tap/coily` - if upgradeable, `brew upgrade coilysiren/tap/coily`. No sudo (Homebrew installs to user-writable `/opt/homebrew`).
 - **Re-baseline lockdown** *only when the bumped commit changed `pkg/lockdown/` or `Formula/coily.rb`-relevant code*: `coily lockdown --apply --replace --recursive --path ~/projects/coilysiren`. Skip when the bump is unrelated to lockdown defaults (most patch bumps).
 - **Skip the auto-schedule** when the push is documentation-only (README, AGENTS.md, docs/) - the binary changes but nothing in it has user-visible effect.
+
+---
+
+## Commands
+
+Route every dev command through coily, which reads [`.coily/coily.yaml`](.coily/coily.yaml). Even in this repo, the lockdown denies bare invocations of the underlying tools (`make`, `go`, etc.). Add new verbs to that file before invoking them.
