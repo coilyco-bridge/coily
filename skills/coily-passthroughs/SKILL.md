@@ -239,6 +239,28 @@ Flags: --format, --out
 
 Pass-through to aws with argv validation + audit log.
 
+## `coily ops claude-remote-control restart`
+
+Restart the claude-remote-control unit.
+
+## `coily ops claude-remote-control start`
+
+Start the claude-remote-control unit.
+
+## `coily ops claude-remote-control status`
+
+Print systemctl status claude-remote-control.
+
+## `coily ops claude-remote-control stop`
+
+Stop the claude-remote-control unit.
+
+## `coily ops claude-remote-control tail`
+
+Tail claude-remote-control journal logs (journalctl -u claude-remote-control -f).
+
+Flags: --follow, --lines
+
 ## `coily ops discord applications applications-get-activity-instance`
 
 GET /applications/{application_id}/activity-instances/{instance_id}
