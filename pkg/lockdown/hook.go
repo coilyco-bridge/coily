@@ -154,12 +154,44 @@ exit 0
 // with a wrapper, the deny message names the wrapper as the recovery path
 // per AGENTS.md "opaque errors are design smells - recovery messages should
 // name the command or skill Kai can dictate next." Issue #61.
+//
+// Source of truth for cross-repo recovery hints (issue #122). Every coily
+// wrapper that shadows a denied bare binary lands here so `coily lockdown`
+// renders the hint into each repo's lockdown-deny.sh, replacing the prior
+// per-repo hand-sync.
 var wrapperRecovery = map[string]string{
+	// ops pass-throughs.
 	"gh":        "coily ops gh",
 	"aws":       "coily ops aws",
 	"kubectl":   "coily ops kubectl",
 	"docker":    "coily docker",
 	"tailscale": "coily tailscale",
+
+	// ssh family. Free-form remote exec was removed; named verbs live under
+	// `coily ssh` (copy, systemctl, journalctl, kubectl, git, deploy, fs).
+	"ssh": "coily ssh",
+	"scp": "coily ssh copy",
+
+	// Package managers. All wrapped under `coily pkg <pkgmgr>`.
+	"npm":    "coily pkg npm",
+	"pnpm":   "coily pkg pnpm",
+	"yarn":   "coily pkg yarn",
+	"bun":    "coily pkg bun",
+	"uv":     "coily pkg uv",
+	"pip":    "coily pkg pip",
+	"pipx":   "coily pkg pipx",
+	"poetry": "coily pkg poetry",
+	"cargo":  "coily pkg cargo",
+	"gem":    "coily pkg gem",
+	"bundle": "coily pkg bundle",
+	"brew":   "coily brew",
+
+	// Build runners. The audited replacement is a named verb in
+	// .coily/coily.yaml dispatched via `coily exec <verb>`.
+	"make":   "coily exec <verb>",
+	"just":   "coily exec <verb>",
+	"task":   "coily exec <verb>",
+	"invoke": "coily exec <verb>",
 }
 
 // renderDenyPrefixCase emits the case statement that matches each deny

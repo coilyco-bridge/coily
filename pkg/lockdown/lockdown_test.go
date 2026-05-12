@@ -365,10 +365,23 @@ func TestRenderHookScript_NamesCoilyWrapperOnDeny(t *testing.T) {
 	}
 	// Issue #61: deny-rule message must name `coily ops <bin>` as the
 	// recovery path for the wrapped binaries the agent reaches for most.
+	// Issue #122: hint coverage now extends to ssh, package managers, and
+	// build runners so `coily lockdown` is the single source of truth.
 	for prefix, recovery := range map[string]string{
-		"gh":      "coily ops gh",
-		"aws":     "coily ops aws",
-		"kubectl": "coily ops kubectl",
+		"gh":        "coily ops gh",
+		"aws":       "coily ops aws",
+		"kubectl":   "coily ops kubectl",
+		"docker":    "coily docker",
+		"tailscale": "coily tailscale",
+		"ssh":       "coily ssh",
+		"scp":       "coily ssh copy",
+		"npm":       "coily pkg npm",
+		"uv":        "coily pkg uv",
+		"pip":       "coily pkg pip",
+		"cargo":     "coily pkg cargo",
+		"brew":      "coily brew",
+		"make":      "coily exec <verb>",
+		"just":      "coily exec <verb>",
 	} {
 		want := "blocked by deny rule: " + prefix + ". Recovery: use `" + recovery
 		if !strings.Contains(body, want) {
