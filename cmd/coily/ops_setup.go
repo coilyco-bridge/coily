@@ -36,13 +36,16 @@ func (r *Runner) setupCommand() *cli.Command {
                                        rejects dev coily binaries from any
                                        cwd; complements per-repo lockdown)
 
-Pass --workspace to override the lockdown root (default: ~/projects/coilysiren).
-Skips the lockdown step if the workspace does not exist.`,
+Pass --workspace or set $COILY_LOCKDOWN_ROOT to override the lockdown root
+(default: ~/projects/coilysiren). Skips the lockdown step if the workspace
+does not exist, which keeps fresh brew installs on hosts without the default
+tree (friends' machines, alternate layouts) silent.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "workspace",
-				Usage: "directory to scan recursively for git repos to lock down",
-				Value: "",
+				Name:    "workspace",
+				Usage:   "directory to scan recursively for git repos to lock down. Read from $COILY_LOCKDOWN_ROOT if unset.",
+				Value:   "",
+				Sources: cli.EnvVars("COILY_LOCKDOWN_ROOT"),
 			},
 			&cli.BoolFlag{
 				Name:  "skip-completion",

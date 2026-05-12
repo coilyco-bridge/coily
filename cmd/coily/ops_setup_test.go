@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/urfave/cli/v3"
 )
 
 // TestInstallSkillSymlinks_LinksAllStaged pins issue #65: every coily-*
@@ -163,4 +165,38 @@ func TestInstallSkillSymlinks_NoStagedDirIsNotAnError(t *testing.T) {
 	if err := installSkillSymlinks(self); err != nil {
 		t.Errorf("installSkillSymlinks on dev build returned %v, want nil", err)
 	}
+}
+
+// TestSetupCommand_WorkspaceFlagBindsEnvVar pins issue #120: the workspace
+// flag must resolve from COILY_LOCKDOWN_ROOT when no --workspace is passed,
+// so brew users can set the env var once in their shell profile and have
+// `coily setup` after each brew upgrade target the right tree without
+// remembering the flag.
+func TestSetupCommand_WorkspaceFlagBindsEnvVar(t *testing.T) {
+	r := NewRunner()
+	cmd := r.setupCommand()
+	var workspace *cli.StringFlag
+	for _, f := range cmd.Flags {
+		sf, ok := f.(*cli.StringFlag)
+		if ok && sf.Name == "workspace" {
+			workspace = sf
+			break
+		}
+	}
+	if workspace == nil {
+		t.Fatal("setup command has no --workspace flag")
+	}
+	got := workspace.Sources.String()
+	if got == "" || !contains(got, "COILY_LOCKDOWN_ROOT") {
+		t.Errorf("workspace.Sources = %q, want it to reference COILY_LOCKDOWN_ROOT", got)
+	}
+}
+
+func contains(haystack, needle string) bool {
+	for i := 0; i+len(needle) <= len(haystack); i++ {
+		if haystack[i:i+len(needle)] == needle {
+			return true
+		}
+	}
+	return false
 }
