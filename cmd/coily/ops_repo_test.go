@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -10,24 +12,24 @@ import (
 
 	"github.com/coilysiren/coily/pkg/audit"
 	"github.com/coilysiren/coily/pkg/repocfg"
+	"github.com/coilysiren/coily/pkg/shell"
 	"github.com/urfave/cli/v3"
 )
 
-// TestBuildExecFromChildren_AggregatesCommands proves that when cwd has
-// no ancestor coily.yaml, child discovery still yields a usable exec
-// command tree: each unique command name across direct children becomes
-// a subcommand, sorted by name.
-func TestBuildExecFromChildren_AggregatesCommands(t *testing.T) {
+// TestBuildExecFromConfigs_AggregatesCommands proves that the unified
+// discovery pool yields a usable exec command tree: each unique command
+// name across the pool becomes a subcommand, sorted by name.
+func TestBuildExecFromConfigs_AggregatesCommands(t *testing.T) {
 	parent := t.TempDir()
 	mkChild(t, parent, "alpha", "commands:\n  alpha-only: true\n  shared: true\n")
 	mkChild(t, parent, "beta", "commands:\n  beta-only: true\n  shared: true\n")
 
-	cfgs, err := repocfg.DiscoverChildren(parent)
+	cfgs, err := repocfg.DiscoverAll(parent)
 	if err != nil {
-		t.Fatalf("DiscoverChildren: %v", err)
+		t.Fatalf("DiscoverAll: %v", err)
 	}
 	r := newTestRunner(t)
-	exec := r.buildExecFromChildren(cfgs)
+	exec := r.buildExecFromConfigs(cfgs)
 
 	want := []string{"alpha-only", "beta-only", "shared"}
 	got := make([]string, 0, len(exec.Commands))
@@ -39,38 +41,136 @@ func TestBuildExecFromChildren_AggregatesCommands(t *testing.T) {
 	}
 }
 
-// TestBuildExecFromChildren_AmbiguousErrors proves that a command name
-// declared by multiple direct children produces an error subcommand
-// listing the matches, rather than picking one silently.
-func TestBuildExecFromChildren_AmbiguousErrors(t *testing.T) {
+// TestPromptChildChoice_PicksByIndex covers the headline pause-for-input
+// behavior: when a name is declared by multiple repos, the subcommand
+// prompts on stderr with a numbered menu and reads a 1-indexed pick
+// from stdin. Drives promptChildChoice directly so the test doesn't
+// depend on a real git repo for the gittree gate.
+func TestPromptChildChoice_PicksByIndex(t *testing.T) {
 	parent := t.TempDir()
 	mkChild(t, parent, "alpha", "commands:\n  shared: true\n")
 	mkChild(t, parent, "beta", "commands:\n  shared: true\n")
-
-	cfgs, err := repocfg.DiscoverChildren(parent)
+	cfgs, err := repocfg.DiscoverAll(parent)
 	if err != nil {
-		t.Fatalf("DiscoverChildren: %v", err)
+		t.Fatalf("DiscoverAll: %v", err)
 	}
-	r := newTestRunner(t)
-	root := wrapExecRoot(r.buildExecFromChildren(cfgs))
-	err = root.Run(t.Context(), []string{"coily", "exec", "shared"})
+	matches := []childMatch{
+		{cfg: cfgs[0], cmd: cfgs[0].Commands[0]},
+		{cfg: cfgs[1], cmd: cfgs[1].Commands[0]},
+	}
+	var out bytes.Buffer
+	pick, err := promptChildChoice("shared", matches, strings.NewReader("2\n"), &out)
+	if err != nil {
+		t.Fatalf("promptChildChoice: %v", err)
+	}
+	wantRoot := filepath.Dir(filepath.Dir(matches[1].cfg.Path))
+	gotRoot := filepath.Dir(filepath.Dir(pick.cfg.Path))
+	if gotRoot != wantRoot {
+		t.Errorf("picked repo root = %q, want %q", gotRoot, wantRoot)
+	}
+	if !strings.Contains(out.String(), "pick one") || !strings.Contains(out.String(), "choice [1-2]") {
+		t.Errorf("prompt output missing expected lines:\n%s", out.String())
+	}
+}
+
+// TestPromptChildChoice_RejectsOutOfRange proves the prompt errors with
+// exec_prompt_invalid rather than panicking when the agent feeds back a
+// number outside the menu range. The hint names the valid range so the
+// next retry can succeed.
+func TestPromptChildChoice_RejectsOutOfRange(t *testing.T) {
+	parent := t.TempDir()
+	mkChild(t, parent, "alpha", "commands:\n  shared: true\n")
+	mkChild(t, parent, "beta", "commands:\n  shared: true\n")
+	cfgs, err := repocfg.DiscoverAll(parent)
+	if err != nil {
+		t.Fatalf("DiscoverAll: %v", err)
+	}
+	matches := []childMatch{
+		{cfg: cfgs[0], cmd: cfgs[0].Commands[0]},
+		{cfg: cfgs[1], cmd: cfgs[1].Commands[0]},
+	}
+	_, err = promptChildChoice("shared", matches, strings.NewReader("99\n"), io.Discard)
 	if err == nil {
-		t.Fatal("ambiguous command did not error")
+		t.Fatal("expected error for out-of-range pick, got nil")
 	}
-	if k := errKind(err); k != "exec_ambiguous_children" {
-		t.Errorf("err kind = %q, want exec_ambiguous_children (err=%v)", k, err)
+	if k := errKind(err); k != "exec_prompt_invalid" {
+		t.Errorf("err kind = %q, want exec_prompt_invalid", k)
 	}
-	if !strings.Contains(err.Error(), "alpha") || !strings.Contains(err.Error(), "beta") {
-		t.Errorf("error message %q does not name both children", err.Error())
+}
+
+// TestBuildExecFromConfigs_PromptingSubcommandPicksRepo wires the
+// prompting subcommand through verb.Wrap and proves that after stdin
+// feeds "2\n", the audit row's commit-scope binds to the second repo
+// (the one the operator picked), not the first.
+func TestBuildExecFromConfigs_PromptingSubcommandPicksRepo(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not on PATH")
+	}
+	if _, err := exec.LookPath("true"); err != nil {
+		t.Skip("true not on PATH")
+	}
+
+	repoA := initSecurityClaimRepo(t)
+	repoB := initSecurityClaimRepo(t)
+	for _, root := range []string{repoA, repoB} {
+		cfgDir := filepath.Join(root, ".coily")
+		if err := os.MkdirAll(cfgDir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(cfgDir, "coily.yaml"),
+			[]byte("commands:\n  noop: true\n"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		mustGitForClaim(t, root, "add", ".coily/coily.yaml")
+		mustGitForClaim(t, root, "commit", "-m", "add coily.yaml")
+		mustGitForClaim(t, root, "push")
+	}
+	cfgA, err := repocfg.Load(filepath.Join(repoA, ".coily", "coily.yaml"))
+	if err != nil {
+		t.Fatalf("load A: %v", err)
+	}
+	cfgB, err := repocfg.Load(filepath.Join(repoB, ".coily", "coily.yaml"))
+	if err != nil {
+		t.Fatalf("load B: %v", err)
+	}
+	// Order matches alphanumeric by Path. The test feeds "2" so we
+	// require the "second" match to be repoB regardless of which repo
+	// the OS-given tempdir ordering put first.
+	configs := []*repocfg.Config{cfgA, cfgB}
+	// Stable sort by Path to mirror DiscoverAll's contract.
+	if cfgA.Path > cfgB.Path {
+		configs = []*repocfg.Config{cfgB, cfgA}
+	}
+
+	r := newSecurityClaimRunnerWithAudit(t)
+	r.Runner = &shell.Runner{
+		Stdout: os.Stdout,
+		Stderr: io.Discard,
+		Stdin:  strings.NewReader("2\n"),
+	}
+	execCmd := r.buildExecFromConfigs(configs)
+	root := wrapExecRoot(execCmd)
+	// exec subcommand "noop" is the prompting variant.
+	if err := root.Run(t.Context(), []string{"coily", "exec", "noop"}); err != nil {
+		t.Fatalf("prompting run: %v", err)
+	}
+	rec := lastAuditRecord(t, r.Audit.Path)
+	wantScope := filepath.Dir(filepath.Dir(configs[1].Path))
+	if rec.CommitScope != wantScope {
+		t.Errorf("commit_scope = %q, want %q (the picked repo)", rec.CommitScope, wantScope)
+	}
+	if rec.Verb != "repo.noop" {
+		t.Errorf("verb = %q, want repo.noop", rec.Verb)
+	}
+	if rec.Decision != audit.DecisionAccept {
+		t.Errorf("decision = %q, want accept", rec.Decision)
 	}
 }
 
 // TestBuildChildRepoCommand_BindsAuditScopeToChild is the headline-case
 // invariant: running `coily exec daily-social` from above coilyco-ai
 // (the issue's example) must bind the audit row's commit-scope to the
-// matched child repo, not cwd's git toplevel. That binding is what
-// keeps repo-scoped audit queries (`coily git audit-show`) working
-// when the operator runs one level above the target.
+// matched repo, not cwd's git toplevel.
 func TestBuildChildRepoCommand_BindsAuditScopeToChild(t *testing.T) {
 	if _, err := exec.LookPath("git"); err != nil {
 		t.Skip("git not on PATH")
@@ -106,7 +206,7 @@ func TestBuildChildRepoCommand_BindsAuditScopeToChild(t *testing.T) {
 
 	rec := lastAuditRecord(t, r.Audit.Path)
 	if rec.CommitScope != repoRoot {
-		t.Errorf("commit_scope = %q, want %q (the matched child repo, not cwd's toplevel)",
+		t.Errorf("commit_scope = %q, want %q (the matched repo, not cwd's toplevel)",
 			rec.CommitScope, repoRoot)
 	}
 	if rec.Verb != "repo.noop" {
@@ -118,9 +218,9 @@ func TestBuildChildRepoCommand_BindsAuditScopeToChild(t *testing.T) {
 }
 
 // TestLoadRepoExecCommand_NoConfigStillBuildsExec proves the verb stays
-// visible in --help even when neither cwd's ancestry nor its direct
-// children declare a coily.yaml. The Action returns a UserError so the
-// operator gets a clear recovery hint instead of "command not found".
+// visible in --help even when nothing is reachable from cwd's discovery
+// pool. The Action returns a UserError so the operator gets a clear
+// recovery hint instead of "command not found".
 func TestLoadRepoExecCommand_NoConfigStillBuildsExec(t *testing.T) {
 	parent := t.TempDir()
 	t.Setenv(repocfg.EnvOverride, "")
@@ -131,11 +231,8 @@ func TestLoadRepoExecCommand_NoConfigStillBuildsExec(t *testing.T) {
 	if exec == nil {
 		t.Fatal("loadRepoExecCommand returned nil exec command")
 	}
-	if res.Ancestor != nil {
-		t.Errorf("Ancestor = %v, want nil", res.Ancestor)
-	}
-	if len(res.Children) != 0 {
-		t.Errorf("Children = %v, want empty", res.Children)
+	if len(res.Configs) != 0 {
+		t.Errorf("Configs = %v, want empty", res.Configs)
 	}
 	if exec.Action == nil {
 		t.Fatal("stub exec command has no Action")
@@ -150,8 +247,9 @@ func TestLoadRepoExecCommand_NoConfigStillBuildsExec(t *testing.T) {
 }
 
 // TestLoadRepoExecCommand_DiscoversChildren proves the headline case
-// from issue #102: `coily exec` invoked one directory above a child
-// repo discovers that child and registers its commands as subcommands.
+// from issue #102 still works under the unified discovery pool: `coily
+// exec` invoked one directory above a child repo discovers that child
+// and registers its commands as subcommands.
 func TestLoadRepoExecCommand_DiscoversChildren(t *testing.T) {
 	parent := t.TempDir()
 	mkChild(t, parent, "alpha", "commands:\n  alpha-only: true\n")
@@ -160,11 +258,8 @@ func TestLoadRepoExecCommand_DiscoversChildren(t *testing.T) {
 
 	r := newTestRunner(t)
 	res, exec := r.loadRepoExecCommand()
-	if res.Ancestor != nil {
-		t.Errorf("Ancestor = %v, want nil", res.Ancestor)
-	}
-	if len(res.Children) != 1 {
-		t.Fatalf("Children = %v, want one entry", res.Children)
+	if len(res.Configs) != 1 {
+		t.Fatalf("Configs = %v, want one entry", res.Configs)
 	}
 	names := make([]string, 0, len(exec.Commands))
 	for _, c := range exec.Commands {
@@ -205,13 +300,9 @@ func pushdir(t *testing.T, dir string) {
 	})
 }
 
-// wrapExecRoot wraps a single cli.Command as the only top-level subcommand
-// of a `coily` root carrying the same global flags the production main
-// installs. Tests that exercise an `exec` subtree pass the result of
-// buildExecFromChildren directly; tests that exercise a single
-// auto-executing leaf pass the buildChildRepoCommand result and invoke
-// it as a top-level verb so c.Root() resolves correctly inside the
-// verb pipeline.
+// wrapExecRoot wraps a single cli.Command as the only top-level
+// subcommand of a `coily` root carrying the same global flags the
+// production main installs.
 func wrapExecRoot(child *cli.Command) *cli.Command {
 	return &cli.Command{
 		Name: "coily",

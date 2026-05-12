@@ -349,7 +349,7 @@ func TestSecurityClaim_repo_verbs_require_clean_tree(t *testing.T) {
 
 	// (1) Clean tree: verb runs, audit row not tagged.
 	r := newSecurityClaimRunnerWithAudit(t)
-	cmd := r.buildRepoCommand(cfg, cfg.Commands[0])
+	cmd := r.buildChildRepoCommand(cfg, cfg.Commands[0])
 	root := wrapInRoot(cmd)
 	if err := root.Run(t.Context(), []string{"coily", "noop"}); err != nil {
 		t.Fatalf("clean-tree run: %v", err)
@@ -367,7 +367,7 @@ func TestSecurityClaim_repo_verbs_require_clean_tree(t *testing.T) {
 		t.Fatal(err)
 	}
 	r = newSecurityClaimRunnerWithAudit(t)
-	cmd = r.buildRepoCommand(cfg, cfg.Commands[0])
+	cmd = r.buildChildRepoCommand(cfg, cfg.Commands[0])
 	root = wrapInRoot(cmd)
 	err = root.Run(t.Context(), []string{"coily", "noop"})
 	if err == nil {
@@ -379,7 +379,7 @@ func TestSecurityClaim_repo_verbs_require_clean_tree(t *testing.T) {
 
 	// (3) Dirty tree with override: runs, audit row tagged.
 	r = newSecurityClaimRunnerWithAudit(t)
-	cmd = r.buildRepoCommand(cfg, cfg.Commands[0])
+	cmd = r.buildChildRepoCommand(cfg, cfg.Commands[0])
 	root = wrapInRoot(cmd)
 	if err := root.Run(t.Context(), []string{"coily", "--audit-override-dirty", "noop"}); err != nil {
 		t.Fatalf("dirty run with override: %v", err)

@@ -185,6 +185,55 @@ func DiscoverChildren(parentDir string) ([]*Config, error) {
 	return configs, nil
 }
 
+// DiscoverAll returns every coily.yaml reachable from start in a single
+// deterministic pool: every level of the ancestor walk from start up to
+// the filesystem root, plus every direct child of start. Results are
+// sorted by Path and deduped. Best-effort like DiscoverChildren: a
+// malformed or unreadable config is silently skipped rather than aborting
+// the whole scan, because the caller's job is to present a unified menu
+// of repo commands and one broken sibling should not blank the menu.
+//
+// This is the single discovery surface for `coily exec`. It replaces the
+// older "ancestor wins, else fall back to direct children" branching,
+// which produced non-deterministic "where did my config come from"
+// behavior when cwd shifted by one level. The new contract: every config
+// the operator could plausibly be targeting from cwd is a candidate, and
+// the verb layer disambiguates by command name (1 declarant auto-runs,
+// >1 declarants prompt for a pick).
+func DiscoverAll(start string) ([]*Config, error) {
+	abs, err := filepath.Abs(start)
+	if err != nil {
+		return nil, fmt.Errorf("repocfg: abs %s: %w", start, err)
+	}
+	var configs []*Config
+	seen := map[string]bool{}
+	dir := abs
+	for {
+		if path, _ := discoverAtLevel(dir); path != "" && !seen[path] {
+			if cfg, loadErr := Load(path); loadErr == nil {
+				configs = append(configs, cfg)
+				seen[path] = true
+			}
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+	children, _ := DiscoverChildren(abs)
+	for _, c := range children {
+		if !seen[c.Path] {
+			configs = append(configs, c)
+			seen[c.Path] = true
+		}
+	}
+	sort.Slice(configs, func(i, j int) bool {
+		return configs[i].Path < configs[j].Path
+	})
+	return configs, nil
+}
+
 // LoadDefault resolves the config path from $COILY_REPO_CONFIG or by walking
 // up from the current working directory, then parses it. Returns nil,
 // ErrNoConfig when no config is found. All other errors are parsing or

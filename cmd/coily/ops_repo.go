@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/coilysiren/coily/pkg/audit"
@@ -17,22 +20,20 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// repoExecResult bundles what loadRepoExecCommand discovered. Either
-// Ancestor is set (cwd ancestry has a coily.yaml; the legacy happy path)
-// or Children is set (cwd itself has no ancestor config but direct
-// children declare commands). Both can be empty when no config is found
-// anywhere; callers render that as the "no config" stub. Mutually
-// exclusive: an ancestor match wins over child discovery so the operator
-// who has consciously cd'd into a configured repo is never overridden by
-// a sibling that happens to declare the same name.
+// repoExecResult bundles what loadRepoExecCommand discovered. The
+// discovery surface is a single unified pool: every coily.yaml reachable
+// from cwd via the ancestor walk plus every coily.yaml in a direct child.
+// `Configs` is that pool, sorted by Path. Empty means no config was
+// found anywhere reachable. There is no ancestor-vs-children branching
+// at this layer: the verb groups commands by name and disambiguates one
+// per-name (single declarant auto-runs, multiple declarants prompt).
 type repoExecResult struct {
-	Ancestor *repocfg.Config
-	Children []*repocfg.Config
+	Configs []*repocfg.Config
 }
 
-// childMatch records one (config, command) pair from the child-discovery
-// pass. Multiple matches with the same command name are the ambiguous
-// case; exactly one match is the auto-execute case.
+// childMatch records one (config, command) pair from the unified pool.
+// Multiple matches with the same command name trigger the interactive
+// pick prompt; exactly one match is the auto-execute case.
 type childMatch struct {
 	cfg *repocfg.Config
 	cmd repocfg.Command
@@ -40,83 +41,59 @@ type childMatch struct {
 
 // loadRepoExecCommand resolves the `exec` verb against cwd. The verb is
 // always returned (non-nil) so it stays visible in --help and --tree
-// regardless of where coily was invoked from. Three resolution modes:
+// regardless of where coily was invoked from.
 //
-//  1. Ancestor coily.yaml found: subcommands come from that file. Same
-//     behavior as the original repo-verb path.
-//  2. No ancestor, but direct children declare commands: subcommands
-//     aggregate from those children. Names declared by exactly one child
-//     auto-execute against that child (cwd-set, commit-scope-bound to it).
-//     Names declared by multiple children become error subcommands that
-//     list the matches so the operator can disambiguate.
-//  3. Neither: a single Action returns a UserError naming the recovery.
+// Discovery is a single pool: every coily.yaml reachable from cwd via
+// repocfg.DiscoverAll (ancestor walk + direct children of cwd). Commands
+// are aggregated across that pool by name (a simple alphanumeric match).
 //
-// Mode 2 is the headline case for running `coily exec daily-social` from
-// one directory above coilyco-ai. The communication contract is loud:
-// the auto-executing branch prints a stderr line naming the matched
-// child before exec, so the operator never silently runs against the
-// wrong repo.
+//   - 0 declarants for a name: name does not exist as a subcommand.
+//   - 1 declarant: subcommand auto-runs against that repo, cwd set to the
+//     repo root, audit row's commit-scope bound to it.
+//   - 2+ declarants: subcommand prompts on stderr for a numeric pick,
+//     reads stdin, then runs the picked repo's command. The audit row's
+//     commit-scope binds to the repo that was picked.
+//
+// This replaces the older "ancestor wins, else fall back to direct
+// children" branching, which produced "where did my config come from"
+// non-determinism when cwd shifted one level up or down.
 func (r *Runner) loadRepoExecCommand() (repoExecResult, *cli.Command) {
-	cfg, err := repocfg.LoadDefault()
-	if err != nil && !errors.Is(err, repocfg.ErrNoConfig) {
-		fmt.Fprintf(os.Stderr, "coily: repo config error: %v\n", err)
-		cfg = nil
-	}
-	if cfg != nil {
-		subs := make([]*cli.Command, 0, len(cfg.Commands))
-		for _, rc := range cfg.Commands {
-			subs = append(subs, r.buildRepoCommand(cfg, rc))
-		}
-		exec := &cli.Command{
-			Name:     "exec",
-			Usage:    "Run a named command from .coily/coily.yaml",
-			Category: "repo",
-			Description: fmt.Sprintf(
-				"Run a per-repo command declared in %s. Subcommand names come from "+
-					"the commands: map. Extra positional args are appended and validated "+
-					"against the same shell-metacharacter rules as privileged verbs.",
-				cfg.Path,
-			),
-			Commands: subs,
-		}
-		return repoExecResult{Ancestor: cfg}, exec
-	}
-
 	cwd, _ := os.Getwd()
-	children, _ := repocfg.DiscoverChildren(cwd)
-	if len(children) > 0 {
-		return repoExecResult{Children: children}, r.buildExecFromChildren(children)
+	configs, err := repocfg.DiscoverAll(cwd)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "coily: repo config discovery error: %v\n", err)
 	}
-
-	return repoExecResult{}, &cli.Command{
-		Name:     "exec",
-		Usage:    "Run a named command from .coily/coily.yaml (no config found in cwd)",
-		Category: "repo",
-		Description: "Run a per-repo command declared in .coily/coily.yaml. " +
-			"Discovery walks from cwd up to the filesystem root looking for " +
-			".coily/coily.yaml, then falls back to scanning direct children. " +
-			"Neither found anything from the current cwd. Create one in the " +
-			"target repo, or cd into a repo (or a directory above one) that " +
-			"has one, then retry.",
-		Action: func(_ context.Context, _ *cli.Command) error {
-			where, _ := os.Getwd()
-			return exitcode.New(exitcode.UserError, "repo_no_config",
-				fmt.Errorf("no .coily/coily.yaml found from cwd (%s) up to filesystem root, "+
-					"and no direct child declares one either", where),
-				"create .coily/coily.yaml in the target repo (or cd into a repo, "+
-					"or one directory above a repo, that has one) and retry")
-		},
+	if len(configs) == 0 {
+		return repoExecResult{}, &cli.Command{
+			Name:     "exec",
+			Usage:    "Run a named command from .coily/coily.yaml (no config reachable from cwd)",
+			Category: "repo",
+			Description: "Run a per-repo command declared in .coily/coily.yaml. " +
+				"Discovery is a single pool: every coily.yaml from cwd's ancestor " +
+				"walk plus every coily.yaml in a direct child of cwd. Nothing " +
+				"was reachable. Create one in the target repo, or cd into a " +
+				"directory that has one (or sits above one), then retry.",
+			Action: func(_ context.Context, _ *cli.Command) error {
+				where, _ := os.Getwd()
+				return exitcode.New(exitcode.UserError, "repo_no_config",
+					fmt.Errorf("no .coily/coily.yaml reachable from cwd (%s) "+
+						"via ancestor walk or direct-child scan", where),
+					"create .coily/coily.yaml in the target repo (or cd into a repo, "+
+						"or one directory above a repo, that has one) and retry")
+			},
+		}
 	}
+	return repoExecResult{Configs: configs}, r.buildExecFromConfigs(configs)
 }
 
-// buildExecFromChildren constructs the `exec` cli.Command from configs
-// discovered in direct children of cwd. Each command name unique across
-// children becomes an auto-executing subcommand bound to that child;
-// names declared by multiple children become error subcommands that list
-// the matches so the operator can disambiguate by cd'ing into the target.
-func (r *Runner) buildExecFromChildren(children []*repocfg.Config) *cli.Command {
+// buildExecFromConfigs constructs the `exec` cli.Command from the unified
+// candidate pool. Each command name unique across the pool becomes an
+// auto-executing subcommand bound to that repo; names declared by more
+// than one repo become prompting subcommands that ask the operator (or
+// agent on stdin) to pick before exec.
+func (r *Runner) buildExecFromConfigs(configs []*repocfg.Config) *cli.Command {
 	matches := map[string][]childMatch{}
-	for _, cfg := range children {
+	for _, cfg := range configs {
 		for _, c := range cfg.Commands {
 			matches[c.Name] = append(matches[c.Name], childMatch{cfg: cfg, cmd: c})
 		}
@@ -133,37 +110,37 @@ func (r *Runner) buildExecFromChildren(children []*repocfg.Config) *cli.Command 
 			subs = append(subs, r.buildChildRepoCommand(ms[0].cfg, ms[0].cmd))
 			continue
 		}
-		subs = append(subs, buildAmbiguousChildCommand(n, ms))
+		subs = append(subs, r.buildPromptingChildCommand(n, ms))
 	}
-	paths := make([]string, 0, len(children))
-	for _, c := range children {
+	paths := make([]string, 0, len(configs))
+	for _, c := range configs {
 		paths = append(paths, filepath.Dir(filepath.Dir(c.Path)))
 	}
 	return &cli.Command{
 		Name:     "exec",
-		Usage:    "Run a command from a direct child's .coily/coily.yaml (cwd has no ancestor config)",
+		Usage:    "Run a command from a .coily/coily.yaml reachable from cwd",
 		Category: "repo",
 		Description: fmt.Sprintf(
-			"cwd has no .coily/coily.yaml in its ancestry, so coily searched its "+
-				"direct children. %d declare commands. The subcommands below "+
-				"aggregate them: names declared by exactly one child auto-execute "+
-				"against that child (cwd-set, audit row bound to its repo). Names "+
-				"declared by multiple children require explicit disambiguation by "+
-				"cd'ing into the target.\n\nChildren scanned:\n  %s",
-			len(children), strings.Join(paths, "\n  "),
+			"Discovery pool: every coily.yaml from cwd's ancestor walk plus "+
+				"every coily.yaml in a direct child of cwd. %d configs in scope. "+
+				"Subcommand names are the union of declared commands across the "+
+				"pool: declared by exactly one repo means auto-execute against "+
+				"that repo (cwd-set, audit row bound to its commit-scope); "+
+				"declared by multiple repos means prompt on stderr for a numeric "+
+				"pick before exec.\n\nConfigs in scope:\n  %s",
+			len(configs), strings.Join(paths, "\n  "),
 		),
 		Commands: subs,
 	}
 }
 
-// buildChildRepoCommand wraps a single (cfg, command) pair from the
-// child-discovery pass into a cli.Command whose Action runs the declared
-// argv inside the child repo (cmd.Dir = repoRoot) and binds the audit
-// row to that child's commit-scope, not cwd's. Mirrors buildRepoCommand
-// but with two differences: the working directory is forced to the
-// child, and the commit-scope is preset rather than read from --commit-
-// scope (which would default to cwd's git toplevel and very likely fail
-// to resolve when the operator is one level above the repo).
+// buildChildRepoCommand wraps a single (cfg, command) pair into a
+// cli.Command whose Action runs the declared argv inside the matched
+// repo (cmd.Dir = repoRoot) and binds the audit row to that repo's
+// commit-scope. Used for command names with exactly one declarant in the
+// unified discovery pool. Repo verbs require a clean working tree and a
+// synced upstream branch so the audit row can be reconstructed from git
+// history; --audit-override-dirty bypasses with audit_override=true.
 func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) *cli.Command {
 	repoRoot := filepath.Dir(filepath.Dir(cfg.Path))
 	verbName := "repo." + rc.Name
@@ -178,13 +155,13 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 		Usage:     usage,
 		ArgsUsage: "[-- extra args]",
 		Description: fmt.Sprintf(
-			"Per-repo command discovered in a direct child of cwd: %s.\nExpands to: %s\n\n"+
-				"cwd has no .coily/coily.yaml in its ancestry, so coily searched its direct "+
-				"children and matched exactly one declaring %q. The command will run with "+
-				"working directory %s and the audit row will bind to that repo's commit-scope.\n\n"+
-				"Extra positional args are appended and validated against the same "+
-				"shell-metacharacter rules as privileged verbs. Repo verbs require a clean "+
-				"working tree and a synced upstream branch.",
+			"Per-repo command discovered in %s.\nExpands to: %s\n\n"+
+				"Exactly one repo in the discovery pool declares %q, so coily runs "+
+				"it without prompting. Working directory is set to %s and the audit "+
+				"row binds to that repo's commit-scope.\n\nExtra positional args "+
+				"are appended and validated against the same shell-metacharacter "+
+				"rules as privileged verbs. Repo verbs require a clean working "+
+				"tree and a synced upstream branch.",
 			cfg.Path, strings.Join(rc.Argv, " "), rc.Name, repoRoot,
 		),
 		Action: verb.Wrap(
@@ -204,28 +181,15 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 					rec.WorkingTreeStatus = dirtyState.Status
 				},
 				Action: func(ctx context.Context, c *cli.Command) error {
-					override := false
-					if root := c.Root(); root != nil {
-						override = root.Bool("audit-override-dirty")
-					}
-					state, err := gittree.CheckClean(repoRoot)
+					state, err := runRepoGate(c, repoRoot, verbName)
 					if err != nil {
-						return exitcode.New(exitcode.Internal, "gittree_error", err,
-							"coily could not evaluate the repo verb gate; run `git status` "+
-								"in the matched child repo to confirm it is in a sane state, then retry")
+						return err
 					}
 					if !state.Clean {
-						if !override {
-							return exitcode.New(exitcode.PolicyDenied, "repo_verb_dirty",
-								errors.New(state.FormatRefusal(verbName)),
-								"commit/push the outstanding work in the matched child repo and retry, "+
-									"or pass --audit-override-dirty for a genuine emergency")
-						}
 						dirtyState = state
 					}
 					fmt.Fprintf(os.Stderr,
-						"coily: exec %s in %s (cwd has no .coily/coily.yaml; "+
-							"matched a single direct child)\n",
+						"coily: exec %s in %s (only repo in pool declaring this name)\n",
 						rc.Name, repoRoot)
 					argv := append([]string{}, rc.Argv[1:]...)
 					argv = append(argv, c.Args().Slice()...)
@@ -237,108 +201,69 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 	}
 }
 
-// buildAmbiguousChildCommand returns a cli.Command for a name declared
-// by more than one direct child. Running it errors with the list of
-// matches so the operator can disambiguate; the matches also appear in
-// the command's --help so disambiguation is possible without invoking.
-// No verb.Wrap here: the command is informational and never reaches the
-// audit layer.
-func buildAmbiguousChildCommand(name string, matches []childMatch) *cli.Command {
-	paths := make([]string, 0, len(matches))
+// buildPromptingChildCommand returns a cli.Command for a name declared
+// by more than one repo in the unified discovery pool. On invocation it
+// prints the matches on stderr, reads a numeric pick from stdin, then
+// runs the chosen repo's command with cwd set to that repo and the audit
+// row's commit-scope bound to it. The pick happens inside the wrapped
+// Action so verb.Wrap's argv validation and audit logging cover the
+// whole flow. CommitScope is left blank by verb.Wrap (SkipScope) and
+// filled in by OnComplete once the pick is known.
+func (r *Runner) buildPromptingChildCommand(name string, matches []childMatch) *cli.Command {
+	verbName := "repo." + name
+	repoPaths := make([]string, 0, len(matches))
 	for _, m := range matches {
-		paths = append(paths, filepath.Dir(filepath.Dir(m.cfg.Path)))
+		repoPaths = append(repoPaths, filepath.Dir(filepath.Dir(m.cfg.Path)))
 	}
-	return &cli.Command{
-		Name:  name,
-		Usage: fmt.Sprintf("Ambiguous: declared by %d direct children", len(matches)),
-		Description: fmt.Sprintf(
-			"Multiple direct children of cwd declare %q in their .coily/coily.yaml. "+
-				"coily refuses to pick one; cd into the target repo (or a parent "+
-				"that has a .coily/coily.yaml) and run again.\n\nMatches:\n  %s",
-			name, strings.Join(paths, "\n  "),
-		),
-		Action: func(_ context.Context, _ *cli.Command) error {
-			return exitcode.New(exitcode.UserError, "exec_ambiguous_children",
-				fmt.Errorf("%q is declared by %d direct children: %s",
-					name, len(matches), strings.Join(paths, ", ")),
-				"cd into the target repo (or a parent that has a .coily/coily.yaml) "+
-					"and retry")
-		},
-	}
-}
-
-// buildRepoCommand turns one repocfg.Command into a cli.Command whose Action
-// exec's the declared argv plus any user-supplied positional args. Everything
-// runs through verb.Wrap so policy validation and audit logging apply.
-//
-// Repo verbs are gated on a clean+synced working tree. The gate refuses the
-// invocation when uncommitted changes, untracked files, a detached HEAD, a
-// branch with no upstream, or a behind-upstream state would prevent the
-// audit row from being reconstructed from git history alone. The
-// --audit-override-dirty flag bypasses the gate but tags the audit row with
-// audit_override=true and captures the porcelain status snapshot. Built-in
-// verbs are unaffected: their behavior is baked into the homebrew-released
-// binary and reproducible from the version trailer in the audit row.
-func (r *Runner) buildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) *cli.Command {
-	usage := rc.Description
-	if usage == "" {
-		usage = "Repo command: " + strings.Join(rc.Argv, " ")
-	}
-	// repoRoot is the parent of .coily/, derived from the discovered config
-	// path. cfg.Path looks like <repoRoot>/.coily/coily.yaml.
-	repoRoot := filepath.Dir(filepath.Dir(cfg.Path))
-	verbName := "repo." + rc.Name
+	var chosen *childMatch
 	var dirtyState *gittree.State
 	return &cli.Command{
-		Name:      rc.Name,
-		Usage:     usage,
+		Name:      name,
+		Usage:     fmt.Sprintf("Declared by %d repos; prompts for a pick on stderr/stdin", len(matches)),
 		ArgsUsage: "[-- extra args]",
 		Description: fmt.Sprintf(
-			"Per-repo command loaded from %s.\nExpands to: %s\n\nExtra positional args are appended and validated against the same "+
-				"shell-metacharacter rules as privileged verbs.\n\nRepo verbs require a clean working tree and a synced upstream branch "+
-				"so the audit log can be reconstructed from git history. Use "+
-				"--audit-override-dirty for genuine emergencies; the override is "+
-				"recorded in the audit row.",
-			cfg.Path, strings.Join(rc.Argv, " "),
-		),
+			"%d repos in the discovery pool declare %q. Invoking this "+
+				"subcommand prints the matches on stderr and reads a numeric "+
+				"choice from stdin. The chosen repo's command runs with cwd "+
+				"set to that repo and the audit row's commit-scope bound to "+
+				"it.\n\nMatches:\n  %s",
+			len(matches), name, strings.Join(repoPaths, "\n  ")),
 		Action: verb.Wrap(
 			verb.Spec{
-				Name: verbName,
+				Name:      verbName,
+				SkipScope: true,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					positional := append([]string{}, rc.Argv...)
-					positional = append(positional, c.Args().Slice()...)
-					return nil, positional
+					return nil, c.Args().Slice()
 				},
 				OnComplete: func(rec *audit.Record) {
-					if dirtyState == nil {
-						return
+					if chosen != nil {
+						rec.CommitScope = filepath.Dir(filepath.Dir(chosen.cfg.Path))
 					}
-					rec.AuditOverride = true
-					rec.WorkingTreeStatus = dirtyState.Status
+					if dirtyState != nil {
+						rec.AuditOverride = true
+						rec.WorkingTreeStatus = dirtyState.Status
+					}
 				},
 				Action: func(ctx context.Context, c *cli.Command) error {
-					override := false
-					if root := c.Root(); root != nil {
-						override = root.Bool("audit-override-dirty")
-					}
-					state, err := gittree.CheckClean(repoRoot)
+					pick, err := promptChildChoice(name, matches, r.Runner.Stdin, r.Runner.Stderr)
 					if err != nil {
-						return exitcode.New(exitcode.Internal, "gittree_error", err,
-							"coily could not evaluate the repo verb gate; run `git status` "+
-								"to confirm the repo is in a sane state, then retry")
+						return err
+					}
+					chosen = &pick
+					repoRoot := filepath.Dir(filepath.Dir(pick.cfg.Path))
+					state, gerr := runRepoGate(c, repoRoot, verbName)
+					if gerr != nil {
+						return gerr
 					}
 					if !state.Clean {
-						if !override {
-							return exitcode.New(exitcode.PolicyDenied, "repo_verb_dirty",
-								errors.New(state.FormatRefusal(verbName)),
-								"commit/push the outstanding work and retry, or pass "+
-									"--audit-override-dirty for a genuine emergency")
-						}
 						dirtyState = state
 					}
-					argv := append([]string{}, rc.Argv[1:]...)
+					fmt.Fprintf(os.Stderr,
+						"coily: exec %s in %s (picked from %d declarants)\n",
+						pick.cmd.Name, repoRoot, len(matches))
+					argv := append([]string{}, pick.cmd.Argv[1:]...)
 					argv = append(argv, c.Args().Slice()...)
-					return r.Runner.Exec(ctx, rc.Argv[0], argv...)
+					return r.Runner.ExecIn(ctx, repoRoot, pick.cmd.Argv[0], argv...)
 				},
 			},
 			r.Audit,
@@ -346,27 +271,83 @@ func (r *Runner) buildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) *cli.
 	}
 }
 
+// runRepoGate runs the clean-tree gate for a repo verb. Returns the
+// gittree state on success (non-nil; state.Clean tells the caller
+// whether to tag the audit row as override) or an error on refusal /
+// gittree failure.
+func runRepoGate(c *cli.Command, repoRoot, verbName string) (*gittree.State, error) {
+	override := false
+	if root := c.Root(); root != nil {
+		override = root.Bool("audit-override-dirty")
+	}
+	state, err := gittree.CheckClean(repoRoot)
+	if err != nil {
+		return nil, exitcode.New(exitcode.Internal, "gittree_error", err,
+			"coily could not evaluate the repo verb gate; run `git status` "+
+				"in the matched repo to confirm it is in a sane state, then retry")
+	}
+	if !state.Clean && !override {
+		return nil, exitcode.New(exitcode.PolicyDenied, "repo_verb_dirty",
+			errors.New(state.FormatRefusal(verbName)),
+			"commit/push the outstanding work in the matched repo and retry, "+
+				"or pass --audit-override-dirty for a genuine emergency")
+	}
+	return state, nil
+}
+
+// promptChildChoice presents the matches on out (stderr) as a numbered
+// menu and reads a single line from in (stdin) containing the 1-indexed
+// choice. Used by the prompting subcommand when a command name is
+// declared by more than one repo. Returns a UserError when input is
+// missing or out of range so the agent gets a clean retry hint instead
+// of a panic.
+func promptChildChoice(name string, matches []childMatch, in io.Reader, out io.Writer) (childMatch, error) {
+	if in == nil {
+		return childMatch{}, exitcode.New(exitcode.UserError, "exec_prompt_no_stdin",
+			fmt.Errorf("%q is declared by %d repos and no stdin is attached to read a pick from",
+				name, len(matches)),
+			"re-invoke with stdin attached and pipe the 1-indexed choice number, "+
+				"or cd into the target repo to disambiguate without a prompt")
+	}
+	_, _ = fmt.Fprintf(out, "coily: %q is declared by %d repos. pick one:\n", name, len(matches))
+	for i, m := range matches {
+		repoRoot := filepath.Dir(filepath.Dir(m.cfg.Path))
+		_, _ = fmt.Fprintf(out, "  %d) %s (%s)\n", i+1, filepath.Base(repoRoot), repoRoot)
+	}
+	_, _ = fmt.Fprintf(out, "choice [1-%d]: ", len(matches))
+	line, err := bufio.NewReader(in).ReadString('\n')
+	if err != nil && (line == "" || !errors.Is(err, io.EOF)) {
+		return childMatch{}, exitcode.New(exitcode.UserError, "exec_prompt_read",
+			fmt.Errorf("read pick for %q: %w", name, err),
+			"re-invoke and pipe the 1-indexed choice number on stdin")
+	}
+	line = strings.TrimSpace(line)
+	if line == "" {
+		return childMatch{}, exitcode.New(exitcode.UserError, "exec_prompt_empty",
+			fmt.Errorf("no choice provided for %q (got %d declarants)", name, len(matches)),
+			"re-invoke and pipe the 1-indexed choice number on stdin")
+	}
+	idx, err := strconv.Atoi(line)
+	if err != nil || idx < 1 || idx > len(matches) {
+		return childMatch{}, exitcode.New(exitcode.UserError, "exec_prompt_invalid",
+			fmt.Errorf("pick %q is not in [1-%d]", line, len(matches)),
+			fmt.Sprintf("re-invoke and pipe an integer in [1-%d] on stdin", len(matches)))
+	}
+	return matches[idx-1], nil
+}
+
 // listCommand renders the built-in and repo command inventory in one shot.
 // Same output for --list on the root command; see main.go. The `exec` verb
 // is always present in the built-in list (see loadRepoExecCommand); the repo
-// section underneath enumerates whatever subcommands the discovered
-// .coily/coily.yaml or direct-child configs declare.
-func listCommand(builtIns []*cli.Command, exec *cli.Command, result repoExecResult) {
+// section underneath enumerates whatever subcommands the unified discovery
+// pool produces.
+func listCommand(builtIns []*cli.Command, _ *cli.Command, result repoExecResult) {
 	fmt.Println("Built-in commands:")
 	printCmdGroup(builtIns)
 	fmt.Println()
-	if result.Ancestor != nil {
-		fmt.Printf("Repo commands from %s (coily exec <name>):\n", result.Ancestor.Path)
-		if exec == nil || len(exec.Commands) == 0 {
-			fmt.Println("  (none declared)")
-			return
-		}
-		printCmdGroup(exec.Commands)
-		return
-	}
-	if len(result.Children) > 0 {
-		fmt.Printf("Repo commands from %d direct child config(s) (coily exec <name>):\n", len(result.Children))
-		for _, c := range result.Children {
+	if len(result.Configs) > 0 {
+		fmt.Printf("Repo commands from %d config(s) reachable from cwd (coily exec <name>):\n", len(result.Configs))
+		for _, c := range result.Configs {
 			fmt.Printf("  %s:\n", c.Path)
 			for _, rc := range c.Commands {
 				if rc.Description != "" {
@@ -379,7 +360,7 @@ func listCommand(builtIns []*cli.Command, exec *cli.Command, result repoExecResu
 		return
 	}
 	fmt.Println("Repo commands (coily exec <name>):")
-	fmt.Println("  (no .coily/coily.yaml found from cwd or its direct children; coily exec is wired but has no subcommands)")
+	fmt.Println("  (no .coily/coily.yaml reachable from cwd; coily exec is wired but has no subcommands)")
 }
 
 // treeCommand renders every coily command and subcommand recursively.
@@ -389,24 +370,15 @@ func treeCommand(builtIns []*cli.Command, exec *cli.Command, result repoExecResu
 	fmt.Println("Built-in commands:")
 	printCmdTree(builtIns, "  ")
 	fmt.Println()
-	if result.Ancestor != nil {
-		fmt.Printf("Repo commands from %s (coily exec <name>):\n", result.Ancestor.Path)
-		if exec == nil || len(exec.Commands) == 0 {
-			fmt.Println("  (none declared)")
-			return
-		}
-		printCmdTree(exec.Commands, "  ")
-		return
-	}
-	if len(result.Children) > 0 {
-		fmt.Printf("Repo commands from %d direct child config(s) (coily exec <name>):\n", len(result.Children))
+	if len(result.Configs) > 0 {
+		fmt.Printf("Repo commands from %d config(s) reachable from cwd (coily exec <name>):\n", len(result.Configs))
 		if exec != nil && len(exec.Commands) > 0 {
 			printCmdTree(exec.Commands, "  ")
 		}
 		return
 	}
 	fmt.Println("Repo commands (coily exec <name>):")
-	fmt.Println("  (no .coily/coily.yaml found from cwd or its direct children; coily exec is wired but has no subcommands)")
+	fmt.Println("  (no .coily/coily.yaml reachable from cwd; coily exec is wired but has no subcommands)")
 }
 
 func printCmdTree(cmds []*cli.Command, indent string) {
