@@ -26,6 +26,7 @@ func (r *Runner) opsCommand() *cli.Command {
 		r.sentryCommand(),
 		r.trelloCommand(),
 		r.forgejoCommand(),
+		r.claudeRemoteControlCommand(),
 	)
 	return &cli.Command{
 		Name:  "ops",
@@ -45,6 +46,9 @@ service's OpenAPI spec by scripts/openapi-to-coily.py):
   coily ops discord  Discord HTTP API (bot auth)
   coily ops sentry   Sentry Public API
   coily ops trello   Trello REST API (key+token auth)
+
+systemd-unit wrappers on kai-server (non-game services):
+  coily ops claude-remote-control {status,tail,start,stop,restart}
 
 Game-server pass-throughs live under coily gaming instead.
 Package-directory wrappers (glama, skillsmp) live under coily pkg.`,
