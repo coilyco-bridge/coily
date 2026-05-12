@@ -146,3 +146,11 @@ coily is a personal-scale remix of three existing ideas.
 - **[Teleport](https://github.com/gravitational/teleport)** - access broker for SSH, k8s, and cloud APIs with per-session audit. coily keeps the scoped-invocation and JSONL-audit slice, drops the cluster and the web UI.
 - **[mise](https://github.com/jdx/mise)** - one CLI multiplexing runtimes, env, and tasks behind consistent verbs. coily applies the same "thin wrapper over N underlying tools" instinct to ops (`aws`, `kubectl`, `gh`, `ssh`) instead of dev envs.
 - **[Dagger](https://github.com/dagger/dagger)** - typed, programmable wrapper over container and CI primitives instead of shelled-out pipeline scripts. coily takes the same "validate structured arguments in a real language, don't just shell out" instinct and applies it to `aws`/`kubectl`/`gh`.
+
+## See also
+
+- [AGENTS.md](AGENTS.md) - agent-facing operating rules.
+- [docs/FEATURES.md](docs/FEATURES.md) - inventory of what ships today.
+- [.coily/coily.yaml](.coily/coily.yaml) - allowlisted commands. Agents route through coily, not bare `make` / `uv` / `python` / `npm` / `cargo` / `dotnet`.
+
+Cross-reference convention from [coilysiren/coilyco-ai#313](https://github.com/coilysiren/coilyco-ai/issues/313).

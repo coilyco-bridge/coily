@@ -181,3 +181,11 @@ hatch by design.
 - Claude Desktop on Windows does not enforce Bash deny list. Lockdown is CLI-only enforcement.
 - Completion scripts use standard urfave/cli v3 patterns, not end-to-end tested.
 - No confirmation tokens. Removed 2026-04-24 because they provided false security with no real fence.
+
+## See also
+
+- [README.md](../README.md) - human-facing intro.
+- [AGENTS.md](../AGENTS.md) - agent-facing operating rules.
+- [.coily/coily.yaml](../.coily/coily.yaml) - allowlisted commands.
+
+Cross-reference convention from [coilysiren/coilyco-ai#313](https://github.com/coilysiren/coilyco-ai/issues/313).
