@@ -2,7 +2,14 @@
 # invoked anywhere inside this checkout. See pkg/repocfg/repocfg.go for the
 # loader, SECURITY.md for the security story.
 #
-# Rules:
+# Rules (enforced by `coily lint`):
+#   - Every commands.<verb>.run must be exactly `make <verb>`. The recipe
+#     lives in the Makefile so the two surfaces cannot drift.
+#   - The matching Makefile target must exist.
+#   - The verb description must match the Makefile target's `## desc`
+#     auto-help comment.
+#
+# General loader rules (enforced by pkg/repocfg):
 #   - Every token parses via strings.Fields and must pass policy.ValidateArg.
 #     No shell metacharacters anywhere. Pipes, redirects, and $(subshells)
 #     are rejected at load time.
@@ -10,22 +17,22 @@
 #   - Repo commands are invoked as `coily exec <name>`, so they cannot
 #     collide with or shadow built-in verbs.
 #
-# Commands that need shell features (heredocs, pipes, env munging) live in a
-# dedicated script file that these commands exec by name.
+# Commands that need shell features (heredocs, pipes, env munging) live in
+# the Makefile target body, not here.
 
 commands:
   test:
-    run: go test ./...
+    run: make test
     description: Run the unit test suite.
   vet:
-    run: go vet ./...
+    run: make vet
     description: go vet across the tree.
   lint:
-    run: golangci-lint run ./...
+    run: make lint
     description: Lint with golangci-lint.
   lint-fix:
-    run: golangci-lint run --fix ./...
+    run: make lint-fix
     description: Autofix lint issues where possible.
   cover:
-    run: go test -coverprofile=coverage.out ./...
+    run: make cover
     description: Unit tests with a coverage profile.

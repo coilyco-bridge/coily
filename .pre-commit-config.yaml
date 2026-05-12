@@ -48,6 +48,14 @@ repos:
         files: '^(cmd/|pkg/)[^/]*/[^/]*\.go$|^\.coily/coily\.yaml$'
         pass_filenames: false
 
+      - id: coily-lint
+        name: coily lint .coily/coily.yaml
+        description: Enforce that every commands.<verb> in .coily/coily.yaml maps to `make <verb>` with a matching Makefile target and `## desc` auto-help string.
+        entry: bash -c 'go run -tags dev ./cmd/coily lint'
+        language: system
+        files: '^(\.coily/coily\.yaml|Makefile)$'
+        pass_filenames: false
+
       - id: coily-trailer
         name: coily audit-log trailer
         description: Append Audit-log trailers to the commit message based on coily's audit log for this repo.

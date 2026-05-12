@@ -23,31 +23,27 @@ GO := go
 # to `go test` since color codes are noise in Actions logs.
 GO_TEST ?= gotest
 
+# Auto-help: each target documents itself with a `## description` comment on
+# the rule line. `make help` greps the Makefile for that pattern. coily lint
+# uses the same convention to enforce that .coily/coily.yaml descriptions
+# stay in sync with the Makefile.
 .PHONY: help
-help:
-	@echo "Targets:"
-	@echo "  make dev              build ./bin/$(DEV_BIN_NAME) (dev name, not on PATH)"
-	@echo "  make build            build ./bin/$(BIN_NAME) (prod tags, for install)"
-	@echo "  make install          sudo-install ./bin/$(BIN_NAME) to $(INSTALL_PREFIX)/bin"
-	@echo "  make install-windows  build + install bin/$(BIN_NAME).exe to $(WINDOWS_INSTALL_DIR) (run from elevated shell)"
-	@echo "  make deploy-server    cross-compile + scp + sudo-install on $(SERVER_HOST)"
-	@echo "  make test             $(GO_TEST) ./..."
-	@echo "  make vet              go vet ./..."
-	@echo "  make clean            remove build outputs"
+help: ## Print this help.
+	@awk 'BEGIN{FS=":.*?## "} /^[a-zA-Z0-9_.-]+:.*?## / {printf "  make %-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: dev
-dev:
+dev: ## Build ./bin/coily-dev (dev tags, not on PATH).
 	@mkdir -p bin
 	$(GO) build -tags dev -ldflags "$(LDFLAGS)" -o bin/$(DEV_BIN_NAME) ./cmd/coily
-	@echo "built bin/$(DEV_BIN_NAME) — invoke via ./bin/$(DEV_BIN_NAME) from the repo root only"
+	@echo "built bin/$(DEV_BIN_NAME) - invoke via ./bin/$(DEV_BIN_NAME) from the repo root only"
 
 .PHONY: build
-build:
+build: ## Build ./bin/coily (prod tags, for install).
 	@mkdir -p bin
 	$(GO) build -tags prod -ldflags "$(LDFLAGS)" -o bin/$(BIN_NAME) ./cmd/coily
 
 .PHONY: install
-install:
+install: ## Sudo-install ./bin/coily to /usr/local/bin (macOS/Linux).
 	@# Block on Windows (Git Bash reports MINGW*/MSYS*/CYGWIN*). The unix
 	@# install path needs `sudo install` + /usr/local/bin, which silently
 	@# no-ops or lands somewhere unreachable on Windows. The Windows-native
@@ -62,7 +58,7 @@ install:
 	@echo "installed $(INSTALL_PREFIX)/bin/$(BIN_NAME) (version $(VERSION))"
 
 .PHONY: install-windows
-install-windows:
+install-windows: ## Build + install bin/coily.exe to C:\Program Files\coily (run from elevated shell).
 	@# Windows analog of `make install`. C:\Program Files\coily is admin-write
 	@# required, same ACL story as /usr/local/bin being root-owned on unix -
 	@# see SECURITY.md for the reasoning. Run this from an elevated
@@ -75,7 +71,7 @@ install-windows:
 	@echo "if coily is not on PATH yet: add 'C:\\Program Files\\coily' to your user or system PATH (once)."
 
 .PHONY: deploy-server
-deploy-server:
+deploy-server: ## Cross-compile + scp + sudo-install on kai-server.
 	@mkdir -p bin
 	GOOS=linux GOARCH=$(SERVER_ARCH) $(GO) build -tags prod -ldflags "$(LDFLAGS)" -o bin/$(BIN_NAME)-linux-$(SERVER_ARCH) ./cmd/coily
 	scp bin/$(BIN_NAME)-linux-$(SERVER_ARCH) $(SERVER_USER)@$(SERVER_HOST):/tmp/$(BIN_NAME)
@@ -83,33 +79,33 @@ deploy-server:
 	@echo "deployed $(VERSION) to $(SERVER_HOST)"
 
 .PHONY: test
-test:
+test: ## Run the unit test suite.
 	$(GO_TEST) ./...
 
 .PHONY: test-integration
-test-integration:
+test-integration: ## Run layer-2 integration tests against live aws/gh/kubectl.
 	@# Layer 2 integration tests. Shell out to live aws/gh/kubectl via
 	@# whoami-style verbs. Requires these binaries to be on PATH.
 	$(GO_TEST) -tags integration ./test/integration/...
 
 .PHONY: vet
-vet:
+vet: ## go vet across the tree.
 	$(GO) vet ./...
 
 .PHONY: lint
-lint:
+lint: ## Lint with golangci-lint.
 	golangci-lint run ./...
 
 .PHONY: lint-fix
-lint-fix:
+lint-fix: ## Autofix lint issues where possible.
 	golangci-lint run --fix ./...
 
 .PHONY: cover
-cover:
+cover: ## Unit tests with a coverage profile.
 	$(GO_TEST) -coverprofile=coverage.out ./...
 	$(GO) tool cover -func=coverage.out | tail -20
 	@echo "HTML report: go tool cover -html=coverage.out"
 
 .PHONY: clean
-clean:
+clean: ## Remove build outputs.
 	rm -rf bin dist

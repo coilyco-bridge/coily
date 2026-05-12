@@ -225,6 +225,10 @@ Install shell tab-completion for coily.
 
 Flags: --dry-run, --shell
 
+## `coily lint`
+
+Lint .coily/coily.yaml against the repo Makefile.
+
 ## `coily lockdown skill`
 
 Regenerate the coily-passthroughs skill from the in-process command tree.
