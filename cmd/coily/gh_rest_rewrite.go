@@ -50,6 +50,13 @@ func readBodyFile(path string) (string, error) {
 // Left as GraphQL on purpose (REST is missing the data or the surface is
 // too fanout-heavy to translate without bugs):
 //
+//   - `gh issue view` / `gh pr view` (read paths) - REST returns a
+//     differently-shaped JSON body than `gh ... --json` produces. Field
+//     names diverge (`url` vs `html_url`) and state casing differs
+//     (`OPEN`/`CLOSED` from gh's GraphQL vs `open`/`closed` from REST),
+//     so a transparent argv rewrite would silently break any caller that
+//     parses the output. Direct call sites that need REST should call
+//     `gh api /repos/.../issues/N` themselves (see dispatch.fetchIssue).
 //   - `gh issue list --search ...` / `gh pr list --search ...` - GraphQL
 //     Search API, no clean REST equivalent for free-text search.
 //   - `gh repo create / edit / fork / list` - many fields live only on

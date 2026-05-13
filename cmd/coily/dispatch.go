@@ -140,13 +140,17 @@ func localRepoPath(repo string) (string, error) {
 	return filepath.Join(home, "projects", allowedOwner, repo), nil
 }
 
-// ghIssue is the subset of `gh issue view --json` fields dispatch consumes.
+// ghIssue is the subset of the GitHub REST issues response dispatch
+// consumes. Fetched via `gh api /repos/{owner}/{repo}/issues/{N}` rather
+// than `gh issue view --json`, since the latter routes through GraphQL and
+// shares its tight secondary-rate-limit budget. REST returns state as
+// lowercase ("open"/"closed"); the State-check downstream is case-insensitive.
 type ghIssue struct {
 	Number int    `json:"number"`
 	Title  string `json:"title"`
 	Body   string `json:"body"`
 	State  string `json:"state"`
-	URL    string `json:"url"`
+	URL    string `json:"html_url"`
 }
 
 func runDispatch(ctx context.Context, r *Runner, c *cli.Command) error {
@@ -198,19 +202,19 @@ func runDispatch(ctx context.Context, r *Runner, c *cli.Command) error {
 }
 
 // fetchIssue shells out to gh to resolve the issue. Uses the runner's
-// Capture so stderr is forwarded if gh fails.
+// Capture so stderr is forwarded if gh fails. Goes through the REST API
+// (`gh api /repos/.../issues/N`) rather than `gh issue view --json` so it
+// doesn't share GraphQL's tight secondary-rate-limit budget (coilysiren/coily#138).
 func fetchIssue(ctx context.Context, r *Runner, ref *issueRef) (*ghIssue, error) {
-	raw, err := r.Runner.Capture(ctx, "gh", "issue", "view",
-		fmt.Sprintf("%d", ref.Number),
-		"--repo", fmt.Sprintf("%s/%s", ref.Owner, ref.Repo),
-		"--json", "number,title,body,state,url",
+	raw, err := r.Runner.Capture(ctx, "gh", "api",
+		fmt.Sprintf("/repos/%s/%s/issues/%d", ref.Owner, ref.Repo, ref.Number),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("dispatch: gh issue view %s: %w", ref, err)
+		return nil, fmt.Errorf("dispatch: gh api repos/%s/%s/issues/%d: %w", ref.Owner, ref.Repo, ref.Number, err)
 	}
 	var issue ghIssue
 	if err := json.Unmarshal(raw, &issue); err != nil {
-		return nil, fmt.Errorf("dispatch: parse gh issue view output: %w", err)
+		return nil, fmt.Errorf("dispatch: parse gh api issue output: %w", err)
 	}
 	return &issue, nil
 }
