@@ -53,6 +53,7 @@ type config struct {
 	egressMode    egress.Mode
 	verbName      string
 	scopeArgvHint func(argv []string) string
+	argvRewriter  func(argv []string) []string
 }
 
 // WithSkipPolicy disables the shell-metacharacter check for this binary.
@@ -95,6 +96,19 @@ func WithVerbName(name string) Option {
 	}
 }
 
+// WithArgvRewriter installs a hook that may rewrite the argv passed to the
+// underlying binary before exec. The original argv is still recorded in the
+// audit log (verb.Wrap captures argv before Action runs); only what reaches
+// the child process changes. Used by the gh wrapper to rewrite GraphQL-backed
+// subcommands like `gh issue create` into REST equivalents via `gh api`, so
+// the GraphQL secondary rate limit is dodged on the common write paths.
+// Return the same slice unchanged to decline the rewrite.
+func WithArgvRewriter(fn func(argv []string) []string) Option {
+	return func(c *config) {
+		c.argvRewriter = fn
+	}
+}
+
 // WithScopeArgvHint installs a fallback --commit-scope resolver that runs
 // only when the operator did not set --commit-scope (or COILY_COMMIT_SCOPE)
 // explicitly. The hook receives the verb's argv and returns an absolute
@@ -130,9 +144,9 @@ func Command(bin string, r *shell.Runner, w *audit.Writer, opts ...Option) *cli.
 		CommitScopeArgvHint: cfg.scopeArgvHint,
 	}
 	if cfg.egressOn {
-		spec.Action, spec.OnComplete = withEgressAction(bin, r, cfg.egressList, cfg.egressMode)
+		spec.Action, spec.OnComplete = withEgressAction(bin, r, cfg.egressList, cfg.egressMode, cfg.argvRewriter)
 	} else {
-		spec.Action, spec.OnComplete = withStderrTail(bin, r)
+		spec.Action, spec.OnComplete = withStderrTail(bin, r, cfg.argvRewriter)
 	}
 	return &cli.Command{
 		Name:            bin,
@@ -148,7 +162,7 @@ func Command(bin string, r *shell.Runner, w *audit.Writer, opts ...Option) *cli.
 // this, kubectl/aws/gh failures in the audit log collapse to bare
 // "exit status 1" and the operator/forensic reader can't tell what
 // actually went wrong.
-func withStderrTail(bin string, base *shell.Runner) (cli.ActionFunc, func(*audit.Record)) {
+func withStderrTail(bin string, base *shell.Runner, rewriter func([]string) []string) (cli.ActionFunc, func(*audit.Record)) {
 	tail := newTailBuffer(audit.MaxStderrTailBytes)
 	action := func(ctx context.Context, c *cli.Command) error {
 		shadow := *base
@@ -160,7 +174,11 @@ func withStderrTail(bin string, base *shell.Runner) (cli.ActionFunc, func(*audit
 		} else {
 			shadow.Stderr = tail
 		}
-		return shadow.Exec(ctx, bin, c.Args().Slice()...)
+		argv := c.Args().Slice()
+		if rewriter != nil {
+			argv = rewriter(argv)
+		}
+		return shadow.Exec(ctx, bin, argv...)
 	}
 	hook := func(rec *audit.Record) {
 		if rec.ExitCode == 0 {
@@ -177,7 +195,7 @@ func withStderrTail(bin string, base *shell.Runner) (cli.ActionFunc, func(*audit
 // proxy, inject HTTPS_PROXY/HTTP_PROXY into a per-call shadow Runner so
 // concurrent commands stay independent, and surface the collected rows
 // through OnComplete.
-func withEgressAction(bin string, base *shell.Runner, allowlist []string, mode egress.Mode) (cli.ActionFunc, func(*audit.Record)) {
+func withEgressAction(bin string, base *shell.Runner, allowlist []string, mode egress.Mode, rewriter func([]string) []string) (cli.ActionFunc, func(*audit.Record)) {
 	var rows []audit.EgressRow
 	tail := newTailBuffer(audit.MaxStderrTailBytes)
 	action := func(ctx context.Context, c *cli.Command) error {
@@ -200,7 +218,11 @@ func withEgressAction(bin string, base *shell.Runner, allowlist []string, mode e
 		} else {
 			shadow.Stderr = tail
 		}
-		execErr := shadow.Exec(ctx, bin, c.Args().Slice()...)
+		argv := c.Args().Slice()
+		if rewriter != nil {
+			argv = rewriter(argv)
+		}
+		execErr := shadow.Exec(ctx, bin, argv...)
 		rows = p.Stop()
 		return execErr
 	}
