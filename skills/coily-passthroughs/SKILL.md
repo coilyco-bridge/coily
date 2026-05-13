@@ -1447,6 +1447,10 @@ PATCH /webhooks/{webhook_id}/{webhook_token}/messages/{message_id}
 
 Flags: --body, --thread_id, --with_components
 
+## `coily ops flyctl`
+
+Pass-through to flyctl with argv validation + audit log.
+
 ## `coily ops forgejo admin auth list`
 
 List forgejo auth sources.

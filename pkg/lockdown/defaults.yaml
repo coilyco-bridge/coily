@@ -135,6 +135,7 @@ deny:
   - Bash(aws:*)
   - Bash(kubectl:*)
   - Bash(gh:*)
+  - Bash(flyctl:*)
 
   # docker. No image builds or container execs from the agent layer.
   - Bash(docker:*)

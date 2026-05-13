@@ -510,6 +510,7 @@ func TestSecurityClaim_LockdownDeniesBareKubectlAndAwsAndGh(t *testing.T) {
 		"Bash(kubectl:*)",
 		"Bash(aws:*)",
 		"Bash(gh:*)",
+		"Bash(flyctl:*)",
 	}
 	denySet := map[string]bool{}
 	for _, deny := range d.Deny {
@@ -527,7 +528,7 @@ func TestSecurityClaim_LockdownDeniesBareKubectlAndAwsAndGh(t *testing.T) {
 	// silently re-open the ergonomics shortcut without re-opening the
 	// design conversation.
 	for _, allow := range d.Allow {
-		for _, prefix := range []string{"Bash(aws ", "Bash(kubectl ", "Bash(gh "} {
+		for _, prefix := range []string{"Bash(aws ", "Bash(kubectl ", "Bash(gh ", "Bash(flyctl "} {
 			if strings.HasPrefix(allow, prefix) {
 				t.Errorf("lockdown defaults allow %q; the inversion forbids enumerated %s reads", allow, prefix)
 			}
