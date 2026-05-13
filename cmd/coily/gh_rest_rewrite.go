@@ -46,17 +46,30 @@ func readBodyFile(path string) (string, error) {
 //   - `gh pr comment N --repo O/R [--body B | --body-file F]`
 //   - `gh pr close N --repo O/R`
 //   - `gh pr reopen N --repo O/R`
+//   - `gh issue view N --repo O/R` (any --json fields ignored)
+//   - `gh pr view N --repo O/R` (any --json fields ignored)
+//   - `gh repo view O/R` (any --json fields ignored)
+//
+// View rewrites carry an accepted breaking change vs `gh ... --json`:
+// callers downstream of `coily ops gh issue view --json ...` see REST
+// shape, not gh's GraphQL-synthesized shape. Notable diffs:
+//
+//   - `url` field is absent; use `html_url`.
+//   - `state` is lowercase (`open`/`closed`/`merged`), not uppercase.
+//   - Nested fields (e.g. `author.login`) are not flattened.
+//   - `--json <fields>` is effectively ignored; callers should `--jq`
+//     against the full REST object.
+//
+// Rationale: GraphQL's secondary rate limit trips multiple times per
+// Claude session, and reads dominate org-internal gh usage. The cost of
+// each affected caller updating to the REST shape is much smaller than
+// the cost of recurring rate-limit breakage. Decline rewrite when
+// `--web` is present (different output channel), or `--comments` (needs
+// a second call), or the issue/pr positional is missing.
 //
 // Left as GraphQL on purpose (REST is missing the data or the surface is
 // too fanout-heavy to translate without bugs):
 //
-//   - `gh issue view` / `gh pr view` (read paths) - REST returns a
-//     differently-shaped JSON body than `gh ... --json` produces. Field
-//     names diverge (`url` vs `html_url`) and state casing differs
-//     (`OPEN`/`CLOSED` from gh's GraphQL vs `open`/`closed` from REST),
-//     so a transparent argv rewrite would silently break any caller that
-//     parses the output. Direct call sites that need REST should call
-//     `gh api /repos/.../issues/N` themselves (see dispatch.fetchIssue).
 //   - `gh issue list --search ...` / `gh pr list --search ...` - GraphQL
 //     Search API, no clean REST equivalent for free-text search.
 //   - `gh repo create / edit / fork / list` - many fields live only on
@@ -85,30 +98,74 @@ func rewriteGHForREST(argv []string) []string {
 
 	switch group {
 	case "issue":
-		switch verb {
-		case "create":
-			return rewriteIssueCreate(rest, argv)
-		case "comment":
-			return rewriteIssueOrPRComment(rest, argv, "issues")
-		case "close":
-			return rewriteIssueClose(rest, argv)
-		case "reopen":
-			return rewriteIssueReopen(rest, argv)
-		case "edit":
-			return rewriteIssueEdit(rest, argv)
-		}
+		return dispatchIssueVerb(verb, rest, argv)
 	case "pr":
-		switch verb {
-		case "comment":
-			// PR comments land on the issues endpoint (PRs are issues).
-			return rewriteIssueOrPRComment(rest, argv, "issues")
-		case "close":
-			return rewritePRClose(rest, argv)
-		case "reopen":
-			return rewritePRReopen(rest, argv)
+		return dispatchPRVerb(verb, rest, argv)
+	case "repo":
+		if verb == "view" {
+			return rewriteRepoView(rest, argv)
 		}
 	}
 	return argv
+}
+
+func dispatchIssueVerb(verb string, rest, argv []string) []string {
+	switch verb {
+	case "create":
+		return rewriteIssueCreate(rest, argv)
+	case "comment":
+		return rewriteIssueOrPRComment(rest, argv, "issues")
+	case "close":
+		return rewriteIssueClose(rest, argv)
+	case "reopen":
+		return rewriteIssueReopen(rest, argv)
+	case "edit":
+		return rewriteIssueEdit(rest, argv)
+	case "view":
+		return rewriteIssueOrPRView(rest, argv, "issues")
+	}
+	return argv
+}
+
+func dispatchPRVerb(verb string, rest, argv []string) []string {
+	switch verb {
+	case "comment":
+		// PR comments land on the issues endpoint (PRs are issues).
+		return rewriteIssueOrPRComment(rest, argv, "issues")
+	case "close":
+		return rewritePRClose(rest, argv)
+	case "reopen":
+		return rewritePRReopen(rest, argv)
+	case "view":
+		return rewriteIssueOrPRView(rest, argv, "pulls")
+	}
+	return argv
+}
+
+// rewriteIssueOrPRView rewrites `gh issue view N --repo O/R` or
+// `gh pr view N --repo O/R` to `gh api /repos/O/R/{issues,pulls}/N`.
+// endpointGroup is "issues" or "pulls". Declines on --web (different
+// output channel), --comments (needs a second call), or a missing
+// number/repo. --json is recognized but ignored: REST returns the full
+// object and callers can --jq against it.
+func rewriteIssueOrPRView(rest []string, full []string, endpointGroup string) []string {
+	num, repo, declined := parseViewArgs(rest)
+	if declined || num == "" || repo == "" {
+		return full
+	}
+	return []string{"api", "/repos/" + repo + "/" + endpointGroup + "/" + num}
+}
+
+// rewriteRepoView rewrites `gh repo view O/R` to `gh api /repos/O/R`.
+// Declines on --web or when the positional isn't owner/repo shape (the
+// shorthand `gh repo view` with no positional resolves via the local
+// git remote, which gh handles for us).
+func rewriteRepoView(rest []string, full []string) []string {
+	repo, declined := parseRepoViewArgs(rest)
+	if declined || repo == "" {
+		return full
+	}
+	return []string{"api", "/repos/" + repo}
 }
 
 // rewriteIssueCreate maps `gh issue create --repo O/R --title T [--body B]
@@ -257,6 +314,8 @@ var untranslatableSet = map[string]bool{
 	"edit-last":       true,
 	"comment":         true,
 	"reason":          true,
+	"web":             true,
+	"comments":        true,
 }
 
 // walkFlags scans argv once and folds it into parsedArgs. Long flags
@@ -398,5 +457,44 @@ func parseEditArgs(rest []string) (num, repo, title, body string, hasUntranslata
 		}
 		body = content
 	}
+	return
+}
+
+// parseViewArgs scans argv for `gh issue view N --repo O/R` or `gh pr view
+// N --repo O/R`. --web and --comments live in untranslatableSet so any
+// presence forces a decline. --json is recognized but ignored (REST always
+// returns the full object).
+func parseViewArgs(rest []string) (num, repo string, declined bool) {
+	p := walkFlags(rest)
+	if p.declined {
+		declined = true
+		return
+	}
+	if len(p.positional) > 0 {
+		num = p.positional[0]
+	}
+	repo = p.first("repo")
+	return
+}
+
+// parseRepoViewArgs scans argv for `gh repo view O/R`. The positional must
+// be owner/repo shape; the no-positional form (resolve from local git
+// remote) declines because we don't replicate that resolution. --web is
+// already in untranslatableSet.
+func parseRepoViewArgs(rest []string) (repo string, declined bool) {
+	p := walkFlags(rest)
+	if p.declined {
+		declined = true
+		return
+	}
+	if len(p.positional) == 0 {
+		return
+	}
+	first := p.positional[0]
+	if !strings.Contains(first, "/") {
+		declined = true
+		return
+	}
+	repo = first
 	return
 }

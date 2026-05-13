@@ -194,6 +194,80 @@ func TestRewriteGHForREST_BodyFileMissingDeclines(t *testing.T) {
 	}
 }
 
+// TestRewriteGHForREST_IssueView covers the accepted-breaking-change
+// rewrite from coilysiren/coily#143. `gh issue view --json` returns a
+// gh-synthesized shape; REST returns the full issue object. The rewrite
+// is intentional: GraphQL's secondary rate limit dominates the cost of
+// downstream callers updating to the REST shape.
+func TestRewriteGHForREST_IssueView(t *testing.T) {
+	cases := []struct {
+		name string
+		in   []string
+		want []string
+	}{
+		{
+			name: "basic",
+			in:   []string{"issue", "view", "42", "--repo", "coilysiren/coily"},
+			want: []string{"api", "/repos/coilysiren/coily/issues/42"},
+		},
+		{
+			name: "with json (ignored)",
+			in:   []string{"issue", "view", "42", "--repo", "coilysiren/coily", "--json", "number,title,body"},
+			want: []string{"api", "/repos/coilysiren/coily/issues/42"},
+		},
+		{
+			name: "short repo flag",
+			in:   []string{"issue", "view", "42", "-R", "coilysiren/coily"},
+			want: []string{"api", "/repos/coilysiren/coily/issues/42"},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := rewriteGHForREST(tc.in)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("rewriteGHForREST(%v):\n got  %v\n want %v", tc.in, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestRewriteGHForREST_PRView(t *testing.T) {
+	in := []string{"pr", "view", "7", "--repo", "coilysiren/coily"}
+	want := []string{"api", "/repos/coilysiren/coily/pulls/7"}
+	if got := rewriteGHForREST(in); !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestRewriteGHForREST_RepoView(t *testing.T) {
+	in := []string{"repo", "view", "coilysiren/coily"}
+	want := []string{"api", "/repos/coilysiren/coily"}
+	if got := rewriteGHForREST(in); !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestRewriteGHForREST_ViewDeclines(t *testing.T) {
+	// --web means the user wants a browser, not a JSON shape; --comments
+	// needs a second call we don't replicate; missing --repo or positional
+	// also declines.
+	cases := [][]string{
+		{"issue", "view", "42", "--repo", "coilysiren/coily", "--web"},
+		{"issue", "view", "42", "--repo", "coilysiren/coily", "--comments"},
+		{"pr", "view", "7", "--repo", "coilysiren/coily", "--web"},
+		{"issue", "view", "--repo", "coilysiren/coily"},
+		{"issue", "view", "42"},
+		{"repo", "view"},
+		{"repo", "view", "--web"},
+	}
+	for _, in := range cases {
+		got := rewriteGHForREST(in)
+		if !reflect.DeepEqual(got, in) {
+			t.Errorf("expected fall-through for %v, got %v", in, got)
+		}
+	}
+}
+
 func TestRewriteGHForREST_TooShort(t *testing.T) {
 	if got := rewriteGHForREST(nil); got != nil {
 		t.Errorf("nil argv should pass through unchanged; got %v", got)
