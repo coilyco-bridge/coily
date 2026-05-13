@@ -27,6 +27,12 @@ Walk an agent through writing a finding about a flagged audit event.
 
 Flags: --id, --slug, --ts, --verb
 
+## `coily audit open`
+
+Open the rendered audit dashboard in the default browser.
+
+Flags: --path
+
 ## `coily audit path`
 
 Print the resolved audit log path and exit.

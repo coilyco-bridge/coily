@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -35,6 +38,7 @@ func (r *Runner) auditCommand() *cli.Command {
 			r.auditTailCommand(),
 			r.auditFindingCommand(),
 			r.auditDashboardCommand(),
+			r.auditOpenCommand(),
 		},
 	}
 }
@@ -94,6 +98,61 @@ with jq or any JSON library.`,
 			r.Audit,
 		),
 	}
+}
+
+// auditOpenCommand launches the rendered dashboard in the OS default
+// browser. Pairs with `audit dashboard`, which renders to the same
+// default path. Dictatable trigger for a Mac launchd agent's output.
+func (r *Runner) auditOpenCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "open",
+		Usage: "Open the rendered audit dashboard in the default browser.",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "path",
+				Usage: "dashboard HTML path (default: ~/.coily/dashboard.html)",
+			},
+		},
+		Action: verb.Wrap(
+			verb.Spec{
+				Name:      "audit.open",
+				SkipScope: true,
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					return map[string]string{"--path": c.String("path")}, nil
+				},
+				Action: func(_ context.Context, c *cli.Command) error {
+					return runAuditOpen(c.String("path"))
+				},
+			},
+			r.Audit,
+		),
+	}
+}
+
+func runAuditOpen(path string) error {
+	if path == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return fmt.Errorf("audit open: resolve home: %w", err)
+		}
+		path = filepath.Join(home, ".coily", "dashboard.html")
+	}
+	if _, err := os.Stat(path); err != nil {
+		return fmt.Errorf("audit open: %s not found (run `coily audit dashboard` first): %w", path, err)
+	}
+	var opener string
+	switch runtime.GOOS {
+	case "darwin":
+		opener = "open"
+	case "linux":
+		opener = "xdg-open"
+	default:
+		return fmt.Errorf("audit open: unsupported platform %q", runtime.GOOS)
+	}
+	cmd := exec.Command(opener, path) //nolint:gosec // opener is a fixed allow-list above
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
 func parseSince(s string) (int64, error) {
