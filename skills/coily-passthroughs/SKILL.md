@@ -15,6 +15,12 @@ Auto-generated lookup table of every coily verb. Regenerate with `coily lockdown
 
 Format: full path, one-line summary, comma-separated flag names. No flag descriptions; click into `coily <path> --help` for those.
 
+## `coily audit dashboard`
+
+Render a static HTML aggregation of the audit log.
+
+Flags: --out, --since
+
 ## `coily audit finding`
 
 Walk an agent through writing a finding about a flagged audit event.

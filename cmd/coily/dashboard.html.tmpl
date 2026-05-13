@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>coily audit dashboard</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #161a20;
+    --text: #d8dde6;
+    --muted: #8a93a3;
+    --accent: #7aa2f7;
+    --ok: #7eca9c;
+    --warn: #e0af68;
+    --bad: #f7768e;
+    --border: #242a33;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  h1 { margin: 0; font-size: 18px; font-weight: 600; }
+  .meta { color: var(--muted); font-size: 12px; }
+  main { padding: 16px 24px; }
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  input[type=text], select {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font: inherit;
+  }
+  input[type=text] { min-width: 240px; }
+  label { color: var(--muted); font-size: 12px; margin-right: 4px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--panel);
+    position: sticky;
+    top: 0;
+  }
+  tr:hover td { background: var(--panel); }
+  .verb { font-weight: 600; color: var(--accent); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .ok { color: var(--ok); }
+  .bad { color: var(--bad); }
+  .warn { color: var(--warn); }
+  .chips {
+    display: flex; flex-wrap: wrap; gap: 4px;
+  }
+  .chip {
+    display: inline-block;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1px 8px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .chip.host { color: var(--warn); border-color: var(--warn); }
+  details { margin-top: 4px; }
+  details summary {
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  pre.argv {
+    font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin: 4px 0 0 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--text);
+  }
+  .empty { color: var(--muted); font-style: italic; padding: 24px; text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>coily audit dashboard</h1>
+  <span class="meta">generated {{.GeneratedAt}}</span>
+  <span class="meta">window starts {{.WindowStart}}</span>
+  <span class="meta">{{.TotalRecords}} records / {{.VerbCount}} verbs</span>
+</header>
+<main>
+  <div class="controls">
+    <span><label>filter</label><input type="text" id="filter" placeholder="verb / repo / host"></span>
+    <span><label>sort</label>
+      <select id="sort">
+        <option value="total">total (desc)</option>
+        <option value="last">last run (desc)</option>
+        <option value="verb">verb (a-z)</option>
+        <option value="egress">egress bytes (desc)</option>
+        <option value="failed">failures (desc)</option>
+      </select>
+    </span>
+    <span><label><input type="checkbox" id="onlyEgress"> only verbs with external hosts</label></span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>verb</th>
+        <th class="num">total</th>
+        <th class="num">ok</th>
+        <th class="num">rej</th>
+        <th class="num">fail</th>
+        <th>repos</th>
+        <th>egress hosts</th>
+        <th>last run</th>
+        <th>argv samples</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div id="empty" class="empty" style="display:none">No verbs match the current filters.</div>
+</main>
+<script>
+// Data baked in at generation. All rendering uses DOM methods + textContent
+// to avoid HTML injection from argv content. Source: ops_audit_dashboard.go.
+const DATA = {{.DataJSON}};
+
+const filterEl = document.getElementById('filter');
+const sortEl = document.getElementById('sort');
+const onlyEgressEl = document.getElementById('onlyEgress');
+const rowsEl = document.getElementById('rows');
+const emptyEl = document.getElementById('empty');
+
+function td(opts) {
+  const cell = document.createElement('td');
+  if (opts.className) cell.className = opts.className;
+  if (opts.text != null) cell.textContent = String(opts.text);
+  if (opts.node) cell.appendChild(opts.node);
+  return cell;
+}
+
+function chipList(items, extraClass) {
+  const wrap = document.createElement('div');
+  wrap.className = 'chips';
+  for (const it of items || []) {
+    const c = document.createElement('span');
+    c.className = 'chip' + (extraClass ? ' ' + extraClass : '');
+    c.textContent = it;
+    wrap.appendChild(c);
+  }
+  return wrap;
+}
+
+function argvDetails(samples) {
+  const d = document.createElement('details');
+  const s = document.createElement('summary');
+  s.textContent = (samples || []).length + ' sample(s)';
+  d.appendChild(s);
+  for (const sample of samples || []) {
+    const pre = document.createElement('pre');
+    pre.className = 'argv';
+    pre.textContent = sample;
+    d.appendChild(pre);
+  }
+  return d;
+}
+
+function verbCell(verb) {
+  const span = document.createElement('span');
+  span.className = 'verb';
+  span.textContent = verb;
+  const cell = document.createElement('td');
+  cell.appendChild(span);
+  return cell;
+}
+
+function lastRunCell(iso) {
+  const span = document.createElement('span');
+  span.className = 'meta';
+  span.textContent = iso || '';
+  const cell = document.createElement('td');
+  cell.appendChild(span);
+  return cell;
+}
+
+function render() {
+  const q = filterEl.value.trim().toLowerCase();
+  const onlyEgress = onlyEgressEl.checked;
+  let rows = DATA.verbs.slice();
+
+  if (q) {
+    rows = rows.filter(v => {
+      if (v.verb.toLowerCase().includes(q)) return true;
+      if ((v.repos || []).some(r => r.toLowerCase().includes(q))) return true;
+      if ((v.egress_hosts || []).some(h => h.toLowerCase().includes(q))) return true;
+      return false;
+    });
+  }
+  if (onlyEgress) {
+    rows = rows.filter(v => (v.egress_hosts || []).length > 0);
+  }
+
+  const sortKey = sortEl.value;
+  rows.sort((a, b) => {
+    switch (sortKey) {
+      case 'last':   return (b.last_run_unix || 0) - (a.last_run_unix || 0);
+      case 'verb':   return a.verb.localeCompare(b.verb);
+      case 'egress': return (b.total_egress_bytes || 0) - (a.total_egress_bytes || 0);
+      case 'failed': return (b.failed || 0) - (a.failed || 0);
+      default:       return (b.total || 0) - (a.total || 0);
+    }
+  });
+
+  while (rowsEl.firstChild) rowsEl.removeChild(rowsEl.firstChild);
+  for (const v of rows) {
+    const tr = document.createElement('tr');
+    tr.appendChild(verbCell(v.verb));
+    tr.appendChild(td({className: 'num', text: v.total}));
+    tr.appendChild(td({className: 'num ok', text: v.accepted || 0}));
+    tr.appendChild(td({className: 'num warn', text: v.rejected || 0}));
+    tr.appendChild(td({className: 'num ' + (v.failed ? 'bad' : ''), text: v.failed || 0}));
+    tr.appendChild(td({node: chipList(v.repos)}));
+    tr.appendChild(td({node: chipList(v.egress_hosts, 'host')}));
+    tr.appendChild(lastRunCell(v.last_run_iso));
+    tr.appendChild(td({node: argvDetails(v.argv_samples)}));
+    rowsEl.appendChild(tr);
+  }
+  emptyEl.style.display = rows.length ? 'none' : 'block';
+}
+
+filterEl.addEventListener('input', render);
+sortEl.addEventListener('change', render);
+onlyEgressEl.addEventListener('change', render);
+render();
+</script>
+</body>
+</html>

@@ -34,6 +34,7 @@ func (r *Runner) auditCommand() *cli.Command {
 			r.auditPathCommand(),
 			r.auditTailCommand(),
 			r.auditFindingCommand(),
+			r.auditDashboardCommand(),
 		},
 	}
 }
@@ -102,9 +103,16 @@ func parseSince(s string) (int64, error) {
 	if n, err := strconv.ParseInt(s, 10, 64); err == nil {
 		return n, nil
 	}
+	// Accept a trailing "d" suffix as days, since Go's time.ParseDuration
+	// only goes up to "h". "7d" reads naturally for the audit window.
+	if strings.HasSuffix(s, "d") {
+		if days, derr := strconv.ParseInt(strings.TrimSuffix(s, "d"), 10, 64); derr == nil {
+			return time.Now().Add(-time.Duration(days) * 24 * time.Hour).Unix(), nil
+		}
+	}
 	d, err := time.ParseDuration(s)
 	if err != nil {
-		return 0, fmt.Errorf("audit tail: --since must be unix seconds or a duration: %w", err)
+		return 0, fmt.Errorf("--since must be unix seconds or a duration like 5m / 24h / 7d: %w", err)
 	}
 	return time.Now().Add(-d).Unix(), nil
 }
