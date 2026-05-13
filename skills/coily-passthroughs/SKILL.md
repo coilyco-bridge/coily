@@ -47,6 +47,12 @@ brew uninstall, scoped to coilysiren/tap/* unless --allow-untapped is set.
 
 brew upgrade, scoped to coilysiren/tap/* unless --allow-untapped is set.
 
+## `coily dispatch`
+
+Fire `claude -p` against a real open coilysiren/* issue.
+
+Flags: --claude-bin, --dry-run
+
 ## `coily docker`
 
 Pass-through to docker with argv validation + audit log.

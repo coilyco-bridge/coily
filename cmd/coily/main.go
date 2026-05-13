@@ -244,6 +244,7 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.sshCommand(),
 		r.auditCommand(),
 		r.gitCommand(),
+		r.dispatchCommand(),
 		r.pkgCommand(),
 		r.brewCommand(),
 		r.lintCommand(),
