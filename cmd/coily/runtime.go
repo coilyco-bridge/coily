@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/coilysiren/coily/pkg/audit"
+	"github.com/coilysiren/cli-guard/audit"
+	"github.com/coilysiren/cli-guard/shell"
 	"github.com/coilysiren/coily/pkg/config"
-	"github.com/coilysiren/coily/pkg/shell"
 	coilyssh "github.com/coilysiren/coily/pkg/ssh"
 )
 

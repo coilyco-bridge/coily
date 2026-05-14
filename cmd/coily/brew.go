@@ -6,10 +6,10 @@ import (
 	"io"
 	"strings"
 
-	"github.com/coilysiren/coily/pkg/audit"
-	"github.com/coilysiren/coily/pkg/egress"
-	"github.com/coilysiren/coily/pkg/exitcode"
-	"github.com/coilysiren/coily/pkg/verb"
+	"github.com/coilysiren/cli-guard/audit"
+	"github.com/coilysiren/cli-guard/egress"
+	"github.com/coilysiren/cli-guard/exitcode"
+	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 

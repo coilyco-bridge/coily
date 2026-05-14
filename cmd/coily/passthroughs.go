@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/coilysiren/coily/pkg/egress"
-	"github.com/coilysiren/coily/pkg/passthrough"
+	"github.com/coilysiren/cli-guard/egress"
+	"github.com/coilysiren/cli-guard/passthrough"
 	"github.com/urfave/cli/v3"
 )
 

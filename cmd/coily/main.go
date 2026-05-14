@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coilysiren/coily/pkg/exitcode"
-	"github.com/coilysiren/coily/pkg/verb"
+	"github.com/coilysiren/cli-guard/exitcode"
+	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )

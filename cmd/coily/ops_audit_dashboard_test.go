@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coilysiren/coily/pkg/audit"
+	"github.com/coilysiren/cli-guard/audit"
 )
 
 func TestBuildDashboardView_GroupsByVerb(t *testing.T) {

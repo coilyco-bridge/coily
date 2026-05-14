@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coilysiren/coily/pkg/audit"
-	"github.com/coilysiren/coily/pkg/repocfg"
-	"github.com/coilysiren/coily/pkg/shell"
+	"github.com/coilysiren/cli-guard/audit"
+	"github.com/coilysiren/cli-guard/repocfg"
+	"github.com/coilysiren/cli-guard/shell"
 	"github.com/urfave/cli/v3"
 )
 

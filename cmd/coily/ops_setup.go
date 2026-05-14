@@ -7,8 +7,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/coilysiren/cli-guard/verb"
 	"github.com/coilysiren/coily/pkg/lockdown"
-	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
 )
 

@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coilysiren/coily/pkg/audit"
+	"github.com/coilysiren/cli-guard/audit"
 	"github.com/coilysiren/coily/pkg/config"
 )
 

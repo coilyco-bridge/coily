@@ -23,14 +23,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coilysiren/coily/pkg/audit"
+	"github.com/coilysiren/cli-guard/audit"
+	"github.com/coilysiren/cli-guard/gittree"
+	"github.com/coilysiren/cli-guard/policy"
+	"github.com/coilysiren/cli-guard/repocfg"
+	"github.com/coilysiren/cli-guard/scope"
+	"github.com/coilysiren/cli-guard/shell"
 	"github.com/coilysiren/coily/pkg/config"
-	"github.com/coilysiren/coily/pkg/gittree"
 	"github.com/coilysiren/coily/pkg/lockdown"
-	"github.com/coilysiren/coily/pkg/policy"
-	"github.com/coilysiren/coily/pkg/repocfg"
-	"github.com/coilysiren/coily/pkg/scope"
-	"github.com/coilysiren/coily/pkg/shell"
 	"github.com/urfave/cli/v3"
 )
 

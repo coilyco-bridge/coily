@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/coilysiren/coily/pkg/policy"
-	"github.com/coilysiren/coily/pkg/verb"
+	"github.com/coilysiren/cli-guard/policy"
+	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 

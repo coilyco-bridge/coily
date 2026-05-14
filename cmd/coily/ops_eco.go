@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/coilysiren/cli-guard/verb"
 	"github.com/coilysiren/coily/cmd/coily/eco"
-	"github.com/coilysiren/coily/pkg/verb"
 	"github.com/urfave/cli/v3"
 )
 
