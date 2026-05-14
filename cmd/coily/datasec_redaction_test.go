@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/config"
 	"github.com/coilysiren/cli-guard/decision"
 	"github.com/coilysiren/cli-guard/profiles"
 	"github.com/coilysiren/cli-guard/verb"
@@ -81,7 +80,7 @@ func setupRedactionEnv(t *testing.T, profileName string) {
 func TestRedaction_StrictestDropsArgv(t *testing.T) {
 	setupRedactionEnv(t, "")
 	r := newTestRunner(t)
-	r.Cfg = &config.Config{}
+	r.Cfg = &Config{}
 	r.Audit.SetRedactPolicy(decision.RedactPolicy())
 
 	rec := runWithArgvAndReadRow(t, r, []string{"ops", "aws", "ssm", "--value=hunter2"})
@@ -98,7 +97,7 @@ func TestRedaction_StrictestDropsArgv(t *testing.T) {
 func TestRedaction_MacTowerRedactsValue(t *testing.T) {
 	setupRedactionEnv(t, "mac-tower")
 	r := newTestRunner(t)
-	r.Cfg = &config.Config{}
+	r.Cfg = &Config{}
 	r.Audit.SetRedactPolicy(decision.RedactPolicy())
 
 	rec := runWithArgvAndReadRow(t, r, []string{"ops", "aws", "ssm", "--value=hunter2"})
@@ -123,7 +122,7 @@ func TestRedaction_MacTowerRedactsValue(t *testing.T) {
 func TestRedaction_WebProfileDropsArgv(t *testing.T) {
 	setupRedactionEnv(t, "web")
 	r := newTestRunner(t)
-	r.Cfg = &config.Config{}
+	r.Cfg = &Config{}
 	r.Audit.SetRedactPolicy(decision.RedactPolicy())
 
 	rec := runWithArgvAndReadRow(t, r, []string{"ops", "aws", "--password=x"})

@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/config"
 	"github.com/coilysiren/cli-guard/shell"
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
@@ -24,7 +23,7 @@ func newTestRunner(t *testing.T) *Runner {
 	// Close on cleanup so Windows can actually remove the TempDir.
 	t.Cleanup(func() { _ = aw.Close() })
 	return &Runner{
-		Cfg:    &config.Config{},
+		Cfg:    &Config{},
 		Runner: &shell.Runner{Stdout: os.Stdout, Stderr: os.Stderr, Stdin: os.Stdin},
 		Audit:  aw,
 	}

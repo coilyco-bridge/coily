@@ -24,7 +24,6 @@ import (
 	"testing"
 
 	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/config"
 	"github.com/coilysiren/cli-guard/gittree"
 	"github.com/coilysiren/cli-guard/lockdown"
 	"github.com/coilysiren/cli-guard/policy"
@@ -40,9 +39,9 @@ import (
 // tests in this file do not invoke Actions.
 func newSecurityClaimRunner(t *testing.T) *Runner {
 	t.Helper()
-	cfg, err := config.Load()
+	cfg, err := LoadConfig()
 	if err != nil {
-		t.Fatalf("config.Load: %v", err)
+		t.Fatalf("LoadConfig: %v", err)
 	}
 	return &Runner{Cfg: cfg}
 }
@@ -418,7 +417,7 @@ func newSecurityClaimRunnerWithAudit(t *testing.T) *Runner {
 	aw := audit.NewWriter(filepath.Join(dir, "audit.jsonl"))
 	t.Cleanup(func() { _ = aw.Close() })
 	return &Runner{
-		Cfg:    &config.Config{},
+		Cfg:    &Config{},
 		Runner: &shell.Runner{Stdout: os.Stdout, Stderr: os.Stderr, Stdin: os.Stdin},
 		Audit:  aw,
 	}

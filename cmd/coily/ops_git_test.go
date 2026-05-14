@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/config"
 )
 
 // seedAuditLog writes the given records to a tempfile and returns its path.
@@ -65,7 +64,7 @@ func captureStdout(t *testing.T, fn func() error) string {
 
 func runnerWithAuditPath(path string) *Runner {
 	r := &Runner{
-		Cfg: &config.Config{},
+		Cfg: &Config{},
 	}
 	r.Cfg.Audit.LogPath = path
 	r.Audit = audit.NewWriter(path)

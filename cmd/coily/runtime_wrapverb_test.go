@@ -10,7 +10,6 @@ import (
 	"testing"
 
 	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/config"
 	"github.com/coilysiren/cli-guard/profiles"
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
@@ -63,7 +62,7 @@ func TestWrapVerb_FlagOn_SentinelButNoOverride_SourceMissingFile(t *testing.T) {
 	}
 
 	r := newTestRunner(t)
-	r.Cfg = &config.Config{}
+	r.Cfg = &Config{}
 	rec := runWrapVerbAndReadAudit(t, r)
 	if rec.ProfileDecision == nil {
 		t.Fatal("flag on: expected decision attached")
@@ -103,7 +102,7 @@ func TestWrapVerb_FlagOn_OverrideHit(t *testing.T) {
 	}
 
 	r := newTestRunner(t)
-	r.Cfg = &config.Config{}
+	r.Cfg = &Config{}
 	rec := runWrapVerbAndReadAudit(t, r)
 	if rec.ProfileDecision == nil {
 		t.Fatal("expected decision attached on override hit")
@@ -131,7 +130,7 @@ func TestWrapVerb_FlagOn_NoSentinel_SourceUnset(t *testing.T) {
 	_ = os.WriteFile(override, profiles.DefaultYAML, 0o600)
 
 	r := newTestRunner(t)
-	r.Cfg = &config.Config{}
+	r.Cfg = &Config{}
 	rec := runWrapVerbAndReadAudit(t, r)
 	if rec.ProfileDecision == nil {
 		t.Fatal("expected decision attached")

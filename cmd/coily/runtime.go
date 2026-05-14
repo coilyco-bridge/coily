@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/config"
 	"github.com/coilysiren/cli-guard/decision"
 	"github.com/coilysiren/cli-guard/shell"
 	"github.com/coilysiren/cli-guard/verb"
@@ -20,12 +19,12 @@ import (
 // methods on this struct. Tests construct a Runner directly with fakes for
 // Audit or SSH.
 //
-// Cfg is the layered *config.Config (embedded defaults, overlaid by
+// Cfg is the layered *Config (embedded defaults, overlaid by
 // ~/.coily/config.yaml, then ./.coily/config.yaml). Path fields like
 // Audit.LogPath are already resolved to absolute paths by pkg/config at
 // load time, so this struct does no path expansion.
 type Runner struct {
-	Cfg    *config.Config
+	Cfg    *Config
 	Runner *shell.Runner
 	Audit  *audit.Writer
 	SSH    *coilyssh.Client
@@ -36,7 +35,7 @@ type Runner struct {
 // writable. Better to fail loudly at startup than silently drop audit
 // records per call.
 func NewRunner() *Runner {
-	cfg, err := config.Load()
+	cfg, err := LoadConfig()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "coily: fatal: cannot load config: %v\n", err)
 		os.Exit(2)
