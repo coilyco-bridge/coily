@@ -237,6 +237,7 @@ func run(r *Runner, argv []string) error {
 func (r *Runner) builtInCommands() []*cli.Command {
 	cmds := []*cli.Command{
 		r.versionCommand(),
+		r.upgradeCommand(),
 		r.whoamiCommand(),
 		r.lockdownCommand(),
 		r.installCompletionCommand(),

@@ -3359,6 +3359,12 @@ Flags: --host, --user
 
 Pass-through to tailscale with argv validation + audit log.
 
+## `coily upgrade`
+
+Self-update via brew (coilysiren/tap/coily).
+
+Flags: --dry
+
 ## `coily version`
 
 Print the build version and exit.
