@@ -38,7 +38,9 @@ func readBodyFile(path string) (string, error) {
 //     cannot translate (--project / --template / --milestone-by-title)
 //     appear, in which case the original argv falls through.
 //   - `gh issue comment N --repo O/R [--body B | --body-file F]`
-//   - `gh issue close N --repo O/R` (no --comment / --reason)
+//   - `gh issue close N --repo O/R [--reason completed|not_planned]`
+//     (defaults state_reason=completed; --comment still falls through
+//     because the GitHub REST equivalent needs two calls)
 //   - `gh issue reopen N --repo O/R`
 //   - `gh issue edit N --repo O/R [--title T] [--body B | --body-file F]`
 //     (no add/remove-label / add/remove-assignee - those need a read-
@@ -204,18 +206,24 @@ func rewriteIssueOrPRComment(rest []string, full []string, endpointGroup string)
 	}
 }
 
-// rewriteIssueClose handles the common case `gh issue close N --repo O/R`.
-// Declines on --comment or --reason because those need extra calls or fields
-// the simple PATCH doesn't cover cleanly.
+// rewriteIssueClose handles `gh issue close N --repo O/R [--reason R]`.
+// state_reason defaults to "completed" (matching gh's default) and is
+// overridden by --reason. Declines on --comment because the GitHub REST
+// equivalent needs two calls (POST comment, then PATCH state) and the
+// rewriter returns a single argv.
 func rewriteIssueClose(rest []string, full []string) []string {
-	num, repo, hasExtras := parseStateChangeArgs(rest)
+	num, repo, reason, hasExtras := parseIssueCloseArgs(rest)
 	if hasExtras || num == "" || repo == "" {
 		return full
+	}
+	if reason == "" {
+		reason = "completed"
 	}
 	return []string{
 		"api", "-X", "PATCH",
 		"repos/" + repo + "/issues/" + num,
 		"-f", "state=closed",
+		"-f", "state_reason=" + reason,
 	}
 }
 
@@ -313,7 +321,6 @@ var untranslatableSet = map[string]bool{
 	"remove-project":  true,
 	"edit-last":       true,
 	"comment":         true,
-	"reason":          true,
 	"web":             true,
 	"comments":        true,
 }
@@ -421,6 +428,23 @@ func parseCommentArgs(rest []string) (num, repo, body string, declined bool) {
 		}
 		body = content
 	}
+	return
+}
+
+// parseIssueCloseArgs is parseStateChangeArgs plus the --reason flag,
+// which the GitHub REST PATCH accepts as state_reason. Kept separate so
+// reopen / pr close / pr reopen continue to decline on unknown extras.
+func parseIssueCloseArgs(rest []string) (num, repo, reason string, hasExtras bool) {
+	p := walkFlags(rest)
+	if p.declined {
+		hasExtras = true
+		return
+	}
+	if len(p.positional) > 0 {
+		num = p.positional[0]
+	}
+	repo = p.first("repo")
+	reason = p.first("reason")
 	return
 }
 

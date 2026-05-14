@@ -92,11 +92,20 @@ func TestRewriteGHForREST_IssueCommentDeclinesEditLast(t *testing.T) {
 }
 
 func TestRewriteGHForREST_IssueCloseReopen(t *testing.T) {
-	// Plain close: PATCH state=closed.
+	// Plain close: PATCH state=closed with default state_reason=completed.
 	got := rewriteGHForREST([]string{"issue", "close", "42", "--repo", "coilysiren/coily"})
-	want := []string{"api", "-X", "PATCH", "repos/coilysiren/coily/issues/42", "-f", "state=closed"}
+	want := []string{"api", "-X", "PATCH", "repos/coilysiren/coily/issues/42",
+		"-f", "state=closed", "-f", "state_reason=completed"}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("issue close: got %v, want %v", got, want)
+	}
+
+	// --reason not_planned overrides the default state_reason.
+	got = rewriteGHForREST([]string{"issue", "close", "42", "--repo", "coilysiren/coily", "--reason", "not_planned"})
+	want = []string{"api", "-X", "PATCH", "repos/coilysiren/coily/issues/42",
+		"-f", "state=closed", "-f", "state_reason=not_planned"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("issue close --reason not_planned: got %v, want %v", got, want)
 	}
 
 	// Plain reopen: PATCH state=open.
