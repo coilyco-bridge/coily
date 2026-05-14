@@ -71,6 +71,9 @@ func TestSessionShowAction_NoSentinelReportsUnset(t *testing.T) {
 	if !strings.Contains(out, "data_security: max") {
 		t.Errorf("expected strictest data_security tier in output, got:\n%s", out)
 	}
+	if !strings.Contains(out, "source: unset") {
+		t.Errorf("expected source: unset in output, got:\n%s", out)
+	}
 }
 
 func TestSessionShowAction_ReadsSentinel(t *testing.T) {

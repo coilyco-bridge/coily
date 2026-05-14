@@ -109,3 +109,7 @@ cover: ## Unit tests with a coverage profile.
 .PHONY: clean
 clean: ## Remove build outputs.
 	rm -rf bin dist
+
+.PHONY: tidy
+tidy: ## Run go mod tidy.
+	$(GO) mod tidy

@@ -1,0 +1,104 @@
+# Per-host lockdown profile registry. Read by coily on every invocation
+# from ~/.coily/coily.yaml (this file is the embedded template; copy it
+# into place with `coily lockdown init-config`).
+#
+# Each profile is a self-contained tier-per-axis Coordinate. There is no
+# inheritance between profiles. Adding a new profile means listing all
+# four axes, every time. The loader rejects partial entries on purpose:
+# "load-bearing lift" should be explicit, not implicit (coilysiren/coily#150).
+#
+# Axes and tiers (strictness-ascending) come from cli-guard/profile:
+#
+#   data_security:    low, medium, high, max
+#   blast_radius:     high, medium, low
+#   network_egress:   open, allowlisted, loopback-only, air-gapped
+#   filesystem_reach: unrestricted, repo-plus-home, repo-only
+#
+# If ~/.coily/coily.yaml is absent, coily resolves every profile to the
+# strictest tier on every axis and refuses anything not explicitly
+# allowed. That is the headless-default. The override file is how the
+# operator opts in to looser tiers, and "looser" is a per-axis decision
+# they make on disk, not a runtime fallback.
+
+profiles:
+
+  # The phone-plus-train-plus-dictation case. Claude Code runs on Kai's
+  # Android app, dispatching to KAI-SERVER. The screen is observable in
+  # public (BART, cafes, airports); dictation can be overheard. Mobile
+  # usability is poor and prompts cost real time, so automation is high
+  # within these bounds. Data security is high (no secrets to chat, no
+  # vault content surfaced), blast radius medium (no force-pushes, no
+  # cluster mutations without an explicit verb), network egress is
+  # allowlisted (kai-server, GitHub, Anthropic, named MCP servers), and
+  # filesystem reach allows the home dir so vault notes and dotfiles
+  # remain readable for context.
+  mobile:
+    data_security: high
+    blast_radius: medium
+    network_egress: allowlisted
+    filesystem_reach: repo-plus-home
+
+  # The Mac laptop at home. Single trusted user, single trusted screen,
+  # home network, full disk encryption, ssh-agent loaded. This is where
+  # Kai does most heads-down engineering. Automation level is medium
+  # but the data-safety environment is the strongest of the five
+  # profiles (no observers, no shoulder-surfing risk, Obsidian vault
+  # inbox reachable). Data security can sit at medium because the
+  # operator can correct in real time; blast radius is high because
+  # this host is the one trusted to run destructive ops with intent;
+  # network egress is open since the host is on a trusted network with
+  # no exfil concern; filesystem reach is unrestricted because the home
+  # dir is the working surface.
+  mac-tower:
+    data_security: medium
+    blast_radius: high
+    network_egress: open
+    filesystem_reach: unrestricted
+
+  # The Windows desktop PC at home. Isolated machine, trusted screen,
+  # but Claude on Windows is rough: path mangling, MSYS edges, MSIX
+  # sandbox quirks, deny-list bypass bugs. Automation level is lower
+  # than mac-tower because the failure modes are more opaque and the
+  # blast radius of "wrong path expanded" is harder to predict. Data
+  # security medium (good auth hygiene, trusted env), blast radius
+  # medium (caution against Windows-specific cross-mount footguns),
+  # network egress open (home network, trusted), filesystem reach
+  # repo-plus-home (avoid drive-letter and UNC-path surprises by
+  # bounding to the user profile and the repo tree).
+  windows-laptop:
+    data_security: medium
+    blast_radius: medium
+    network_egress: open
+    filesystem_reach: repo-plus-home
+
+  # The Chrome web UI, claude.ai/code. Usually running at Kapwing or in
+  # public. Assume the screen is observable, assume the network is not
+  # trusted, assume permission walls cannot be safely prompted through
+  # because the agent should STOP and report rather than escalate on a
+  # public screen (per kai-execution-mode-web). Data security at max
+  # because secrets must not surface on an observable screen; blast
+  # radius low because the operator cannot supervise destructive ops in
+  # a public context; network egress allowlisted because a human is
+  # still watching the output stream and can react to anomalies;
+  # filesystem reach repo-only since the agent has no business reading
+  # the home dir from a public-screen session.
+  web:
+    data_security: max
+    blast_radius: low
+    network_egress: allowlisted
+    filesystem_reach: repo-only
+
+  # Lights-out autonomous runs. No human watching the output stream,
+  # no interactive correction loop, the agent runs from a scheduler or
+  # dispatch queue against work it picked up on its own. Every axis
+  # locked down. Network egress ratchets one notch past web to
+  # air-gapped: outbound packets are the primary exfil channel and
+  # there is no operator to authorize a one-off allow. If a headless
+  # run needs network, it should fail loud and ask Kai to either lift
+  # the profile temporarily or add an explicit allowlist entry, rather
+  # than silently reach.
+  headless:
+    data_security: max
+    blast_radius: low
+    network_egress: air-gapped
+    filesystem_reach: repo-only

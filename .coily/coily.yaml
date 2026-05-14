@@ -36,6 +36,9 @@ commands:
   cover:
     run: make cover
     description: Unit tests with a coverage profile.
+  tidy:
+    run: make tidy
+    description: Run go mod tidy.
 
 # Catalog metadata for the cross-repo knowledge graph.
 # Schema: coilysiren/coilyco-ai#420 (tracker).

@@ -12,25 +12,13 @@ import (
 	"github.com/coilysiren/cli-guard/exitcode"
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/coilysiren/coily/pkg/config"
+	"github.com/coilysiren/coily/pkg/profiles"
 	"github.com/urfave/cli/v3"
 )
 
 // sessionEnvVar is the Claude Code-injected env var coily reads to bind
 // session state. coily attaches; Claude Code owns the lifecycle.
 const sessionEnvVar = "CLAUDE_CODE_SESSION_ID"
-
-// wouldBeStrictest is the phase-2 placeholder for the active coordinate
-// `coily session show` prints. Once cli-guard/profile lands in coily's
-// go.mod (phase 3) this gets replaced by profile.Strictest() and the
-// per-axis lookup. Kept as a string slice so the show output is stable
-// across the two phases and the format does not churn when phase 3 wires
-// up the real import.
-var wouldBeStrictest = [][2]string{
-	{"data_security", "max"},
-	{"blast_radius", "low"},
-	{"network_egress", "air-gapped"},
-	{"filesystem_reach", "repo-only"},
-}
 
 // sessionCommand groups the per-session lockdown-profile verbs. Phase 2
 // of coilysiren/coily#150: observable state only, no gate behavior.
@@ -151,9 +139,11 @@ func sessionUseAction(c *cli.Command) error {
 	return nil
 }
 
-// sessionShowAction prints active profile + would-be strictest tiers.
-// In phase 2 the tier list is hardcoded; phase 3 replaces with
-// profile.Strictest() once cli-guard/profile is in go.mod.
+// sessionShowAction prints the active profile and its resolved
+// Coordinate. The Coordinate comes from profiles.Resolve so the
+// operator sees exactly what tiers a future gate evaluation would
+// apply, including the source line that distinguishes
+// "override-hit" from "deny-everything fallback".
 func sessionShowAction(w io.Writer) error {
 	sessionID, err := requireSessionID()
 	if err != nil {
@@ -163,20 +153,30 @@ func sessionShowAction(w io.Writer) error {
 	if err != nil {
 		return err
 	}
+	var sentinelName string
 	active, readErr := readSentinel(target)
 	switch {
 	case errors.Is(readErr, os.ErrNotExist):
 		active = "(unset; run `coily session use <profile>` to set)"
 	case readErr != nil:
 		return readErr
+	default:
+		sentinelName = active
+	}
+	res, err := profiles.Resolve(sentinelName)
+	if err != nil {
+		return err
 	}
 	_, _ = fmt.Fprintf(w, "session_id: %s\n", sessionID)
 	_, _ = fmt.Fprintf(w, "sentinel: %s\n", target)
 	_, _ = fmt.Fprintf(w, "active_profile: %s\n", active)
-	_, _ = fmt.Fprintln(w, "would_be_axes:")
-	for _, kv := range wouldBeStrictest {
-		_, _ = fmt.Fprintf(w, "  %s: %s\n", kv[0], kv[1])
-	}
+	_, _ = fmt.Fprintf(w, "source: %s\n", res.Source)
+	_, _ = fmt.Fprintf(w, "note: %s\n", res.Note)
+	_, _ = fmt.Fprintln(w, "axes:")
+	_, _ = fmt.Fprintf(w, "  data_security: %s\n", res.Coord.DataSecurity)
+	_, _ = fmt.Fprintf(w, "  blast_radius: %s\n", res.Coord.BlastRadius)
+	_, _ = fmt.Fprintf(w, "  network_egress: %s\n", res.Coord.NetworkEgress)
+	_, _ = fmt.Fprintf(w, "  filesystem_reach: %s\n", res.Coord.FilesystemReach)
 	return nil
 }
 

@@ -9,6 +9,7 @@ import (
 
 	"github.com/coilysiren/cli-guard/lockdown"
 	"github.com/coilysiren/cli-guard/verb"
+	"github.com/coilysiren/coily/pkg/profiles"
 	"github.com/coilysiren/coily/pkg/skillgen"
 	"github.com/urfave/cli/v3"
 )
@@ -77,6 +78,68 @@ func (r *Runner) lockdownSkillCommand() *cli.Command {
 	}
 }
 
+// lockdownInitConfigCommand writes the embedded default profiles
+// registry to ~/.coily/coily.yaml. Mirrors `coily lockdown --apply`'s
+// no-clobber stance: refuses to overwrite an existing file unless
+// --replace is passed. Per coilysiren/coily#150 the override file is
+// the only thing that lifts any axis off Strictest, so writing it is
+// an opt-in action the operator takes deliberately.
+func (r *Runner) lockdownInitConfigCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "init-config",
+		Usage: "Write the embedded default profiles registry to ~/.coily/coily.yaml.",
+		Description: `init-config installs the embedded default profile registry at
+~/.coily/coily.yaml. The file declares the named profiles
+(mobile, mac-tower, windows-laptop, web, headless) and their
+per-axis tier values. coily refuses to lift any axis off the
+strictest tier unless this file exists.
+
+Refuses to overwrite an existing file by default. Pass --replace
+to clobber, parallel to ` + "`coily lockdown --apply --replace`" + `.`,
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:  "replace",
+				Usage: "overwrite an existing ~/.coily/coily.yaml",
+			},
+		},
+		Action: verb.Wrap(
+			verb.Spec{
+				Name:      "lockdown.init-config",
+				SkipScope: true,
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					return map[string]string{"--replace": fmt.Sprintf("%t", c.Bool("replace"))}, nil
+				},
+				Action: func(_ context.Context, c *cli.Command) error {
+					return lockdownInitConfigAction(c.Bool("replace"))
+				},
+			},
+			r.Audit,
+		),
+	}
+}
+
+func lockdownInitConfigAction(replace bool) error {
+	path, err := profiles.OverridePath()
+	if err != nil {
+		return err
+	}
+	if _, statErr := os.Stat(path); statErr == nil && !replace {
+		return fmt.Errorf("lockdown init-config: %s already exists. Use `coily lockdown init-config --replace` to overwrite", path)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		return fmt.Errorf("lockdown init-config: mkdir: %w", err)
+	}
+	if err := os.WriteFile(path, profiles.DefaultYAML, 0o600); err != nil {
+		return fmt.Errorf("lockdown init-config: write %s: %w", path, err)
+	}
+	verb := "created"
+	if replace {
+		verb = "replaced"
+	}
+	fmt.Fprintf(os.Stderr, "%s: %s\n", displayPath(path), verb)
+	return nil
+}
+
 // lockdownCommand is tiered by blast radius:
 //
 //   - bare `coily lockdown` prints the plan, no write.
@@ -106,6 +169,7 @@ deny list into <path>/.claude/settings.local.json so a session started at
 the recursion root cannot shadow per-repo deny rules with a broader allow.`,
 		Commands: []*cli.Command{
 			r.lockdownSkillCommand(),
+			r.lockdownInitConfigCommand(),
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{

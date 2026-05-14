@@ -247,6 +247,12 @@ Flags: --dry-run, --shell
 
 Lint .coily/coily.yaml against the repo Makefile.
 
+## `coily lockdown init-config`
+
+Write the embedded default profiles registry to ~/.coily/coily.yaml.
+
+Flags: --replace
+
 ## `coily lockdown skill`
 
 Regenerate the coily-passthroughs skill from the in-process command tree.

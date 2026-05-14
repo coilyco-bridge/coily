@@ -1,5 +1,5 @@
-github.com/coilysiren/cli-guard v0.0.0-20260514044534-ab02ef5531da h1:6Z02DxECEgY3gq3P2tAyVms7yXEtMHo1Uj4rwCSr0Dk=
-github.com/coilysiren/cli-guard v0.0.0-20260514044534-ab02ef5531da/go.mod h1:XQTArBLnO/AryDhZ/Dt+ID5ze95v3O8ZOIecEZr6tKA=
+github.com/coilysiren/cli-guard v0.0.0-20260514045513-37019805e13b h1:nvqL+UlEmbLjDJd/MpwuiKonUhtjmfkdHU/cxb9aSQ0=
+github.com/coilysiren/cli-guard v0.0.0-20260514045513-37019805e13b/go.mod h1:XQTArBLnO/AryDhZ/Dt+ID5ze95v3O8ZOIecEZr6tKA=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
