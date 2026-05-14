@@ -5,6 +5,40 @@ import (
 	"testing"
 )
 
+// TestSystemctlVerbs_StatusIsNoSudo pins coilysiren/coily#144: status
+// is a read-only inspection that systemd serves without privilege.
+// Sudo-prefixing it broke non-tty SSH callers ("a terminal is required
+// to read the password"). Mutating verbs (start/stop/restart/enable/
+// disable/daemon-reload) keep sudo because they touch runtime state
+// or /etc/systemd/system.
+func TestSystemctlVerbs_StatusIsNoSudo(t *testing.T) {
+	mustNoSudo := map[string]bool{"status": true}
+	mustSudo := map[string]bool{
+		"start": true, "stop": true, "restart": true,
+		"enable": true, "disable": true, "daemon-reload": true,
+	}
+	seen := map[string]bool{}
+	for _, v := range systemctlVerbs {
+		seen[v.Name] = true
+		switch {
+		case mustNoSudo[v.Name] && !v.NoSudo:
+			t.Errorf("verb %q must run NoSudo (read-only)", v.Name)
+		case mustSudo[v.Name] && v.NoSudo:
+			t.Errorf("verb %q must run sudo-prefixed (mutator)", v.Name)
+		}
+	}
+	for name := range mustNoSudo {
+		if !seen[name] {
+			t.Errorf("verb %q missing from systemctlVerbs", name)
+		}
+	}
+	for name := range mustSudo {
+		if !seen[name] {
+			t.Errorf("verb %q missing from systemctlVerbs", name)
+		}
+	}
+}
+
 func TestValidateUnitName(t *testing.T) {
 	cases := []struct {
 		in      string

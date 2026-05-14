@@ -139,33 +139,41 @@ var systemctlVerbs = []struct {
 	Name      string
 	Usage     string
 	NeedsUnit bool
+	// NoSudo flags read-only verbs that don't need privilege. systemctl
+	// status reads cached state from systemd; running it under sudo trips
+	// "a terminal is required to read the password" on non-tty SSH
+	// sessions even though the read itself is unprivileged. Per
+	// coilysiren/coily#144. Mutating verbs (start/stop/restart/enable/
+	// disable/daemon-reload) stay sudo-prefixed because they write to
+	// runtime state or /etc/systemd/system.
+	NoSudo bool
 	// Argv builds the remote argv. Receives the unit name (or "" when
-	// !NeedsUnit). Output is appended after `sudo`.
+	// !NeedsUnit). Output is appended after `sudo` unless NoSudo is set.
 	Argv func(unit string) []string
 }{
-	{"status", "Print systemctl status of <unit>.", true, func(u string) []string { return []string{"systemctl", "status", u, "--no-pager"} }},
-	{"start", "Start <unit>.", true, func(u string) []string { return []string{"systemctl", "start", u} }},
-	{"stop", "Stop <unit>.", true, func(u string) []string { return []string{"systemctl", "stop", u} }},
-	{"restart", "Restart <unit>.", true, func(u string) []string { return []string{"systemctl", "restart", u} }},
-	{"enable", "Enable <unit>.", true, func(u string) []string { return []string{"systemctl", "enable", u} }},
-	{"disable", "Disable <unit>.", true, func(u string) []string { return []string{"systemctl", "disable", u} }},
-	{"daemon-reload", "Run systemctl daemon-reload.", false, func(string) []string { return []string{"systemctl", "daemon-reload"} }},
+	{"status", "Print systemctl status of <unit>.", true, true, func(u string) []string { return []string{"systemctl", "status", u, "--no-pager"} }},
+	{"start", "Start <unit>.", true, false, func(u string) []string { return []string{"systemctl", "start", u} }},
+	{"stop", "Stop <unit>.", true, false, func(u string) []string { return []string{"systemctl", "stop", u} }},
+	{"restart", "Restart <unit>.", true, false, func(u string) []string { return []string{"systemctl", "restart", u} }},
+	{"enable", "Enable <unit>.", true, false, func(u string) []string { return []string{"systemctl", "enable", u} }},
+	{"disable", "Disable <unit>.", true, false, func(u string) []string { return []string{"systemctl", "disable", u} }},
+	{"daemon-reload", "Run systemctl daemon-reload.", false, false, func(string) []string { return []string{"systemctl", "daemon-reload"} }},
 }
 
 func (r *Runner) sshSystemctlCommand() *cli.Command {
 	cmds := make([]*cli.Command, 0, len(systemctlVerbs))
 	for _, v := range systemctlVerbs {
-		cmds = append(cmds, r.sshSystemctlVerb(v.Name, v.Usage, v.NeedsUnit, v.Argv))
+		cmds = append(cmds, r.sshSystemctlVerb(v.Name, v.Usage, v.NeedsUnit, v.NoSudo, v.Argv))
 	}
 	return &cli.Command{
 		Name:        "systemctl",
 		Usage:       "Run a fixed-shape systemctl verb on the remote.",
-		Description: "Each leaf maps to one systemctl call (sudo-prefixed). Mirrors systemctl's own verb names; no free-form passthrough.",
+		Description: "Each leaf maps to one systemctl call (sudo-prefixed for mutators; status runs unprivileged). Mirrors systemctl's own verb names; no free-form passthrough.",
 		Commands:    cmds,
 	}
 }
 
-func (r *Runner) sshSystemctlVerb(name, usage string, needsUnit bool, build func(string) []string) *cli.Command {
+func (r *Runner) sshSystemctlVerb(name, usage string, needsUnit, noSudo bool, build func(string) []string) *cli.Command {
 	argsUsage := "<unit>"
 	if !needsUnit {
 		argsUsage = ""
@@ -201,7 +209,12 @@ func (r *Runner) sshSystemctlVerb(name, usage string, needsUnit bool, build func
 					if err != nil {
 						return err
 					}
-					argv := append([]string{"sudo"}, build(unit)...)
+					var argv []string
+					if noSudo {
+						argv = build(unit)
+					} else {
+						argv = append([]string{"sudo"}, build(unit)...)
+					}
 					return r.SSH.Stream(ctx, host, user, strings.Join(argv, " "), os.Stdout, os.Stderr)
 				},
 			},
