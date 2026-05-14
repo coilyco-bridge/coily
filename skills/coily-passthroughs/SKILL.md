@@ -3195,6 +3195,12 @@ Rsync the source-tree Eco mod <name> from eco-mods / eco-mods-public into the Ec
 
 Flags: --host, --user
 
+## `coily ssh deploy personal-dashboard`
+
+Fast-forward /home/kai/projects/coilysiren/infrastructure and run /home/kai/projects/coilysiren/infrastructure/scripts/install-personal-dashboard.sh as root.
+
+Flags: --host, --user
+
 ## `coily ssh deploy repo-recall`
 
 Fast-forward /home/kai/projects/coilysiren/repo-recall and run /home/kai/projects/coilysiren/infrastructure/scripts/install-repo-recall.sh as root.

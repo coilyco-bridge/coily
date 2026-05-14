@@ -51,6 +51,11 @@ var deployTargets = []deployTarget{
 		RepoDir: "/home/kai/projects/coilysiren/repo-recall",
 		Script:  "/home/kai/projects/coilysiren/infrastructure/scripts/install-repo-recall.sh",
 	},
+	{
+		Name:    "personal-dashboard",
+		RepoDir: "/home/kai/projects/coilysiren/infrastructure",
+		Script:  "/home/kai/projects/coilysiren/infrastructure/scripts/install-personal-dashboard.sh",
+	},
 }
 
 func (r *Runner) sshDeployCommand() *cli.Command {
