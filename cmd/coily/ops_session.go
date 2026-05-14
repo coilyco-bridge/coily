@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/coilysiren/cli-guard/config"
 	"github.com/coilysiren/cli-guard/exitcode"
 	"github.com/coilysiren/cli-guard/verb"
-	"github.com/coilysiren/coily/pkg/config"
 	"github.com/coilysiren/coily/pkg/profiles"
 	"github.com/urfave/cli/v3"
 )

@@ -4,8 +4,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/coilysiren/cli-guard/config"
 	"github.com/coilysiren/cli-guard/lockdown"
-	"github.com/coilysiren/coily/pkg/config"
 	"github.com/coilysiren/coily/pkg/decision"
 )
 

@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/coily/pkg/config"
+	"github.com/coilysiren/cli-guard/config"
 )
 
 // seedAuditLog writes the given records to a tempfile and returns its path.

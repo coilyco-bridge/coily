@@ -24,13 +24,13 @@ import (
 	"testing"
 
 	"github.com/coilysiren/cli-guard/audit"
+	"github.com/coilysiren/cli-guard/config"
 	"github.com/coilysiren/cli-guard/gittree"
 	"github.com/coilysiren/cli-guard/lockdown"
 	"github.com/coilysiren/cli-guard/policy"
 	"github.com/coilysiren/cli-guard/repocfg"
 	"github.com/coilysiren/cli-guard/scope"
 	"github.com/coilysiren/cli-guard/shell"
-	"github.com/coilysiren/coily/pkg/config"
 	"github.com/urfave/cli/v3"
 )
 
