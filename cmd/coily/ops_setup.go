@@ -31,18 +31,18 @@ func (r *Runner) setupCommand() *cli.Command {
   2. <prefix>/share/coily/skills/*    (symlink every staged coily-* skill
                                        into ~/.claude/skills/ so the harness
                                        picks them up)
-  3. coily lockdown --recursive ...   (re-baseline workspace allow/deny lists)
+  3. coily lockdown --recursive ...   (re-baseline allow/deny lists under the lockdown root)
   4. ~/.claude/coily-binary-gate.sh   (user-level PreToolUse hook that
                                        rejects dev coily binaries from any
                                        cwd; complements per-repo lockdown)
 
-Pass --workspace or set $COILY_LOCKDOWN_ROOT to override the lockdown root
-(default: ~/projects/coilysiren). Skips the lockdown step if the workspace
+Pass --lockdown-root or set $COILY_LOCKDOWN_ROOT to override the lockdown root
+(default: ~/projects/coilysiren). Skips the lockdown step if the root
 does not exist, which keeps fresh brew installs on hosts without the default
 tree (friends' machines, alternate layouts) silent.`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:    "workspace",
+				Name:    "lockdown-root",
 				Usage:   "directory to scan recursively for git repos to lock down. Read from $COILY_LOCKDOWN_ROOT if unset.",
 				Value:   "",
 				Sources: cli.EnvVars("COILY_LOCKDOWN_ROOT"),
@@ -69,7 +69,7 @@ tree (friends' machines, alternate layouts) silent.`,
 				Name:      "setup",
 				SkipScope: true,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					return map[string]string{"--workspace": c.String("workspace")}, nil
+					return map[string]string{"--lockdown-root": c.String("lockdown-root")}, nil
 				},
 				Action: setupAction,
 			},
@@ -103,7 +103,7 @@ func setupAction(ctx context.Context, c *cli.Command) error {
 
 	if !c.Bool("skip-lockdown") {
 		fmt.Fprintln(os.Stderr, "==> lockdown")
-		if err := runLockdownStep(ctx, self, c.String("workspace")); err != nil {
+		if err := runLockdownStep(ctx, self, c.String("lockdown-root")); err != nil {
 			return err
 		}
 	}
@@ -277,27 +277,27 @@ func filepathHasPrefix(s, prefix string) bool {
 	return len(s) >= len(prefix) && s[:len(prefix)] == prefix
 }
 
-func runLockdownStep(ctx context.Context, self, workspace string) error {
-	if workspace == "" {
+func runLockdownStep(ctx context.Context, self, lockdownRoot string) error {
+	if lockdownRoot == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return fmt.Errorf("setup: home dir: %w", err)
 		}
-		workspace = filepath.Join(home, "projects", "coilysiren")
+		lockdownRoot = filepath.Join(home, "projects", "coilysiren")
 	}
-	info, err := os.Stat(workspace)
+	info, err := os.Stat(lockdownRoot)
 	if os.IsNotExist(err) {
-		fmt.Fprintf(os.Stderr, "    skipped: %s does not exist\n", workspace)
+		fmt.Fprintf(os.Stderr, "    skipped: %s does not exist\n", lockdownRoot)
 		return nil
 	}
 	if err != nil {
-		return fmt.Errorf("setup: stat workspace: %w", err)
+		return fmt.Errorf("setup: stat lockdown root: %w", err)
 	}
 	if !info.IsDir() {
-		return fmt.Errorf("setup: workspace %s is not a directory", workspace)
+		return fmt.Errorf("setup: lockdown root %s is not a directory", lockdownRoot)
 	}
 	cmd := exec.CommandContext(ctx, self, "lockdown",
-		"--recursive", "--apply", "--replace", "--path", workspace)
+		"--recursive", "--apply", "--replace", "--path", lockdownRoot)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {

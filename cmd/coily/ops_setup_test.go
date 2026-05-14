@@ -167,28 +167,28 @@ func TestInstallSkillSymlinks_NoStagedDirIsNotAnError(t *testing.T) {
 	}
 }
 
-// TestSetupCommand_WorkspaceFlagBindsEnvVar pins issue #120: the workspace
-// flag must resolve from COILY_LOCKDOWN_ROOT when no --workspace is passed,
-// so brew users can set the env var once in their shell profile and have
-// `coily setup` after each brew upgrade target the right tree without
-// remembering the flag.
-func TestSetupCommand_WorkspaceFlagBindsEnvVar(t *testing.T) {
+// TestSetupCommand_LockdownRootFlagBindsEnvVar pins issue #120: the
+// --lockdown-root flag (renamed from --workspace per #121) must resolve
+// from COILY_LOCKDOWN_ROOT when not passed, so brew users can set the
+// env var once in their shell profile and have `coily setup` after each
+// brew upgrade target the right tree without remembering the flag.
+func TestSetupCommand_LockdownRootFlagBindsEnvVar(t *testing.T) {
 	r := NewRunner()
 	cmd := r.setupCommand()
-	var workspace *cli.StringFlag
+	var lockdownRoot *cli.StringFlag
 	for _, f := range cmd.Flags {
 		sf, ok := f.(*cli.StringFlag)
-		if ok && sf.Name == "workspace" {
-			workspace = sf
+		if ok && sf.Name == "lockdown-root" {
+			lockdownRoot = sf
 			break
 		}
 	}
-	if workspace == nil {
-		t.Fatal("setup command has no --workspace flag")
+	if lockdownRoot == nil {
+		t.Fatal("setup command has no --lockdown-root flag")
 	}
-	got := workspace.Sources.String()
+	got := lockdownRoot.Sources.String()
 	if got == "" || !contains(got, "COILY_LOCKDOWN_ROOT") {
-		t.Errorf("workspace.Sources = %q, want it to reference COILY_LOCKDOWN_ROOT", got)
+		t.Errorf("lockdown-root.Sources = %q, want it to reference COILY_LOCKDOWN_ROOT", got)
 	}
 }
 
