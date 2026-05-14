@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/coilysiren/cli-guard/sudo"
 	"github.com/coilysiren/cli-guard/verb"
-	"github.com/coilysiren/coily/pkg/sudo"
 	"github.com/urfave/cli/v3"
 )
 

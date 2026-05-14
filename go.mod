@@ -8,12 +8,11 @@ require (
 )
 
 require (
-	github.com/coilysiren/cli-guard v0.0.0-20260514053839-a04d3b41009a
+	github.com/coilysiren/cli-guard v0.0.0-20260514113450-2e183eae979c
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/pkg/sftp v1.13.10
 	golang.org/x/crypto v0.50.0
-	golang.org/x/term v0.42.0
 )
 
 require (
@@ -31,6 +30,7 @@ require (
 	github.com/olekukonko/ll v0.1.6 // indirect
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/term v0.42.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )
