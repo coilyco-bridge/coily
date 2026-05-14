@@ -16,10 +16,12 @@ import (
 // add a new pass-through, append a row and decide which group it mounts
 // under (opsCommand, pkgCommand, or builtInCommands).
 //
-// SkipPolicy mirrors passthrough.WithSkipPolicy: enable for tools whose
-// argv goes through execve straight to the underlying CLI without ever
-// being handed to a shell. Unsafe for tools with exec-into-shell paths
-// (kubectl, docker, ssh - argv content can reach a remote bash -c there).
+// SkipPolicy mirrors passthrough.WithSkipPolicy. Reserved for future
+// per-verb opt-outs once cli-guard grows verb-granular policy hooks.
+// No coily wrapper sets it today: the threat model is verb-granular
+// (`tailscale status` is execve-only, `tailscale ssh` ships argv into
+// a remote shell) and a tool-granular toggle can't tell them apart.
+// See coilysiren/coily#162.
 //
 // VerbName mirrors passthrough.WithVerbName and overrides the audit verb
 // from the bare bin name. Used for binaries mounted under a group so the
@@ -48,8 +50,8 @@ type ptEntry struct {
 // small. Audit verb names are stamped "ops.<bin>" so the log reflects the
 // user-visible path.
 var ptOps = []ptEntry{
-	{Bin: "aws", SkipPolicy: true, VerbName: "ops.aws"},
-	{Bin: "gh", SkipPolicy: true, VerbName: "ops.gh", ScopeArgvHint: ghRepoScopeHint, ArgvRewriter: rewriteGHForREST},
+	{Bin: "aws", VerbName: "ops.aws"},
+	{Bin: "gh", VerbName: "ops.gh", ScopeArgvHint: ghRepoScopeHint, ArgvRewriter: rewriteGHForREST},
 	{Bin: "kubectl", VerbName: "ops.kubectl"},
 	{Bin: "flyctl", VerbName: "ops.flyctl"},
 }
@@ -59,7 +61,7 @@ var ptOps = []ptEntry{
 // These don't share a category with the ops/pkg groups.
 var ptTopLevel = []ptEntry{
 	{Bin: "docker"},
-	{Bin: "tailscale", SkipPolicy: true},
+	{Bin: "tailscale"},
 }
 
 // ptPkg is the package-manager set mounted under `coily pkg <bin>`. Order

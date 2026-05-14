@@ -67,9 +67,8 @@ fixes the cause or bypasses with --no-verify (which they won't, per
 the global git workflow rule).`,
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:       "git.trailer-hook",
-				SkipScope:  true,
-				SkipPolicy: true,
+				Name:      "git.trailer-hook",
+				SkipScope: true,
 				Action: func(_ context.Context, c *cli.Command) error {
 					return runTrailerHook(r, c)
 				},
