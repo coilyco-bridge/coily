@@ -145,15 +145,30 @@ func (r *Runner) systemdStart(u systemdUnit) *cli.Command {
 }
 
 // systemdRemote runs one or more argv lines on kai-server in sequence.
-// Each argv is joined space-wise and piped through the ssh session as a
-// single remote command. Elements come from compile-time literals; no user
-// input reaches this path.
+// When invoked on kai-server itself (detected via hostNameMatches), the
+// argvs are exec'd locally to skip an ssh-to-self that doesn't carry
+// authentication in non-interactive environments like the
+// claude-remote-control daemon. Per coilysiren/coily#135.
+//
+// Local mode still needs sudo for mutating verbs; the operator must
+// have a sudoers entry for each systemctl verb (tracked in the
+// infrastructure repo). Read-only verbs (status, tail) work without
+// sudo on a host where kai is in the adm group.
+//
+// Elements come from compile-time literals; no user input reaches this
+// path.
 func (r *Runner) systemdRemote(argvs [][]string) cli.ActionFunc {
 	return func(ctx context.Context, _ *cli.Command) error {
 		host := r.Cfg.KaiServer.TailscaleHost
+		if host == "" {
+			return fmt.Errorf("systemd: kai_server.tailscale_host not configured")
+		}
+		if hostIsLocal(host) {
+			return r.systemdRemoteLocal(ctx, argvs)
+		}
 		user := r.Cfg.KaiServer.SSHUser
-		if host == "" || user == "" {
-			return fmt.Errorf("systemd: kai_server.tailscale_host or ssh_user not configured")
+		if user == "" {
+			return fmt.Errorf("systemd: kai_server.ssh_user not configured")
 		}
 		parts := make([]string, 0, len(argvs))
 		for _, a := range argvs {
@@ -165,6 +180,40 @@ func (r *Runner) systemdRemote(argvs [][]string) cli.ActionFunc {
 		}
 		return nil
 	}
+}
+
+// systemdRemoteLocal exec's each argv directly on the local host using
+// the runner's shell.Runner. Stdout/stderr forward to the operator's
+// terminal. Stops at the first failure to mirror the `&&` chaining the
+// ssh path uses.
+func (r *Runner) systemdRemoteLocal(ctx context.Context, argvs [][]string) error {
+	for _, a := range argvs {
+		if len(a) == 0 {
+			continue
+		}
+		if err := r.Runner.Exec(ctx, a[0], a[1:]...); err != nil {
+			return fmt.Errorf("systemd: local exec %s: %w", strings.Join(a, " "), err)
+		}
+	}
+	return nil
+}
+
+// hostIsLocal reports whether target names the host this binary is
+// running on. Matches on the leading hostname segment so target=
+// "kai-server" matches local "kai-server", "kai-server.local",
+// "kai-server.tail-scale.ts.net", etc. False on os.Hostname errors so
+// the safe default is to ssh (the original behavior).
+func hostIsLocal(target string) bool {
+	if target == "" {
+		return false
+	}
+	h, err := os.Hostname()
+	if err != nil {
+		return false
+	}
+	local := strings.SplitN(h, ".", 2)[0]
+	want := strings.SplitN(target, ".", 2)[0]
+	return strings.EqualFold(local, want)
 }
 
 func (r *Runner) coreKeeperCommand() *cli.Command {

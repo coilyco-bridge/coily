@@ -3139,11 +3139,13 @@ Pass-through to poetry with argv validation + audit log.
 
 GET /ai-search - semantic search across skills.
 
+Flags: --output, --query
+
 ## `coily pkg skillsmp search`
 
 GET /search - keyword search across skills.
 
-Flags: --limit, --page, --sort-by
+Flags: --limit, --output, --page, --query, --sort-by
 
 ## `coily pkg uv`
 
