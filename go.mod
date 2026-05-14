@@ -8,7 +8,7 @@ require (
 )
 
 require (
-	github.com/coilysiren/cli-guard v0.0.0-20260514115057-3691896baf06
+	github.com/coilysiren/cli-guard v0.0.0-20260514115304-5c35d625df43
 	github.com/pkg/sftp v1.13.10
 	golang.org/x/crypto v0.50.0
 )

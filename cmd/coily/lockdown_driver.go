@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/coilysiren/cli-guard/config"
+	"github.com/coilysiren/cli-guard/decision"
 	"github.com/coilysiren/cli-guard/lockdown"
-	"github.com/coilysiren/coily/pkg/decision"
 )
 
 // coilyAllowedPaths is the closed set of filesystem paths a `coily`
