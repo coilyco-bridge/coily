@@ -43,6 +43,31 @@ func TestLoadMakefileTargets(t *testing.T) {
 	}
 }
 
+func TestLoadCoilyYamlVerbs_EmptyCommandsIsNoop(t *testing.T) {
+	dir := t.TempDir()
+	overlay := filepath.Join(dir, ".coily")
+	if err := os.MkdirAll(overlay, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	yamlPath := filepath.Join(overlay, "coily.yaml")
+	for _, body := range []string{
+		"commands: {}\n",
+		"commands:\n",
+		"version: 1\n",
+	} {
+		if err := os.WriteFile(yamlPath, []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		verbs, err := loadCoilyYamlVerbs(yamlPath)
+		if err != nil {
+			t.Fatalf("body=%q: %v", body, err)
+		}
+		if len(verbs) != 0 {
+			t.Errorf("body=%q: got %d verbs, want 0", body, len(verbs))
+		}
+	}
+}
+
 func TestLoadCoilyYamlVerbs(t *testing.T) {
 	dir := t.TempDir()
 	overlay := filepath.Join(dir, ".coily")

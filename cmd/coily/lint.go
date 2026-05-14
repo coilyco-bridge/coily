@@ -56,6 +56,10 @@ func runCoilyLint() error {
 	if err != nil {
 		return exitcode.New(exitcode.UserError, "user_error", err, "")
 	}
+	if len(verbs) == 0 {
+		fmt.Println("coily lint: 0 verbs OK")
+		return nil
+	}
 	targets, err := loadMakefileTargets(makefilePath)
 	if err != nil {
 		return exitcode.New(exitcode.UserError, "user_error", err, "")
@@ -126,8 +130,12 @@ func loadCoilyYamlVerbs(path string) ([]coilyVerb, error) {
 }
 
 // findCommandsNode returns the yaml mapping under the top-level
-// `commands:` key, or an error if the document shape is wrong.
+// `commands:` key. A missing key or null value returns an empty
+// mapping so the caller can treat a verb-less coily.yaml as a noop
+// instead of an error (a repo may declare .coily/coily.yaml purely
+// for lockdown uniformity without owning any dev verbs).
 func findCommandsNode(path string, root *yaml.Node) (*yaml.Node, error) {
+	empty := &yaml.Node{Kind: yaml.MappingNode}
 	if len(root.Content) == 0 || root.Content[0].Kind != yaml.MappingNode {
 		return nil, fmt.Errorf("%s: top level is not a mapping", path)
 	}
@@ -137,12 +145,15 @@ func findCommandsNode(path string, root *yaml.Node) (*yaml.Node, error) {
 			continue
 		}
 		commands := doc.Content[i+1]
+		if commands.Kind == yaml.ScalarNode && (commands.Tag == "!!null" || commands.Value == "") {
+			return empty, nil
+		}
 		if commands.Kind != yaml.MappingNode {
 			return nil, fmt.Errorf("%s: 'commands' is not a mapping", path)
 		}
 		return commands, nil
 	}
-	return nil, fmt.Errorf("%s: missing top-level 'commands:' map", path)
+	return empty, nil
 }
 
 // parseVerbNode extracts run + description from a single command's
