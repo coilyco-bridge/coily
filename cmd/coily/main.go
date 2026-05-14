@@ -51,6 +51,7 @@ type errorEnvelope struct {
 	Kind         string `yaml:"kind"`
 	Message      string `yaml:"message"`
 	Hint         string `yaml:"hint,omitempty"`
+	Reason       string `yaml:"reason,omitempty"`
 	ExitCode     int    `yaml:"exit_code"`
 	AuditLogPath string `yaml:"audit_log_path,omitempty"`
 	Timestamp    int64  `yaml:"timestamp"`
@@ -64,6 +65,7 @@ func emitErrorEnvelope(w *os.File, err error, rc int, auditPath string) {
 		AuditLogPath: auditPath,
 		Timestamp:    time.Now().Unix(),
 	}
+	env.Reason = reasonFor(env.Kind)
 	if c := exitcode.From(err); c != nil {
 		if ce, ok := c.(interface{ HintText() string }); ok {
 			env.Hint = ce.HintText()
