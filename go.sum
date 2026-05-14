@@ -4,8 +4,8 @@ github.com/clipperhouse/displaywidth v0.10.0 h1:GhBG8WuerxjFQQYeuZAeVTuyxuX+Urai
 github.com/clipperhouse/displaywidth v0.10.0/go.mod h1:XqJajYsaiEwkxOj4bowCTMcT1SgvHo9flfF3jQasdbs=
 github.com/clipperhouse/uax29/v2 v2.6.0 h1:z0cDbUV+aPASdFb2/ndFnS9ts/WNXgTNNGFoKXuhpos=
 github.com/clipperhouse/uax29/v2 v2.6.0/go.mod h1:Wn1g7MK6OoeDT0vL+Q0SQLDz/KpfsVRgg6W7ihQeh4g=
-github.com/coilysiren/cli-guard v0.0.0-20260514113922-28676fbc6cb6 h1:GeIU5EmNCnEon58llh5VQ8+Hph5GMjCeAXylkAsv1zU=
-github.com/coilysiren/cli-guard v0.0.0-20260514113922-28676fbc6cb6/go.mod h1:Xz0FsiyEoAiVIvNwudb6ar8wn4oh/gLgXuJQRQjLsBk=
+github.com/coilysiren/cli-guard v0.0.0-20260514114222-4b45230da10e h1:lCtTzLMJrnBaDr1dvjo8vunF6WNoOUA4H5si6f+/c1o=
+github.com/coilysiren/cli-guard v0.0.0-20260514114222-4b45230da10e/go.mod h1:Xz0FsiyEoAiVIvNwudb6ar8wn4oh/gLgXuJQRQjLsBk=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

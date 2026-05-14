@@ -8,11 +8,28 @@ import (
 	"strings"
 
 	"github.com/coilysiren/cli-guard/lockdown"
+	"github.com/coilysiren/cli-guard/skillgen"
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/coilysiren/coily/pkg/profiles"
-	"github.com/coilysiren/coily/pkg/skillgen"
 	"github.com/urfave/cli/v3"
 )
+
+// passthroughsFrontmatter is the YAML frontmatter prepended to the
+// generated coily-passthroughs SKILL.md. The description is what Claude
+// Code uses to decide when to load the skill.
+//
+//nolint:gosec // YAML frontmatter; gosec misreads the description body
+const passthroughsFrontmatter = `---
+name: coily-passthroughs
+description: |
+  Use when a shell command is denied by Claude Code's permission system
+  (e.g. "Permission to use Bash with command X has been denied"), when
+  reaching for aws, gh, kubectl, docker, tailscale, ssh, or scp against
+  Kai's homelab, AWS account, or coilysiren resources, or when checking
+  whether a privileged op has a coily wrapper. The body is a flat lookup
+  table of every coily command.
+---
+`
 
 // lockdownSkillCommand regenerates skills/coily-passthroughs/SKILL.md by
 // walking the in-process cli.Command tree. Sits under `coily lockdown`
@@ -47,12 +64,15 @@ func (r *Runner) lockdownSkillCommand() *cli.Command {
 					var body string
 					switch format {
 					case "markdown", "":
-						body = skillgen.RenderPassthroughs(r.builtInCommands())
+						body = passthroughsFrontmatter + "\n# coily passthroughs\n\n" +
+							"Auto-generated lookup table of every coily verb. Regenerate with `coily lockdown skill`.\n\n" +
+							"Format: full path, one-line summary, comma-separated flag names. No flag descriptions; click into `coily <path> --help` for those.\n\n" +
+							skillgen.RenderMarkdown(r.builtInCommands(), "coily")
 						if out == "" {
 							out = "skills/coily-passthroughs/SKILL.md"
 						}
 					case "yaml":
-						y, err := skillgen.RenderPassthroughsYAML(r.builtInCommands())
+						y, err := skillgen.RenderYAML(r.builtInCommands(), "coily")
 						if err != nil {
 							return err
 						}
