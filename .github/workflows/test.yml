@@ -23,7 +23,7 @@ jobs:
           cache: true
 
       - name: Sync embedded config
-        run: cp config.example.yaml config.yaml && cp config.yaml pkg/config/config.yaml
+        run: cp config.example.yaml config.yaml
 
       - name: go vet
         run: go vet ./...
