@@ -20,9 +20,9 @@ import (
 	"time"
 
 	"github.com/coilysiren/cli-guard/audit"
+	"github.com/coilysiren/cli-guard/respfmt"
 	"github.com/coilysiren/cli-guard/shell"
 	"github.com/coilysiren/cli-guard/verb"
-	"github.com/coilysiren/coily/pkg/respfmt"
 	"github.com/urfave/cli/v3"
 )
 
