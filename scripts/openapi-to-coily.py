@@ -223,9 +223,9 @@ import (
 \t"strings"
 \t"time"
 
-\t"github.com/coilysiren/coily/pkg/audit"
-\t"github.com/coilysiren/coily/pkg/shell"
-\t"github.com/coilysiren/coily/pkg/verb"
+\t"github.com/coilysiren/cli-guard/audit"
+\t"github.com/coilysiren/cli-guard/shell"
+\t"github.com/coilysiren/cli-guard/verb"
 \t"github.com/urfave/cli/v3"
 )
 
