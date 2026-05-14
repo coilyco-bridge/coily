@@ -78,6 +78,65 @@ func (r *Runner) lockdownSkillCommand() *cli.Command {
 	}
 }
 
+// wrapperAllows maps a bare binary deny entry (the deny-list shape baked
+// into cli-guard's defaults.yaml) to the explicit `Bash(coily ...:*)`
+// allow that names the audited route an agent should reach for instead.
+// The bare-deny is what we reject; the coily-prefixed allow is what we
+// sanction. Both must ship together. Per coilysiren/coily#115.
+//
+// The Claude Code auto-mode classifier strips `coily tailscale status`
+// back to `tailscale status` and re-applies the bare-binary deny rule
+// (#159), so the explicit allow tells the classifier "this exact form
+// is the audited path the deny was carved around" instead of relying on
+// the bare `Bash(coily:*)` umbrella allow.
+//
+// Maintenance: when a new wrapped verb lands, add it here AND to
+// defaults.yaml. TestWrapperAllowsParity asserts the two stay in sync.
+var wrapperAllows = map[string]string{
+	"Bash(tailscale:*)": "Bash(coily tailscale:*)",
+	"Bash(docker:*)":    "Bash(coily docker:*)",
+	"Bash(aws:*)":       "Bash(coily ops aws:*)",
+	"Bash(kubectl:*)":   "Bash(coily ops kubectl:*)",
+	"Bash(gh:*)":        "Bash(coily ops gh:*)",
+	"Bash(flyctl:*)":    "Bash(coily ops flyctl:*)",
+	"Bash(ssh:*)":       "Bash(coily ssh:*)",
+	"Bash(brew:*)":      "Bash(coily brew:*)",
+	"Bash(npm:*)":       "Bash(coily pkg npm:*)",
+	"Bash(pnpm:*)":      "Bash(coily pkg pnpm:*)",
+	"Bash(yarn:*)":      "Bash(coily pkg yarn:*)",
+	"Bash(uv:*)":        "Bash(coily pkg uv:*)",
+	"Bash(pip:*)":       "Bash(coily pkg pip:*)",
+	"Bash(pipx:*)":      "Bash(coily pkg pipx:*)",
+	"Bash(poetry:*)":    "Bash(coily pkg poetry:*)",
+	"Bash(cargo:*)":     "Bash(coily pkg cargo:*)",
+	"Bash(gem:*)":       "Bash(coily pkg gem:*)",
+	"Bash(bundle:*)":    "Bash(coily pkg bundle:*)",
+}
+
+// applyWrapperAllows augments the canonical allow list with explicit
+// `Bash(coily <wrapper>:*)` entries for every bare-binary deny that
+// has a sanctioned coily wrapper. See wrapperAllows. Returns a fresh
+// *Defaults so the cached embedded value is not mutated.
+func applyWrapperAllows(d *lockdown.Defaults) *lockdown.Defaults {
+	out := &lockdown.Defaults{
+		Allow: append([]string(nil), d.Allow...),
+		Deny:  append([]string(nil), d.Deny...),
+	}
+	have := make(map[string]bool, len(out.Allow))
+	for _, a := range out.Allow {
+		have[a] = true
+	}
+	for _, deny := range out.Deny {
+		allow, ok := wrapperAllows[deny]
+		if !ok || have[allow] {
+			continue
+		}
+		out.Allow = append(out.Allow, allow)
+		have[allow] = true
+	}
+	return out
+}
+
 // applyDataSecurityDenies extends the canonical deny list with extra
 // entries when the lockdown driver's attached Coordinate names a high
 // or max data_security tier. Phase 5 of coilysiren/coily#150.
@@ -333,6 +392,7 @@ func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults) e
 	target := lockdown.TargetPath(dir, local)
 	drv := coilyLockdownDriver()
 	d = applyDataSecurityDenies(d, drv)
+	d = applyWrapperAllows(d)
 	plan, err := lockdown.BuildPlan(target, d, drv)
 	if err != nil {
 		return err
