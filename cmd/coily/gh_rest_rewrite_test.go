@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -119,6 +120,71 @@ func TestRewriteGHForREST_IssueCloseReopen(t *testing.T) {
 	in := []string{"issue", "close", "42", "--repo", "coilysiren/coily", "--comment", "done"}
 	if got := rewriteGHForREST(in); !reflect.DeepEqual(got, in) {
 		t.Errorf("--comment should fall through; got %v", got)
+	}
+}
+
+// TestRewriteJQFile covers coilysiren/coily#165: --jq-file <path> is a
+// coily-side shorthand that expands into gh's native --jq <content>
+// after the metachar gate has already validated the (clean) filesystem
+// path. The substituted content can carry pipes/braces/etc. without
+// re-tripping the gate.
+func TestRewriteJQFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "q.jq")
+	body := "[.[] | select(.status != \"completed\")] | length\n"
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	want := strings.TrimRight(body, "\n")
+
+	// Two-token form: --jq-file <path>
+	got := rewriteJQFile([]string{"api", "/repos/x/y/runs", "--jq-file", path})
+	expect := []string{"api", "/repos/x/y/runs", "--jq", want}
+	if !reflect.DeepEqual(got, expect) {
+		t.Errorf("--jq-file <path>: got %v, want %v", got, expect)
+	}
+
+	// Inline form: --jq-file=<path>
+	got = rewriteJQFile([]string{"api", "/repos/x/y/runs", "--jq-file=" + path})
+	if !reflect.DeepEqual(got, expect) {
+		t.Errorf("--jq-file=<path>: got %v, want %v", got, expect)
+	}
+
+	// Missing file: fall through unchanged so gh reports the error itself.
+	in := []string{"api", "/repos/x/y/runs", "--jq-file", filepath.Join(dir, "nope.jq")}
+	if got := rewriteJQFile(in); !reflect.DeepEqual(got, in) {
+		t.Errorf("missing file should fall through; got %v, want %v", got, in)
+	}
+
+	// No following token: fall through unchanged.
+	in = []string{"api", "/repos/x/y/runs", "--jq-file"}
+	if got := rewriteJQFile(in); !reflect.DeepEqual(got, in) {
+		t.Errorf("--jq-file with no value should fall through; got %v", got)
+	}
+
+	// No --jq-file at all: identity.
+	in = []string{"api", "/repos/x/y/runs", "--jq", ".title"}
+	if got := rewriteJQFile(in); !reflect.DeepEqual(got, in) {
+		t.Errorf("argv without --jq-file should be returned unchanged; got %v", got)
+	}
+}
+
+// TestRewriteGHForRESTAndJQFile_Chained pins that the jq-file pass runs
+// before the REST rewriter, so a `gh issue view N --repo X/Y --jq-file Q`
+// becomes a REST api call with the expanded --jq value.
+func TestRewriteGHForRESTAndJQFile_Chained(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "q.jq")
+	if err := os.WriteFile(path, []byte(".title"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	// gh issue view declines its --jq today (parseViewArgs only reads
+	// num+repo); the rewrite still expands --jq-file, then the REST
+	// rewriter routes the call. The substituted --jq lands on gh api.
+	got := rewriteGHForRESTAndJQFile([]string{"api", "/repos/x/y/issues/1", "--jq-file", path})
+	want := []string{"api", "/repos/x/y/issues/1", "--jq", ".title"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("chained: got %v, want %v", got, want)
 	}
 }
 

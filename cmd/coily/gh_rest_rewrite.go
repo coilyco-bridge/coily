@@ -5,6 +5,55 @@ import (
 	"strings"
 )
 
+// rewriteJQFile expands the coily-side `--jq-file <path>` (or
+// `--jq-file=<path>`) shorthand into gh's native `--jq <content>`.
+// Pulled out as its own pass so the metachar gate runs on the raw
+// argv (where the value is a clean filesystem path) and the file
+// content only enters argv after the gate. Per coilysiren/coily#165.
+//
+// Falls through unchanged on file-read errors so gh reports the
+// missing-path error itself instead of coily synthesizing one.
+// Falls through if the flag has no value after it (malformed argv).
+func rewriteJQFile(argv []string) []string {
+	out := make([]string, 0, len(argv))
+	for i := 0; i < len(argv); i++ {
+		tok := argv[i]
+		switch {
+		case tok == "--jq-file":
+			rest := argv[i+1:]
+			if len(rest) == 0 {
+				return argv
+			}
+			// #nosec G304 G602 -- path is operator-supplied via argv;
+			// metachar gate already validated it. Bounds checked above.
+			content, err := os.ReadFile(rest[0])
+			if err != nil {
+				return argv
+			}
+			out = append(out, "--jq", strings.TrimRight(string(content), "\n"))
+			i++
+		case strings.HasPrefix(tok, "--jq-file="):
+			path := strings.TrimPrefix(tok, "--jq-file=")
+			// #nosec G304 -- see above.
+			content, err := os.ReadFile(path)
+			if err != nil {
+				return argv
+			}
+			out = append(out, "--jq", strings.TrimRight(string(content), "\n"))
+		default:
+			out = append(out, tok)
+		}
+	}
+	return out
+}
+
+// rewriteGHForRESTAndJQFile chains the jq-file substitution before the
+// REST rewriter so the substituted argv flows through both passes.
+// Wired as the gh entry's ArgvRewriter in passthroughs.go.
+func rewriteGHForRESTAndJQFile(argv []string) []string {
+	return rewriteGHForREST(rewriteJQFile(argv))
+}
+
 // readBodyFile reads the contents of `path` for `--body-file` translation.
 // `-` reads from stdin, matching gh's own convention. Returns the body as a
 // string with trailing whitespace preserved (issue bodies are sensitive to
