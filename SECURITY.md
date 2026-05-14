@@ -4,6 +4,16 @@
 
 That's the goal in one sentence. The rest of this document is the rationale behind each of those three properties and the design guardrails that preserve them.
 
+## Framing
+
+The unlock for lights-out engineering is not the cleverness of the agent. It is the clarity of the boundaries inside which the agent can work. Every wrapped tool validates argv unconditionally. Every denial names the recovery command. Every audit row carries a session id. The agent feels slower for two days, then suddenly the failure modes are all things humans can read and route, instead of opaque retries.
+
+Mike Piccolo, ["The Harness Is the Backend"](https://iii.dev/blog/the-harness-is-the-backend/) (iii, 2026-04-28), puts the same idea from the opposite direction:
+
+> The model isn't the product. The infrastructure is.
+
+coily is the infrastructure on the privileged-ops side of that line. The boundary is the product.
+
 This document was written during a Claude Code session on 2026-04-21 after a real incident. A manually-edited `ClusterSecretStore` had drifted from source, silently broke ExternalSecret syncing for the entire cluster, and was only noticed when pods started hitting `CreateContainerConfigError`. The incident itself was benign drift, but it highlighted a broader question. What stops an AI agent (or an attacker via prompt injection against an AI agent) from doing something genuinely destructive?
 
 ## Threat model
