@@ -11,7 +11,6 @@ package skillsmp
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -23,6 +22,7 @@ import (
 	"github.com/coilysiren/cli-guard/audit"
 	"github.com/coilysiren/cli-guard/shell"
 	"github.com/coilysiren/cli-guard/verb"
+	"github.com/coilysiren/coily/pkg/respfmt"
 	"github.com/urfave/cli/v3"
 )
 
@@ -47,16 +47,26 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 	}
 }
 
+// queryOutputFlags are the aws-CLI-style projection + format flags
+// shared by every leaf. Per coilysiren/coily#172 (and #134's umbrella).
+// Centralized so adding a new leaf doesn't mean re-typing the pair.
+func queryOutputFlags() []cli.Flag {
+	return []cli.Flag{
+		&cli.StringFlag{Name: "query", Usage: "JMESPath projection applied to the response"},
+		&cli.StringFlag{Name: "output", Usage: "yaml (default) | yaml-stream | json | text | table"},
+	}
+}
+
 func searchCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
 		Name:      "search",
 		Usage:     "GET /search - keyword search across skills.",
 		ArgsUsage: "<query>",
-		Flags: []cli.Flag{
+		Flags: append([]cli.Flag{
 			&cli.StringFlag{Name: "sort-by", Usage: "sort field (e.g. stars)", Value: "stars"},
 			&cli.IntFlag{Name: "limit", Usage: "results per page"},
 			&cli.IntFlag{Name: "page", Usage: "page number (1-indexed)"},
-		},
+		}, queryOutputFlags()...),
 		Action: verb.Wrap(
 			verb.Spec{
 				Name: "skillsmp.search",
@@ -67,6 +77,12 @@ func searchCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 					}
 					if c.IsSet("page") {
 						args["--page"] = fmt.Sprint(c.Int("page"))
+					}
+					if c.IsSet("query") {
+						args["--query"] = c.String("query")
+					}
+					if c.IsSet("output") {
+						args["--output"] = c.String("output")
 					}
 					return args, c.Args().Slice()
 				},
@@ -84,7 +100,7 @@ func searchCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if c.IsSet("page") {
 						vals.Set("page", fmt.Sprint(c.Int("page")))
 					}
-					return doGetAndStream(ctx, r, "/search", vals)
+					return doGetAndRender(ctx, r, "/search", vals, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -97,11 +113,19 @@ func aiSearchCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 		Name:      "ai-search",
 		Usage:     "GET /ai-search - semantic search across skills.",
 		ArgsUsage: "<query>",
+		Flags:     queryOutputFlags(),
 		Action: verb.Wrap(
 			verb.Spec{
 				Name: "skillsmp.ai-search",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					return nil, c.Args().Slice()
+					args := map[string]string{}
+					if c.IsSet("query") {
+						args["--query"] = c.String("query")
+					}
+					if c.IsSet("output") {
+						args["--output"] = c.String("output")
+					}
+					return args, c.Args().Slice()
 				},
 				Action: func(ctx context.Context, c *cli.Command) error {
 					q, err := requireQuery(c)
@@ -110,7 +134,7 @@ func aiSearchCmd(r *shell.Runner, w *audit.Writer) *cli.Command {
 					}
 					vals := url.Values{}
 					vals.Set("q", q)
-					return doGetAndStream(ctx, r, "/ai-search", vals)
+					return doGetAndRender(ctx, r, "/ai-search", vals, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -129,10 +153,12 @@ func requireQuery(c *cli.Command) (string, error) {
 	return strings.Join(args, " "), nil
 }
 
-// doGetAndStream fetches the skillsmp endpoint with the SSM-resolved
-// bearer token, then streams the response body to stdout. 4xx/5xx
-// surface as errors with the response body included.
-func doGetAndStream(ctx context.Context, r *shell.Runner, path string, q url.Values) error {
+// doGetAndRender fetches the skillsmp endpoint with the SSM-resolved
+// bearer token, then runs the response body through respfmt.Render to
+// apply the operator-supplied JMESPath projection (--query) and output
+// format (--output, default yaml). 4xx/5xx surface as errors with the
+// response body included.
+func doGetAndRender(ctx context.Context, r *shell.Runner, path string, q url.Values, query, output string) error {
 	apiKey, err := fetchAPIKey(ctx, r)
 	if err != nil {
 		return err
@@ -155,20 +181,18 @@ func doGetAndStream(ctx context.Context, r *shell.Runner, path string, q url.Val
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	if resp.StatusCode >= 400 {
-		body, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("skillsmp: HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
-	}
-
-	var pretty json.RawMessage
-	if err := json.NewDecoder(resp.Body).Decode(&pretty); err != nil {
-		return fmt.Errorf("skillsmp: decode response: %w", err)
-	}
-	out, err := json.MarshalIndent(pretty, "", "  ")
+	raw, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("skillsmp: re-encode response: %w", err)
+		return fmt.Errorf("skillsmp: read response: %w", err)
 	}
-	if _, err := fmt.Fprintln(os.Stdout, string(out)); err != nil {
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("skillsmp: HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(raw)))
+	}
+	rendered, err := respfmt.Render(raw, query, output)
+	if err != nil {
+		return fmt.Errorf("skillsmp: render response: %w", err)
+	}
+	if _, err := os.Stdout.Write(rendered); err != nil {
 		return err
 	}
 	return nil
