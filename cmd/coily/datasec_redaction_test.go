@@ -10,9 +10,9 @@ import (
 
 	"github.com/coilysiren/cli-guard/audit"
 	"github.com/coilysiren/cli-guard/config"
+	"github.com/coilysiren/cli-guard/profiles"
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/coilysiren/coily/pkg/decision"
-	"github.com/coilysiren/coily/pkg/profiles"
 	"github.com/urfave/cli/v3"
 )
 

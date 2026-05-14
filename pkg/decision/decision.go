@@ -11,7 +11,7 @@ import (
 
 	"github.com/coilysiren/cli-guard/audit"
 	"github.com/coilysiren/cli-guard/profile"
-	"github.com/coilysiren/coily/pkg/profiles"
+	"github.com/coilysiren/cli-guard/profiles"
 )
 
 // RedactPolicy is coily's contribution to audit.Writer's redactor:

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/coilysiren/cli-guard/profile"
-	"github.com/coilysiren/coily/pkg/profiles"
+	"github.com/coilysiren/cli-guard/profiles"
 )
 
 func withHome(t *testing.T) string {

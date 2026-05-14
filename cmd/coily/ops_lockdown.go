@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/coilysiren/cli-guard/lockdown"
+	"github.com/coilysiren/cli-guard/profiles"
 	"github.com/coilysiren/cli-guard/skillgen"
 	"github.com/coilysiren/cli-guard/verb"
-	"github.com/coilysiren/coily/pkg/profiles"
 	"github.com/urfave/cli/v3"
 )
 
