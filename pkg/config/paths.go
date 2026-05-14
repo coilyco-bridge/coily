@@ -30,6 +30,16 @@ const LocalDirName = ".coily"
 // logs live. One JSONL file per repo slug.
 const AuditSubdir = "audit"
 
+// SessionsSubdir is the subdirectory under AuditSubdir where per-session
+// state lives. One directory per CLAUDE_CODE_SESSION_ID. Currently holds
+// the active-profile sentinel; future per-session artifacts (audit
+// counters, blocked-call rows) can land alongside.
+const SessionsSubdir = "sessions"
+
+// SessionProfileFile is the basename of the per-session sentinel file
+// containing the active lockdown profile name. Plain text, one line.
+const SessionProfileFile = "profile"
+
 // UnrootedAuditName is the slug used when coily is invoked outside any git
 // repo (or inside one with no origin remote). All such invocations land in
 // a single shared file rather than scattering by cwd basename.
@@ -62,6 +72,30 @@ func LocalConfigPath() (string, error) {
 		return "", fmt.Errorf("config: getwd: %w", err)
 	}
 	return filepath.Join(cwd, LocalDirName, "config.yaml"), nil
+}
+
+// SessionDir returns ~/.coily/audit/sessions/<sessionID>. Caller is
+// responsible for MkdirAll. Returns an error if sessionID is empty or
+// $HOME cannot be resolved.
+func SessionDir(sessionID string) (string, error) {
+	if sessionID == "" {
+		return "", fmt.Errorf("config: session id is empty")
+	}
+	dir, err := GlobalDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, AuditSubdir, SessionsSubdir, sessionID), nil
+}
+
+// SessionProfilePath returns the per-session profile sentinel file path
+// for sessionID. Errors propagate from SessionDir.
+func SessionProfilePath(sessionID string) (string, error) {
+	d, err := SessionDir(sessionID)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(d, SessionProfileFile), nil
 }
 
 // DefaultAuditPath returns ~/.coily/audit/<slug>.jsonl, where slug is

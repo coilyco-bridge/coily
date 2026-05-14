@@ -3125,6 +3125,18 @@ Pass-through to uv with argv validation + audit log.
 
 Pass-through to yarn with argv validation + audit log.
 
+## `coily session clear`
+
+Remove the per-session sentinel. No-op if absent.
+
+## `coily session show`
+
+Print the active profile and (phase-2) the would-be strictest axis tiers.
+
+## `coily session use`
+
+Record the active lockdown profile for this Claude Code session.
+
 ## `coily setup`
 
 Run the post-upgrade rituals: completion, lockdown re-baseline, and user hook.

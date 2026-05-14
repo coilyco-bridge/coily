@@ -248,6 +248,7 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.pkgCommand(),
 		r.brewCommand(),
 		r.lintCommand(),
+		r.sessionCommand(),
 	}
 	cmds = append(cmds, r.passthroughCommands(ptTopLevel)...)
 	return cmds
