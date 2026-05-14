@@ -119,6 +119,7 @@ func printFindingWalkthrough(w io.Writer, a findingArgs) error {
 	area := verbToSkillArea(a.Verb)
 	findingFile := filepath.Join(a.SkillsDir, area, "findings", a.Today+"-"+slug+".md")
 
+	wtCWDBanner(w, a.SkillsDir)
 	wtIntro(w)
 	wtBackground(w)
 	wtStep1Locate(w, a)
@@ -128,6 +129,32 @@ func printFindingWalkthrough(w io.Writer, a findingArgs) error {
 	wtStep5Stop(w)
 	wtReferences(w, a)
 	return nil
+}
+
+// wtCWDBanner surfaces invoke-cwd drift at the top of the walkthrough.
+// If the resolved skills directory does not sit under the agent's
+// invoke-cwd (because they did `cd <repo> && coily ...` and the
+// resolver picked up the parent via $OLDPWD / $COILY_INVOKE_CWD), say
+// so explicitly. Quiet when invoke-cwd matches the subprocess cwd,
+// when COILY_INVOKE_CWD/OLDPWD aren't set, or when the resolution
+// can't be determined. See coilysiren/coily#109.
+func wtCWDBanner(w io.Writer, skillsDir string) {
+	invoke := resolveInvokeCWD()
+	subproc, err := os.Getwd()
+	if err != nil || invoke == "" || invoke == subproc {
+		return
+	}
+	source := "OLDPWD"
+	if os.Getenv("COILY_INVOKE_CWD") != "" {
+		source = "COILY_INVOKE_CWD"
+	}
+	fln(w, "[invoke-cwd]")
+	fln(w, "    invoke-cwd:    ", invoke, "(from $"+source+")")
+	fln(w, "    subprocess-cwd:", subproc)
+	fln(w, "    skills-dir:    ", skillsDir)
+	fln(w, "Walkthrough paths below are bound to the invoke-cwd, not the subprocess.")
+	fln(w, "If you intended the subprocess cwd, re-run from there without the cd.")
+	fln(w)
 }
 
 func wtIntro(w io.Writer) {
@@ -363,12 +390,47 @@ func verbAreaTable() []string {
 	}
 }
 
-// detectSkillsDir picks the most plausible skills directory for the
-// host running this command. Walks up from cwd looking for a `.claude/
-// skills/` directory; falls back to `~/.claude/skills/`. The walkthrough
-// uses this to print absolute paths the agent can act on.
-func detectSkillsDir() string {
+// resolveInvokeCWD returns the cwd the operator was sitting in when they
+// kicked off coily, not the cwd of the subprocess. The two diverge when
+// an agent does `cd <repo> && coily ...` to enter a target repo before
+// invoking the binary; coily's getcwd then reports `<repo>/`, but the
+// human's intent was bound to the parent. See coilysiren/coily#109.
+//
+// Resolution order:
+//
+//  1. $COILY_INVOKE_CWD - explicit hand-off from the agent layer.
+//  2. $OLDPWD - bash/zsh export this on cd, so the bash-cd case
+//     recovers automatically with no agent-side cooperation.
+//  3. os.Getwd() - subprocess cwd, the previous default.
+//
+// Any candidate that doesn't resolve to a real directory is skipped,
+// so a stale env var doesn't poison the lookup.
+func resolveInvokeCWD() string {
+	for _, env := range []string{"COILY_INVOKE_CWD", "OLDPWD"} {
+		v := strings.TrimSpace(os.Getenv(env))
+		if v == "" {
+			continue
+		}
+		// #nosec G304 -- read-only stat for cwd routing; no file open or
+		// write follows. Worst case is the walkthrough prints the wrong
+		// path, which the operator sees and corrects.
+		if info, err := os.Stat(filepath.Clean(v)); err == nil && info.IsDir() {
+			return v
+		}
+	}
 	if cwd, err := os.Getwd(); err == nil {
+		return cwd
+	}
+	return ""
+}
+
+// detectSkillsDir picks the most plausible skills directory for the
+// host running this command. Walks up from the resolved invoke-cwd
+// (see resolveInvokeCWD) looking for a `.claude/skills/` directory;
+// falls back to `~/.claude/skills/`. The walkthrough uses this to
+// print absolute paths the agent can act on.
+func detectSkillsDir() string {
+	if cwd := resolveInvokeCWD(); cwd != "" {
 		dir := cwd
 		for {
 			candidate := filepath.Join(dir, ".claude", "skills")

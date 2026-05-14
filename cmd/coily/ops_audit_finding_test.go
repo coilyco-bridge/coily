@@ -117,6 +117,69 @@ func TestVerbAreaMap_TargetsExistOnDisk(t *testing.T) {
 	}
 }
 
+// TestResolveInvokeCWD_PrefersExplicitOverOldpwdOverGetwd pins the
+// resolution order from coilysiren/coily#109 so an agent can stop the
+// audit-finding walkthrough from binding to the post-cd subprocess
+// cwd by exporting COILY_INVOKE_CWD or relying on the bash-cd $OLDPWD.
+func TestResolveInvokeCWD_PrefersExplicitOverOldpwdOverGetwd(t *testing.T) {
+	parent := t.TempDir()
+	other := t.TempDir()
+
+	t.Setenv("COILY_INVOKE_CWD", parent)
+	t.Setenv("OLDPWD", other)
+	if got := resolveInvokeCWD(); got != parent {
+		t.Errorf("with COILY_INVOKE_CWD set, got %q, want %q", got, parent)
+	}
+
+	t.Setenv("COILY_INVOKE_CWD", "")
+	t.Setenv("OLDPWD", other)
+	if got := resolveInvokeCWD(); got != other {
+		t.Errorf("with only OLDPWD set, got %q, want %q", got, other)
+	}
+
+	t.Setenv("COILY_INVOKE_CWD", "/nonexistent/path/should/skip")
+	t.Setenv("OLDPWD", other)
+	if got := resolveInvokeCWD(); got != other {
+		t.Errorf("stale COILY_INVOKE_CWD should be skipped; got %q, want %q", got, other)
+	}
+}
+
+// TestPrintFindingWalkthrough_BannerOnInvokeCwdDrift covers the drift
+// surface from #109: when invoke-cwd disagrees with the subprocess
+// cwd, the walkthrough prints a banner naming both so the agent can't
+// silently land the finding in the wrong tree.
+func TestPrintFindingWalkthrough_BannerOnInvokeCwdDrift(t *testing.T) {
+	parent := t.TempDir()
+	t.Setenv("COILY_INVOKE_CWD", parent)
+	t.Setenv("OLDPWD", "")
+
+	var buf bytes.Buffer
+	err := printFindingWalkthrough(&buf, findingArgs{
+		AuditPath: "/tmp/audit.jsonl",
+		SkillsDir: "/tmp/skills",
+		Today:     "2026-05-14",
+		Verb:      "aws.s3.ls",
+	})
+	if err != nil {
+		t.Fatalf("printFindingWalkthrough: %v", err)
+	}
+	out := buf.String()
+
+	subproc, _ := os.Getwd()
+	if subproc == parent {
+		t.Skip("test binary cwd happens to equal the temp dir; banner suppression is correct")
+	}
+	for _, want := range []string{
+		"[invoke-cwd]",
+		parent,
+		"COILY_INVOKE_CWD",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing banner substring %q in:\n%s", want, out)
+		}
+	}
+}
+
 // findRepoSkillsDir walks up from the test's cwd looking for a
 // `.claude/skills/` directory. Returns "" if none is found before the
 // filesystem root. Mirrors detectSkillsDir's runtime logic but without
