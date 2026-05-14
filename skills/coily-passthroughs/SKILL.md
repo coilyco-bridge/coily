@@ -63,7 +63,7 @@ brew upgrade, scoped to coilysiren/tap/* unless --allow-untapped is set.
 
 Fire `claude -p` against a real open coilysiren/* issue.
 
-Flags: --claude-bin, --dry-run
+Flags: --allowed-tools, --claude-bin, --dry-run, --permission-mode
 
 ## `coily docker`
 

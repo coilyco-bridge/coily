@@ -94,6 +94,21 @@ func TestIssueRef_String(t *testing.T) {
 	}
 }
 
+// TestDispatchDefaults pins the headless-friendly defaults from #142:
+// permission-mode defaults to auto so the child doesn't stall on the
+// first non-allowed tool, and allowed-tools covers the workflow footer
+// from seedPrompt (git, coily wrappers, edits, reads, todos).
+func TestDispatchDefaults(t *testing.T) {
+	if defaultDispatchPermissionMode != "auto" {
+		t.Errorf("defaultDispatchPermissionMode = %q, want auto", defaultDispatchPermissionMode)
+	}
+	for _, tool := range []string{"Bash", "Read", "Edit", "Write", "Glob", "Grep", "TodoWrite"} {
+		if !strings.Contains(defaultDispatchAllowedTools, tool) {
+			t.Errorf("defaultDispatchAllowedTools missing %q (got %q)", tool, defaultDispatchAllowedTools)
+		}
+	}
+}
+
 func TestAllowedOwner(t *testing.T) {
 	// Lock the owner constant so a casual edit cannot widen the boundary
 	// without also tripping this test. Part of the security claim for the

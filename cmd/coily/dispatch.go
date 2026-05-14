@@ -38,16 +38,31 @@ the repo first, then re-runs dispatch.
 This is the only sanctioned path from inside a coily session to a fresh
 top-level claude session. The auto-mode classifier denies bare 'claude -p'
 because the prompt is unconstrained; here the prompt is derived from a
-real open org issue.`,
+real open org issue.
+
+The child claude session is launched with --permission-mode (default 'auto')
+and --allowedTools (default Bash,Read,Edit,Write,Glob,Grep,TodoWrite). Both
+are overridable per invocation via --permission-mode and --allowed-tools so
+target repos that need a wider tool set can opt in without editing dispatch.`,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:  "dry-run",
-				Usage: "print the resolved issue + seeded prompt + repo path, do not exec claude",
+				Usage: "print the resolved issue + seeded prompt + repo path + flags, do not exec claude",
 			},
 			&cli.StringFlag{
 				Name:  "claude-bin",
 				Usage: "override the claude binary path (default: 'claude' on $PATH)",
 				Value: "claude",
+			},
+			&cli.StringFlag{
+				Name:  "permission-mode",
+				Usage: "permission mode passed to the child claude session (auto, default, acceptEdits, plan, bypassPermissions). Headless dispatch needs a non-prompting mode; default is auto.",
+				Value: defaultDispatchPermissionMode,
+			},
+			&cli.StringFlag{
+				Name:  "allowed-tools",
+				Usage: "comma-separated allowedTools list passed to the child. Default covers the workflow footer: git, coily wrappers, file edits, reads, todos.",
+				Value: defaultDispatchAllowedTools,
 			},
 		},
 		Action: r.WrapVerb(
@@ -56,7 +71,9 @@ real open org issue.`,
 				SkipPolicy: false,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
-						"--claude-bin": c.String("claude-bin"),
+						"--claude-bin":      c.String("claude-bin"),
+						"--permission-mode": c.String("permission-mode"),
+						"--allowed-tools":   c.String("allowed-tools"),
 					}, c.Args().Slice()
 				},
 				CommitScopeArgvHint: func(argv []string) string {
@@ -130,6 +147,20 @@ func firstIssueRef(argv []string) *issueRef {
 // than configurable: this is the security claim, not a knob.
 const allowedOwner = "coilysiren"
 
+// defaultDispatchPermissionMode is the strictest mode that still lets the
+// headless child make progress without an operator to approve prompts.
+// auto matches the classifier-driven mode coily's lockdown reasons about;
+// strictly stricter modes (default, plan) stall on the first non-allowed
+// tool because there's no human to approve.
+const defaultDispatchPermissionMode = "auto"
+
+// defaultDispatchAllowedTools is the baseline tool set the seeded prompt
+// footer assumes. It covers the workflow that closes a coilysiren/* issue:
+// git read+commit+push, coily-wrapped privileged ops (gh, aws, kubectl
+// pass-throughs), and the standard file/search/todos primitives. Override
+// with --allowed-tools when a target repo needs more.
+const defaultDispatchAllowedTools = "Bash,Read,Edit,Write,Glob,Grep,TodoWrite"
+
 // localRepoPath returns the expected local checkout for a coilysiren repo.
 // Mirrors the workspace shape from AGENTS.md.
 func localRepoPath(repo string) (string, error) {
@@ -184,21 +215,39 @@ func runDispatch(ctx context.Context, r *Runner, c *cli.Command) error {
 	}
 
 	prompt := seedPrompt(ref, issue)
+	permMode := c.String("permission-mode")
+	allowedTools := c.String("allowed-tools")
 
 	if c.Bool("dry-run") {
 		fmt.Printf("# dispatch (dry-run)\n")
-		fmt.Printf("issue: %s\n", ref)
-		fmt.Printf("url:   %s\n", issue.URL)
-		fmt.Printf("cwd:   %s\n", repoPath)
+		fmt.Printf("issue:           %s\n", ref)
+		fmt.Printf("url:             %s\n", issue.URL)
+		fmt.Printf("cwd:             %s\n", repoPath)
+		fmt.Printf("permission-mode: %s\n", permMode)
+		fmt.Printf("allowed-tools:   %s\n", allowedTools)
 		fmt.Printf("----- seeded prompt -----\n%s\n----- end -----\n", prompt)
 		return nil
 	}
 
-	bin := c.String("claude-bin")
-	if bin == "" {
-		bin = "claude"
+	bin, argv := buildDispatchClaudeArgv(c.String("claude-bin"), prompt, permMode, allowedTools)
+	return r.Runner.ExecIn(ctx, repoPath, bin, argv...)
+}
+
+// buildDispatchClaudeArgv resolves the child claude binary and argv. Pulled
+// out of runDispatch so the per-flag conditionals don't push the latter past
+// the gocyclo threshold.
+func buildDispatchClaudeArgv(claudeBin, prompt, permMode, allowedTools string) (string, []string) {
+	if claudeBin == "" {
+		claudeBin = "claude"
 	}
-	return r.Runner.ExecIn(ctx, repoPath, bin, "-p", prompt)
+	argv := []string{"-p", prompt}
+	if permMode != "" {
+		argv = append(argv, "--permission-mode", permMode)
+	}
+	if allowedTools != "" {
+		argv = append(argv, "--allowedTools", allowedTools)
+	}
+	return claudeBin, argv
 }
 
 // fetchIssue shells out to gh to resolve the issue. Uses the runner's
