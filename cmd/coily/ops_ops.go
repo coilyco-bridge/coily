@@ -27,6 +27,7 @@ func (r *Runner) opsCommand() *cli.Command {
 		r.trelloCommand(),
 		r.forgejoCommand(),
 		r.claudeRemoteControlCommand(),
+		r.personalDashboardCommand(),
 	)
 	return &cli.Command{
 		Name:  "ops",

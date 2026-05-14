@@ -1497,6 +1497,28 @@ GET /games/{game-id}/mods
 
 Flags: --limit, --offset
 
+## `coily ops personal-dashboard restart`
+
+Restart the personal-dashboard unit.
+
+## `coily ops personal-dashboard start`
+
+Start the personal-dashboard unit.
+
+## `coily ops personal-dashboard status`
+
+Print systemctl status personal-dashboard.
+
+## `coily ops personal-dashboard stop`
+
+Stop the personal-dashboard unit.
+
+## `coily ops personal-dashboard tail`
+
+Tail personal-dashboard journal logs (journalctl -u personal-dashboard -f).
+
+Flags: --follow, --lines
+
 ## `coily ops sentry events bulk-mutate-a-list-of-issues`
 
 Bulk mutate various attributes on issues. The list of issues to modify is given through the `id` query parameter. It is…
