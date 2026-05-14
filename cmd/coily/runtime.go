@@ -1,13 +1,18 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/coilysiren/cli-guard/audit"
 	"github.com/coilysiren/cli-guard/shell"
+	"github.com/coilysiren/cli-guard/verb"
 	"github.com/coilysiren/coily/pkg/config"
+	"github.com/coilysiren/coily/pkg/decision"
 	coilyssh "github.com/coilysiren/coily/pkg/ssh"
+	"github.com/urfave/cli/v3"
 )
 
 // Runner owns the audit writer, shell runner, ssh client, and loaded config.
@@ -64,4 +69,33 @@ func NewRunner() *Runner {
 		// ~/.ssh/known_hosts either way. See pkg/ssh/ssh.go.
 		SSH: &coilyssh.Client{KeyPath: expandTilde(cfg.KaiServer.SSHKeyPath)},
 	}
+}
+
+// WrapVerb wraps spec into a cli.ActionFunc. When audit.profile_aware
+// is true on this Runner's config, OnEvaluate is injected so every
+// audit row carries the resolved profile decision. Phase 4 of #150:
+// the injected evaluator always returns Allowed=true; phase 5 puts
+// per-axis decision logic behind this single chokepoint. Callers
+// already passing OnEvaluate keep their value; nil callers get the
+// runtime-managed evaluator.
+//
+// The writer argument is accepted (and forwarded to verb.Wrap) so the
+// call shape `r.WrapVerb(spec, r.Audit)` is a single-token swap from
+// `verb.Wrap(spec, r.Audit)`. The argument is redundant given the
+// receiver carries r.Audit; phase 6 cleanup retires it once every
+// call site is on this helper.
+func (r *Runner) WrapVerb(spec verb.Spec, writer *audit.Writer) cli.ActionFunc {
+	if r != nil && r.Cfg != nil && r.Cfg.Audit.ProfileAware && spec.OnEvaluate == nil {
+		spec.OnEvaluate = func(_ context.Context, _ *cli.Command) (*audit.ProfileDecision, error) {
+			sid := strings.TrimSpace(os.Getenv(sessionEnvVar))
+			active := ""
+			if sid != "" {
+				if name, err := readSessionProfileName(sid); err == nil {
+					active = name
+				}
+			}
+			return decision.Evaluate(active)
+		}
+	}
+	return verb.Wrap(spec, writer)
 }

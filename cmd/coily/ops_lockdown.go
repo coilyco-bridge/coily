@@ -34,7 +34,7 @@ func (r *Runner) lockdownSkillCommand() *cli.Command {
 				Value: "markdown",
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "lockdown.skill",
 				SkipScope: true,
@@ -102,7 +102,7 @@ to clobber, parallel to ` + "`coily lockdown --apply --replace`" + `.`,
 				Usage: "overwrite an existing ~/.coily/coily.yaml",
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "lockdown.init-config",
 				SkipScope: true,
@@ -194,7 +194,7 @@ the recursion root cannot shadow per-repo deny rules with a broader allow.`,
 				Usage: "scan up to 4 directories below --path for git repos and lock down each",
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "lockdown",
 				SkipScope: true,

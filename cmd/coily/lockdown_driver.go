@@ -1,7 +1,12 @@
 package main
 
 import (
+	"os"
+	"strings"
+
 	"github.com/coilysiren/cli-guard/lockdown"
+	"github.com/coilysiren/coily/pkg/config"
+	"github.com/coilysiren/coily/pkg/decision"
 )
 
 // coilyAllowedPaths is the closed set of filesystem paths a `coily`
@@ -70,5 +75,38 @@ var wrapperRecovery = map[string]string{
 // know which binary it is gating and which wrappers to mention in
 // deny recovery hints.
 func coilyLockdownDriver() *lockdown.Driver {
-	return lockdown.ClaudeCode("coily", coilyAllowedPaths, wrapperRecovery)
+	drv := lockdown.ClaudeCode("coily", coilyAllowedPaths, wrapperRecovery)
+	// Phase 4 plumbing for #150: attach the resolved per-session
+	// Coordinate to the driver so phase 5's BuildSettings consumer can
+	// branch on it. Best-effort: a malformed override file leaves the
+	// Coordinate unset (nil) so today's settings.json output path is
+	// unaffected.
+	sid := strings.TrimSpace(os.Getenv(sessionEnvVar))
+	if sid != "" {
+		if active, err := readSessionProfileName(sid); err == nil {
+			if c, err := decision.CoordinatePtr(active); err == nil {
+				drv.Coordinate = c
+			}
+		}
+	}
+	return drv
+}
+
+// readSessionProfileName reads the session sentinel for sid via the
+// same code path as `coily session show`, returning the empty string
+// if the sentinel is absent. Errors propagate only for malformed
+// sentinels.
+func readSessionProfileName(sid string) (string, error) {
+	path, err := config.SessionProfilePath(sid)
+	if err != nil {
+		return "", err
+	}
+	b, err := os.ReadFile(path) //nolint:gosec // path derived from $CLAUDE_CODE_SESSION_ID via config.SessionProfilePath
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", nil
+		}
+		return "", err
+	}
+	return strings.TrimSpace(string(b)), nil
 }

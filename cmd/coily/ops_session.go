@@ -55,7 +55,7 @@ func (r *Runner) sessionUseCommand() *cli.Command {
 		Name:      "use",
 		Usage:     "Record the active lockdown profile for this Claude Code session.",
 		ArgsUsage: "<profile-name>",
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "session.use",
 				SkipScope: true,
@@ -75,7 +75,7 @@ func (r *Runner) sessionShowCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "show",
 		Usage: "Print the active profile and (phase-2) the would-be strictest axis tiers.",
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "session.show",
 				SkipScope: true,
@@ -92,7 +92,7 @@ func (r *Runner) sessionClearCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "clear",
 		Usage: "Remove the per-session sentinel. No-op if absent.",
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "session.clear",
 				SkipScope: true,
