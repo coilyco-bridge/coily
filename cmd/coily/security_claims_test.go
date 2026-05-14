@@ -25,12 +25,12 @@ import (
 
 	"github.com/coilysiren/cli-guard/audit"
 	"github.com/coilysiren/cli-guard/gittree"
+	"github.com/coilysiren/cli-guard/lockdown"
 	"github.com/coilysiren/cli-guard/policy"
 	"github.com/coilysiren/cli-guard/repocfg"
 	"github.com/coilysiren/cli-guard/scope"
 	"github.com/coilysiren/cli-guard/shell"
 	"github.com/coilysiren/coily/pkg/config"
-	"github.com/coilysiren/coily/pkg/lockdown"
 	"github.com/urfave/cli/v3"
 )
 
@@ -200,7 +200,7 @@ func TestSecurityClaim_NoDevModeBypassInProdBuilds(t *testing.T) {
 // Issue #66.
 func TestSecurityClaim_UserBinaryGateUnconditional(t *testing.T) {
 	home := t.TempDir()
-	hookPath, _, err := lockdown.EnsureUserHook(home)
+	hookPath, _, err := lockdown.EnsureUserHook(home, coilyLockdownDriver())
 	if err != nil {
 		t.Fatalf("EnsureUserHook: %v", err)
 	}
@@ -226,7 +226,7 @@ func TestSecurityClaim_UserBinaryGateUnconditional(t *testing.T) {
 		inner, _ := m["hooks"].([]any)
 		for _, h := range inner {
 			hm, _ := h.(map[string]any)
-			if marker, _ := hm["_coily"].(string); marker == lockdown.UserHookSettingsKey {
+			if marker, _ := hm["_coily"].(string); marker == coilyLockdownDriver().UserHookMarkerKey {
 				ourEntry = m
 				break
 			}
@@ -279,7 +279,7 @@ func TestSecurityClaim_UserBinaryGateBlocksDevCoilyForCronStdin(t *testing.T) {
 		t.Skip("/bin/sh not available")
 	}
 	home := t.TempDir()
-	hookPath, _, err := lockdown.EnsureUserHook(home)
+	hookPath, _, err := lockdown.EnsureUserHook(home, coilyLockdownDriver())
 	if err != nil {
 		t.Fatalf("EnsureUserHook: %v", err)
 	}

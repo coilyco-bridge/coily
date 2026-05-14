@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/coilysiren/cli-guard/lockdown"
 	"github.com/coilysiren/cli-guard/verb"
-	"github.com/coilysiren/coily/pkg/lockdown"
 	"github.com/coilysiren/coily/pkg/skillgen"
 	"github.com/urfave/cli/v3"
 )
@@ -227,7 +227,7 @@ func reassertAncestor(root string, apply bool, d *lockdown.Defaults) error {
 
 func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults) error {
 	target := lockdown.TargetPath(dir, local)
-	plan, err := lockdown.BuildPlan(target, d)
+	plan, err := lockdown.BuildPlan(target, d, coilyLockdownDriver())
 	if err != nil {
 		return err
 	}
@@ -323,7 +323,7 @@ func writeLockdown(plan *lockdown.Plan, d *lockdown.Defaults, verb string) error
 		return err
 	}
 	fmt.Fprintf(os.Stderr, "%s: %s\n", displayPath(plan.TargetPath), verb)
-	hookPath, hookExisted, err := lockdown.WriteHook(plan.TargetPath, d)
+	hookPath, hookExisted, err := lockdown.WriteHook(plan.TargetPath, d, coilyLockdownDriver())
 	if err != nil {
 		return fmt.Errorf("lockdown: hook write failed (settings.json was written): %w", err)
 	}

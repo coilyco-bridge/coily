@@ -7,8 +7,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/coilysiren/cli-guard/lockdown"
 	"github.com/coilysiren/cli-guard/verb"
-	"github.com/coilysiren/coily/pkg/lockdown"
 	"github.com/urfave/cli/v3"
 )
 
@@ -129,7 +129,7 @@ func runUserHookStep() error {
 	if err != nil {
 		return fmt.Errorf("setup: home dir: %w", err)
 	}
-	hookPath, changed, err := lockdown.EnsureUserHook(home)
+	hookPath, changed, err := lockdown.EnsureUserHook(home, coilyLockdownDriver())
 	if err != nil {
 		return fmt.Errorf("setup: user hook: %w", err)
 	}
