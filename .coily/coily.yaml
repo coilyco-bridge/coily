@@ -36,3 +36,17 @@ commands:
   cover:
     run: make cover
     description: Unit tests with a coverage profile.
+
+# Catalog metadata for the cross-repo knowledge graph.
+# Schema: coilysiren/coilyco-ai#420 (tracker).
+catalog:
+  kind: Component
+  type: tool
+  system: coily-platform
+  owner: kai
+  lifecycle: production
+  description: "CLI security boundary for privileged ops, escape-hatch-resistant with an audit trail."
+  dependsOn: []
+  providesApis:
+    - coily-cli
+    - audit-log
