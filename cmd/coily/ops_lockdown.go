@@ -137,6 +137,42 @@ func applyWrapperAllows(d *lockdown.Defaults) *lockdown.Defaults {
 	return out
 }
 
+// hostBinaryAllows lists pure non-shell evaluators that the agent
+// reaches for routinely (jq, yq) but which aren't in cli-guard's
+// canonical defaults.yaml allow list yet. Same safety class as grep
+// and rg: argv is a query expression in the binary's own DSL, no
+// shell-out, no user-controlled command execution. Adding them here
+// keeps external pipes (`coily ops gh api X | jq .title`) usable
+// without per-invocation prompts. Per coilysiren/coily#163.
+//
+// Promote to cli-guard/lockdown/defaults.yaml once a release window
+// opens; this list is the staging area in the meantime.
+var hostBinaryAllows = []string{
+	"Bash(jq:*)",
+	"Bash(yq:*)",
+}
+
+// applyHostBinaryAllows merges hostBinaryAllows into the canonical
+// allow list. Returns a fresh *Defaults so the cached embedded value
+// is not mutated.
+func applyHostBinaryAllows(d *lockdown.Defaults) *lockdown.Defaults {
+	out := &lockdown.Defaults{
+		Allow: append([]string(nil), d.Allow...),
+		Deny:  append([]string(nil), d.Deny...),
+	}
+	have := make(map[string]bool, len(out.Allow))
+	for _, a := range out.Allow {
+		have[a] = true
+	}
+	for _, a := range hostBinaryAllows {
+		if !have[a] {
+			out.Allow = append(out.Allow, a)
+			have[a] = true
+		}
+	}
+	return out
+}
+
 // applyDataSecurityDenies extends the canonical deny list with extra
 // entries when the lockdown driver's attached Coordinate names a high
 // or max data_security tier. Phase 5 of coilysiren/coily#150.
@@ -393,6 +429,7 @@ func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults) e
 	drv := coilyLockdownDriver()
 	d = applyDataSecurityDenies(d, drv)
 	d = applyWrapperAllows(d)
+	d = applyHostBinaryAllows(d)
 	plan, err := lockdown.BuildPlan(target, d, drv)
 	if err != nil {
 		return err
