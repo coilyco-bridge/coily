@@ -13,7 +13,11 @@ package main
 //
 // Source of truth for the why-line per coilysiren/coily#126.
 var denialReasons = map[string]string{
-	"policy_denied":        "policy gate caught an argv shape that has no audited path; the gate exists so coily owns the bounds, not the wrapped tool",
+	"policy_denied": "policy gate caught a shell metacharacter in argv; the gate exists because some downstream verbs (tailscale ssh, aws ssm send-command) ship argv into a remote shell, and a per-tool toggle can't tell those verbs apart from the safe ones. " +
+		"Workarounds for the high-volume cases: " +
+		"--body 'markdown' -> --body-file /tmp/body.md (gh native); " +
+		"--change-batch '{...}' -> --change-batch file:///tmp/batch.json (aws native); " +
+		"--jq '...' -> external pipe (coily ops gh api X | jq '...') or coily-side --jq-file /tmp/q.jq",
 	"repo_verb_dirty":      "audit rows must bind to a clean commit so the run can be reconstructed from git history",
 	"repo_no_config":       "repo verbs require a .coily/coily.yaml so the verb surface is declarative and reviewable",
 	"scope_unresolved":     "every audit row binds to a real commit scope; --commit-scope is the explicit hand-off when cwd cannot resolve one",
