@@ -47,7 +47,7 @@ func (r *Runner) auditPathCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "path",
 		Usage: "Print the resolved audit log path and exit.",
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "audit.path",
 				SkipScope: true,
@@ -80,7 +80,7 @@ with jq or any JSON library.`,
 				Usage: "skip records older than this (unix seconds or duration like 5m)",
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "audit.tail",
 				SkipScope: true,
@@ -113,7 +113,7 @@ func (r *Runner) auditOpenCommand() *cli.Command {
 				Usage: "dashboard HTML path (default: ~/.coily/dashboard.html)",
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "audit.open",
 				SkipScope: true,

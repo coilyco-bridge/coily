@@ -62,7 +62,7 @@ func (r *Runner) sshFsVerb(name, usage string, build func(string) []string) *cli
 		Usage:     usage,
 		ArgsUsage: "<path>",
 		Flags:     r.sshHostUserFlags(),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ssh." + name,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
@@ -106,7 +106,7 @@ func (r *Runner) sshGrepCommand() *cli.Command {
 		Usage:     "Run grep -F -- '<pattern>' <path> (fixed-string match).",
 		ArgsUsage: "<pattern> <path>",
 		Flags:     r.sshHostUserFlags(),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ssh.grep",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {

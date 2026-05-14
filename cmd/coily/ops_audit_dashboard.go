@@ -44,7 +44,7 @@ browser.`,
 				Usage: "output HTML path (default: ~/.coily/dashboard.html)",
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "audit.dashboard",
 				SkipScope: true,

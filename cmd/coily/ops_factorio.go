@@ -99,7 +99,7 @@ func (r *Runner) factorioUpdateCommand() *cli.Command {
 calls steamcmd to validate / pull the latest stable headless binary.
 Run this with the server stopped; running it while the unit is active
 is harmless but wastes the Steam download.`,
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:   "factorio.update",
 				Action: r.factorioRemote("bash " + script),
@@ -126,7 +126,7 @@ func (r *Runner) factorioSavesListCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "list",
 		Usage: "List zip saves under the FactorioServer/saves directory.",
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "factorio.saves.list",
 				Action: r.factorioRemote(fmt.Sprintf(
@@ -153,7 +153,7 @@ func (r *Runner) factorioSavesBackupCommand() *cli.Command {
 the FactorioServer/saves directory to the configured S3 bucket
 (s3://kai-game-backups/factorio/...). Cron runs the same script
 nightly; this verb is for ad-hoc snapshots before risky operations.`,
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:   "factorio.saves.backup-now",
 				Action: r.factorioRemote("bash " + script),
@@ -181,7 +181,7 @@ func (r *Runner) factorioModsListCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "list",
 		Usage: "Print mod-list.json entries with their enabled flag.",
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "factorio.mods.list",
 				Action: r.factorioRemote(fmt.Sprintf(
@@ -233,7 +233,7 @@ restart' afterwards once you are happy with the new mod set.`,
 			&cli.BoolFlag{Name: "dry-run", Usage: "preview without writing to mods/"},
 			&cli.StringFlag{Name: "mod", Usage: "scope sync to a single mod name"},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "factorio.mods.sync",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
@@ -288,7 +288,7 @@ func (r *Runner) factorioPlayersListCommand(name, listFile string) *cli.Command 
 	return &cli.Command{
 		Name:  name,
 		Usage: fmt.Sprintf("Print entries from %s.", listFile),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "factorio.players." + name,
 				Action: r.factorioRemote(fmt.Sprintf(

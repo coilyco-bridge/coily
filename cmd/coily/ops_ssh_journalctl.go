@@ -29,7 +29,7 @@ func (r *Runner) sshJournalctlCommand() *cli.Command {
 				Value: 50,
 			},
 		),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ssh.journalctl",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {

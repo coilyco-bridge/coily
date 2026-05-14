@@ -64,7 +64,7 @@ placeholders the agent must fill in.`,
 				Usage: "short kebab-case slug for the finding filename and frontmatter",
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "audit.finding",
 				SkipScope: true,

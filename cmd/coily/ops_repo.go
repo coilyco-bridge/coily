@@ -164,7 +164,7 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 				"tree and a synced upstream branch.",
 			cfg.Path, strings.Join(rc.Argv, " "), rc.Name, repoRoot,
 		),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:                verbName,
 				CommitScopeOverride: repoRoot,
@@ -228,7 +228,7 @@ func (r *Runner) buildPromptingChildCommand(name string, matches []childMatch) *
 				"set to that repo and the audit row's commit-scope bound to "+
 				"it.\n\nMatches:\n  %s",
 			len(matches), name, strings.Join(repoPaths, "\n  ")),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      verbName,
 				SkipScope: true,

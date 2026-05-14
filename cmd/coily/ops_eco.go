@@ -47,7 +47,7 @@ func (r *Runner) ecoStatusCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "status",
 		Usage: "Print systemctl status eco-server.",
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:   "eco.status",
 				Action: r.ecoRemote([]string{"sudo", "systemctl", "status", "eco-server", "--no-pager"}),
@@ -73,7 +73,7 @@ func (r *Runner) ecoTailCommand() *cli.Command {
 				Value: true,
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "eco.tail",
 				Action: func(ctx context.Context, c *cli.Command) error {
@@ -97,7 +97,7 @@ func (r *Runner) ecoRestartCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "restart",
 		Usage: "Restart the eco-server systemd unit.",
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:   "eco.restart",
 				Action: r.ecoRemote([]string{"sudo", "systemctl", "restart", "eco-server"}),
@@ -111,7 +111,7 @@ func (r *Runner) ecoStopCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "stop",
 		Usage: "Stop the eco-server systemd unit.",
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:   "eco.stop",
 				Action: r.ecoRemote([]string{"sudo", "systemctl", "stop", "eco-server"}),
@@ -125,7 +125,7 @@ func (r *Runner) ecoStartCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "start",
 		Usage: "Start the eco-server systemd unit.",
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:   "eco.start",
 				Action: r.ecoRemote([]string{"sudo", "systemctl", "start", "eco-server"}),
@@ -203,7 +203,7 @@ func (r *Runner) ecoWorldGetSeedCommand() *cli.Command {
 		Name:  "get-seed",
 		Usage: "Print the current Seed from Configs/WorldGenerator.eco.",
 		Flags: []cli.Flag{configsDirFlag()},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "eco.world.get-seed",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
@@ -235,7 +235,7 @@ func (r *Runner) ecoWorldSetSeedCommand() *cli.Command {
 			configsDirFlag(),
 			&cli.IntFlag{Name: "seed", Usage: "seed value (1..2,000,000,000)", Required: true},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "eco.world.set-seed",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
@@ -266,7 +266,7 @@ func (r *Runner) ecoWorldRandomizeCommand() *cli.Command {
 		Name:  "randomize",
 		Usage: "Generate a random seed and write it to Configs/WorldGenerator.eco.",
 		Flags: []cli.Flag{configsDirFlag()},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "eco.world.randomize",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
@@ -301,7 +301,7 @@ func (r *Runner) ecoWorldSnapshotCommand() *cli.Command {
 			configsDirFlag(),
 			&cli.StringFlag{Name: "target", Usage: "destination file path", Required: true},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "eco.world.snapshot",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {

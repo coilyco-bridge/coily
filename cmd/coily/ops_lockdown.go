@@ -78,6 +78,46 @@ func (r *Runner) lockdownSkillCommand() *cli.Command {
 	}
 }
 
+// applyDataSecurityDenies extends the canonical deny list with extra
+// entries when the lockdown driver's attached Coordinate names a high
+// or max data_security tier. Phase 5 of coilysiren/coily#150.
+//
+// At high (and stricter):
+//   - Block Claude Code's Read of the coilyco-vault tree. Private
+//     personal context should not surface inside a session whose
+//     active profile names "data_security=high" or stricter.
+//
+// At max:
+//   - Block bash patterns that paste $-prefixed env vars into
+//     subprocess stdin via echo, the classic "leak the secret" shape.
+//
+// Returns a fresh *Defaults so the original (which the package may
+// cache between calls) is not mutated.
+func applyDataSecurityDenies(d *lockdown.Defaults, drv *lockdown.Driver) *lockdown.Defaults {
+	if drv == nil || drv.Coordinate == nil {
+		return d
+	}
+	tier := string(drv.Coordinate.DataSecurity)
+	if tier == "" || tier == "low" || tier == "medium" {
+		return d
+	}
+	out := &lockdown.Defaults{
+		Allow: append([]string(nil), d.Allow...),
+		Deny:  append([]string(nil), d.Deny...),
+	}
+	out.Deny = append(out.Deny,
+		"Read(/Users/kai/projects/coilysiren/coilyco-vault/**)",
+		"Read(~/projects/coilysiren/coilyco-vault/**)",
+	)
+	if tier == "max" {
+		out.Deny = append(out.Deny,
+			"Bash(echo*$*)",
+			"Bash(printf*$*)",
+		)
+	}
+	return out
+}
+
 // lockdownInitConfigCommand writes the embedded default profiles
 // registry to ~/.coily/coily.yaml. Mirrors `coily lockdown --apply`'s
 // no-clobber stance: refuses to overwrite an existing file unless
@@ -291,7 +331,9 @@ func reassertAncestor(root string, apply bool, d *lockdown.Defaults) error {
 
 func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults) error {
 	target := lockdown.TargetPath(dir, local)
-	plan, err := lockdown.BuildPlan(target, d, coilyLockdownDriver())
+	drv := coilyLockdownDriver()
+	d = applyDataSecurityDenies(d, drv)
+	plan, err := lockdown.BuildPlan(target, d, drv)
 	if err != nil {
 		return err
 	}

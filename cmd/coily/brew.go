@@ -74,7 +74,7 @@ func (r *Runner) brewSubcommand(sub string) *cli.Command {
 		Name:            sub,
 		Usage:           fmt.Sprintf("brew %s, scoped to coilysiren/tap/* unless --allow-untapped is set.", sub),
 		SkipFlagParsing: true,
-		Action: verb.Wrap(verb.Spec{
+		Action: r.WrapVerb(verb.Spec{
 			Name:       "brew." + sub,
 			SkipPolicy: true,
 			ArgsFunc: func(c *cli.Command) (map[string]string, []string) {

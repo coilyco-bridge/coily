@@ -65,7 +65,7 @@ func (r *Runner) sshGitVerb(name, usage string, build func(string) []string) *cl
 		Usage:     usage,
 		ArgsUsage: "<repo-path>",
 		Flags:     r.sshHostUserFlags(),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ssh.git." + name,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {

@@ -47,6 +47,7 @@ func NewRunner() *Runner {
 	aw.MaxBackups = cfg.Audit.MaxBackups
 	aw.MaxAgeDays = cfg.Audit.MaxAgeDays
 	aw.Compress = cfg.Audit.Compress
+	aw.SetRedactPolicy(decision.RedactPolicy())
 	// Loud-fail if the configured audit directory is not writable. Better
 	// than silently dropping records over the lifetime of the process.
 	if err := aw.Preflight(); err != nil {
@@ -71,21 +72,17 @@ func NewRunner() *Runner {
 	}
 }
 
-// WrapVerb wraps spec into a cli.ActionFunc. When audit.profile_aware
-// is true on this Runner's config, OnEvaluate is injected so every
-// audit row carries the resolved profile decision. Phase 4 of #150:
-// the injected evaluator always returns Allowed=true; phase 5 puts
-// per-axis decision logic behind this single chokepoint. Callers
-// already passing OnEvaluate keep their value; nil callers get the
+// WrapVerb wraps spec into a cli.ActionFunc. Always injects
+// OnEvaluate so every audit row carries the resolved profile decision
+// and audit.Writer can apply data_security redaction. Callers passing
+// their own OnEvaluate keep their value; nil callers get the
 // runtime-managed evaluator.
 //
 // The writer argument is accepted (and forwarded to verb.Wrap) so the
 // call shape `r.WrapVerb(spec, r.Audit)` is a single-token swap from
-// `verb.Wrap(spec, r.Audit)`. The argument is redundant given the
-// receiver carries r.Audit; phase 6 cleanup retires it once every
-// call site is on this helper.
+// the prior `verb.Wrap(spec, r.Audit)`.
 func (r *Runner) WrapVerb(spec verb.Spec, writer *audit.Writer) cli.ActionFunc {
-	if r != nil && r.Cfg != nil && r.Cfg.Audit.ProfileAware && spec.OnEvaluate == nil {
+	if spec.OnEvaluate == nil {
 		spec.OnEvaluate = func(_ context.Context, _ *cli.Command) (*audit.ProfileDecision, error) {
 			sid := strings.TrimSpace(os.Getenv(sessionEnvVar))
 			active := ""

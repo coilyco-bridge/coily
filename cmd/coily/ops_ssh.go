@@ -100,7 +100,7 @@ func (r *Runner) sshCopyCommand() *cli.Command {
 		Usage:     "Upload a local file to the remote via sftp.",
 		ArgsUsage: "<local-path> <remote-path>",
 		Flags:     r.sshHostUserFlags(),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ssh.copy",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
@@ -175,7 +175,7 @@ func (r *Runner) sshSystemctlVerb(name, usage string, needsUnit bool, build func
 		Usage:     usage,
 		ArgsUsage: argsUsage,
 		Flags:     r.sshHostUserFlags(),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ssh.systemctl." + name,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
@@ -219,7 +219,7 @@ func (r *Runner) sshRmUnitCommand() *cli.Command {
 		Usage:     "Remove /etc/systemd/system/<unit>.service and reload systemd.",
 		ArgsUsage: "<unit>",
 		Flags:     r.sshHostUserFlags(),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ssh.rm-unit",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {

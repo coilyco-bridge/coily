@@ -50,7 +50,7 @@ real open org issue.`,
 				Value: "claude",
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:       "dispatch",
 				SkipPolicy: false,

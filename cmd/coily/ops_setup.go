@@ -64,7 +64,7 @@ tree (friends' machines, alternate layouts) silent.`,
 				Usage: "skip the user-level PreToolUse hook install",
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "setup",
 				SkipScope: true,

@@ -23,7 +23,7 @@ which GitHub identity gh is authenticated as.
 
 Non-fatal. If any tool is not configured or returns an error, its block
 reports the error but the other tools still run.`,
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "whoami",
 				SkipScope: true,

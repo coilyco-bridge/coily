@@ -45,15 +45,8 @@ func runWrapVerbAndReadAudit(t *testing.T, r *Runner) audit.Record {
 	return rec
 }
 
-func TestWrapVerb_FlagOff_NoDecisionAttached(t *testing.T) {
-	r := newTestRunner(t)
-	r.Cfg.Audit.ProfileAware = false
-	t.Setenv(sessionEnvVar, "sess-flagoff")
-	rec := runWrapVerbAndReadAudit(t, r)
-	if rec.ProfileDecision != nil {
-		t.Errorf("flag off: expected no decision, got %+v", rec.ProfileDecision)
-	}
-}
+// Phase 5+6 retired the audit.profile_aware feature flag. Every audit
+// row from a WrapVerb-wrapped verb now carries a ProfileDecision.
 
 func TestWrapVerb_FlagOn_SentinelButNoOverride_SourceMissingFile(t *testing.T) {
 	dir := t.TempDir()
@@ -70,7 +63,7 @@ func TestWrapVerb_FlagOn_SentinelButNoOverride_SourceMissingFile(t *testing.T) {
 	}
 
 	r := newTestRunner(t)
-	r.Cfg = &config.Config{Audit: config.Audit{ProfileAware: true}}
+	r.Cfg = &config.Config{}
 	rec := runWrapVerbAndReadAudit(t, r)
 	if rec.ProfileDecision == nil {
 		t.Fatal("flag on: expected decision attached")
@@ -110,7 +103,7 @@ func TestWrapVerb_FlagOn_OverrideHit(t *testing.T) {
 	}
 
 	r := newTestRunner(t)
-	r.Cfg = &config.Config{Audit: config.Audit{ProfileAware: true}}
+	r.Cfg = &config.Config{}
 	rec := runWrapVerbAndReadAudit(t, r)
 	if rec.ProfileDecision == nil {
 		t.Fatal("expected decision attached on override hit")
@@ -138,7 +131,7 @@ func TestWrapVerb_FlagOn_NoSentinel_SourceUnset(t *testing.T) {
 	_ = os.WriteFile(override, profiles.DefaultYAML, 0o600)
 
 	r := newTestRunner(t)
-	r.Cfg = &config.Config{Audit: config.Audit{ProfileAware: true}}
+	r.Cfg = &config.Config{}
 	rec := runWrapVerbAndReadAudit(t, r)
 	if rec.ProfileDecision == nil {
 		t.Fatal("expected decision attached")

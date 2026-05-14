@@ -96,12 +96,6 @@ type Audit struct {
 	MaxBackups int    `yaml:"max_backups"`
 	MaxAgeDays int    `yaml:"max_age_days"`
 	Compress   bool   `yaml:"compress"`
-	// ProfileAware is the per-host feature flag for the per-session
-	// lockdown-profile evaluator (coilysiren/coily#150). Default false.
-	// When true, audit rows carry a profile_decision block capturing
-	// the resolved Coordinate and source. Phase 4 plumbing only;
-	// the evaluator does not yet deny. Retired in phase 6.
-	ProfileAware bool `yaml:"profile_aware"`
 }
 
 // AWS holds the named profile that `coily ops aws` passes through to the

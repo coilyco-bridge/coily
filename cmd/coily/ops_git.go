@@ -65,7 +65,7 @@ Exits non-zero on any error - missing audit log, scope can't be
 resolved, write fails. The commit is then blocked until the operator
 fixes the cause or bypasses with --no-verify (which they won't, per
 the global git workflow rule).`,
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:       "git.trailer-hook",
 				SkipScope:  true,
@@ -237,7 +237,7 @@ stdout; the hook is expected to append it to the commit message.`,
 				Value: defaultTrailerMax,
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "git.trailer",
 				SkipScope: true,
@@ -419,7 +419,7 @@ prints the full set of rows in the same window/scope as the original
 				Usage: "(with --since) repo path to filter by",
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "git.audit-show",
 				SkipScope: true,

@@ -48,7 +48,7 @@ func TestRunner_WrappedActionAuditsAndRuns(t *testing.T) {
 	r := newTestRunner(t)
 
 	called := false
-	wrapped := verb.Wrap(
+	wrapped := r.WrapVerb(
 		verb.Spec{
 			Name: "test.action",
 			ArgsFunc: func(c *cli.Command) (map[string]string, []string) {

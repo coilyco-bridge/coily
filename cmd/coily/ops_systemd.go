@@ -53,7 +53,7 @@ func (r *Runner) systemdStatus(u systemdUnit) *cli.Command {
 	return &cli.Command{
 		Name:  "status",
 		Usage: fmt.Sprintf("Print systemctl status %s.", u.UnitName),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:   u.VerbName + ".status",
 				Action: r.systemdRemote([][]string{{"sudo", "systemctl", "status", u.UnitName, "--no-pager"}}),
@@ -71,7 +71,7 @@ func (r *Runner) systemdTail(u systemdUnit) *cli.Command {
 			&cli.IntFlag{Name: "lines", Usage: "number of lines of history before tailing", Value: 200},
 			&cli.BoolFlag{Name: "follow", Usage: "keep tailing after initial history", Value: true},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: u.VerbName + ".tail",
 				Action: func(ctx context.Context, c *cli.Command) error {
@@ -98,7 +98,7 @@ func (r *Runner) systemdRestart(u systemdUnit) *cli.Command {
 	return &cli.Command{
 		Name:  "restart",
 		Usage: fmt.Sprintf("Restart the %s unit.", u.UnitName),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:   u.VerbName + ".restart",
 				Action: r.systemdRemote(argvs),
@@ -116,7 +116,7 @@ func (r *Runner) systemdStop(u systemdUnit) *cli.Command {
 	return &cli.Command{
 		Name:  "stop",
 		Usage: fmt.Sprintf("Stop the %s unit.", u.UnitName),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:   u.VerbName + ".stop",
 				Action: r.systemdRemote(argvs),
@@ -134,7 +134,7 @@ func (r *Runner) systemdStart(u systemdUnit) *cli.Command {
 	return &cli.Command{
 		Name:  "start",
 		Usage: fmt.Sprintf("Start the %s unit.", u.UnitName),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:   u.VerbName + ".start",
 				Action: r.systemdRemote(argvs),

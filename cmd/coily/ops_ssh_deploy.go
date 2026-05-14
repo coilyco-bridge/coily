@@ -78,7 +78,7 @@ func (r *Runner) sshDeployTarget(t deployTarget) *cli.Command {
 		Name:  t.Name,
 		Usage: fmt.Sprintf("Fast-forward %s and run %s as root.", t.RepoDir, t.Script),
 		Flags: r.sshHostUserFlags(),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ssh.deploy." + t.Name,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
@@ -137,7 +137,7 @@ Files land under kai-owned paths so no sudo is involved. The verb does
 not restart the Eco server - run 'coily gaming eco restart' separately when
 the new mod should take effect.`,
 		Flags: r.sshHostUserFlags(),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ssh.deploy.eco-mod",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
@@ -206,7 +206,7 @@ Files land under kai-owned paths so no sudo is involved. The verb does
 not restart the Eco server - run 'coily gaming eco restart' separately when
 the new mod should take effect.`,
 		Flags: r.sshHostUserFlags(),
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ssh.deploy.eco-mod-source",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {

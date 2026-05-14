@@ -38,7 +38,7 @@ Pass --dry-run to print the script to stdout instead of writing.`,
 				Usage: "print the completion script to stdout instead of writing a file",
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name:      "install-completion",
 				SkipScope: true,

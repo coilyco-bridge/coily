@@ -7,10 +7,37 @@
 package decision
 
 import (
+	"regexp"
+
 	"github.com/coilysiren/cli-guard/audit"
 	"github.com/coilysiren/cli-guard/profile"
 	"github.com/coilysiren/coily/pkg/profiles"
 )
+
+// RedactPolicy is coily's contribution to audit.Writer's redactor:
+// the secret-flag pattern list and the identifier regex list. Owned
+// here so cli-guard stays consumer-agnostic. Installed once at
+// Runner construction via audit.Writer.SetRedactPolicy.
+func RedactPolicy() audit.RedactPolicy {
+	return audit.RedactPolicy{
+		SecretFlagPatterns: []string{
+			"--secret", "--secrets",
+			"--password", "--passwd",
+			"--token", "--api-key", "--api_key",
+			"--auth", "--auth-token",
+			"--credential", "--credentials",
+			"--private-key",
+			"--key-data",
+			"--value", // covers `aws ssm put-parameter --value <secret>` for SecureString
+		},
+		IdentifierPatterns: []*regexp.Regexp{
+			// AWS account id: 12 consecutive digits at word boundaries.
+			regexp.MustCompile(`\b\d{12}\b`),
+			// Email address. Tight enough for audit-row context.
+			regexp.MustCompile(`[\w.+-]+@[\w-]+\.[\w.-]+`),
+		},
+	}
+}
 
 // Evaluate resolves the named session profile via pkg/profiles and
 // returns an attached audit.ProfileDecision. Allowed is always true in

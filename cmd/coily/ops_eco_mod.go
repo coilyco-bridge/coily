@@ -63,7 +63,7 @@ for Eco's ModKitPlugin to pick them up.`,
 			&cli.StringFlag{Name: "server-dir", Usage: "override config.eco.server_dir"},
 			&cli.BoolFlag{Name: "keep-remote", Usage: "leave the .zip on kai-server after extract"},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "eco.mod.push",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {

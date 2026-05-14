@@ -70,7 +70,7 @@ func (r *Runner) forgejoAdminUserListCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "list",
 		Usage: "List forgejo users.",
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ops.forgejo.admin.user.list",
 				Action: func(ctx context.Context, c *cli.Command) error {
@@ -89,7 +89,7 @@ func (r *Runner) forgejoAdminAuthListCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "list",
 		Usage: "List forgejo auth sources.",
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ops.forgejo.admin.auth.list",
 				Action: func(ctx context.Context, c *cli.Command) error {
@@ -119,7 +119,7 @@ func (r *Runner) forgejoDoctorCheckCommand() *cli.Command {
 				Required: true,
 			},
 		},
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ops.forgejo.doctor.check",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {

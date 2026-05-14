@@ -40,7 +40,7 @@ func (r *Runner) sshKubectlCommand() *cli.Command {
 		Usage:           "Run `k3s kubectl <args>` on kai-server.",
 		ArgsUsage:       "[kubectl args...]",
 		SkipFlagParsing: true,
-		Action: verb.Wrap(
+		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ssh.kubectl",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
