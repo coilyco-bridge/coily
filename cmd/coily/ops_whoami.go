@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/coilysiren/cli-guard/shell"
+	"github.com/coilysiren/cli-guard/stscache"
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
@@ -49,7 +50,9 @@ func (r *Runner) whoamiAction(ctx context.Context, _ *cli.Command) error {
 }
 
 func awsWhoami(ctx context.Context, r *shell.Runner) any {
-	raw, err := r.Capture(ctx, "aws", "sts", "get-caller-identity", "--output", "json")
+	raw, err := stscache.CallerIdentity(func() ([]byte, error) {
+		return r.Capture(ctx, "aws", "sts", "get-caller-identity", "--output", "json")
+	})
 	if err != nil {
 		return errBlock("aws sts get-caller-identity failed", err)
 	}
