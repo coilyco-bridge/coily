@@ -45,12 +45,9 @@ func (r *Runner) sshPassthroughAction(ctx context.Context, c *cli.Command) error
 		return cli.ShowAppHelp(c)
 	}
 	alias := argv[0]
-	rest := argv[1:]
-	if len(rest) > 0 && rest[0] == "--" {
-		rest = rest[1:]
-	}
+	rest := normalizePassthroughRest(argv[1:])
 	if len(rest) == 0 {
-		return fmt.Errorf("ssh passthrough: usage: coily ssh %s -- <coily args>", alias)
+		return fmt.Errorf("ssh passthrough: usage: coily ssh %s -- coily <args>", alias)
 	}
 
 	target, err := r.resolveSSHTarget(alias)
@@ -140,6 +137,24 @@ func joinPOSIX(argv []string) string {
 		out[i] = posixQuote(a)
 	}
 	return strings.Join(out, " ")
+}
+
+// normalizePassthroughRest strips the leading "--" separator (urfave keeps
+// it in c.Args() depending on how the operator typed the line) and the
+// leading "coily" binary token if present. The spec form is
+// `coily ssh <alias> -- coily <subcommand> <args>` and the remote command
+// we build re-prepends "coily" itself; without this consume step the
+// composed remote argv would be `coily ... coily <subcommand>`, which
+// urfave dispatches to no subcommand and falls through to help (the bug
+// caught while validating coilysiren/coily#191 step 7 of #187 live).
+func normalizePassthroughRest(rest []string) []string {
+	if len(rest) > 0 && rest[0] == "--" {
+		rest = rest[1:]
+	}
+	if len(rest) > 0 && rest[0] == "coily" {
+		rest = rest[1:]
+	}
+	return rest
 }
 
 func posixQuote(s string) string {

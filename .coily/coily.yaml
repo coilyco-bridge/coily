@@ -49,7 +49,7 @@ ssh:
   targets:
     kai-server:
       user: kai
-      host: kai-server.tail09a41b.ts.net
+      host: kai-server
       working_dir: /home/kai/projects/coilysiren
 
 # Catalog metadata for the cross-repo knowledge graph.

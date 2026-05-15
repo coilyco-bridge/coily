@@ -27,6 +27,35 @@ func TestPosixQuote(t *testing.T) {
 	}
 }
 
+func TestNormalizePassthroughRest(t *testing.T) {
+	cases := []struct {
+		name string
+		in   []string
+		want []string
+	}{
+		{"strips leading dash-dash and leading coily", []string{"--", "coily", "whoami"}, []string{"whoami"}},
+		{"strips leading dash-dash only", []string{"--", "systemctl", "status", "forgejo"}, []string{"systemctl", "status", "forgejo"}},
+		{"strips leading coily only (no separator)", []string{"coily", "ops", "aws", "sts", "get-caller-identity"}, []string{"ops", "aws", "sts", "get-caller-identity"}},
+		{"no leading coily leaves rest intact", []string{"systemctl", "status", "forgejo"}, []string{"systemctl", "status", "forgejo"}},
+		{"empty stays empty", []string{}, []string{}},
+		{"just dash-dash collapses", []string{"--"}, []string{}},
+		{"dash-dash plus coily collapses", []string{"--", "coily"}, []string{}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := normalizePassthroughRest(c.in)
+			if len(got) != len(c.want) {
+				t.Fatalf("got %v, want %v", got, c.want)
+			}
+			for i := range c.want {
+				if got[i] != c.want[i] {
+					t.Errorf("got[%d] = %q, want %q", i, got[i], c.want[i])
+				}
+			}
+		})
+	}
+}
+
 func TestJoinPOSIX(t *testing.T) {
 	got := joinPOSIX([]string{"coily", "--commit-scope=/home/kai", "gh", "issue", "create", "--body", "body with space; and semicolon"})
 	want := `coily --commit-scope=/home/kai gh issue create --body 'body with space; and semicolon'`
