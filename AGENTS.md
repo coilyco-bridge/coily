@@ -68,7 +68,7 @@ Per the workspace "Default to proactive scheduling" rule: after pushing to `main
 - **Verify CI green first**: `coily ops gh run list --repo coilysiren/coily --limit 1` should show the release run as `completed/success`. If still in progress, re-schedule once at +180s; if failed, surface the failure and stop.
 - **Upgrade**: `brew outdated coilysiren/tap/coily` - if upgradeable, `brew upgrade coilysiren/tap/coily`. No sudo (Homebrew installs to user-writable `/opt/homebrew`).
 - **Re-baseline lockdown** *only when the bumped commit changed `pkg/lockdown/` or `Formula/coily.rb`-relevant code*: `coily lockdown --apply --replace --recursive --path ~/projects/coilysiren`. Skip when the bump is unrelated to lockdown defaults (most patch bumps).
-- **Trigger kai-server update**: `coily ssh systemctl start coily-update.service`. The unit runs `brew upgrade coilysiren/tap/coily` + `coily setup` on the server with `COILY_LOCKDOWN_ROOT=/home/kai/projects/coilysiren`. Oneshot returns immediately; verify with `coily ssh systemctl status coily-update.service`. Skip when the bump is laptop-only (macOS-specific code path, Windows-only fix, etc.).
+- **Trigger kai-server update**: `coily ssh kai-server -- coily systemctl start coily-update.service`. The unit runs `brew upgrade coilysiren/tap/coily` + `coily setup` on the server with `COILY_LOCKDOWN_ROOT=/home/kai/projects/coilysiren`. Oneshot returns immediately; verify with `coily ssh kai-server -- coily systemctl status coily-update.service`. Skip when the bump is laptop-only (macOS-specific code path, Windows-only fix, etc.).
 - **Skip the auto-schedule** when the push is documentation-only (README, AGENTS.md, docs/) - the binary changes but nothing in it has user-visible effect.
 
 ---

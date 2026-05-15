@@ -50,16 +50,10 @@ hatch by design.
 - `coily pkg glama` - Glama MCP server directory plus telemetry.
 - `coily pkg skillsmp` - skillsmp.com v1 skill discovery.
 
-### SSH (named verbs only)
+### SSH (free-form passthrough)
 
-- `coily ssh copy <local> <remote>` - SFTP upload.
-- `coily ssh systemctl <verb> <unit>` - Fixed systemctl surface.
-- `coily ssh rm-unit <unit>` - Remove a systemd unit.
-- `coily ssh git <verb> <path>` - Read and fast-forward git verbs only.
-- `coily ssh deploy <name>` - Allowlisted repo plus script pairs, sudo -n with tty fallback.
-- `coily ssh ls | tree | cat | head | tail | wc | file | grep <path>` - Readonly remote fs inspection.
-- `coily ssh journalctl <unit>` - Read systemd journal.
-- `coily ssh kubectl` - Passthrough to `sudo k3s kubectl` on the remote.
+- `coily ssh <alias> -- coily <subcommand> <args>` - Resolves the host alias from `.coily/coily.yaml` `ssh.targets`, ssh's in, runs the supplied coily argv on the remote. Remote coily's lockdown is the security boundary, not this client side. Audit rows chain across hosts via `--audit-parent` (local row id is pre-allocated and shipped to the remote; remote row records it). See [coily#187](https://github.com/coilysiren/coily/issues/187) for the design.
+- The previous per-verb wrappers (`coily ssh systemctl`, `copy`, `deploy`, `git`, `journalctl`, `kubectl`, `fs`, `rm-unit`) got deleted in step 8 of #187 once the passthrough was proven end-to-end on the systemctl call site ([coily#191](https://github.com/coilysiren/coily/issues/191)). Replacement form: `coily ssh kai-server -- coily <equivalent>`.
 
 ### Game-server ops (`coily gaming`)
 

@@ -3,23 +3,76 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
-// systemctlCommand is the local-execution sibling of `coily ssh systemctl`.
-// Same verb table, same argv shapes, but the action runs against the host
-// the binary is on (sudo where mutating, no sudo for status; status reads
-// cached systemd state and trips a tty-prompt under sudo on non-tty
-// sessions per coilysiren/coily#144).
+// systemctlVerbs is the closed set of systemctl actions exposed through
+// `coily systemctl`. Each entry has a fixed argv shape that takes either
+// no argument (daemon-reload) or exactly one unit name. New verbs land
+// here, not as a free-form pass-through.
 //
-// The intended call-site is the remote coily that local
-// `coily ssh kai-server -- coily systemctl <verb> <unit>` dispatches to.
-// Direct `coily systemctl ...` use from a Mac is supported but no-ops
-// without a local systemd. The point of this verb is to be the migration
-// target for coilysiren/coily#187 step 7: prove the passthrough on one
-// real call site before tearing down the per-verb ssh wrappers in step 8.
+// NoSudo flags read-only verbs that don't need privilege. systemctl
+// status reads cached state from systemd; running it under sudo trips
+// "a terminal is required to read the password" on non-tty sessions
+// even though the read itself is unprivileged (coilysiren/coily#144).
+// Mutating verbs (start/stop/restart/enable/disable/daemon-reload) stay
+// sudo-prefixed because they write to runtime state or
+// /etc/systemd/system.
+var systemctlVerbs = []struct {
+	Name      string
+	Usage     string
+	NeedsUnit bool
+	NoSudo    bool
+	// Argv builds the remote argv. Receives the unit name (or "" when
+	// !NeedsUnit). Output is appended after `sudo` unless NoSudo is set.
+	Argv func(unit string) []string
+}{
+	{"status", "Print systemctl status of <unit>.", true, true, func(u string) []string { return []string{"systemctl", "status", u, "--no-pager"} }},
+	{"start", "Start <unit>.", true, false, func(u string) []string { return []string{"systemctl", "start", u} }},
+	{"stop", "Stop <unit>.", true, false, func(u string) []string { return []string{"systemctl", "stop", u} }},
+	{"restart", "Restart <unit>.", true, false, func(u string) []string { return []string{"systemctl", "restart", u} }},
+	{"enable", "Enable <unit>.", true, false, func(u string) []string { return []string{"systemctl", "enable", u} }},
+	{"disable", "Disable <unit>.", true, false, func(u string) []string { return []string{"systemctl", "disable", u} }},
+	{"daemon-reload", "Run systemctl daemon-reload.", false, false, func(string) []string { return []string{"systemctl", "daemon-reload"} }},
+}
+
+// validateUnitName rejects anything that isn't a sane systemd unit name.
+// systemd allows [A-Za-z0-9:_.\-@] in names; we add a length cap and
+// disallow leading "-" to avoid argv-as-flag confusion.
+func validateUnitName(unit string) error {
+	if unit == "" {
+		return fmt.Errorf("systemctl: unit name is empty")
+	}
+	if len(unit) > 128 {
+		return fmt.Errorf("systemctl: unit name too long")
+	}
+	if strings.HasPrefix(unit, "-") {
+		return fmt.Errorf("systemctl: unit name must not start with '-'")
+	}
+	for _, r := range unit {
+		switch {
+		case r >= 'A' && r <= 'Z',
+			r >= 'a' && r <= 'z',
+			r >= '0' && r <= '9',
+			r == ':', r == '_', r == '.', r == '-', r == '@':
+			// ok
+		default:
+			return fmt.Errorf("systemctl: unit name contains invalid character %q", r)
+		}
+	}
+	return nil
+}
+
+// systemctlCommand is the local-execution systemctl verb tree. The
+// intended call-site is the remote coily that local
+// `coily ssh <alias> -- coily systemctl <verb> <unit>` dispatches to.
+// Direct `coily systemctl ...` use from a Mac is a no-op without local
+// systemd. Sudo discipline: status reads cached systemd state
+// unprivileged (sudo trips a tty prompt on non-tty sessions, per
+// coilysiren/coily#144); mutating verbs are sudo-prefixed.
 func (r *Runner) systemctlCommand() *cli.Command {
 	cmds := make([]*cli.Command, 0, len(systemctlVerbs))
 	for _, v := range systemctlVerbs {
@@ -28,16 +81,11 @@ func (r *Runner) systemctlCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "systemctl",
 		Usage: "Run a fixed-shape systemctl verb on the local host.",
-		Description: `Local-execution sibling of ` + "`coily ssh systemctl`" + `.
-Same closed verb set (status/start/stop/restart/enable/disable/
-daemon-reload), same argv shapes, but each leaf invokes the local
-systemctl directly rather than ssh-dispatching to kai-server. Sudo
-discipline matches the ssh path: status runs unprivileged (the read
-itself is unprivileged and sudo trips a tty prompt on non-tty
-sessions, coilysiren/coily#144), mutating verbs are sudo-prefixed.
-
-Designed for the remote side of ` + "`coily ssh kai-server -- coily systemctl <verb> <unit>`" + `,
-which is the coily#187 step 7 migration target.`,
+		Description: `Closed verb set (status/start/stop/restart/enable/
+disable/daemon-reload). Status runs unprivileged (sudo trips a tty
+prompt on non-tty sessions, coilysiren/coily#144); mutating verbs are
+sudo-prefixed. Intended for the remote side of
+` + "`coily ssh <alias> -- coily systemctl <verb> <unit>`" + `.`,
 		Commands: cmds,
 	}
 }

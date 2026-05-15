@@ -170,6 +170,17 @@ func renderForgejoCmd(forgejoArgs []string) string {
 	return strings.Join(parts, " ")
 }
 
+// posixShellQuote wraps s in POSIX single quotes. Embedded single quotes
+// are encoded as '\” (close-quote, escaped quote, reopen-quote). The
+// result is safe to splice into a shell command line. Distinct from
+// ssh_passthrough.go's posixQuote, which fast-paths safe strings and is
+// tested against that behavior; this one always quotes, matching the
+// kubectl-exec-shell discipline that the forgejo verb inherited from
+// the old `coily ssh kubectl` path.
+func posixShellQuote(s string) string {
+	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
+}
+
 // validateForgejoDoctorCheckName rejects anything that isn't a sane forgejo
 // doctor check name. Forgejo's check names are kebab-case identifiers
 // (db-version, paths, storages, etc.); we add a length cap and disallow
