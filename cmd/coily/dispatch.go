@@ -9,6 +9,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/coilysiren/cli-guard/ghcache"
+	"github.com/coilysiren/cli-guard/ghratelimit"
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
@@ -255,9 +257,12 @@ func buildDispatchClaudeArgv(claudeBin, prompt, permMode, allowedTools string) (
 // (`gh api /repos/.../issues/N`) rather than `gh issue view --json` so it
 // doesn't share GraphQL's tight secondary-rate-limit budget (coilysiren/coily#138).
 func fetchIssue(ctx context.Context, r *Runner, ref *issueRef) (*ghIssue, error) {
-	raw, err := r.Runner.Capture(ctx, "gh", "api",
-		fmt.Sprintf("/repos/%s/%s/issues/%d", ref.Owner, ref.Repo, ref.Number),
-	)
+	path := fmt.Sprintf("/repos/%s/%s/issues/%d", ref.Owner, ref.Repo, ref.Number)
+	raw, err := ghcache.GetJSON(path, func() ([]byte, error) {
+		return ghratelimit.Retry(func() ([]byte, error) {
+			return r.Runner.Capture(ctx, "gh", "api", path)
+		})
+	})
 	if err != nil {
 		return nil, fmt.Errorf("dispatch: gh api repos/%s/%s/issues/%d: %w", ref.Owner, ref.Repo, ref.Number, err)
 	}
