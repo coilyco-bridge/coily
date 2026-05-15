@@ -63,6 +63,46 @@ jobs:
           name: ${{ steps.tag.outputs.new_tag }}
           body: ${{ steps.tag.outputs.changelog }}
 
+  windows-build:
+    # Cross-compile Windows binaries and attach to the release so the
+    # coilysiren/scoop-bucket manifest has a stable asset URL to point at.
+    # Mirrors the brew-tap path: brew builds from source via Formula, scoop
+    # downloads the prebuilt .exe + .sha256 pair.
+    needs: release
+    if: ${{ needs.release.outputs.tag != '' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Cross-compile coily-windows-${{ matrix.arch }}.exe
+        env:
+          GOOS: windows
+          GOARCH: ${{ matrix.arch }}
+          VERSION: ${{ needs.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          mkdir -p bin
+          out="bin/coily-windows-${GOARCH}.exe"
+          go build -tags prod \
+            -ldflags "-s -w -X main.Version=${VERSION}" \
+            -o "$out" ./cmd/coily
+          ( cd bin && sha256sum "$(basename "$out")" > "$(basename "$out").sha256" )
+
+      - name: Attach binary + checksum to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.release.outputs.tag }}
+          files: |
+            bin/coily-windows-${{ matrix.arch }}.exe
+            bin/coily-windows-${{ matrix.arch }}.exe.sha256
+
   bump-tap:
     needs: release
     if: ${{ needs.release.outputs.tag != '' }}
