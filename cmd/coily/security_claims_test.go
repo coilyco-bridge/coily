@@ -496,6 +496,14 @@ func recordedSubcommands(c *cli.Command) []string {
 // allowlist and denies the bare binaries entirely so every call lands in
 // the audit log. kubectl exec, kubectl run, and the rest are covered
 // transitively by Bash(kubectl:*).
+//
+// Note: as of coilysiren/coily#183 + coilysiren/coily#185, applyHookHandoffTrim
+// removes these entries from the *rendered* per-repo settings.json so the
+// agent-guard PreToolUse hook becomes the primary gate (and surfaces the
+// recovery hint on CLI, where the built-in deny matcher would otherwise
+// clobber it). This test still asserts the canonical defaults shipped by
+// cli-guard contain the denies; the post-trim render shape is asserted by
+// TestApplyHookHandoffTrim_* in ops_lockdown_hookhandoff_test.go.
 func TestSecurityClaim_LockdownDeniesBareKubectlAndAwsAndGh(t *testing.T) {
 	// LoadDefaults parses pkg/lockdown/defaults.yaml (embedded). Asserting
 	// against the parsed struct (rather than substring-matching the raw

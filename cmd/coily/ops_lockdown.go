@@ -133,10 +133,61 @@ var wrapperAllows = map[string]string{
 	"Bash(bundle:*)":    "Bash(coily pkg bundle:*)",
 }
 
+// applyHookHandoffTrim drops `Bash(<token>:*)` deny entries (and the
+// matching `wrapperAllows` explicit allows) for every bare binary the
+// agent-guard PreToolUse hook now gates via its routing-hint table.
+// The hook is the primary gate for those binaries; keeping the bare
+// deny in place makes Claude Code CLI's built-in deny matcher fire
+// first and clobber the hook's recovery hint, which was the audit-
+// shopping pattern documented in coilysiren/coily#183.
+//
+// Tokens covered: keys of wrapperRecovery (declared in
+// lockdown_driver.go). Tokens absent from wrapperRecovery keep their
+// bare deny + their wrapperAllows explicit-allow counterweight: the
+// auto-mode classifier still flags `coily ops flyctl` style wrappers
+// as deny circumvention (coilysiren/coily#159) when the bare deny is
+// in play, and the explicit allow tells the classifier the wrapped
+// path is sanctioned.
+//
+// Order in the pipeline: this runs BEFORE applyWrapperAllows so the
+// explicit-allow pass only counterweights surviving bare denies.
+func applyHookHandoffTrim(d *lockdown.Defaults) *lockdown.Defaults {
+	trimDenies := make(map[string]bool, len(wrapperRecovery))
+	for token := range wrapperRecovery {
+		trimDenies[fmt.Sprintf("Bash(%s:*)", token)] = true
+	}
+	trimAllows := make(map[string]bool, len(trimDenies))
+	for deny := range trimDenies {
+		if allow, ok := wrapperAllows[deny]; ok {
+			trimAllows[allow] = true
+		}
+	}
+	out := &lockdown.Defaults{
+		Allow: make([]string, 0, len(d.Allow)),
+		Deny:  make([]string, 0, len(d.Deny)),
+	}
+	for _, a := range d.Allow {
+		if !trimAllows[a] {
+			out.Allow = append(out.Allow, a)
+		}
+	}
+	for _, dn := range d.Deny {
+		if !trimDenies[dn] {
+			out.Deny = append(out.Deny, dn)
+		}
+	}
+	return out
+}
+
 // applyWrapperAllows augments the canonical allow list with explicit
 // `Bash(coily <wrapper>:*)` entries for every bare-binary deny that
 // has a sanctioned coily wrapper. See wrapperAllows. Returns a fresh
 // *Defaults so the cached embedded value is not mutated.
+//
+// After the agent-guard hook handoff (coilysiren/coily#183), this
+// only matters for entries whose bare deny survives applyHookHandoffTrim
+// - currently `Bash(flyctl:*)` and any future wrapped verbs not yet
+// covered by the agent-guard hook table.
 func applyWrapperAllows(d *lockdown.Defaults) *lockdown.Defaults {
 	out := &lockdown.Defaults{
 		Allow: append([]string(nil), d.Allow...),
@@ -448,6 +499,7 @@ func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults) e
 	target := lockdown.TargetPath(dir, local)
 	drv := coilyLockdownDriver()
 	d = applyDataSecurityDenies(d, drv)
+	d = applyHookHandoffTrim(d)
 	d = applyWrapperAllows(d)
 	d = applyHostBinaryAllows(d)
 	plan, err := lockdown.BuildPlan(target, d, drv)

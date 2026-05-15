@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/coilysiren/cli-guard/lockdown"
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
@@ -119,25 +118,19 @@ func setupAction(ctx context.Context, c *cli.Command) error {
 	return nil
 }
 
-// runUserHookStep installs ~/.claude/coily-binary-gate.sh and patches
-// ~/.claude/settings.json to invoke it via PreToolUse. The gate rejects
-// any coily invocation that doesn't resolve to a homebrew install path,
-// catching dev binaries built from source even when invoked from a cwd
-// that has no per-repo lockdown hook.
+// runUserHookStep used to install ~/.claude/coily-binary-gate.sh, a
+// user-wide PreToolUse hook that rejected coily invocations from any
+// path outside the homebrew install set. As of coilysiren/coily#185
+// that check moved into `agent-guard hook pre-tool-use` (agent-guard#14)
+// and now fires from every per-repo hook coily writes via the new
+// shim. The user-wide hook is redundant; this step is a no-op kept
+// only so existing `coily setup` invocations don't surface a missing-
+// step error.
+//
+// TODO: drop runUserHookStep and the --skip-user-hook flag in the
+// release after the migration window closes.
 func runUserHookStep() error {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return fmt.Errorf("setup: home dir: %w", err)
-	}
-	hookPath, changed, err := lockdown.EnsureUserHook(home, coilyLockdownDriver())
-	if err != nil {
-		return fmt.Errorf("setup: user hook: %w", err)
-	}
-	verb := "unchanged"
-	if changed {
-		verb = "updated"
-	}
-	fmt.Fprintf(os.Stderr, "    %s (settings.json %s)\n", hookPath, verb)
+	fmt.Fprintln(os.Stderr, "    skipped (agent-guard hook owns the binary-path check now; see coilysiren/coily#185)")
 	return nil
 }
 
