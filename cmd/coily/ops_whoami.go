@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/coilysiren/cli-guard/ghidcache"
 	"github.com/coilysiren/cli-guard/shell"
 	"github.com/coilysiren/cli-guard/stscache"
 	"github.com/coilysiren/cli-guard/verb"
@@ -109,7 +110,9 @@ func enrichKubectlContext(ctx context.Context, r *shell.Runner, out map[string]a
 }
 
 func ghWhoami(ctx context.Context, r *shell.Runner) any {
-	raw, err := r.Capture(ctx, "gh", "api", "user")
+	raw, err := ghidcache.APIUser(func() ([]byte, error) {
+		return r.Capture(ctx, "gh", "api", "user")
+	})
 	if err != nil {
 		return errBlock("gh api user failed", err)
 	}
