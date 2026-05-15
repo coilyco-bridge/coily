@@ -254,6 +254,7 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.gamingCommand(),
 		r.opsCommand(),
 		r.sshCommand(),
+		r.systemctlCommand(),
 		r.auditCommand(),
 		r.gitCommand(),
 		r.dispatchCommand(),

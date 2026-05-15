@@ -3357,6 +3357,34 @@ Run wc <path>.
 
 Flags: --host, --user
 
+## `coily systemctl daemon-reload`
+
+Run systemctl daemon-reload.
+
+## `coily systemctl disable`
+
+Disable <unit>.
+
+## `coily systemctl enable`
+
+Enable <unit>.
+
+## `coily systemctl restart`
+
+Restart <unit>.
+
+## `coily systemctl start`
+
+Start <unit>.
+
+## `coily systemctl status`
+
+Print systemctl status of <unit>.
+
+## `coily systemctl stop`
+
+Stop <unit>.
+
 ## `coily tailscale`
 
 Pass-through to tailscale with argv validation + audit log.
