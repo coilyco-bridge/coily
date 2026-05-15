@@ -168,8 +168,17 @@ func brewInTapScope(f string) bool {
 // receives a tee of brew's stderr; the egress rows are returned so
 // the audit hook can attach them.
 func (r *Runner) execBrew(ctx context.Context, sub string, args []string, tail *brewTail) ([]audit.EgressRow, error) {
-	allow := egress.Allowlists["brew"]
-	p := egress.New(allow, egress.ModeEnforce)
+	// ModeObserve: every CONNECT is forwarded and logged. The brew install
+	// path for tap formulae spawns `go build`, which hits a wide and
+	// unstable set of hosts (proxy.golang.org, sum.golang.org, github.com,
+	// codeload.github.com, objects.githubusercontent.com, plus whatever a
+	// formula's transitive deps need). Pinning an allowlist in code that
+	// covers every legitimate dependency is fragile; the prior
+	// ModeEnforce-with-empty-allowlist combination effectively denied
+	// every brew install of a from-source formula. coilysiren/coily#195.
+	// The audit row still captures egress rows in observe mode, so the
+	// forensic value of "what did brew talk to" is preserved.
+	p := egress.New(nil, egress.ModeObserve)
 	proxyURL, err := p.Start(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("egress: start proxy: %w", err)
