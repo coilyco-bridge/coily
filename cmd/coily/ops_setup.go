@@ -19,7 +19,7 @@ import (
 // brew formula stages under <prefix>/share/coily/skills/ and links each
 // into ~/.claude/skills/. This keeps every authored skill visible to the
 // harness on a fresh brew install, not just one. Friends installing coily
-// via brew get the full set without needing a coilyco-ai checkout.
+// via brew get the full set without needing a agentic-os-kai checkout.
 func (r *Runner) setupCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "setup",

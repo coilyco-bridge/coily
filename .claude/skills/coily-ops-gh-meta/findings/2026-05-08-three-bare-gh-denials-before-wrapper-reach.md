@@ -28,6 +28,6 @@ This finding is the second data point in 4 days for the same shape. The 2026-05-
 
 ## Rule it produced
 
-Sequencing rule, now landed in `coilyco-ai/AGENTS.md` "Coily permission discipline": when the harness denies a bare external command (`gh`, `aws`, `kubectl`, `docker`, `tailscale`), retry through the coily wrapper rather than stopping. Any harness denial - in any context - also triggers a `coily audit finding` so the meta-improvement loop sees the friction.
+Sequencing rule, now landed in `agentic-os-kai/AGENTS.md` "Coily permission discipline": when the harness denies a bare external command (`gh`, `aws`, `kubectl`, `docker`, `tailscale`), retry through the coily wrapper rather than stopping. Any harness denial - in any context - also triggers a `coily audit finding` so the meta-improvement loop sees the friction.
 
 The carve-out preserves the original "denial means stop" rule for the cases it was written for: `coily lockdown`, `.claude/settings*.json` hand-edits, deny-loosening operations. Those still stop on denial.

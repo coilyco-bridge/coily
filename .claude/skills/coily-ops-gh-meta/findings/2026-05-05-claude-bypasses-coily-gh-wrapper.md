@@ -15,8 +15,8 @@ Sweep of `~/.claude/projects/**/*.jsonl` over the 35-day window: 113 `Permission
 - `gh repo list coilysiren --limit 50`
 - `gh issue list --repo coilysiren/eco-mcp-app --state open`
 - `gh run list --repo coilysiren/repo-recall --branch main --limit 5`
-- `gh issue view 21 --repo coilysiren/coilyco-ai`
-- `gh api repos/coilysiren/coilyco-ai/issues/21`
+- `gh issue view 21 --repo coilysiren/agentic-os-kai`
+- `gh api repos/coilysiren/agentic-os-kai/issues/21`
 
 In the same window, `coily gh.*` verbs landed 1000+ audit rows (gh.run.list, gh, gh.issue.create, gh.api, gh.search.issues, gh.issue.view, etc.). The wrapper exists and is exercised. Claude reaches for raw `gh` 113 times anyway and gets blocked at the Claude-Code permission boundary.
 

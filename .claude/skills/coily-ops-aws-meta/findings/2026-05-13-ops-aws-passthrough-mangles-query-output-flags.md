@@ -9,10 +9,10 @@ promoted_to:
 
 ## What was observed
 
-While fetching three SSM parameters during webhook setup (coilyco-ai#405), three consecutive `coily ops aws` invocations of the shape
+While fetching three SSM parameters during webhook setup (agentic-os-kai#405), three consecutive `coily ops aws` invocations of the shape
 
 ```
-coily --commit-scope=/home/kai/projects/coilysiren/coilyco-ai ops aws -- ssm get-parameter --name /coily/discord-webhook-url --with-decryption --query Parameter.Value --output text
+coily --commit-scope=/home/kai/projects/coilysiren/agentic-os-kai ops aws -- ssm get-parameter --name /coily/discord-webhook-url --with-decryption --query Parameter.Value --output text
 ```
 
 failed with `aws` rejecting `--query`, `Parameter.Value`, `--output`, and `text` as four separate "Unknown options." Audit rows: `019e23b4-73d9-7829-be9f-dd2529090b90`, `019e23b4-7545-75a7-8dcd-110e7ed0c7b3`, `019e23b4-76a0-7e75-8be4-04ffb5cc3539` (all ts 1778715489, verb `ops.aws`, decision accept, exit_code 1). Each audit row recorded the full argv including `--query`/`--output`, so the mangling happens between coily-side audit capture and the actual exec of `aws`.

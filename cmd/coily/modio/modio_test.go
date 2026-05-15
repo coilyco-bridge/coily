@@ -40,7 +40,7 @@ func TestDefaultGameIDStable(t *testing.T) {
 }
 
 func TestSSMParamPath(t *testing.T) {
-	// Cross-check with the canonical inventory in coilyco-ai/AGENTS.md.
+	// Cross-check with the canonical inventory in agentic-os-kai/AGENTS.md.
 	if !strings.HasPrefix(SSMParamAPIKey, "/modio/") {
 		t.Errorf("SSMParamAPIKey = %q, want /modio/* prefix", SSMParamAPIKey)
 	}

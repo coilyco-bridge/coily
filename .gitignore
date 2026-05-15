@@ -20,9 +20,9 @@ vendor/
 # Claude Code per-machine state. Skills under .claude/skills/ ARE tracked
 # (this repo is the canonical home for the coily meta-aggregator skill,
 # which encodes coily's operational role across hosts. The general
-# pattern of skills-in-coilyco-ai still holds for everything else; coily
+# pattern of skills-in-agentic-os-kai still holds for everything else; coily
 # is the named exception because it IS the operational layer it would
-# otherwise be a runbook for). Matches coilyco-ai/.gitignore for parity.
+# otherwise be a runbook for). Matches agentic-os-kai/.gitignore for parity.
 .claude/settings.local.json
 .claude/worktrees/
 .claude/skills/*/scripts/venv/

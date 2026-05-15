@@ -44,4 +44,4 @@ Candidate sequencing rule for `coily-shared-meta` or `coily-discipline`: "After 
 
 Candidate forward action on coilysiren/coily: align the generic npm/npx/node deny message with the npx-specific one. The npx error already names coily as the boundary being bypassed; npm should too. Specifically, the harness deny rule covering `npm/npx/node` tooling should return the same coily-aware text for all four binaries, not just npx. This is one settings-file edit, mechanical.
 
-Candidate forward action on coilyco-ai or coily: decide whether `coily ops mcporter` (or `coily ops npm` as a narrow allowlisted pass-through scoped to mcporter calls) should exist on Linux hosts. If yes, file an issue. If no, document the Mac-only constraint in `tooling-mcp-servers` so the next agent stops earlier.
+Candidate forward action on agentic-os-kai or coily: decide whether `coily ops mcporter` (or `coily ops npm` as a narrow allowlisted pass-through scoped to mcporter calls) should exist on Linux hosts. If yes, file an issue. If no, document the Mac-only constraint in `tooling-mcp-servers` so the next agent stops earlier.

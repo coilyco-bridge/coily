@@ -34,7 +34,7 @@ const (
 	DefaultGameID = 6
 	// SSMParamAPIKey is the SSM Parameter Store path that holds the
 	// read-only mod.io API key. Per the canonical inventory in
-	// coilyco-ai/AGENTS.md.
+	// agentic-os-kai/AGENTS.md.
 	SSMParamAPIKey = "/modio/api-key" //nolint:gosec // SSM path, not a credential
 	apiBase        = "https://api.mod.io/v1"
 	httpTimeout    = 30 * time.Second

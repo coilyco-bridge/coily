@@ -168,7 +168,7 @@ func TestBuildExecFromConfigs_PromptingSubcommandPicksRepo(t *testing.T) {
 }
 
 // TestBuildChildRepoCommand_BindsAuditScopeToChild is the headline-case
-// invariant: running `coily exec daily-social` from above coilyco-ai
+// invariant: running `coily exec daily-social` from above agentic-os-kai
 // (the issue's example) must bind the audit row's commit-scope to the
 // matched repo, not cwd's git toplevel.
 func TestBuildChildRepoCommand_BindsAuditScopeToChild(t *testing.T) {

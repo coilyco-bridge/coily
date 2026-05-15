@@ -16,7 +16,7 @@ func TestBuildDashboardView_GroupsByVerb(t *testing.T) {
 	now := time.Now().Unix()
 	records := []audit.Record{
 		{Verb: "ops.gh", Timestamp: now - 10, Decision: audit.DecisionAccept, Argv: []string{"coily", "ops", "gh", "issue", "view"}, CommitScope: "/repos/coily"},
-		{Verb: "ops.gh", Timestamp: now - 5, Decision: audit.DecisionAccept, Argv: []string{"coily", "ops", "gh", "issue", "list"}, CommitScope: "/repos/coilyco-ai", Egress: []audit.EgressRow{{Host: "api.github.com", Decision: "allow", BytesDown: 100}}},
+		{Verb: "ops.gh", Timestamp: now - 5, Decision: audit.DecisionAccept, Argv: []string{"coily", "ops", "gh", "issue", "list"}, CommitScope: "/repos/agentic-os-kai", Egress: []audit.EgressRow{{Host: "api.github.com", Decision: "allow", BytesDown: 100}}},
 		{Verb: "ops.gh", Timestamp: now - 1, Decision: audit.DecisionAccept, Argv: []string{"coily", "ops", "gh", "issue", "view"}, CommitScope: "/repos/coily"},
 		{Verb: "dispatch", Timestamp: now - 20, Decision: audit.DecisionAccept, Argv: []string{"coily", "dispatch", "coilysiren/coily#1"}, ExitCode: 1},
 	}
@@ -39,7 +39,7 @@ func TestBuildDashboardView_GroupsByVerb(t *testing.T) {
 	if gh.Accepted != 3 {
 		t.Errorf("ops.gh.Accepted = %d, want 3", gh.Accepted)
 	}
-	wantRepos := []string{"coily", "coilyco-ai"}
+	wantRepos := []string{"coily", "agentic-os-kai"}
 	if !stringSliceEqual(gh.Repos, wantRepos) {
 		t.Errorf("ops.gh.Repos = %v, want %v", gh.Repos, wantRepos)
 	}

@@ -29,7 +29,7 @@ import (
 const (
 	// SSMParamAPIKey is the SSM Parameter Store path that holds the
 	// skillsmp.com bearer token. Per the canonical inventory in
-	// coilyco-ai/AGENTS.md.
+	// agentic-os-kai/AGENTS.md.
 	SSMParamAPIKey = "/skillsmp/api-key" //nolint:gosec // SSM path, not a credential
 	apiBase        = "https://skillsmp.com/api/v1/skills"
 	httpTimeout    = 30 * time.Second

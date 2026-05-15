@@ -14,13 +14,13 @@ Working session began at cwd `/Users/kai/projects/coilysiren/` (the parent direc
 - `gh issue list --search "gif OR fixture..." --state all --limit 20` (run with cwd at `coilysiren/otel-a2a-relay`)
 - `gh issue view 92 --json title,body,state` (same cwd)
 - `gh issue create --title "Pin GIF fixture..." --body ...` (same cwd)
-- `gh issue list --search "openclaw OR JOURNAL OR ..."` (run with cwd at `coilysiren/coilyco-ai`)
+- `gh issue list --search "openclaw OR JOURNAL OR ..."` (run with cwd at `coilysiren/agentic-os-kai`)
 - `gh issue view 98 --json ...` (same cwd)
 
 All five succeeded without prompting and produced **zero** audit rows. Confirmed:
 
 - `/Users/kai/.coily/audit/coilysiren-otel-a2a-relay.jsonl` was 0 bytes, last touched May 7 01:51, despite `gh issue create` against that repo on May 8.
-- `/Users/kai/.coily/audit/coilysiren-coilyco-ai.jsonl` last touched May 7 23:08, no May 8 rows for the bare `gh` calls.
+- `/Users/kai/.coily/audit/coilysiren-agentic-os-kai.jsonl` last touched May 7 23:08, no May 8 rows for the bare `gh` calls.
 
 Each subordinate repo's `.claude/settings.json` correctly contains `"Bash(gh:*)"` in its deny list - so the per-repo lockdown is intact. The bypass came from `/Users/kai/projects/coilysiren/.claude/settings.local.json`:
 

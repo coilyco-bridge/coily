@@ -66,7 +66,7 @@ Anything else inside the mapping is currently ignored silently by `yaml.v3`. See
 
 The `run` line is split by whitespace, never by a shell. Every resulting token (and every user-supplied extra appended at invocation time) is checked against `policy.ValidateArg`, which rejects shell metacharacters: `$ ; & | < > ( ) { } \` plus newline, carriage return, tab. Pipes, redirects, and `$(subshells)` fail at load time, not at invocation.
 
-If a repo command needs a shell pipeline, the answer is a wrapper script committed under the repo, not an escape hatch in the schema. See `coilyco-ai/.coily/coily.yaml` for the pattern: a `daily-*-auth` entry runs `bash scripts/refresh-daily-auth.sh <name>` rather than encoding the shell logic inline.
+If a repo command needs a shell pipeline, the answer is a wrapper script committed under the repo, not an escape hatch in the schema. See `agentic-os-kai/.coily/coily.yaml` for the pattern: a `daily-*-auth` entry runs `bash scripts/refresh-daily-auth.sh <name>` rather than encoding the shell logic inline.
 
 ## Discovery
 
@@ -82,7 +82,7 @@ If a repo command needs a shell pipeline, the answer is a wrapper script committ
 Walked all `.coily/coily.yaml` files under `~/projects/coilysiren/`:
 
 ```
-backend, coily, coilyco-ai, coilysiren, eco-cycle-prep, eco-jobs-tracker,
+backend, coily, agentic-os-kai, coilysiren, eco-cycle-prep, eco-jobs-tracker,
 eco-mcp-app, eco-mods-public, eco-telemetry, factorio-mods, galaxy-gen,
 gauntlet, homebrew-tap, infrastructure, message-ops, otel-a2a-relay,
 repo-recall, sirens-discord-ops, website
