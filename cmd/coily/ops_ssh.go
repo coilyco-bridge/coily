@@ -10,11 +10,17 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// sshCommand is the named-verb ssh wrapper for kai-server. Free-form
-// `coily ssh exec <argv>` is intentionally absent: it would let any holder
-// of the binary run arbitrary commands as kai on the homelab, which is the
-// exact escape the lockdown that blocks raw `ssh` is meant to close. The
-// only ways to reach the remote shell through coily are:
+// sshCommand is the ssh entry-point: a named-verb wrapper layer plus, as of
+// coilysiren/coily#187 phase 2, a free-form passthrough that falls through
+// when no named verb matches the first positional. The boundary that makes
+// the passthrough safe is the *remote* coily binary's lockdown, not this
+// local wrapper: every `coily ssh <alias> -- <args>` invocation ssh's into
+// the alias's target and runs coily there, where its own
+// .agent-guard/agent-guard.yaml + lockdown profile gate the action. See
+// coilysiren/coily#187 for the design (NOPASSWD-for-coily sudoers stance,
+// audit-row parent chain via --audit-parent, etc).
+//
+// Named verbs that still work today (deprecation tracked under #187 step 8):
 //
 //   - coily ssh copy                 sftp upload (constrained to file xfer)
 //   - coily ssh systemctl <verb>     fixed verb tree mirroring systemctl
@@ -41,12 +47,21 @@ import (
 func (r *Runner) sshCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "ssh",
-		Usage: "Run named operations on kai-server over ssh.",
-		Description: `ssh wraps golang.org/x/crypto/ssh. The default target is
-kai_server.tailscale_host as kai_server.ssh_user (override per-call with
---host / --user). Free-form remote exec was removed in favor of named
-verbs; see the package doc on ops_ssh.go for the rationale.`,
+		Usage: "Run named operations on kai-server over ssh, or free-form passthrough to any configured host alias.",
+		Description: `ssh wraps golang.org/x/crypto/ssh. Two shapes coexist
+during the coilysiren/coily#187 migration:
+
+  - Named subcommand form: coily ssh systemctl status <unit>
+    (Defaults to kai_server.tailscale_host as kai_server.ssh_user;
+    override per-call with --host / --user.)
+
+  - Free-form passthrough form: coily ssh <alias> -- <coily args>
+    Resolves <alias> from .coily/coily.yaml ssh.targets and ships the
+    args to a remote coily. Remote coily's lockdown is the security
+    boundary, not this wrapper. See coilysiren/coily#187 for the
+    design and the per-verb-wrapper deprecation plan.`,
 		Commands: r.sshSubcommands(),
+		Action:   r.sshPassthroughAction,
 	}
 }
 

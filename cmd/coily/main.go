@@ -212,6 +212,15 @@ func run(r *Runner, argv []string) error {
 				Value:   "auto",
 				Sources: cli.EnvVars("COILY_COMMIT_SCOPE"),
 			},
+			&cli.StringFlag{
+				Name: verb.AuditParentFlag,
+				Usage: "record this invocation's audit row as a child of <id>. " +
+					"Set by `coily ssh <alias> -- <args>` on the remote invocation so " +
+					"the remote row links back to the local row (coilysiren/coily#187). " +
+					"Read from $COILY_AUDIT_PARENT if unset. " +
+					"Empty in the common single-host case.",
+				Sources: cli.EnvVars(verb.AuditParentEnvVar),
+			},
 		},
 		Action: func(_ context.Context, c *cli.Command) error {
 			if c.Bool("list") {
