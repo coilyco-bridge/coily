@@ -84,8 +84,8 @@ Walked all `.coily/coily.yaml` files under `~/projects/coilysiren/`:
 ```
 backend, coily, agentic-os-kai, coilysiren, eco-cycle-prep, eco-jobs-tracker,
 eco-mcp-app, eco-mods-public, eco-telemetry, factorio-mods, galaxy-gen,
-gauntlet, homebrew-tap, infrastructure, message-ops, otel-a2a-relay,
-repo-recall, sirens-discord-ops, website
+gauntlet, homebrew-tap, infrastructure, message-ops, repo-recall,
+session-lattice, sirens-discord-ops, website
 ```
 
 19 files total. **No drift observed:**
