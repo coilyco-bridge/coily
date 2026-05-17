@@ -79,7 +79,8 @@ func (r *Runner) loadRepoExecCommand() (repoExecResult, *cli.Command) {
 					fmt.Errorf("no .coily/coily.yaml reachable from cwd (%s) "+
 						"via ancestor walk or direct-child scan", where),
 					"create .coily/coily.yaml in the target repo (or cd into a repo, "+
-						"or one directory above a repo, that has one) and retry")
+						"or one directory above a repo, that has one) and retry").
+					WithReason("repo verbs require a .coily/coily.yaml so the verb surface is declarative and reviewable")
 			},
 		}
 	}
@@ -290,7 +291,8 @@ func runRepoGate(c *cli.Command, repoRoot, verbName string) (*gittree.State, err
 		return nil, exitcode.New(exitcode.PolicyDenied, "repo_verb_dirty",
 			errors.New(state.FormatRefusal(verbName)),
 			"commit/push the outstanding work in the matched repo and retry, "+
-				"or pass --audit-override-dirty for a genuine emergency")
+				"or pass --audit-override-dirty for a genuine emergency").
+			WithReason("audit rows must bind to a clean commit so the run can be reconstructed from git history")
 	}
 	return state, nil
 }
@@ -307,7 +309,8 @@ func promptChildChoice(name string, matches []childMatch, in io.Reader, out io.W
 			fmt.Errorf("%q is declared by %d repos and no stdin is attached to read a pick from",
 				name, len(matches)),
 			"re-invoke with stdin attached and pipe the 1-indexed choice number, "+
-				"or cd into the target repo to disambiguate without a prompt")
+				"or cd into the target repo to disambiguate without a prompt").
+			WithReason("the choice prompt for ambiguous repo names needs an interactive stdin; pipe the 1-indexed pick instead")
 	}
 	_, _ = fmt.Fprintf(out, "coily: %q is declared by %d repos. pick one:\n", name, len(matches))
 	for i, m := range matches {
@@ -319,19 +322,22 @@ func promptChildChoice(name string, matches []childMatch, in io.Reader, out io.W
 	if err != nil && (line == "" || !errors.Is(err, io.EOF)) {
 		return childMatch{}, exitcode.New(exitcode.UserError, "exec_prompt_read",
 			fmt.Errorf("read pick for %q: %w", name, err),
-			"re-invoke and pipe the 1-indexed choice number on stdin")
+			"re-invoke and pipe the 1-indexed choice number on stdin").
+			WithReason("the choice prompt for ambiguous repo names needs an interactive stdin; pipe the 1-indexed pick instead")
 	}
 	line = strings.TrimSpace(line)
 	if line == "" {
 		return childMatch{}, exitcode.New(exitcode.UserError, "exec_prompt_empty",
 			fmt.Errorf("no choice provided for %q (got %d declarants)", name, len(matches)),
-			"re-invoke and pipe the 1-indexed choice number on stdin")
+			"re-invoke and pipe the 1-indexed choice number on stdin").
+			WithReason("the choice prompt requires a 1-indexed integer; an empty pick is ambiguous")
 	}
 	idx, err := strconv.Atoi(line)
 	if err != nil || idx < 1 || idx > len(matches) {
 		return childMatch{}, exitcode.New(exitcode.UserError, "exec_prompt_invalid",
 			fmt.Errorf("pick %q is not in [1-%d]", line, len(matches)),
-			fmt.Sprintf("re-invoke and pipe an integer in [1-%d] on stdin", len(matches)))
+			fmt.Sprintf("re-invoke and pipe an integer in [1-%d] on stdin", len(matches))).
+			WithReason("the choice prompt requires a 1-indexed integer in range")
 	}
 	return matches[idx-1], nil
 }

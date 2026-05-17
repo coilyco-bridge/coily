@@ -65,11 +65,17 @@ func emitErrorEnvelope(w *os.File, err error, rc int, auditPath string) {
 		AuditLogPath: auditPath,
 		Timestamp:    time.Now().Unix(),
 	}
-	env.Reason = reasonFor(env.Kind)
 	if c := exitcode.From(err); c != nil {
 		if ce, ok := c.(interface{ HintText() string }); ok {
 			env.Hint = ce.HintText()
 		}
+	}
+	var rsn exitcode.Reasoner
+	if errors.As(err, &rsn) {
+		env.Reason = rsn.Reason()
+	}
+	if env.Reason == "" {
+		env.Reason = reasonFor(env.Kind)
 	}
 	// Write the human line first so it stays visible even if a downstream
 	// pipe truncates; envelope follows for programmatic consumers.

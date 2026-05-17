@@ -101,13 +101,15 @@ func (r *Runner) brewAction(sub string) (cli.ActionFunc, func(*audit.Record)) {
 			if sub == "upgrade" && len(formulae) == 0 {
 				return exitcode.New(exitcode.PolicyDenied, "policy_denied",
 					fmt.Errorf("brew upgrade with no formula upgrades every keg on the system; pass --allow-untapped to confirm"),
-					"add --allow-untapped to confirm an upgrade-everything run, or name specific formulae")
+					"add --allow-untapped to confirm an upgrade-everything run, or name specific formulae").
+					WithReason("bare `brew upgrade` touches every installed keg, turning a single-intent invocation into a global state shift on a long-lived host; --allow-untapped is the explicit opt-in")
 			}
 			for _, f := range formulae {
 				if !brewInTapScope(f) {
 					return exitcode.New(exitcode.PolicyDenied, "policy_denied",
 						fmt.Errorf("brew %s %q is outside coilysiren/tap/*; pass --allow-untapped to confirm", sub, f),
-						"prefix the formula with coilysiren/tap/ if it lives in that tap, or add --allow-untapped to confirm an off-tap formula")
+						"prefix the formula with coilysiren/tap/ if it lives in that tap, or add --allow-untapped to confirm an off-tap formula").
+						WithReason("brew state should be coilysiren/tap/* by default so the install graph is reviewable from one repo; --allow-untapped is the explicit opt-out for one-offs")
 				}
 			}
 		}

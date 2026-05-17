@@ -2,20 +2,20 @@ package main
 
 import "testing"
 
-// TestReasonFor_KnownKinds pins the load-bearing denial-reason mappings
-// from coilysiren/coily#126 so a kind rename can't silently drop the
-// why-line from the envelope. New kinds added here become required;
-// kinds without a registered reason are tolerated (envelope omits the
-// field) but the high-frequency denial classes must always carry one.
-func TestReasonFor_KnownKinds(t *testing.T) {
+// TestReasonFor_FallbackKinds pins the why-line fallbacks for kinds
+// still emitted by cli-guard sites that have not migrated to
+// exitcode.CodedError.WithReason(). Coily-side sites attach reasons at
+// construction; the remaining map entries cover cli-guard internals.
+// Drop entries here once the corresponding cli-guard site adds
+// WithReason() upstream.
+func TestReasonFor_FallbackKinds(t *testing.T) {
 	required := []string{
 		"policy_denied",
-		"repo_verb_dirty",
 		"scope_unresolved",
 	}
 	for _, k := range required {
 		if got := reasonFor(k); got == "" {
-			t.Errorf("reasonFor(%q) = empty; high-frequency kinds must carry a why-line", k)
+			t.Errorf("reasonFor(%q) = empty; cli-guard-emitted kinds must carry a fallback why-line", k)
 		}
 	}
 }
