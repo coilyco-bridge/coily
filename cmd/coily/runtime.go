@@ -93,5 +93,8 @@ func (r *Runner) WrapVerb(spec verb.Spec, writer *audit.Writer) cli.ActionFunc {
 			return decision.Evaluate(active)
 		}
 	}
+	if spec.ResolveInvokeCWD == nil {
+		spec.ResolveInvokeCWD = resolveInvokeCWD
+	}
 	return verb.Wrap(spec, writer)
 }
