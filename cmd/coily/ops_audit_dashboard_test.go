@@ -39,7 +39,7 @@ func TestBuildDashboardView_GroupsByVerb(t *testing.T) {
 	if gh.Accepted != 3 {
 		t.Errorf("ops.gh.Accepted = %d, want 3", gh.Accepted)
 	}
-	wantRepos := []string{"coily", "agentic-os-kai"}
+	wantRepos := []string{"agentic-os-kai", "coily"}
 	if !stringSliceEqual(gh.Repos, wantRepos) {
 		t.Errorf("ops.gh.Repos = %v, want %v", gh.Repos, wantRepos)
 	}
