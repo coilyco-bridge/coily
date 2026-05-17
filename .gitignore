@@ -11,6 +11,9 @@
 /coverage.out
 vendor/
 
+# runtime config materialized from config.example.yaml (CI step "Sync embedded config")
+/config.yaml
+
 # editor
 .idea/
 .vscode/
