@@ -9,10 +9,14 @@ import (
 )
 
 // TestPrintFindingWalkthrough_LoadBearingStrings pins the load-bearing pieces
-// of the agent walkthrough: the file path, the frontmatter template, the
-// section headers, and the verb-to-area suggestion line. The exact prose
-// can drift; these are the parts an agent following the walkthrough must
-// see verbatim or it will produce a malformed finding.
+// of the agent walkthrough: the gh API invocation, the section headers, the
+// area-slug suggestion line, the issue-template scaffolding, and the
+// references block. The exact prose can drift; these are the parts an agent
+// following the walkthrough must see verbatim or it will file a malformed
+// finding (or none at all).
+//
+// As of coilysiren/coily#215, findings are GH issues, not files. The
+// strings below reflect that contract.
 func TestPrintFindingWalkthrough_LoadBearingStrings(t *testing.T) {
 	var buf bytes.Buffer
 	err := printFindingWalkthrough(&buf, findingArgs{
@@ -30,40 +34,56 @@ func TestPrintFindingWalkthrough_LoadBearingStrings(t *testing.T) {
 
 	wantSubstrings := []string{
 		"/tmp/audit.jsonl",
-		"/tmp/skills/coily-ops-aws-meta/findings/2026-05-05-s3-passes-argv-gate-free.md",
-		"Suggested area for verb \"aws.s3.ls\": coily-ops-aws-meta",
-		"date: 2026-05-05",
-		"slug: s3-passes-argv-gate-free",
+		"Suggested area for verb \"aws.s3.ls\": ops-aws",
+		"finding (ops-aws):",
 		"## What was observed",
 		"## Why it slipped",
 		"## Rule it produced",
-		"`coily-<area>-meta`",
+		"`finding`",
+		"coily ops gh api -X POST repos/coilysiren/coily/issues",
+		"\"labels\": [\"finding\"]",
 		"jq 'select(.id == \"id-xyz\")'",
-		"coily-meta-improvement/SKILL.md",
+		filepath.Join("/tmp/skills", "coily-meta", "SKILL.md"),
+		"https://github.com/coilysiren/coily/issues?q=label%3Afinding",
 	}
 	for _, s := range wantSubstrings {
 		if !strings.Contains(out, s) {
 			t.Errorf("walkthrough missing required substring: %q", s)
 		}
 	}
+
+	// Negative: the old per-area file-path shape must NOT appear. Catches
+	// regressions back to the on-disk findings model.
+	dontWantSubstrings := []string{
+		"coily-<area>-meta",
+		"coily-ops-aws-meta/findings/",
+		"coily-meta-improvement/SKILL.md",
+		"date: 2026-05-05",
+	}
+	for _, s := range dontWantSubstrings {
+		if strings.Contains(out, s) {
+			t.Errorf("walkthrough still contains pre-#215 substring: %q", s)
+		}
+	}
 }
 
-// TestVerbToSkillArea_PrefixMapping covers the dotted verb -> meta skill
-// mapping. The audit log records dotted verbs, the skill directories use
-// kebab; this is the seam.
+// TestVerbToSkillArea_PrefixMapping covers the dotted verb -> area-slug
+// mapping. The audit log records dotted verbs, the title prefix uses the
+// short area slug.
 func TestVerbToSkillArea_PrefixMapping(t *testing.T) {
 	cases := map[string]string{
-		"":                          "coily-<area>-meta",
-		"aws":                       "coily-ops-aws-meta",
-		"aws.route53.change":        "coily-ops-aws-meta",
-		"gh":                        "coily-ops-gh-meta",
-		"gh.issue.create":           "coily-ops-gh-meta",
-		"kubectl":                   "coily-ops-kubectl-meta",
-		"docker":                    "coily-docker-meta",
-		"eco.status":                "coily-gaming-eco-meta",
-		"audit.path":                "coily-audit-meta",
-		"some-unknown-verb":         "coily-shared-meta",
-		"completely.unknown.string": "coily-shared-meta",
+		"":                          "<area>",
+		"aws":                       "ops-aws",
+		"aws.route53.change":        "ops-aws",
+		"gh":                        "ops-gh",
+		"gh.issue.create":           "ops-gh",
+		"kubectl":                   "ops-kubectl",
+		"docker":                    "docker",
+		"eco.status":                "gaming-eco",
+		"audit.path":                "audit",
+		"systemctl.restart":         "systemctl",
+		"some-unknown-verb":         "shared",
+		"completely.unknown.string": "shared",
 	}
 	for verb, want := range cases {
 		if got := verbToSkillArea(verb); got != want {
@@ -72,47 +92,34 @@ func TestVerbToSkillArea_PrefixMapping(t *testing.T) {
 	}
 }
 
-// TestVerbAreaMap_TargetsExistOnDisk catches drift between the static
-// verb -> meta-skill table and the actual `coily-<area>-meta` directories
-// shipped in the repo. The walkthrough is only useful if every area name
-// it suggests is a real path the agent can write into; without this test
-// a renamed or removed skill would silently send agents to a missing
-// directory.
-//
-// Skips when run outside a coily checkout (e.g. an installed-binary
-// smoke test) - detected by the absence of `.claude/skills/`. In CI the
-// directory is always present, so the assertion fires there.
-func TestVerbAreaMap_TargetsExistOnDisk(t *testing.T) {
-	skillsDir := findRepoSkillsDir(t)
-	if skillsDir == "" {
-		t.Skip(".claude/skills/ not found above test cwd; running outside a checkout")
-	}
-
-	// Every value in the lookup map must be a real directory.
-	for prefix, area := range verbAreaMap {
-		if info, err := os.Stat(filepath.Join(skillsDir, area)); err != nil || !info.IsDir() {
-			t.Errorf("verbAreaMap[%q] = %q but %s is not a directory: %v",
-				prefix, area, filepath.Join(skillsDir, area), err)
-		}
-	}
-
-	// The agent-visible table renders the same data plus the two
-	// fallbacks (coily-shared-meta, coily-security-boundary-discipline).
-	// Parse the right-hand side of each `prefix -> area` line and check
-	// the same property. Catches drift between map and table too.
+// TestVerbAreaTable_RendersEveryMappedSlug catches drift between the
+// internal verbAreaMap and the agent-facing verbAreaTable. Both surface
+// the same data; if a verb prefix lands in one but not the other, the
+// agent walkthrough is out of sync with the title prefix that gets
+// suggested at runtime.
+func TestVerbAreaTable_RendersEveryMappedSlug(t *testing.T) {
+	tableSlugs := map[string]bool{}
 	for _, line := range verbAreaTable() {
 		i := strings.Index(line, "->")
 		if i < 0 {
 			t.Errorf("verbAreaTable entry missing arrow: %q", line)
 			continue
 		}
-		// Right-hand side may have trailing parenthetical commentary
-		// ("coily-shared-meta (cross-cutting)"). Take the first token.
 		rhs := strings.TrimSpace(line[i+2:])
-		area := strings.Fields(rhs)[0]
-		if info, err := os.Stat(filepath.Join(skillsDir, area)); err != nil || !info.IsDir() {
-			t.Errorf("verbAreaTable points at %q but %s is not a directory: %v",
-				area, filepath.Join(skillsDir, area), err)
+		slug := strings.Fields(rhs)[0]
+		tableSlugs[slug] = true
+	}
+	for prefix, area := range verbAreaMap {
+		if !tableSlugs[area] {
+			t.Errorf("verbAreaMap[%q] = %q but verbAreaTable does not render slug %q",
+				prefix, area, area)
+		}
+	}
+	// Fallback slugs from the negative branches of verbToSkillArea
+	// belong in the table too, so the walkthrough can show them.
+	for _, fallback := range []string{"shared", "security-boundary"} {
+		if !tableSlugs[fallback] {
+			t.Errorf("verbAreaTable does not render fallback slug %q", fallback)
 		}
 	}
 }
@@ -147,7 +154,7 @@ func TestResolveInvokeCWD_PrefersExplicitOverOldpwdOverGetwd(t *testing.T) {
 // TestPrintFindingWalkthrough_BannerOnInvokeCwdDrift covers the drift
 // surface from #109: when invoke-cwd disagrees with the subprocess
 // cwd, the walkthrough prints a banner naming both so the agent can't
-// silently land the finding in the wrong tree.
+// silently bind the audit-log read to the wrong host context.
 func TestPrintFindingWalkthrough_BannerOnInvokeCwdDrift(t *testing.T) {
 	parent := t.TempDir()
 	t.Setenv("COILY_INVOKE_CWD", parent)
@@ -177,29 +184,5 @@ func TestPrintFindingWalkthrough_BannerOnInvokeCwdDrift(t *testing.T) {
 		if !strings.Contains(out, want) {
 			t.Errorf("missing banner substring %q in:\n%s", want, out)
 		}
-	}
-}
-
-// findRepoSkillsDir walks up from the test's cwd looking for a
-// `.claude/skills/` directory. Returns "" if none is found before the
-// filesystem root. Mirrors detectSkillsDir's runtime logic but without
-// the home-dir fallback - a unit test should only validate the in-tree
-// skills layout, not whatever the host happens to have installed.
-func findRepoSkillsDir(t *testing.T) string {
-	t.Helper()
-	dir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("getwd: %v", err)
-	}
-	for {
-		candidate := filepath.Join(dir, ".claude", "skills")
-		if info, err := os.Stat(candidate); err == nil && info.IsDir() {
-			return candidate
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			return ""
-		}
-		dir = parent
 	}
 }

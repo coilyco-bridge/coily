@@ -23,7 +23,7 @@ Flags: --out, --since
 
 ## `coily audit finding`
 
-Walk an agent through writing a finding about a flagged audit event.
+Walk an agent through filing a finding GitHub issue about a flagged audit event.
 
 Flags: --id, --slug, --ts, --verb
 
