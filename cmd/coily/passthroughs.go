@@ -28,9 +28,11 @@ import (
 // audit row reflects the user-visible path (`coily ops aws` writes
 // "ops.aws", not "aws").
 //
-// Egress, when true, opts the wrapper into the per-binary egress allowlist
-// in cli-guard/egress. Today only brew has an entry; the other package managers
-// gain enforce mode in Phase 2 of issue #35.
+// Egress, when true, routes the wrapped binary's HTTP/HTTPS through the
+// per-invocation CONNECT proxy so the audit row's egress_hosts column is
+// populated. If cli-guard/egress has a registered allowlist for the binary,
+// the proxy runs in ModeEnforce; otherwise it runs in ModeObserve (capture
+// only). Enforce-mode allowlists for individual binaries are Phase 2 of #35.
 //
 // ScopeArgvHint, when non-nil, installs a fallback --commit-scope resolver
 // that fires when the operator did not set the flag (or env var) and the
@@ -50,8 +52,8 @@ type ptEntry struct {
 // small. Audit verb names are stamped "ops.<bin>" so the log reflects the
 // user-visible path.
 var ptOps = []ptEntry{
-	{Bin: "aws", VerbName: "ops.aws"},
-	{Bin: "gh", VerbName: "ops.gh", ScopeArgvHint: ghRepoScopeHint, ArgvRewriter: rewriteGHForRESTAndJQFile},
+	{Bin: "aws", VerbName: "ops.aws", Egress: true},
+	{Bin: "gh", VerbName: "ops.gh", Egress: true, ScopeArgvHint: ghRepoScopeHint, ArgvRewriter: rewriteGHForRESTAndJQFile},
 	{Bin: "kubectl", VerbName: "ops.kubectl"},
 	{Bin: "flyctl", VerbName: "ops.flyctl"},
 }
@@ -103,6 +105,11 @@ func (r *Runner) passthroughCommand(e ptEntry) *cli.Command {
 	if e.Egress {
 		if allow, ok := egress.Allowlists[e.Bin]; ok {
 			opts = append(opts, passthrough.WithEgress(allow, egress.ModeEnforce))
+		} else {
+			// No registered allowlist: still wire the proxy in observe mode so
+			// the audit row's egress_hosts column is populated. Enforcement is a
+			// later phase, capture-first lights up the dashboard today (#139).
+			opts = append(opts, passthrough.WithEgress(nil, egress.ModeObserve))
 		}
 	}
 	if e.ScopeArgvHint != nil {
