@@ -300,19 +300,24 @@ func TestSecurityClaim_UserBinaryGateBlocksDevCoilyForCronStdin(t *testing.T) {
 }
 
 // TestSecurityClaim_repo_verbs_require_clean_tree covers SECURITY.md's
-// claim that .coily/coily.yaml repo verbs refuse to run when the working
-// tree is dirty / behind upstream / on a branch with no upstream. The
-// gate exists so an audit row for a repo verb can be reconstructed from
-// git history alone, closing the off-host shadow that local script edits
-// would otherwise create.
+// claim that .coily/coily.yaml repo verbs refuse to run when the audit
+// row could not be reconstructed from git history. The gate exists so
+// the verb argv (declared in coily.yaml) is always recoverable at the
+// HEAD commit, closing the off-host shadow that local edits to the
+// declaring file would otherwise create.
 //
 // Drives the gate end-to-end: build a tiny repo, drop a coily.yaml with a
 // no-op verb, run the verb under buildRepoCommand. Asserts:
 //
 //  1. Clean repo: the verb runs and the audit row carries no override.
-//  2. Dirty repo without --audit-override-dirty: refusal with PolicyDenied.
-//  3. Dirty repo with --audit-override-dirty: the verb runs and the audit
-//     row is tagged audit_override=true with the porcelain status captured.
+//  2. Dirty repo, only non-coily.yaml files dirty: verb runs without
+//     override; audit row captures porcelain status without
+//     audit_override=true (coilysiren/coily#211).
+//  3. Dirty coily.yaml without --audit-override-dirty: refusal with
+//     PolicyDenied.
+//  4. Dirty coily.yaml with --audit-override-dirty: the verb runs and the
+//     audit row is tagged audit_override=true with the porcelain status
+//     captured.
 func TestSecurityClaim_repo_verbs_require_clean_tree(t *testing.T) {
 	if _, err := exec.LookPath("git"); err != nil {
 		t.Skip("git not on PATH")
@@ -361,8 +366,29 @@ func TestSecurityClaim_repo_verbs_require_clean_tree(t *testing.T) {
 		t.Errorf("clean run captured WorkingTreeStatus=%q", rec.WorkingTreeStatus)
 	}
 
-	// (2) Dirty tree, no override: refusal.
+	// (2) Dirty tree limited to non-coily.yaml files: no override needed,
+	// verb runs, audit row captures status but is not tagged as override.
+	// Closes coilysiren/coily#211: dirt outside the declaring file does
+	// not break audit-row reconstruction.
 	if err := os.WriteFile(filepath.Join(repoRoot, "dirt.txt"), []byte("x\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	r = newSecurityClaimRunnerWithAudit(t)
+	cmd = r.buildChildRepoCommand(cfg, cfg.Commands[0])
+	root = wrapInRoot(cmd)
+	if err := root.Run(t.Context(), []string{"coily", "noop"}); err != nil {
+		t.Fatalf("dirty-outside-coily.yaml run without override: %v", err)
+	}
+	rec = lastAuditRecord(t, r.Audit.Path)
+	if rec.AuditOverride {
+		t.Errorf("non-coily.yaml dirt tagged audit_override=true; rec=%+v", rec)
+	}
+	if !strings.Contains(rec.WorkingTreeStatus, "dirt.txt") {
+		t.Errorf("dirty-outside-coily.yaml run did not capture status mentioning dirt.txt; got %q", rec.WorkingTreeStatus)
+	}
+
+	// (3) Dirty coily.yaml without override: refusal.
+	if err := os.WriteFile(cfgPath, []byte("commands:\n  noop: true\n# edited\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	r = newSecurityClaimRunnerWithAudit(t)
@@ -370,25 +396,25 @@ func TestSecurityClaim_repo_verbs_require_clean_tree(t *testing.T) {
 	root = wrapInRoot(cmd)
 	err = root.Run(t.Context(), []string{"coily", "noop"})
 	if err == nil {
-		t.Fatal("dirty run without override returned nil; expected PolicyDenied")
+		t.Fatal("dirty coily.yaml run without override returned nil; expected PolicyDenied")
 	}
 	if k := errKind(err); k != "repo_verb_dirty" {
-		t.Errorf("dirty refusal kind = %q, want repo_verb_dirty (err=%v)", k, err)
+		t.Errorf("dirty coily.yaml refusal kind = %q, want repo_verb_dirty (err=%v)", k, err)
 	}
 
-	// (3) Dirty tree with override: runs, audit row tagged.
+	// (4) Dirty coily.yaml with override: runs, audit row tagged.
 	r = newSecurityClaimRunnerWithAudit(t)
 	cmd = r.buildChildRepoCommand(cfg, cfg.Commands[0])
 	root = wrapInRoot(cmd)
 	if err := root.Run(t.Context(), []string{"coily", "--audit-override-dirty", "noop"}); err != nil {
-		t.Fatalf("dirty run with override: %v", err)
+		t.Fatalf("dirty coily.yaml run with override: %v", err)
 	}
 	rec = lastAuditRecord(t, r.Audit.Path)
 	if !rec.AuditOverride {
 		t.Errorf("override run did not tag audit_override=true; rec=%+v", rec)
 	}
-	if !strings.Contains(rec.WorkingTreeStatus, "dirt.txt") {
-		t.Errorf("override run did not capture porcelain status mentioning dirt.txt; got %q", rec.WorkingTreeStatus)
+	if !strings.Contains(rec.WorkingTreeStatus, "coily.yaml") {
+		t.Errorf("override run did not capture porcelain status mentioning coily.yaml; got %q", rec.WorkingTreeStatus)
 	}
 }
 

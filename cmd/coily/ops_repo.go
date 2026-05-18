@@ -139,9 +139,11 @@ func (r *Runner) buildExecFromConfigs(configs []*repocfg.Config) *cli.Command {
 // cli.Command whose Action runs the declared argv inside the matched
 // repo (cmd.Dir = repoRoot) and binds the audit row to that repo's
 // commit-scope. Used for command names with exactly one declarant in the
-// unified discovery pool. Repo verbs require a clean working tree and a
-// synced upstream branch so the audit row can be reconstructed from git
-// history; --audit-override-dirty bypasses with audit_override=true.
+// unified discovery pool. Repo verbs require a synced upstream branch and
+// that the coily.yaml that declares them be committed, so the audit row's
+// argv can be reconstructed from git history; --audit-override-dirty
+// bypasses with audit_override=true. Working-tree dirt outside coily.yaml
+// is recorded in the audit row but does not refuse.
 func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) *cli.Command {
 	repoRoot := filepath.Dir(filepath.Dir(cfg.Path))
 	verbName := "repo." + rc.Name
@@ -150,7 +152,10 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 		usage = "Repo command: " + strings.Join(rc.Argv, " ")
 	}
 	usage = fmt.Sprintf("%s [from %s]", usage, repoRoot)
-	var dirtyState *gittree.State
+	var (
+		capturedState *gittree.State
+		overrideUsed  bool
+	)
 	return &cli.Command{
 		Name:      rc.Name,
 		Usage:     usage,
@@ -161,8 +166,10 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 				"it without prompting. Working directory is set to %s and the audit "+
 				"row binds to that repo's commit-scope.\n\nExtra positional args "+
 				"are appended and validated against the same shell-metacharacter "+
-				"rules as privileged verbs. Repo verbs require a clean working "+
-				"tree and a synced upstream branch.",
+				"rules as privileged verbs. Repo verbs require the declaring "+
+				"coily.yaml to be committed and a synced upstream branch; "+
+				"unrelated working-tree dirt is captured in the audit row but "+
+				"does not refuse.",
 			cfg.Path, strings.Join(rc.Argv, " "), rc.Name, repoRoot,
 		),
 		Action: r.WrapVerb(
@@ -175,19 +182,20 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 					return nil, positional
 				},
 				OnComplete: func(rec *audit.Record) {
-					if dirtyState == nil {
+					if capturedState == nil {
 						return
 					}
-					rec.AuditOverride = true
-					rec.WorkingTreeStatus = dirtyState.Status
+					rec.WorkingTreeStatus = capturedState.Status
+					rec.AuditOverride = overrideUsed
 				},
 				Action: func(ctx context.Context, c *cli.Command) error {
-					state, err := runRepoGate(c, repoRoot, verbName)
+					state, used, err := runRepoGate(c, repoRoot, cfg.Path, verbName)
 					if err != nil {
 						return err
 					}
-					if !state.Clean {
-						dirtyState = state
+					if state.Status != "" {
+						capturedState = state
+						overrideUsed = used
 					}
 					fmt.Fprintf(os.Stderr,
 						"coily: exec %s in %s (only repo in pool declaring this name)\n",
@@ -216,8 +224,11 @@ func (r *Runner) buildPromptingChildCommand(name string, matches []childMatch) *
 	for _, m := range matches {
 		repoPaths = append(repoPaths, filepath.Dir(filepath.Dir(m.cfg.Path)))
 	}
-	var chosen *childMatch
-	var dirtyState *gittree.State
+	var (
+		chosen        *childMatch
+		capturedState *gittree.State
+		overrideUsed  bool
+	)
 	return &cli.Command{
 		Name:      name,
 		Usage:     fmt.Sprintf("Declared by %d repos; prompts for a pick on stderr/stdin", len(matches)),
@@ -240,9 +251,9 @@ func (r *Runner) buildPromptingChildCommand(name string, matches []childMatch) *
 					if chosen != nil {
 						rec.CommitScope = filepath.Dir(filepath.Dir(chosen.cfg.Path))
 					}
-					if dirtyState != nil {
-						rec.AuditOverride = true
-						rec.WorkingTreeStatus = dirtyState.Status
+					if capturedState != nil {
+						rec.WorkingTreeStatus = capturedState.Status
+						rec.AuditOverride = overrideUsed
 					}
 				},
 				Action: func(ctx context.Context, c *cli.Command) error {
@@ -252,12 +263,13 @@ func (r *Runner) buildPromptingChildCommand(name string, matches []childMatch) *
 					}
 					chosen = &pick
 					repoRoot := filepath.Dir(filepath.Dir(pick.cfg.Path))
-					state, gerr := runRepoGate(c, repoRoot, verbName)
+					state, used, gerr := runRepoGate(c, repoRoot, pick.cfg.Path, verbName)
 					if gerr != nil {
 						return gerr
 					}
-					if !state.Clean {
-						dirtyState = state
+					if state.Status != "" {
+						capturedState = state
+						overrideUsed = used
 					}
 					fmt.Fprintf(os.Stderr,
 						"coily: exec %s in %s (picked from %d declarants)\n",
@@ -273,28 +285,64 @@ func (r *Runner) buildPromptingChildCommand(name string, matches []childMatch) *
 }
 
 // runRepoGate runs the clean-tree gate for a repo verb. Returns the
-// gittree state on success (non-nil; state.Clean tells the caller
-// whether to tag the audit row as override) or an error on refusal /
-// gittree failure.
-func runRepoGate(c *cli.Command, repoRoot, verbName string) (*gittree.State, error) {
+// gittree state, an overrideUsed boolean (true when --audit-override-dirty
+// was actually needed to bypass the gate, false when the gate passed on
+// its own), or an error on refusal / gittree failure.
+//
+// The gate refuses when the repo's audit row could not be reconstructed
+// from git history: an upstream/HEAD problem, or the declaring coily.yaml
+// itself is among the dirty paths (so the verb argv at HEAD is not what
+// just ran). Working-tree dirt outside coily.yaml does not refuse - the
+// committed coily.yaml plus HEAD still reconstruct the verb invocation -
+// but the porcelain status is returned so the caller can stamp it on the
+// audit row for forensics. See coilysiren/coily#211.
+func runRepoGate(c *cli.Command, repoRoot, cfgPath, verbName string) (*gittree.State, bool, error) {
 	override := false
 	if root := c.Root(); root != nil {
 		override = root.Bool("audit-override-dirty")
 	}
 	state, err := gittree.CheckClean(repoRoot)
 	if err != nil {
-		return nil, exitcode.New(exitcode.Internal, "gittree_error", err,
+		return nil, false, exitcode.New(exitcode.Internal, "gittree_error", err,
 			"coily could not evaluate the repo verb gate; run `git status` "+
 				"in the matched repo to confirm it is in a sane state, then retry")
 	}
-	if !state.Clean && !override {
-		return nil, exitcode.New(exitcode.PolicyDenied, "repo_verb_dirty",
-			errors.New(state.FormatRefusal(verbName)),
-			"commit/push the outstanding work in the matched repo and retry, "+
-				"or pass --audit-override-dirty for a genuine emergency").
-			WithReason("audit rows must bind to a clean commit so the run can be reconstructed from git history")
+	if state.Clean {
+		return state, false, nil
 	}
-	return state, nil
+	if dirtIsOutsideCoilyConfig(state, repoRoot, cfgPath) {
+		return state, false, nil
+	}
+	if override {
+		return state, true, nil
+	}
+	return nil, false, exitcode.New(exitcode.PolicyDenied, "repo_verb_dirty",
+		errors.New(state.FormatRefusal(verbName)),
+		"commit/push the outstanding coily.yaml change in the matched repo "+
+			"and retry, or pass --audit-override-dirty for a genuine emergency").
+		WithReason("audit rows must bind to a committed coily.yaml so the verb argv can be reconstructed from git history")
+}
+
+// dirtIsOutsideCoilyConfig reports whether state is a "working tree is
+// dirty" refusal whose dirty path set does not touch the declaring
+// coily.yaml. Returns false for upstream/HEAD refusals (those still gate
+// even if coily.yaml is committed) and for any dirty set that includes
+// coily.yaml itself.
+func dirtIsOutsideCoilyConfig(state *gittree.State, repoRoot, cfgPath string) bool {
+	if state.Reason != "working tree is dirty" {
+		return false
+	}
+	rel, err := filepath.Rel(repoRoot, cfgPath)
+	if err != nil {
+		return false
+	}
+	rel = filepath.ToSlash(rel)
+	for _, p := range state.DirtyPaths {
+		if filepath.ToSlash(p) == rel {
+			return false
+		}
+	}
+	return true
 }
 
 // promptChildChoice presents the matches on out (stderr) as a numbered
