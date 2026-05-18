@@ -31,7 +31,7 @@ func main() {
 // classifyExit walks the error chain looking for a coded error. Falls
 // back to UpstreamFailed for *exec.ExitError (the underlying tool ran
 // and returned non-zero) and Generic for anything else. See
-// pkg/exitcode for the public contract.
+// cli-guard/exitcode for the public contract.
 func classifyExit(err error) int {
 	if c := exitcode.From(err); c != nil {
 		return c.Code()

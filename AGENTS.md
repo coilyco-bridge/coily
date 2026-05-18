@@ -44,7 +44,7 @@ After pushing to `main`, schedule a wake-up to land the new binary and re-baseli
 - **Cadence**: 300-360s after push.
 - **Verify CI**: `coily ops gh run list --repo coilysiren/coily --limit 1` should be `completed/success`. Re-schedule once at +180s if in progress; stop on failure.
 - **Upgrade host**: Mac `brew upgrade coilysiren/tap/coily`. Windows `scoop update coily`. No sudo on either.
-- **Re-baseline lockdown** only when the bumped commit touched `pkg/lockdown/`: `coily lockdown --apply --replace --recursive --path ~/projects/coilysiren`.
+- **Re-baseline lockdown** only when the bumped commit touched `cli-guard/lockdown/`: `coily lockdown --apply --replace --recursive --path ~/projects/coilysiren`.
 - **kai-server**: `coily ssh kai-server -- coily systemctl start coily-update.service`. Oneshot.
 - **Skip** for docs-only pushes.
 

@@ -28,7 +28,7 @@ import (
 //  2. audit.log_path from the loaded config layers
 //  3. ~/.local/state/coily/audit.jsonl (default)
 //
-// `coily audit path` always prints whatever pkg/config resolved.
+// `coily audit path` always prints whatever cli-guard/config resolved.
 func (r *Runner) auditCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "audit",
@@ -182,7 +182,7 @@ func parseSince(s string) (int64, error) {
 // but the polling latency is fine for the orchestrator-poll case and
 // keeps the implementation portable.
 func tailAuditLog(ctx context.Context, path string, since int64, follow bool) error {
-	f, err := os.Open(path) //nolint:gosec // resolved via pkg/config; reading is the point
+	f, err := os.Open(path) //nolint:gosec // resolved via cli-guard/config; reading is the point
 	if err != nil {
 		return fmt.Errorf("audit tail: open %s: %w", path, err)
 	}

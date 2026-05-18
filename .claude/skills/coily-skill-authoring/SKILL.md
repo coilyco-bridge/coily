@@ -64,7 +64,7 @@ Three-line shape:
 Example:
 
 ```markdown
-- **New iam permission lands in `pkg/policy` before the verb that uses it.**
+- **New iam permission lands in `cli-guard/policy` before the verb that uses it.**
   **Why:** the gate must reject before the underlying call can succeed. A verb shipping ahead of its policy entry passes through unvalidated for the time-between.
   **How to apply:** any PR that adds an aws sub-verb.
 ```

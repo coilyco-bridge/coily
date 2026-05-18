@@ -102,7 +102,7 @@ func runAuditDashboard(r *Runner, c *cli.Command) error {
 // readRecords reads the JSONL audit log, skipping malformed lines and
 // records older than since.
 func readRecords(path string, since int64) ([]audit.Record, error) {
-	f, err := os.Open(path) //nolint:gosec // resolved via pkg/config; reading is the point
+	f, err := os.Open(path) //nolint:gosec // resolved via cli-guard/config; reading is the point
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil

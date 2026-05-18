@@ -27,8 +27,8 @@ No systemctl-specific sequencing rules seeded yet. Candidate (not yet promoted):
 
 - `cmd/coily/ops_systemctl.go` - cli surface for `coily systemctl`.
 - `cmd/coily/ops_systemctl_test.go` - closed-verb-set test.
-- `pkg/policy` - argv-validation gate. Closed verb set: `status` / `start` / `stop` / `restart` / `enable` / `disable` / `daemon-reload`.
-- `pkg/audit` - audit-row writer. Systemctl verbs land as `systemctl.<verb>`.
+- `cli-guard/policy` - argv-validation gate. Closed verb set: `status` / `start` / `stop` / `restart` / `enable` / `disable` / `daemon-reload`.
+- `cli-guard/audit` - audit-row writer. Systemctl verbs land as `systemctl.<verb>`.
 - `~/.coily/audit/*.jsonl` - filter `verb` prefix `systemctl.` for rows.
 - `findings/` - dated write-once observations.
 - Friend-shippable host fleet rule: every coily-managed host carries `(ALL) NOPASSWD: /home/linuxbrew/.linuxbrew/bin/coily` (or the equivalent install path). Hosts without that grant fall back to per-unit sudoers and the strict-match failure mode is in play. See `coily-shared-meta` for the host inventory.

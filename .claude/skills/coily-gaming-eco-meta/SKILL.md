@@ -23,7 +23,7 @@ No eco-specific sequencing rules seeded yet.
 ## 3. References
 
 - `cmd/coily/ops_eco.go` and `cmd/coily/ops_eco_mod.go` - cli surface for `coily gaming eco`.
-- `pkg/ssh` - transport. The verbatim-error surface lives here.
-- `pkg/audit` - audit-row writer. Eco verbs land as `eco.*` and `gaming.eco.*`.
+- `cli-guard/ssh` - transport. The verbatim-error surface lives here.
+- `cli-guard/audit` - audit-row writer. Eco verbs land as `eco.*` and `gaming.eco.*`.
 - `~/.coily/audit/*.jsonl` - filter `verb` prefix `eco.` or `gaming.eco.` for rows.
 - `findings/` - dated write-once observations.

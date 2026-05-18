@@ -34,7 +34,7 @@ make dev                # ./bin/coily-dev for iteration (not on PATH)
 
 ### `aws`, `kubectl`, `gh` resolution
 
-Via `$PATH` like any other binary. Argv validation + audit + the [lockdown deny list](pkg/lockdown/defaults.yaml) carry the safety boundary; binary authenticity is the host's problem. See [SECURITY.md](SECURITY.md).
+Via `$PATH` like any other binary. Argv validation + audit + the lockdown deny list carry the safety boundary; binary authenticity is the host's problem. See [SECURITY.md](SECURITY.md).
 
 ## Per-repo commands (`.coily/coily.yaml`)
 

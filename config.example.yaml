@@ -4,7 +4,7 @@
 # is: binary defaults < ~/.coily/config.yaml < ./.coily/config.yaml.
 #
 # log_path defaults to ~/.coily/audit/<owner>-<repo>.jsonl, derived from
-# `git remote get-url origin`. See pkg/config/paths.go.
+# `git remote get-url origin`. See cli-guard/config/paths.go.
 
 kai_server:
   # Tailscale hostname for the homelab box. Resolved dynamically via tailscale SDK at runtime;

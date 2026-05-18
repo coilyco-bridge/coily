@@ -44,7 +44,7 @@ Rules that apply to all `coily-*-meta` skills. Per-area skills do not duplicate 
 - **Removing a verb removes its policy entry and any composed-with skill references in the *same* commit, never a follow-up.**
   **Why:** orphan policy entries become stale documentation that lies about the surface. Orphan skill references send future readers to dead pointers.
   **How to apply:** any coily-verb deletion PR.
-- **A new top-level verb requires (a) a `pkg/policy` entry, (b) a `TestSecurityClaim_*` test if it makes a security-boundary claim, and (c) a corresponding `coily-<area>-meta` skill once it earns a finding.** **Why:** the boundary is the composition of code + test + skill. Shipping any one without the others creates a degradation gap. **How to apply:** any PR that adds a new top-level coily verb or sub-verb group.
+- **A new top-level verb requires (a) a `cli-guard/policy` entry, (b) a `TestSecurityClaim_*` test if it makes a security-boundary claim, and (c) a corresponding `coily-<area>-meta` skill once it earns a finding.** **Why:** the boundary is the composition of code + test + skill. Shipping any one without the others creates a degradation gap. **How to apply:** any PR that adds a new top-level coily verb or sub-verb group.
 
 ## 4. Cross-cutting anti-signals
 
@@ -66,8 +66,8 @@ Decisions that are settled and apply across all `coily-*-meta` skills. Listed he
 ## 6. References
 
 - `cmd/coily/` - the cli surface.
-- `pkg/policy` - argv-validation gate (the runtime layer of the sequencing rules above).
-- `pkg/audit` - audit-row writer.
+- `cli-guard/policy` - argv-validation gate (the runtime layer of the sequencing rules above).
+- `cli-guard/audit` - audit-row writer.
 - `cmd/coily/security_claims_test.go` (`TestSecurityClaim_*`) - prose-vs-runtime gate.
 - `~/.coily/audit/*.jsonl` - per-repo audit trails.
 - [coily#55](https://github.com/coilysiren/coily/issues/55) - off-host audit shadow placeholder.

@@ -31,7 +31,7 @@ on kai-server. Each subcommand is a per-game verb tree.
                           mods has {list,sync}; sync pulls archives into mods/
                           to match mod-list.json via the Factorio mod portal.
 
-Every leaf verb routes through pkg/ssh against kai-server (no ssh
+Every leaf verb routes through cli-guard/ssh against kai-server (no ssh
 subprocess), with audit + policy enforcement provided by verb.Wrap.`,
 		Commands: []*cli.Command{
 			r.ecoCommand(),

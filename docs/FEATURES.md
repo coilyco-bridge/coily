@@ -54,7 +54,7 @@ No prebuilt binaries. Push to `main` triggers semver auto-bump + tag + GitHub Re
 
 ## Cross-cutting infrastructure
 
-`pkg/shell` (subprocess), `pkg/gittree` (clean/dirty/ahead/behind), `pkg/ttlcache` (cwd-to-toplevel memo), `pkg/ssh` (`golang.org/x/crypto/ssh` + known_hosts + ssh-agent + SFTP).
+All cross-cutting infrastructure lives in the sibling `cli-guard` module: `cli-guard/shell` (subprocess), `cli-guard/gittree` (clean/dirty/ahead/behind), `cli-guard/ttlcache` (cwd-to-toplevel memo), `cli-guard/ssh` (`golang.org/x/crypto/ssh` + known_hosts + ssh-agent + SFTP). coily itself has no `pkg/` tree.
 
 ## Testing + docs
 

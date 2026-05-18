@@ -14,7 +14,7 @@ import (
 
 // ecoCommand wraps the eco game server which runs as a systemd unit on
 // kai-server. All verbs run a `sudo <systemctl|journalctl> ... eco-server`
-// command on kai-server through pkg/ssh, which wraps
+// command on kai-server through cli-guard/ssh, which wraps
 // golang.org/x/crypto/ssh. No ssh subprocess is spawned. The ssh target is
 // taken from embedded config (kai_server.tailscale_host and ssh_user).
 //
@@ -329,7 +329,7 @@ func (r *Runner) ecoWorldSnapshotCommand() *cli.Command {
 }
 
 // ecoRemote returns a cli.ActionFunc that runs the given argv on kai-server
-// through pkg/ssh (golang.org/x/crypto/ssh under the hood, no ssh
+// through cli-guard/ssh (golang.org/x/crypto/ssh under the hood, no ssh
 // subprocess). The remote command is composed as a single space-joined
 // string because crypto/ssh's session API takes one string (which the
 // remote shell parses), the same shape ssh(1) uses. Every element of

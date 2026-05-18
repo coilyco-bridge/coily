@@ -9,8 +9,8 @@ import (
 	"github.com/coilysiren/cli-guard/audit"
 	"github.com/coilysiren/cli-guard/decision"
 	"github.com/coilysiren/cli-guard/shell"
+	coilyssh "github.com/coilysiren/cli-guard/ssh"
 	"github.com/coilysiren/cli-guard/verb"
-	coilyssh "github.com/coilysiren/coily/pkg/ssh"
 	"github.com/urfave/cli/v3"
 )
 
@@ -21,7 +21,7 @@ import (
 //
 // Cfg is the layered *Config (embedded defaults, overlaid by
 // ~/.coily/config.yaml, then ./.coily/config.yaml). Path fields like
-// Audit.LogPath are already resolved to absolute paths by pkg/config at
+// Audit.LogPath are already resolved to absolute paths by cli-guard/config at
 // load time, so this struct does no path expansion.
 type Runner struct {
 	Cfg    *Config
@@ -66,7 +66,7 @@ func NewRunner() *Runner {
 		// set (e.g. on Windows where the MSYS agent is unreachable from the
 		// native Windows binary), auth uses that key. Otherwise it falls back
 		// to ssh-agent (SSH_AUTH_SOCK). Host keys verified against
-		// ~/.ssh/known_hosts either way. See pkg/ssh/ssh.go.
+		// ~/.ssh/known_hosts either way. Library lives in cli-guard/ssh.
 		SSH: &coilyssh.Client{KeyPath: expandTilde(cfg.KaiServer.SSHKeyPath)},
 	}
 }

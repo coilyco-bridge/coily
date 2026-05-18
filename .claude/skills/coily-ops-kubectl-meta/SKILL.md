@@ -23,7 +23,7 @@ No kubectl-specific sequencing rules seeded yet.
 ## 3. References
 
 - `cmd/coily/ops_kubectl.go` - cli surface for `coily ops kubectl`.
-- `pkg/policy` - argv-validation gate.
-- `pkg/audit` - audit-row writer. Kubectl verbs land as `kubectl.*` (currently) or `ops.kubectl.*` (post-#50). The stderr-tail extension proposed in #63 lives here.
+- `cli-guard/policy` - argv-validation gate.
+- `cli-guard/audit` - audit-row writer. Kubectl verbs land as `kubectl.*` (currently) or `ops.kubectl.*` (post-#50). The stderr-tail extension proposed in #63 lives here.
 - `~/.coily/audit/*.jsonl` - filter `verb` prefix `kubectl.` for rows.
 - `findings/` - dated write-once observations.

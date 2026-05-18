@@ -15,7 +15,7 @@ Conventions for `coily-*-meta` skills (catalogue vs. rule shape, write-once find
 
 Phrases or framings that survived a previous design round because nobody tested them. Each entry pairs the bad shape with the actual property. Entries grounded by a finding, issue, or test carry a `**Pin:**` line. Absence of Pin means the entry is seeded, not yet grounded.
 
-- **"argv validation is the boundary."** False. Argv validation is one layer. The boundary is the composition of argv validation + the audit row + the off-host shadow + the verification that the gate code is correct (`pkg/policy` tests). A regression in any one layer degrades the boundary even if the others still pass.
+- **"argv validation is the boundary."** False. Argv validation is one layer. The boundary is the composition of argv validation + the audit row + the off-host shadow + the verification that the gate code is correct (`cli-guard/policy` tests). A regression in any one layer degrades the boundary even if the others still pass.
 - **"iam allow is sufficient, the coily gate is belt-and-suspenders."** False. iam policies drift wider than the runtime needs (lazy scoping, role reuse). The coily gate is the layer that enforces the *intended* surface, narrower than what iam permits. Drop coily and the effective surface jumps to iam-wide.
 - **"read-only aws verbs do not need an audit row."** False. Read-only verbs still exfiltrate (a `s3 ls` on a sensitive bucket, an `sts get-caller-identity` that confirms a role assumption). The audit row is the trail, not the gate. Trails apply to reads.
 - **"audit row is sufficient for read-only verbs."** False. The trail documents the leak. It does not prevent it.
@@ -31,8 +31,8 @@ No aws-specific sequencing rules seeded yet.
 ## 3. References
 
 - `cmd/coily/ops_aws.go` - cli surface for `coily ops aws`.
-- `pkg/policy` - argv-validation gate.
-- `pkg/audit` - audit-row writer. Aws verbs land as `ops.aws.*`.
+- `cli-guard/policy` - argv-validation gate.
+- `cli-guard/audit` - audit-row writer. Aws verbs land as `ops.aws.*`.
 - `cmd/coily/security_claims_test.go` (`TestSecurityClaim_*`) - prose-vs-runtime gate. Any aws claim added to `SECURITY.md` requires a matching test.
 - `~/.coily/audit/*.jsonl` - per-repo audit trail. Filter `verb` prefix `ops.aws.` for aws rows.
 - `findings/` - dated write-once observations that produced the entries above.

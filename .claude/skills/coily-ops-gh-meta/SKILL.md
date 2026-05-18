@@ -23,7 +23,7 @@ No gh-specific sequencing rules seeded yet.
 ## 3. References
 
 - `cmd/coily/ops_gh.go` - cli surface for `coily ops gh`.
-- `pkg/policy` - argv-validation gate. Gh metachar rejections account for the dominant gh failure mode.
-- `pkg/audit` - audit-row writer. Gh verbs land as `gh.*` (currently) or `ops.gh.*` (post-#50).
+- `cli-guard/policy` - argv-validation gate. Gh metachar rejections account for the dominant gh failure mode.
+- `cli-guard/audit` - audit-row writer. Gh verbs land as `gh.*` (currently) or `ops.gh.*` (post-#50).
 - `~/.coily/audit/*.jsonl` - filter `verb` prefix `gh.` for gh rows.
 - `findings/` - dated write-once observations.

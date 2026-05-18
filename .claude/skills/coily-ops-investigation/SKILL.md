@@ -93,7 +93,7 @@ Routing heuristic:
 ## References
 
 - `~/.coily/audit/*.jsonl` - audit trail. First place to look for what was attempted.
-- `pkg/policy` - argv-validation gate. Second place to look for why an attempt was rejected.
-- `pkg/audit` - audit-row writer.
+- `cli-guard/policy` - argv-validation gate. Second place to look for why an attempt was rejected.
+- `cli-guard/audit` - audit-row writer.
 - `findings/` (in this directory) - dated write-once observations of cross-cutting investigation patterns.
 - Composes-with: `coily-meta-improvement`, `coily-shared-meta`, `coily-security-boundary-discipline`, every `coily-*-meta` skill.

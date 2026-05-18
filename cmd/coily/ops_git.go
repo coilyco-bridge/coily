@@ -349,7 +349,7 @@ func scopeMatches(recScope, filterScope string) bool {
 }
 
 func loadAuditRecords(path, scopePath string, since int64) ([]audit.Record, error) {
-	f, err := os.Open(path) //nolint:gosec // resolved via pkg/config; reading is the point
+	f, err := os.Open(path) //nolint:gosec // resolved via cli-guard/config; reading is the point
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -502,7 +502,7 @@ func findRecordByShortID(path string, ts int64, short string) (*audit.Record, er
 
 // writeRecordsYAML emits each record as a `trailer:` + `record:` block,
 // matching the trailer shape carried by audit.Record's Trailer/TrailerLine
-// helpers (see pkg/audit).
+// helpers (see cli-guard/audit).
 func writeRecordsYAML(w io.Writer, records []audit.Record) error {
 	for _, rec := range records {
 		view := map[string]any{

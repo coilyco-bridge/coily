@@ -29,7 +29,7 @@ import (
 // "ops.aws", not "aws").
 //
 // Egress, when true, opts the wrapper into the per-binary egress allowlist
-// in pkg/egress. Today only brew has an entry; the other package managers
+// in cli-guard/egress. Today only brew has an entry; the other package managers
 // gain enforce mode in Phase 2 of issue #35.
 //
 // ScopeArgvHint, when non-nil, installs a fallback --commit-scope resolver

@@ -13,7 +13,7 @@ Composes with: `coily-meta-improvement` (the loop), `coily-skill-authoring` (rul
 
 The boundary is real if and only if all three hold. Drop any one and the boundary becomes a hopeful gesture, not a security artifact.
 
-- **Privileged-ops scope.** The set of operations that must route through coily is enumerable, documented in `SECURITY.md`, and enforced at runtime by `pkg/policy`. An op outside the documented scope that still mutates is a gap.
+- **Privileged-ops scope.** The set of operations that must route through coily is enumerable, documented in `SECURITY.md`, and enforced at runtime by `cli-guard/policy`. An op outside the documented scope that still mutates is a gap.
 - **Escape-hatch resistance.** No `SkipPolicy: true`, no `--bypass`, no environment-variable backdoor that lets the operator route around the gate. If escape hatches exist, they are themselves enumerated and audited.
 - **Audit trail.** Every invocation lands a row in `~/.coily/audit/<owner>-<repo>.jsonl`, regardless of whether the gate denied or allowed. The row carries enough to reconstruct what was attempted.
 
@@ -21,7 +21,7 @@ The boundary is real if and only if all three hold. Drop any one and the boundar
 
 Phrases or framings that survived previous design rounds because nobody tested them.
 
-- **"Plumbed through the gate makes it part of the boundary."** False. A verb that calls into `pkg/policy` is using the gate. The boundary includes only verbs whose policy actually constrains them. A pass-through that delegates 100% to argv-noop is plumbed but not gated.
+- **"Plumbed through the gate makes it part of the boundary."** False. A verb that calls into `cli-guard/policy` is using the gate. The boundary includes only verbs whose policy actually constrains them. A pass-through that delegates 100% to argv-noop is plumbed but not gated.
 - **"A summary stream is an off-host shadow of the audit log."** False. A summary loses the row-level fidelity required to reconstruct what happened. A real shadow preserves rows (rsync, S3 with object-lock, an append-only HTTP endpoint), not summaries.
   **Pin:** [coily#51](https://github.com/coilysiren/coily/issues/51), [coily#55](https://github.com/coilysiren/coily/issues/55).
 - **"Drop the feature, then build the replacement."** False. Replace-before-drop preserves the boundary mid-flight. Drop-then-replace creates a window where the boundary is degraded and any in-flight op uses the unguarded path.
@@ -48,7 +48,7 @@ Generic boundary mechanics (policy-before-verb, deny-by-default for destructive,
 Three questions. All three must be yes for the feature to be on the boundary.
 
 1. Does the verb mutate state outside the operator's local scope (cloud, repo, cluster, remote service)?
-2. Does `pkg/policy` reject some non-empty subset of valid argv? (If policy is allow-all, the gate is plumbed but not gated.)
+2. Does `cli-guard/policy` reject some non-empty subset of valid argv? (If policy is allow-all, the gate is plumbed but not gated.)
 3. Does the audit row carry enough to reconstruct what was attempted?
 
 If any answer is no, the feature uses the boundary but is not part of it. Document accordingly.
@@ -57,8 +57,8 @@ If any answer is no, the feature uses the boundary but is not part of it. Docume
 
 - `SECURITY.md` (in coily root) - the prose surface. Load-bearing claims live here.
 - `cmd/coily/security_claims_test.go` (`TestSecurityClaim_*`) - the runtime pin for prose claims.
-- `pkg/policy` - argv-validation gate.
-- `pkg/audit` - audit-row writer.
-- `pkg/verb`, `pkg/scope` - the verb-to-policy binding.
+- `cli-guard/policy` - argv-validation gate.
+- `cli-guard/audit` - audit-row writer.
+- `cli-guard/verb`, `cli-guard/scope` - the verb-to-policy binding.
 - `findings/` (in this directory) - dated write-once observations that produced the entries above.
 - Composes-with: `coily-meta-improvement`, `coily-shared-meta`, `coily-ops-investigation`, every `coily-ops-*-meta` skill.

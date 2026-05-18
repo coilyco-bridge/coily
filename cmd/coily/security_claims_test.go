@@ -47,7 +47,7 @@ func newSecurityClaimRunner(t *testing.T) *Runner {
 }
 
 // TestSecurityClaim_PolicyRejectsAllShellMetacharacters covers the
-// SECURITY.md claim that pkg/policy rejects shell metacharacters before they
+// SECURITY.md claim that cli-guard/policy rejects shell metacharacters before they
 // reach a subprocess. Walks every byte in the documented ShellMeta set so a
 // loosened matcher fails here even if the matcher's own unit test missed it.
 func TestSecurityClaim_PolicyRejectsAllShellMetacharacters(t *testing.T) {
@@ -74,7 +74,7 @@ func TestSecurityClaim_PolicyRejectsAllShellMetacharacters(t *testing.T) {
 // Walks the registered command tree built by the production Runner and fails
 // if any forbidden name lands as a top-level verb or under ssh. (Kubectl is
 // a passthrough that does not register subcommands in the tree; the deny
-// list at pkg/lockdown/defaults.yaml covers `kubectl exec` separately and is
+// list at cli-guard/lockdown/defaults.yaml covers `kubectl exec` separately and is
 // asserted by TestSecurityClaim_LockdownDeniesKubectlExec.)
 func TestSecurityClaim_NoEscapeHatchVerbs(t *testing.T) {
 	r := newSecurityClaimRunner(t)
@@ -514,7 +514,7 @@ func recordedSubcommands(c *cli.Command) []string {
 }
 
 // TestSecurityClaim_LockdownDeniesBareKubectlAndAwsAndGh verifies the deny
-// list shipped in pkg/lockdown/defaults.yaml covers bare invocation of
+// list shipped in cli-guard/lockdown/defaults.yaml covers bare invocation of
 // kubectl, aws, and gh - the three privileged-op binaries that route
 // through coily ops. The previous design enumerated read-verb allows and
 // write-verb denies separately because Claude Code's Bash(prefix:*) syntax
@@ -531,7 +531,7 @@ func recordedSubcommands(c *cli.Command) []string {
 // cli-guard contain the denies; the post-trim render shape is asserted by
 // TestApplyHookHandoffTrim_* in ops_lockdown_hookhandoff_test.go.
 func TestSecurityClaim_LockdownDeniesBareKubectlAndAwsAndGh(t *testing.T) {
-	// LoadDefaults parses pkg/lockdown/defaults.yaml (embedded). Asserting
+	// LoadDefaults parses cli-guard/lockdown/defaults.yaml (embedded). Asserting
 	// against the parsed struct (rather than substring-matching the raw
 	// file) means a typo in the file blows up here as a parse error rather
 	// than as a silent miss.

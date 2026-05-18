@@ -37,7 +37,7 @@ func (r *Runner) systemdUnitCommand(u systemdUnit) *cli.Command {
 		Name:  u.VerbName,
 		Usage: fmt.Sprintf("Operate the %s systemd unit on kai-server.", u.UnitName),
 		Description: fmt.Sprintf(`%s wraps systemctl/journalctl calls against the %s unit
-that runs on kai-server. Every call goes through pkg/ssh; no ssh
+that runs on kai-server. Every call goes through cli-guard/ssh; no ssh
 subprocess is spawned.`, u.VerbName, u.UnitName),
 		Commands: []*cli.Command{
 			r.systemdStatus(u),
