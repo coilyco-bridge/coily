@@ -1,6 +1,6 @@
 ---
 name: coily-meta
-description: Design surface for coily as a system. Carries the meta-improvement loop, authoring conventions, agent discipline, security-boundary discipline, investigation discipline, shared host-fleet and audit inventory, generic ops sequencing rules, and per-verb anti-signals (aws, gh, kubectl, systemctl, gaming-eco). Findings are GitHub issues on coilysiren/coily labelled `finding`. Triggers - coily, coily ops, coily lockdown, coily audit, audit finding, lockdown, escape hatch, route through coily, security boundary, threat model, anti-signal, sequencing rule, investigate, triage, debug, root cause, host fleet, kai-server, friends machine, audit log architecture, meta-improvement loop, finding, write-once.
+description: Design surface for coily (the operator CLI). Meta-improvement loop, security-boundary discipline, agent discipline, per-verb anti-signals. Findings live as GitHub issues with label `finding`. Always fires on "investigate", "triage", "debug". Triggers - coily, coily audit, audit finding, investigate, triage, debug.
 ---
 
 # coily-meta
