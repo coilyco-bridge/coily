@@ -195,7 +195,7 @@ Per-host, per-repo JSONL at `~/.coily/audit/<owner>-<repo>.jsonl`. One row per c
 ### 4.4 Cross-cutting anti-signals
 
 - **"scope auto-detect is transparent to the operator."** False. The `--commit-scope auto` default fails closed when cwd is not inside a tracked tree. Many ops verbs (game-server restarts, SSM parameter rotations, k8s queries) have nothing to do with the cwd's repo identity but still get rejected. The `_unrooted.jsonl` audit file accumulated 485 rows in 35 days. The error names the fix but does not apply it.
-  **Pin:** [coily#59](https://github.com/coilysiren/coily/issues/59).
+  **Pin:** finding [coily#229](https://github.com/coilysiren/coily/issues/229), forward [coily#59](https://github.com/coilysiren/coily/issues/59).
 
 ### 4.5 Coily design invariants
 
@@ -227,7 +227,7 @@ The boundary is real if and only if all three hold. Drop any one and the boundar
 - **"Drop the feature, then build the replacement."** False. Replace-before-drop preserves the boundary mid-flight. Drop-then-replace creates a window where the boundary is degraded.
 - **"Prose in `SECURITY.md` reflects current runtime."** Not unless a `TestSecurityClaim_*` test pins it. Doc-runtime drift is the default.
 - **"Context-free shell-metachar policy is the right default."** False given coily's direct-exec model. The metachar gate's threat model is "what if argv is shell-evaluated downstream"; coily executes via direct exec, no shell. For known content-flag values (jq expressions, markdown bodies, JSON literals) the metachars are inert in the actual execution path. Cost in the 35-day window: `gh.run.list` 96.6% rejected on jq's `|`, `gh issue` body args rejected on markdown `>`, `aws route53 change-resource-record-sets` rejected on JSON `{`.
-  **Pin:** [coily#60](https://github.com/coilysiren/coily/issues/60).
+  **Pin:** finding [coily#227](https://github.com/coilysiren/coily/issues/227), forward [coily#60](https://github.com/coilysiren/coily/issues/60).
 
 ### 5.3 Sequencing rules for boundary changes
 
@@ -303,7 +303,7 @@ Canonical instance of the security-boundary discipline. When that discipline col
 - **"iam allow is sufficient, the coily gate is belt-and-suspenders."** False. iam policies drift wider than the runtime needs. The coily gate enforces the intended surface, narrower than what iam permits. Drop coily and the effective surface jumps to iam-wide.
 - **"read-only aws verbs do not need an audit row."** False. Read-only verbs still exfiltrate. The audit row is the trail, not the gate. Trails apply to reads.
 - **"audit row is sufficient for read-only verbs."** False. The trail documents the leak. It does not prevent it.
-  **Pin:** [coily#58](https://github.com/coilysiren/coily/issues/58).
+  **Pin:** finding [coily#219](https://github.com/coilysiren/coily/issues/219), forward [coily#58](https://github.com/coilysiren/coily/issues/58).
 - **"if it's denied at the iam edge, coily does not need to deny it."** False. iam denials happen after the request is sent. Coily denials happen before. The pre-send denial keeps an opaque-but-rejected attempt out of CloudTrail and out of the threat model "what was tried."
 
 References: `cmd/coily/ops_aws.go`, audit-row verb prefix `ops.aws.`.
@@ -313,7 +313,7 @@ References: `cmd/coily/ops_aws.go`, audit-row verb prefix `ops.aws.`.
 High-volume (~1000 audit rows in a 35-day window), the single largest source of friction-driven workarounds. Anti-signals come from real audit-log evidence.
 
 - **"the wrapper exists, therefore the agent uses it."** False. The agent uses the path of least denial. Raw `gh` denied by Claude Code's permission boundary, without the deny message naming the wrapper, is the path the agent learns. 113 raw `gh` denials in 35d while `coily ops gh` was actively exercised 1000+ times. Lockdown is the mechanism that closes this. Rollout is the gap.
-  **Pin:** [coily#61](https://github.com/coilysiren/coily/issues/61).
+  **Pin:** finding [coily#221](https://github.com/coilysiren/coily/issues/221), forward [coily#61](https://github.com/coilysiren/coily/issues/61).
 
 References: `cmd/coily/ops_gh.go`, audit-row verb prefix `gh.` (currently) or `ops.gh.` (post-#50).
 
@@ -322,7 +322,7 @@ References: `cmd/coily/ops_gh.go`, audit-row verb prefix `gh.` (currently) or `o
 Lower-volume than gh or aws but failure-dense (100% failure rate on `kubectl.get` in the 35-day window). Exposes the pass-through-stderr-loss pattern that likely affects every pass-through verb.
 
 - **"the audit row's `error` field captures the underlying tool's error."** False for pass-through verbs. For verbs accepted by the gate but failing downstream, the field captures only the Go process exit (`error: "exit status 1"`). The downstream tool's stderr is not durable. This affects every pass-through, not just kubectl, but kubectl shows it cleanest.
-  **Pin:** [coily#63](https://github.com/coilysiren/coily/issues/63).
+  **Pin:** finding [coily#225](https://github.com/coilysiren/coily/issues/225), forward [coily#63](https://github.com/coilysiren/coily/issues/63).
 
 References: `cmd/coily/ops_kubectl.go`, audit-row verb prefix `kubectl.` (currently) or `ops.kubectl.` (post-#50).
 
@@ -331,9 +331,9 @@ References: `cmd/coily/ops_kubectl.go`, audit-row verb prefix `kubectl.` (curren
 Lower-volume than the `ops` passthroughs but failure-dense at hosts where the per-unit sudoers fragment does not strict-match every verb in the closed set. The cleanest demonstration of the boundary-vs-perimeter question.
 
 - **"per-unit sudoers carveouts are the gate."** False. coily is the gate. Per-unit NOPASSWD lists in `/etc/sudoers.d/<repo>` duplicate the closed verb set already enforced inside coily, and drift via sudoers strict-match: a fragment that lists `restart` + `status` for one service silently fails to cover `stop` / `disable` / `daemon-reload`, or covers `<service>.service` but not the matching `.timer`. The duplication is the failure mode, not the safety.
-  **Pin:** [coily#203](https://github.com/coilysiren/coily/issues/203).
+  **Pin:** finding [coily#233](https://github.com/coilysiren/coily/issues/233), forward [coily#203](https://github.com/coilysiren/coily/issues/203).
 - **"inner sudo works on every host."** False on non-tty sessions (Claude Code Bash tool, systemd-spawned shells, cron) when the host lacks a per-unit NOPASSWD rule that strict-matches the full argv. Sudo refuses to prompt without a tty and the verb fails with `sudo: a terminal is required to read the password`.
-  **Pin:** [coily#203](https://github.com/coilysiren/coily/issues/203).
+  **Pin:** finding [coily#233](https://github.com/coilysiren/coily/issues/233), forward [coily#203](https://github.com/coilysiren/coily/issues/203).
 
 Friend-shippable host fleet rule: every coily-managed host carries `(ALL) NOPASSWD: /home/linuxbrew/.linuxbrew/bin/coily` (or the equivalent install path). Hosts without that grant fall back to per-unit sudoers and the strict-match failure mode is in play.
 
@@ -344,7 +344,7 @@ References: `cmd/coily/ops_systemctl.go`, `cmd/coily/ops_systemctl_test.go`, clo
 Operates the eco-server systemd unit on kai-server via the ssh transport. Failures typically split into transport-layer (ssh, sudo, key path) and game-server-state.
 
 - **"remote-side transport errors surface usefully through coily."** False. They surface verbatim. Verbatim is fidelity, not actionability. `coily eco status` failed 6/6 with `ssh: no authentication method available (ssh-agent unreachable and no key path)` - correct, faithful, not actionable.
-  **Pin:** [coily#62](https://github.com/coilysiren/coily/issues/62).
+  **Pin:** finding [coily#218](https://github.com/coilysiren/coily/issues/218), forward [coily#62](https://github.com/coilysiren/coily/issues/62).
 
 References: `cmd/coily/ops_eco.go`, `cmd/coily/ops_eco_mod.go`, `cli-guard/ssh` for the transport layer, audit-row verb prefix `eco.` or `gaming.eco.`.
 
