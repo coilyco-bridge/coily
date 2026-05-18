@@ -54,13 +54,19 @@ type ptEntry struct {
 var ptOps = []ptEntry{
 	{Bin: "aws", VerbName: "ops.aws", Egress: true},
 	{Bin: "gh", VerbName: "ops.gh", Egress: true, ScopeArgvHint: ghRepoScopeHint, ArgvRewriter: rewriteGHForRESTAndJQFile},
-	{Bin: "kubectl", VerbName: "ops.kubectl"},
-	{Bin: "flyctl", VerbName: "ops.flyctl"},
+	{Bin: "kubectl", VerbName: "ops.kubectl", Egress: true},
+	{Bin: "flyctl", VerbName: "ops.flyctl", Egress: true},
 }
 
 // ptTopLevel is the pass-through set mounted at the coily root. Each entry
 // becomes a top-level verb (`coily docker ...`, `coily tailscale ...`).
 // These don't share a category with the ops/pkg groups.
+//
+// Neither entry sets Egress: true on purpose. The docker and tailscale CLIs
+// talk to their respective local daemons (dockerd, tailscaled) over a unix
+// socket. The daemon does the actual outbound HTTPS, so HTTPS_PROXY env vars
+// set on the CLI never reach the code that opens the network connection.
+// Wiring the proxy here would start a listener nothing connects to.
 var ptTopLevel = []ptEntry{
 	{Bin: "docker"},
 	{Bin: "tailscale"},
