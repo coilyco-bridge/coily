@@ -73,12 +73,28 @@ func (r *Runner) factorioServerDir() string {
 // factorioRemote runs a single shell command on kai-server and streams
 // stdout/stderr back. cmd is composed from compile-time string literals
 // plus a small set of validated flags - never raw user input.
+//
+// When invoked on kai-server itself (hostIsLocal), the cmd runs through
+// `bash -c` locally to skip an ssh-to-self that doesn't carry auth in
+// non-interactive environments. `bash -c` is required (not r.Runner.Exec
+// of an argv) because call sites compose shell-feature strings: pipes
+// into jq, `if [ -f X ]; then ... fi` guards, `2>/dev/null || echo`
+// fallbacks. Closes coilysiren/coily#262.
 func (r *Runner) factorioRemote(cmd string) cli.ActionFunc {
 	return func(ctx context.Context, _ *cli.Command) error {
 		host := r.Cfg.KaiServer.TailscaleHost
+		if host == "" {
+			return fmt.Errorf("factorio: kai_server.tailscale_host not configured")
+		}
+		if hostIsLocal(host) {
+			if err := r.Runner.Exec(ctx, "bash", "-c", cmd); err != nil {
+				return fmt.Errorf("factorio: local exec: %w", err)
+			}
+			return nil
+		}
 		user := r.Cfg.KaiServer.SSHUser
-		if host == "" || user == "" {
-			return fmt.Errorf("factorio: kai_server.tailscale_host or ssh_user not configured")
+		if user == "" {
+			return fmt.Errorf("factorio: kai_server.ssh_user not configured")
 		}
 		if err := r.SSH.Stream(ctx, host, user, cmd, os.Stdout, os.Stderr); err != nil {
 			return fmt.Errorf("factorio: remote exec: %w", err)
