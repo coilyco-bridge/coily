@@ -137,14 +137,14 @@ The v1 distribution story is "laptop builds, scps to kai-server, sudo installs."
 Shape:
 
 1. Write new verb in the coily repo on the laptop. Commit, push.
-2. **Adversarial review at the commit gate** before anything merges to `main`. A second-opinion agent (ChatGPT via `codex` CLI, or Gemini via `gemini` CLI) reads the diff cold, with no access to the writer's context window, and either approves or blocks. Only approved diffs flow to CI. The reviewer has no ability to modify code, only approve or reject. A prompt injection that steered the writer does not steer the reviewer because the reviewer's context is independent.
+2. **Adversarial review at the commit gate** before anything merges to `main`. A second-opinion agent (Gemini via `gemini` CLI) reads the diff cold, with no access to the writer's context window, and either approves or blocks. Only approved diffs flow to CI. The reviewer has no ability to modify code, only approve or reject. A prompt injection that steered the writer does not steer the reviewer because the reviewer's context is independent.
 3. CI (GitHub Actions) builds + tests + cross-compiles (darwin-arm64, linux-arm64). CI signs the binaries with a private key held only in GitHub Secrets.
 4. Signed binaries published to a known location (GH Releases or a private S3 bucket).
 5. `coily self-update` fetches latest, verifies the signature against a public key compiled into the running binary, and swaps itself in. Install fails if the signature doesn't verify. Cosign is the usual tool for this.
 
 The adversarial reviewer is the piece that actually defends against prompt injection. Binary signing closes "malicious binary at the distribution URL" even if the storage bucket is compromised, but does nothing against "bad diff written and approved by the same writer." The two mechanisms compose.
 
-Status as of 2026-04-21: Kai wants this but is not setting up codex / gemini today. Revisit once the v1 command surface is useful day-to-day.
+Status as of 2026-05-19: Kai wants this but is not setting up gemini today. Revisit once the v1 command surface is useful day-to-day.
 
 ## Reference: current Claude Code deny rules
 
