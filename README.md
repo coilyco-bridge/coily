@@ -24,7 +24,7 @@ coily is never published as a prebuilt binary; every install is a local build. C
 
 ```
 make install            # macOS, sudo-install /usr/local/bin/coily
-brew install coilysiren/tap/coily   # bootstrap-only on a fresh laptop
+brew tap coilysiren/coily https://github.com/coilysiren/coily && brew install coilysiren/coily/coily
 make install-windows    # elevated shell, installs C:\Program Files\coily\coily.exe
 make deploy-server      # linux cross-compile + scp + sudo-install on kai-server
 make dev                # ./bin/coily-dev for iteration (not on PATH)

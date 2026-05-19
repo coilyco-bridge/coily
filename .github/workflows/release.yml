@@ -1,31 +1,20 @@
 name: release
 
-# Fully automatic release on every push to main:
+# Tag-only release on every push to main. Conventional commits drive the
+# semver bump. Tag is created at the pushed commit, GH Release is cut
+# with the auto-generated changelog, then bump-formula rewrites the
+# Formula's url+tag+revision line via the Contents API (web-flow signed,
+# satisfies the signed-commits ruleset).
 #
-# 1. Every commit triggers at least a patch bump. Conventional-commit
-#    subjects bump higher:
-#      <plain>    -> patch       fix: ...     -> patch
-#      feat: ...  -> minor       feat!: ...   -> major  (also `BREAKING CHANGE:`)
-# 2. A tag is created and pushed.
-# 3. A GitHub Release is created with the auto-generated changelog.
-# 4. The new tarball sha256 is computed, then a repository_dispatch is
-#    fired to coilysiren/homebrew-tap whose own bump-coily workflow
-#    rewrites Formula/coily.rb via the Contents API. The receiver lives
-#    in homebrew-tap so the commit is signed by GitHub's web-flow key
-#    (only installation-token API commits are auto-signed) and clears
-#    the signed-commits ruleset.
+# Brew install path is direct-repo (no aggregator tap):
+#   brew tap coilysiren/coily https://github.com/coilysiren/coily
+#   brew install coilysiren/coily/coily
 #
-# Unlike repo-recall, there is no source-tree version bump: coily's
-# `main.Version` is set at build time via ldflags by the Formula, so
-# the git tag is the only version artifact.
+# `main.Version` is set at build time via ldflags by the Formula, so the
+# git tag is the only version artifact.
 #
-# All `${{ }}` interpolations below are repo-controlled (action outputs,
-# job needs) - no github.event.* untrusted input flows into run blocks.
-#
-# Manual setup (one-time, requires Kai):
-#   gh secret set HOMEBREW_TAP_TOKEN --repo coilysiren/coily
-#     value: a fine-grained PAT scoped to coilysiren/homebrew-tap with
-#            `Repository permissions -> Contents: Read and write`
+# All `${{ }}` interpolations are repo-controlled - no github.event.*
+# untrusted input flows into a run block.
 
 on:
   push:
@@ -103,12 +92,22 @@ jobs:
             bin/coily-windows-${{ matrix.arch }}.exe
             bin/coily-windows-${{ matrix.arch }}.exe.sha256
 
-  bump-tap:
+  bump-formula:
+    # Rewrite Formula/coily.rb's url line to point at the just-cut tag +
+    # revision. Brew reads the formula from the tap clone (latest main),
+    # so the rewrite has to land back here. Commit message carries the
+    # skip-CI marker so this push doesn't re-trigger the release workflow.
+    # The GITHUB_TOKEN Contents API commit is web-flow signed and clears
+    # the signed-commits ruleset.
     needs: release
     if: ${{ needs.release.outputs.tag != '' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       TAG: ${{ needs.release.outputs.tag }}
+      REPO: ${{ github.repository }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out the release tag
         uses: actions/checkout@v4
@@ -120,31 +119,24 @@ jobs:
         run: |
           set -euo pipefail
           revision=$(git rev-parse HEAD)
-          url="ssh://git@github.com/coilysiren/coily.git"
           echo "revision=$revision" >> "$GITHUB_OUTPUT"
-          echo "url=$url" >> "$GITHUB_OUTPUT"
 
-      - name: Dispatch bump to homebrew-tap
+      - name: Rewrite Formula url via Contents API
         env:
-          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-          TAG: ${{ needs.release.outputs.tag }}
-          NEW_URL: ${{ steps.rev.outputs.url }}
           NEW_REVISION: ${{ steps.rev.outputs.revision }}
-        # The homebrew-tap ruleset requires signed commits. A PAT-driven
-        # `git push` or Contents-API call from this runner produces an
-        # unsigned commit and is rejected. Instead we trigger the
-        # bump-coily workflow in homebrew-tap, where the built-in
-        # GITHUB_TOKEN (an installation token) drives the Contents API
-        # and the resulting commit is web-flow-signed by GitHub.
-        #
-        # Payload carries the .git remote URL plus the commit revision at
-        # the tag - the tap rewrites Formula/coily.rb to brew's git URL
-        # strategy (url+tag+revision), avoiding GitHub's anonymous-archive
-        # rate-limit bucket. See homebrew-tap#26.
         run: |
           set -euo pipefail
-          gh api -X POST repos/coilysiren/homebrew-tap/dispatches \
-            -f event_type=bump-coily \
-            -f "client_payload[tag]=${TAG}" \
-            -f "client_payload[url]=${NEW_URL}" \
-            -f "client_payload[revision]=${NEW_REVISION}"
+          path=Formula/coily.rb
+          tmp=$(mktemp -d)
+          curl -fsSL \
+            "https://raw.githubusercontent.com/${REPO}/main/${path}" \
+            > "$tmp/coily.rb"
+          new_line="  url \"ssh://git@github.com/${REPO}.git\", tag: \"${TAG}\", revision: \"${NEW_REVISION}\""
+          sed -i "s|^  url \".*|${new_line}|" "$tmp/coily.rb"
+          cur_sha=$(gh api "repos/${REPO}/contents/${path}?ref=main" --jq .sha)
+          new_b64=$(base64 -w0 < "$tmp/coily.rb")
+          gh api -X PUT "repos/${REPO}/contents/${path}" \
+            -f message="chore(formula): bump to ${TAG} [skip ci]" \
+            -f content="$new_b64" \
+            -f sha="$cur_sha" \
+            -f branch=main
