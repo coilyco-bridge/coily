@@ -328,21 +328,37 @@ func (r *Runner) ecoWorldSnapshotCommand() *cli.Command {
 	}
 }
 
-// ecoRemote returns a cli.ActionFunc that runs the given argv on kai-server
-// through cli-guard/ssh (golang.org/x/crypto/ssh under the hood, no ssh
-// subprocess). The remote command is composed as a single space-joined
-// string because crypto/ssh's session API takes one string (which the
-// remote shell parses), the same shape ssh(1) uses. Every element of
-// remoteArgv is hardcoded at compile time in this file. No user input
-// reaches here, so no runtime metacharacter risk from this path. If we ever
-// take user input, add policy.ValidateArgSlice at the entry point.
+// ecoRemote returns a cli.ActionFunc that runs the given argv on
+// kai-server, either through cli-guard/ssh (off-host caller) or
+// directly via r.Runner.Exec (on-host caller, detected via hostIsLocal).
+// The local branch skips an ssh-to-self that doesn't carry auth in
+// non-interactive environments. Closes coilysiren/coily#261.
+//
+// Every element of remoteArgv is hardcoded at compile time in this
+// file. No user input reaches here, so no runtime metacharacter risk
+// from either path. If we ever take user input, add
+// policy.ValidateArgSlice at the entry point.
 func (r *Runner) ecoRemote(remoteArgv []string) cli.ActionFunc {
 	return func(ctx context.Context, _ *cli.Command) error {
 		host := r.Cfg.KaiServer.TailscaleHost
-		user := r.Cfg.KaiServer.SSHUser
-		if host == "" || user == "" {
-			return fmt.Errorf("eco: kai_server.tailscale_host or ssh_user not configured")
+		if host == "" {
+			return fmt.Errorf("eco: kai_server.tailscale_host not configured")
 		}
+		if hostIsLocal(host) {
+			if len(remoteArgv) == 0 {
+				return fmt.Errorf("eco: empty argv")
+			}
+			if err := r.Runner.Exec(ctx, remoteArgv[0], remoteArgv[1:]...); err != nil {
+				return fmt.Errorf("eco: local %s: %w", remoteArgv[0], err)
+			}
+			return nil
+		}
+		user := r.Cfg.KaiServer.SSHUser
+		if user == "" {
+			return fmt.Errorf("eco: kai_server.ssh_user not configured")
+		}
+		// crypto/ssh's session API takes one string (which the remote
+		// shell parses), the same shape ssh(1) uses.
 		cmd := strings.Join(remoteArgv, " ")
 		// Stream stdout/stderr live. Some eco verbs (`tail --follow`) run
 		// indefinitely, so buffering the whole output is wrong.
