@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/coilysiren/cli-guard/audit"
+	"github.com/coilysiren/cli-guard/decision"
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
@@ -219,7 +220,14 @@ func (a *verbAcc) addArgvSample(argv []string) {
 	if len(a.bucket.ArgvSamples) >= argvSampleCap {
 		return
 	}
-	joined := strings.Join(argv, " ")
+	// Cross-surface redaction (coily#252, forward action for finding
+	// #228): the dashboard is a less-restricted surface than the on-disk
+	// JSONL, so secret-flag values get redacted before joining
+	// regardless of the row's stored data_security tier. Preserves the
+	// verb path + non-secret flags so sample diversity still informs
+	// the dashboard.
+	safe := audit.RedactArgv(argv, audit.DataSecurityHigh, decision.RedactPolicy())
+	joined := strings.Join(safe, " ")
 	if _, seen := a.argvSeen[joined]; seen {
 		return
 	}

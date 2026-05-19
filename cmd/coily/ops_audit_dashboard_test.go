@@ -146,3 +146,34 @@ func stringSliceEqual(a, b []string) bool {
 	}
 	return true
 }
+
+// TestAddArgvSample_RedactsSecretFlagValues pins coily#252 (forward
+// action for finding #228): argv re-published into the dashboard goes
+// through cross-surface redaction, so a SecureString put-parameter
+// invocation does not leak the value into the JSON output.
+func TestAddArgvSample_RedactsSecretFlagValues(t *testing.T) {
+	acc := &verbAcc{argvSeen: map[string]struct{}{}}
+	acc.addArgvSample([]string{
+		"coily", "ops", "aws", "ssm", "put-parameter",
+		"--name", "/tailscale/oauth/backend/client-id",
+		"--value", "tskey-client-VERY_SECRET_HERE",
+		"--type", "SecureString",
+		"--overwrite",
+	})
+	if len(acc.bucket.ArgvSamples) != 1 {
+		t.Fatalf("ArgvSamples length = %d, want 1", len(acc.bucket.ArgvSamples))
+	}
+	sample := acc.bucket.ArgvSamples[0]
+	if strings.Contains(sample, "VERY_SECRET_HERE") {
+		t.Errorf("argv sample leaked plaintext secret: %q", sample)
+	}
+	if !strings.Contains(sample, "[REDACTED]") {
+		t.Errorf("argv sample missing redaction marker: %q", sample)
+	}
+	// Non-secret tokens should survive redaction.
+	for _, want := range []string{"coily", "ops", "aws", "ssm", "put-parameter", "--type", "SecureString"} {
+		if !strings.Contains(sample, want) {
+			t.Errorf("argv sample missing non-secret token %q: %q", want, sample)
+		}
+	}
+}

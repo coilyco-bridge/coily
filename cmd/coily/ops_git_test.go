@@ -276,3 +276,40 @@ func TestFindRecordByShortID_RoundTrip(t *testing.T) {
 		t.Errorf("missing file: got %v, want errNotFound", err)
 	}
 }
+
+// TestWriteRecordsYAML_RedactsSecretFlagValues pins coily#252 (forward
+// action for finding #228): argv re-published into audit-show output
+// goes through cross-surface redaction, so a SecureString put-parameter
+// invocation does not leak the value into the YAML.
+func TestWriteRecordsYAML_RedactsSecretFlagValues(t *testing.T) {
+	rec := audit.Record{
+		ID:        "019e0000-0000-0000-0000-000000000001",
+		Timestamp: 1778744466,
+		Verb:      "ops.aws.ssm.put-parameter",
+		Decision:  audit.DecisionAccept,
+		Argv: []string{
+			"coily", "ops", "aws", "ssm", "put-parameter",
+			"--name", "/tailscale/oauth/backend/client-id",
+			"--value", "tskey-client-VERY_SECRET_HERE",
+			"--type", "SecureString",
+			"--overwrite",
+		},
+	}
+	var buf bytes.Buffer
+	if err := writeRecordsYAML(&buf, []audit.Record{rec}); err != nil {
+		t.Fatalf("writeRecordsYAML: %v", err)
+	}
+	out := buf.String()
+	if strings.Contains(out, "VERY_SECRET_HERE") {
+		t.Errorf("YAML leaked plaintext secret:\n%s", out)
+	}
+	if !strings.Contains(out, "[REDACTED]") {
+		t.Errorf("YAML missing redaction marker:\n%s", out)
+	}
+	// Non-secret tokens stay visible (so audit-show remains useful).
+	for _, want := range []string{"put-parameter", "SecureString", "--overwrite"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("YAML missing non-secret token %q:\n%s", want, out)
+		}
+	}
+}

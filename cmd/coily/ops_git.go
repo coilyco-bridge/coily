@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/coilysiren/cli-guard/audit"
+	"github.com/coilysiren/cli-guard/decision"
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
@@ -503,8 +504,17 @@ func findRecordByShortID(path string, ts int64, short string) (*audit.Record, er
 // writeRecordsYAML emits each record as a `trailer:` + `record:` block,
 // matching the trailer shape carried by audit.Record's Trailer/TrailerLine
 // helpers (see cli-guard/audit).
+//
+// Cross-surface redaction (coily#252, forward action for finding #228):
+// argv is re-published into a less-restricted surface (audit-show output
+// is operator-piped anywhere), so secret-flag values get redacted before
+// emission regardless of the row's stored data_security tier. The high-
+// tier redactor blanks `--value`, `--password`, `--token`, `--secret`,
+// etc., per decision.RedactPolicy.
 func writeRecordsYAML(w io.Writer, records []audit.Record) error {
+	policy := decision.RedactPolicy()
 	for _, rec := range records {
+		safeArgv := audit.RedactArgv(rec.Argv, audit.DataSecurityHigh, policy)
 		view := map[string]any{
 			"trailer": rec.Trailer(),
 			"record": map[string]any{
@@ -512,7 +522,7 @@ func writeRecordsYAML(w io.Writer, records []audit.Record) error {
 				"ts":           rec.Timestamp,
 				"ts_iso":       time.Unix(rec.Timestamp, 0).UTC().Format(time.RFC3339),
 				"verb":         rec.Verb,
-				"argv":         rec.Argv,
+				"argv":         safeArgv,
 				"decision":     rec.Decision,
 				"exit_code":    rec.ExitCode,
 				"duration_ms":  rec.DurationMS,
