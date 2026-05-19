@@ -202,16 +202,38 @@ func (r *Runner) forgejoDoctorCheckCommand() *cli.Command {
 	}
 }
 
-// runForgejo is the single ssh-stream call shared by every forgejo leaf.
-// Pinned to namespace=forgejo, pod-selector=deploy/forgejo. The verb argv is
-// the forgejo subcommand (e.g. ["admin", "user", "list"]).
+// runForgejo dispatches every forgejo leaf to either a local exec or an
+// ssh stream to kai-server. Pinned to namespace=forgejo,
+// pod-selector=deploy/forgejo. The verb argv is the forgejo subcommand
+// (e.g. ["admin", "user", "list"]).
+//
+// When invoked on kai-server itself (detected via hostIsLocal), the
+// kubectl command runs directly through r.Runner.Exec to skip an
+// ssh-to-self that doesn't carry authentication in non-interactive
+// environments. Same pattern as systemdRemote (coilysiren/coily#135),
+// closing coilysiren/coily#260.
 func (r *Runner) runForgejo(ctx context.Context, forgejoArgs []string) error {
 	host := r.Cfg.KaiServer.TailscaleHost
+	if host == "" {
+		return fmt.Errorf("ops forgejo: kai_server.tailscale_host must be set in config")
+	}
+	if hostIsLocal(host) {
+		argv := forgejoLocalArgv(forgejoArgs)
+		return r.Runner.Exec(ctx, argv[0], argv[1:]...)
+	}
 	user := r.Cfg.KaiServer.SSHUser
-	if host == "" || user == "" {
-		return fmt.Errorf("ops forgejo: kai_server.tailscale_host / ssh_user must be set in config")
+	if user == "" {
+		return fmt.Errorf("ops forgejo: kai_server.ssh_user must be set in config")
 	}
 	return r.SSH.Stream(ctx, host, user, renderForgejoCmd(forgejoArgs), os.Stdout, os.Stderr)
+}
+
+// forgejoLocalArgv returns the argv used when forgejo runs on kai-server
+// itself. No shell layer involved, so no POSIX quoting; the args go
+// straight into execve. Shape mirrors renderForgejoCmd's pinned target.
+func forgejoLocalArgv(forgejoArgs []string) []string {
+	argv := []string{"k3s", "kubectl", "-n", "forgejo", "exec", "deploy/forgejo", "--", "forgejo"}
+	return append(argv, forgejoArgs...)
 }
 
 // renderForgejoCmd assembles the remote command string sent to kai-server.

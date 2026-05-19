@@ -78,6 +78,28 @@ func TestRenderForgejoCmd_AdminUserCreatePinsRandomAndMustChange(t *testing.T) {
 	}
 }
 
+// TestForgejoLocalArgv_PinnedTarget asserts the local-exec argv shape
+// matches the rendered remote command's pinned namespace and pod selector,
+// and that no shell quoting leaks into argv (execve sees the raw bytes).
+// Closes coilysiren/coily#260.
+func TestForgejoLocalArgv_PinnedTarget(t *testing.T) {
+	got := forgejoLocalArgv([]string{"admin", "user", "list"})
+	want := []string{"k3s", "kubectl", "-n", "forgejo", "exec", "deploy/forgejo", "--", "forgejo", "admin", "user", "list"}
+	if len(got) != len(want) {
+		t.Fatalf("argv len = %d, want %d: got %v", len(got), len(want), got)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("argv[%d] = %q, want %q", i, got[i], want[i])
+		}
+	}
+	for _, a := range got {
+		if strings.HasPrefix(a, "'") && strings.HasSuffix(a, "'") {
+			t.Errorf("local argv element %q is POSIX-quoted; quoting is for the ssh path only", a)
+		}
+	}
+}
+
 func TestValidateForgejoUsername(t *testing.T) {
 	ok := []string{"peer", "kai-siren", "k.s", "user_1", "AlphaBeta", "a"}
 	for _, n := range ok {
