@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/coilysiren/cli-guard/verb"
@@ -70,9 +72,15 @@ func validateUnitName(unit string) error {
 // intended call-site is the remote coily that local
 // `coily ssh <alias> -- coily systemctl <verb> <unit>` dispatches to.
 // Direct `coily systemctl ...` use from a Mac is a no-op without local
-// systemd. Sudo discipline: status reads cached systemd state
-// unprivileged (sudo trips a tty prompt on non-tty sessions, per
-// coilysiren/coily#144); mutating verbs are sudo-prefixed.
+// systemd.
+//
+// Sudo discipline (coilysiren/coily#203): mutating verbs self-elevate by
+// re-execing the coily binary under outer sudo, then run `systemctl ...`
+// directly inside the root call. This relies on a broad
+// `(ALL) NOPASSWD: <coily-path>` sudoers rule on the host: coily is the
+// security boundary, so per-unit sudoers carveouts duplicate the gate
+// and drift. Status reads cached systemd state unprivileged (sudo trips
+// a tty prompt on non-tty sessions, coilysiren/coily#144).
 func (r *Runner) systemctlCommand() *cli.Command {
 	cmds := make([]*cli.Command, 0, len(systemctlVerbs))
 	for _, v := range systemctlVerbs {
@@ -88,6 +96,48 @@ sudo-prefixed. Intended for the remote side of
 ` + "`coily ssh <alias> -- coily systemctl <verb> <unit>`" + `.`,
 		Commands: cmds,
 	}
+}
+
+// buildSelfElevateArgv composes the outer-sudo re-exec argv. Pure helper
+// so the shape is unit-testable without a real sudo. Pinned form:
+//
+//	sudo --non-interactive <coilyPath> systemctl <verb> [<unit>]
+//
+// No inner sudo, no shell, no `sudo -i`. --non-interactive is explicit so
+// a host missing the NOPASSWD grant fails fast instead of dangling on a
+// hidden password prompt (the coily#203 motivating bug).
+func buildSelfElevateArgv(coilyPath, name, unit string, needsUnit bool) []string {
+	argv := []string{"sudo", "--non-interactive", coilyPath, "systemctl", name}
+	if needsUnit {
+		argv = append(argv, unit)
+	}
+	return argv
+}
+
+// systemctlSelfElevate re-execs the coily binary under outer sudo so the
+// inner systemctl call can run as root without a per-unit sudoers rule.
+// The audit row for the outer invocation is already in flight by the
+// time we get here (WrapVerb wraps Action); the inner root coily writes
+// its own row when it runs. Two rows, both reconstructable, mirror the
+// privilege transition.
+//
+// Path resolution: exec.LookPath("coily") so we pick the PATH-resolved
+// symlink (e.g. /home/linuxbrew/.linuxbrew/bin/coily on kai-server) that
+// the sudoers rule strict-matches. Falls back to os.Executable() if
+// LookPath misses, with a clear error if both fail.
+func (r *Runner) systemctlSelfElevate(ctx context.Context, name, unit string, needsUnit bool) error {
+	coilyPath, err := exec.LookPath("coily")
+	if err != nil {
+		coilyPath, err = os.Executable()
+		if err != nil {
+			return fmt.Errorf("systemctl %s: locate coily binary for sudo re-exec: %w", name, err)
+		}
+	}
+	argv := buildSelfElevateArgv(coilyPath, name, unit, needsUnit)
+	if err := r.Runner.Exec(ctx, argv[0], argv[1:]...); err != nil {
+		return fmt.Errorf("systemctl %s: sudo re-exec failed (does this host grant `NOPASSWD: %s` for the invoking user?): %w", name, coilyPath, err)
+	}
+	return nil
 }
 
 func (r *Runner) systemctlVerb(name, usage string, needsUnit, noSudo bool, build func(string) []string) *cli.Command {
@@ -119,8 +169,8 @@ func (r *Runner) systemctlVerb(name, usage string, needsUnit, noSudo bool, build
 						return fmt.Errorf("systemctl %s: takes no args, got %d", name, c.Args().Len())
 					}
 					argv := build(unit)
-					if !noSudo {
-						argv = append([]string{"sudo"}, argv...)
+					if !noSudo && os.Geteuid() != 0 {
+						return r.systemctlSelfElevate(ctx, name, unit, needsUnit)
 					}
 					return r.Runner.Exec(ctx, argv[0], argv[1:]...)
 				},
