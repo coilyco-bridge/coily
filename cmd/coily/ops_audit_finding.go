@@ -39,8 +39,8 @@ func (r *Runner) auditFindingCommand() *cli.Command {
 		Description: `finding emits a self-contained walkthrough that takes an agent with no
 prior coily context from a single flagged audit row to a filed GitHub
 issue on coilysiren/coily with label ` + "`finding`" + `. A "finding" is the
-write-once observation issue that feeds coily's meta-improvement loop
-(see coily-meta/SKILL.md).
+observation issue that feeds coily's meta-improvement loop (see
+coily-meta/SKILL.md).
 
 Use this verb when a human has flagged a row in the audit log as a
 violation - a refusal that should not have been needed, an accept that
@@ -176,16 +176,16 @@ func wtBackground(w io.Writer) {
 	fln(w, "Background")
 	fln(w, "----------")
 	fln(w, "coily is the operator CLI for Kai's homelab. Every invocation lands one")
-	fln(w, "JSONL row in the audit log. A `finding` is a write-once GitHub issue on")
+	fln(w, "JSONL row in the audit log. A `finding` is a GitHub issue on")
 	fln(w, "coilysiren/coily, labelled `finding`, that records something the audit")
 	fln(w, "log surfaced - a denial that should not have been needed, an accept that")
 	fln(w, "should have been a denial, or a near-miss the gate caught but the threat")
 	fln(w, "model missed. Findings feed the meta-improvement loop documented in")
 	fln(w, "coily-meta/SKILL.md. The issue is the artifact, not a file on disk.")
 	fln(w)
-	fln(w, "Write-once discipline: do not edit the issue body after creation. State")
-	fln(w, "that changes later (a rule lands, a test pins it, an upstream patch")
-	fln(w, "removes the cause) goes in comments, not the body.")
+	fln(w, "The body should capture the observation as it was made (the audit row's")
+	fln(w, "facts, what was observed, why it slipped, the rule it implies). Edits and")
+	fln(w, "comments are both fine after that - GitHub issues are mutable on purpose.")
 	fln(w)
 }
 
@@ -277,8 +277,7 @@ func wtStep3FileIssue(w io.Writer, a findingArgs, area, slug string) {
 func wtStep4Stop(w io.Writer) {
 	fln(w, "Step 4 - Stop")
 	fln(w, "-------------")
-	fln(w, "Findings are write-once. Do not edit the issue body after creation. Do")
-	fln(w, "not promote the finding to an anti-signal or sequencing rule in any")
+	fln(w, "Do not promote the finding to an anti-signal or sequencing rule in any")
 	fln(w, "SKILL.md - that step happens in a separate review, by a human or a")
 	fln(w, "later agent, with the finding issue as the evidence pin. Your boundary")
 	fln(w, "ends at Step 3.")

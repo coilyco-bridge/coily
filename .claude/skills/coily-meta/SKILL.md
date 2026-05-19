@@ -44,7 +44,7 @@ A finding is a GitHub issue on coilysiren/coily with label `finding`. Body schem
 
 Title: `finding: <one-line summary>`. Label: `finding`.
 
-Findings are write-once in discipline: do not edit the issue body after creation. State that changes after creation (a rule lands, a test pins it, an upstream patch removes the cause) goes in comments, not in the body. The body preserves the observation. Comments preserve the trail.
+The body should capture the observation as it was made: the audit row's facts, what was observed, why it slipped, the rule it implies. After that, edits and comments are both fine - GitHub issues are mutable and resolution updates (linked commits, "fixed in vX.Y.Z", reframing) are useful trail.
 
 `coily audit finding` walks an agent through the file step from a single audit-row id.
 
@@ -286,7 +286,7 @@ This skill is a reference doc and a routing surface. It does not embed orchestra
 
 ## 8. Where the data lives
 
-- **Findings.** GitHub issues on coilysiren/coily with label `finding`. Index: `gh issue list --repo coilysiren/coily --label finding --state all`. Body is write-once; followup goes in comments.
+- **Findings.** GitHub issues on coilysiren/coily with label `finding`. Index: `gh issue list --repo coilysiren/coily --label finding --state all`. Body captures the observation; resolution and followup land in comments or body edits as the trail accumulates.
 - **Audit rows.** `~/.coily/audit/<owner>-<repo>.jsonl`. Per-host, append-only. Not copied into this skill or its issues.
 - **Aggregations across findings.** Write a Python helper in `scripts/`. Do not hand-curate aggregated views into this skill.
 - **This skill.** Bounded. Anti-signals, sequencing rules, references. No raw data, no per-day logs, no aggregated reports.
