@@ -69,3 +69,10 @@ catalog:
   providesApis:
     - coily-cli
     - audit-log
+  deploy:
+    dev: local
+    staging:
+      mac: brew
+      windows: scoop
+    prod:
+      kai-server: linuxbrew
