@@ -65,6 +65,47 @@ func TestSplitBrewArgs(t *testing.T) {
 	}
 }
 
+// TestBrewServicesCommand_HasMutatingVerbs pins the closed-set surface
+// for `coily brew services` (coily#249). start/stop/restart are the
+// mutating verbs that need an audited wrapper. status is intentionally
+// absent: it lives on `coily pkg brew services list` (read-only side).
+func TestBrewServicesCommand_HasMutatingVerbs(t *testing.T) {
+	r := &Runner{}
+	cmd := r.brewServicesCommand()
+	if cmd.Name != "services" {
+		t.Fatalf("Name = %q, want \"services\"", cmd.Name)
+	}
+	got := make(map[string]bool, len(cmd.Commands))
+	for _, c := range cmd.Commands {
+		got[c.Name] = true
+	}
+	for _, want := range []string{"start", "stop", "restart"} {
+		if !got[want] {
+			t.Errorf("missing subcommand %q (got %v)", want, got)
+		}
+	}
+	if got["status"] {
+		t.Errorf("found `status` under brew services; coily#249 routes status to `coily pkg brew services list`")
+	}
+}
+
+// TestBrewCommand_HasServicesSubcommand pins that `coily brew services`
+// is reachable from the parent `coily brew` (coily#249).
+func TestBrewCommand_HasServicesSubcommand(t *testing.T) {
+	r := &Runner{}
+	cmd := r.brewCommand()
+	for _, c := range cmd.Commands {
+		if c.Name == "services" {
+			return
+		}
+	}
+	got := make([]string, 0, len(cmd.Commands))
+	for _, c := range cmd.Commands {
+		got = append(got, c.Name)
+	}
+	t.Errorf("brewCommand missing `services` subcommand; got %v", got)
+}
+
 func TestBrewInTapScope(t *testing.T) {
 	cases := map[string]bool{
 		"coilysiren/tap/coily":       true,

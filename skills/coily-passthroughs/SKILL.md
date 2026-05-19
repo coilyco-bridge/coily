@@ -51,6 +51,18 @@ brew install, scoped to coilysiren/tap/* unless --allow-untapped is set.
 
 brew reinstall, scoped to coilysiren/tap/* unless --allow-untapped is set.
 
+## `coily brew services restart`
+
+brew services restart, scoped to coilysiren/tap/* unless --allow-untapped is set.
+
+## `coily brew services start`
+
+brew services start, scoped to coilysiren/tap/* unless --allow-untapped is set.
+
+## `coily brew services stop`
+
+brew services stop, scoped to coilysiren/tap/* unless --allow-untapped is set.
+
 ## `coily brew uninstall`
 
 brew uninstall, scoped to coilysiren/tap/* unless --allow-untapped is set.

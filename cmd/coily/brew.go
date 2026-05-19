@@ -44,8 +44,133 @@ Subcommands forward verbatim to brew after the scope check. The
 			r.brewSubcommand("uninstall"),
 			r.brewSubcommand("upgrade"),
 			r.brewSubcommand("reinstall"),
+			r.brewServicesCommand(),
 		},
 	}
+}
+
+// brewServicesCommand wraps `brew services {start,stop,restart}` for
+// coilysiren/tap/* formulae. Closes coilysiren/coily#249 - the
+// post-upgrade follow-up to `coily brew upgrade <service-formula>` had
+// no audited path (brew upgrade installs the new binary alongside the
+// old launchd plist but does not restart, so the agent had to drop out
+// of the coily wrapper to dictate `brew services restart` by hand).
+//
+// status is read-only and lives on `coily pkg brew services list`, the
+// existing pass-through, mirroring the read-only / mutating split for
+// the rest of the brew surface.
+func (r *Runner) brewServicesCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "services",
+		Usage: "brew services start/stop/restart, scoped to coilysiren/tap/* unless --allow-untapped is set.",
+		Description: `services wraps the mutating brew-services verbs.
+Same scope rules as the parent: coilysiren/tap/* (plus bare names that
+resolve to that tap) are default-allowed; anything else needs
+--allow-untapped.
+
+Status is read-only and lives on ` + "`coily pkg brew services list`" + `.`,
+		Commands: []*cli.Command{
+			r.brewServicesSubcommand("start"),
+			r.brewServicesSubcommand("stop"),
+			r.brewServicesSubcommand("restart"),
+		},
+	}
+}
+
+// brewServicesSubcommand wires one of start/stop/restart. The audit
+// verb is "brew.services.<sub>" so each row distinguishes the verb
+// cleanly from a brew-install row of the same formula.
+func (r *Runner) brewServicesSubcommand(sub string) *cli.Command {
+	action, hook := r.brewServicesAction(sub)
+	return &cli.Command{
+		Name:            sub,
+		Usage:           fmt.Sprintf("brew services %s, scoped to coilysiren/tap/* unless --allow-untapped is set.", sub),
+		SkipFlagParsing: true,
+		Action: r.WrapVerb(verb.Spec{
+			Name: "brew.services." + sub,
+			ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+				return nil, c.Args().Slice()
+			},
+			Action:     action,
+			OnComplete: hook,
+		}, r.Audit),
+	}
+}
+
+// brewServicesAction returns the (action, onComplete) pair for one
+// brew-services subcommand. Mirrors brewAction's structure - splits the
+// raw argv into forwarded args and formula positionals, gates on scope,
+// then forwards to `brew services <sub> <args...>` with egress + stderr
+// tail wired the same way. The hook attaches captured egress rows and
+// any stderr tail to the audit record.
+func (r *Runner) brewServicesAction(sub string) (cli.ActionFunc, func(*audit.Record)) {
+	var rows []audit.EgressRow
+	tail := newBrewTail(audit.MaxStderrTailBytes)
+	action := func(ctx context.Context, c *cli.Command) error {
+		raw := c.Args().Slice()
+		allow, forward, formulae := splitBrewArgs(raw)
+
+		if !allow {
+			if len(formulae) == 0 {
+				return exitcode.New(exitcode.PolicyDenied, "policy_denied",
+					fmt.Errorf("brew services %s with no formula targets every service on the system; pass --allow-untapped to confirm", sub),
+					"add --allow-untapped to confirm a touch-everything run, or name specific formulae").
+					WithReason("bare `brew services <verb>` touches every service brew knows about, turning a single-intent invocation into a global state shift; --allow-untapped is the explicit opt-in")
+			}
+			for _, f := range formulae {
+				if !brewInTapScope(f) {
+					return exitcode.New(exitcode.PolicyDenied, "policy_denied",
+						fmt.Errorf("brew services %s %q is outside coilysiren/tap/*; pass --allow-untapped to confirm", sub, f),
+						"prefix the formula with coilysiren/tap/ if it lives in that tap, or add --allow-untapped to confirm an off-tap formula").
+						WithReason("brew-services state should be coilysiren/tap/* by default so the running-service graph is reviewable from one repo; --allow-untapped is the explicit opt-out")
+				}
+			}
+		}
+
+		captured, execErr := r.execBrewServices(ctx, sub, forward, tail)
+		rows = captured
+		return execErr
+	}
+	hook := func(rec *audit.Record) {
+		if len(rows) > 0 {
+			rec.Egress = rows
+		}
+		if rec.ExitCode != 0 {
+			if s := strings.TrimSpace(tail.String()); s != "" {
+				rec.StderrTail = s
+			}
+		}
+	}
+	return action, hook
+}
+
+// execBrewServices forwards to `brew services <sub> <args...>` with the
+// same egress proxy + stderr tail wiring execBrew uses. Two-token first
+// arg ("services" then sub) is the only structural difference from the
+// existing brew-verb path.
+func (r *Runner) execBrewServices(ctx context.Context, sub string, args []string, tail *brewTail) ([]audit.EgressRow, error) {
+	p := egress.New(nil, egress.ModeObserve)
+	proxyURL, err := p.Start(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("egress: start proxy: %w", err)
+	}
+	shadow := *r.Runner
+	shadow.Env = append([]string(nil), r.Runner.Env...)
+	shadow.Env = append(shadow.Env,
+		"HTTPS_PROXY="+proxyURL,
+		"HTTP_PROXY="+proxyURL,
+		"https_proxy="+proxyURL,
+		"http_proxy="+proxyURL,
+	)
+	if r.Runner.Stderr != nil {
+		shadow.Stderr = io.MultiWriter(r.Runner.Stderr, tail)
+	} else {
+		shadow.Stderr = tail
+	}
+	full := append([]string{"services", sub}, args...)
+	execErr := shadow.Exec(ctx, "brew", full...)
+	rows := p.Stop()
+	return rows, execErr
 }
 
 // scopedTapFormulae mirrors the bare formula names in
