@@ -92,7 +92,10 @@ var ptPkg = []ptEntry{
 	{Bin: "cargo", Egress: true},
 	{Bin: "gem", Egress: true},
 	{Bin: "bundle", Egress: true},
-	{Bin: "brew", Egress: true},
+	// brew is NOT a thin passthrough: it has its own scoped wrapper
+	// at pkgBrewCommand (coily#253) that handles formula-scoped,
+	// tap-scoped, and touch-everything verbs alongside read-only
+	// passthrough. Wired into pkgCommand directly.
 }
 
 // passthroughCommand builds a cli.Command from a single registry entry.

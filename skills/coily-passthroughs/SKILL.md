@@ -43,34 +43,6 @@ Stream audit records as JSONL.
 
 Flags: --follow, --since
 
-## `coily brew install`
-
-brew install, scoped to coilysiren/tap/* unless --allow-untapped is set.
-
-## `coily brew reinstall`
-
-brew reinstall, scoped to coilysiren/tap/* unless --allow-untapped is set.
-
-## `coily brew services restart`
-
-brew services restart, scoped to coilysiren/tap/* unless --allow-untapped is set.
-
-## `coily brew services start`
-
-brew services start, scoped to coilysiren/tap/* unless --allow-untapped is set.
-
-## `coily brew services stop`
-
-brew services stop, scoped to coilysiren/tap/* unless --allow-untapped is set.
-
-## `coily brew uninstall`
-
-brew uninstall, scoped to coilysiren/tap/* unless --allow-untapped is set.
-
-## `coily brew upgrade`
-
-brew upgrade, scoped to coilysiren/tap/* unless --allow-untapped is set.
-
 ## `coily dispatch`
 
 Fire `claude -p` against a real open coilysiren/* issue.
@@ -3093,7 +3065,7 @@ Get a field on a Webhook
 
 ## `coily pkg brew`
 
-Pass-through to brew with argv validation + audit log.
+Scoped wrapper around brew. Mirrors brew's argv shape.
 
 ## `coily pkg bun`
 

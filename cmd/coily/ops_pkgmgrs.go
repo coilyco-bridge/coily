@@ -10,6 +10,7 @@ import "github.com/urfave/cli/v3"
 func (r *Runner) pkgCommand() *cli.Command {
 	cmds := r.passthroughCommands(ptPkg)
 	cmds = append(cmds,
+		r.pkgBrewCommand(),
 		r.glamaCommand(),
 		r.skillsmpCommand(),
 	)

@@ -65,45 +65,81 @@ func TestSplitBrewArgs(t *testing.T) {
 	}
 }
 
-// TestBrewServicesCommand_HasMutatingVerbs pins the closed-set surface
-// for `coily brew services` (coily#249). start/stop/restart are the
-// mutating verbs that need an audited wrapper. status is intentionally
-// absent: it lives on `coily pkg brew services list` (read-only side).
-func TestBrewServicesCommand_HasMutatingVerbs(t *testing.T) {
+// TestClassifyBrewInvocation pins the dispatcher's audit-name + scope-
+// category mapping for the coily#253 single-entry-point brew surface.
+// One table covers every category so future drift on any verb trips.
+func TestClassifyBrewInvocation(t *testing.T) {
 	r := &Runner{}
-	cmd := r.brewServicesCommand()
-	if cmd.Name != "services" {
-		t.Fatalf("Name = %q, want \"services\"", cmd.Name)
+	cases := []struct {
+		name     string
+		argv     []string
+		wantName string
+	}{
+		// Formula-scoped.
+		{"install", []string{"install", "coily"}, "pkg.brew.install"},
+		{"uninstall", []string{"uninstall", "coily"}, "pkg.brew.uninstall"},
+		{"upgrade", []string{"upgrade", "coily"}, "pkg.brew.upgrade"},
+		{"reinstall", []string{"reinstall", "coily"}, "pkg.brew.reinstall"},
+		{"link", []string{"link", "coily"}, "pkg.brew.link"},
+		{"unlink", []string{"unlink", "coily"}, "pkg.brew.unlink"},
+		{"pin", []string{"pin", "coily"}, "pkg.brew.pin"},
+		{"unpin", []string{"unpin", "coily"}, "pkg.brew.unpin"},
+		// Tap-scoped.
+		{"tap", []string{"tap", "coilysiren/homebrew-tap"}, "pkg.brew.tap"},
+		{"untap", []string{"untap", "coilysiren/homebrew-tap"}, "pkg.brew.untap"},
+		// Touch-everything.
+		{"cleanup", []string{"cleanup"}, "pkg.brew.cleanup"},
+		{"autoremove", []string{"autoremove"}, "pkg.brew.autoremove"},
+		// Services formula-scoped.
+		{"services start", []string{"services", "start", "coily"}, "pkg.brew.services.start"},
+		{"services stop", []string{"services", "stop", "coily"}, "pkg.brew.services.stop"},
+		{"services restart", []string{"services", "restart", "coily"}, "pkg.brew.services.restart"},
+		{"services run", []string{"services", "run", "coily"}, "pkg.brew.services.run"},
+		{"services kill", []string{"services", "kill", "coily"}, "pkg.brew.services.kill"},
+		// Services touch-everything.
+		{"services cleanup", []string{"services", "cleanup"}, "pkg.brew.services.cleanup"},
+		// Passthrough.
+		{"search", []string{"search", "ripgrep"}, "pkg.brew.search"},
+		{"info", []string{"info", "ripgrep"}, "pkg.brew.info"},
+		{"list", []string{"list"}, "pkg.brew.list"},
+		{"update", []string{"update"}, "pkg.brew.update"},
+		{"services list", []string{"services", "list"}, "pkg.brew.services.list"},
+		{"services info", []string{"services", "info"}, "pkg.brew.services.info"},
+		{"bare", []string{}, "pkg.brew"},
+		{"unknown verb passes through", []string{"weirdverb"}, "pkg.brew.weirdverb"},
 	}
-	got := make(map[string]bool, len(cmd.Commands))
-	for _, c := range cmd.Commands {
-		got[c.Name] = true
-	}
-	for _, want := range []string{"start", "stop", "restart"} {
-		if !got[want] {
-			t.Errorf("missing subcommand %q (got %v)", want, got)
-		}
-	}
-	if got["status"] {
-		t.Errorf("found `status` under brew services; coily#249 routes status to `coily pkg brew services list`")
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			gotName, action, _ := r.classifyBrewInvocation(tc.argv)
+			if gotName != tc.wantName {
+				t.Errorf("name = %q, want %q (argv=%v)", gotName, tc.wantName, tc.argv)
+			}
+			if action == nil {
+				t.Errorf("action is nil for argv=%v", tc.argv)
+			}
+		})
 	}
 }
 
-// TestBrewCommand_HasServicesSubcommand pins that `coily brew services`
-// is reachable from the parent `coily brew` (coily#249).
-func TestBrewCommand_HasServicesSubcommand(t *testing.T) {
+// TestPkgBrewCommand_TopLevelShape pins the parent's single-entry-point
+// shape: SkipFlagParsing on so brew's argv content (jq-style, --cask,
+// markdown-bearing flags) survives, and no Commands subtree so the
+// dispatcher owns routing.
+func TestPkgBrewCommand_TopLevelShape(t *testing.T) {
 	r := &Runner{}
-	cmd := r.brewCommand()
-	for _, c := range cmd.Commands {
-		if c.Name == "services" {
-			return
-		}
+	cmd := r.pkgBrewCommand()
+	if cmd.Name != "brew" {
+		t.Fatalf("Name = %q, want \"brew\"", cmd.Name)
 	}
-	got := make([]string, 0, len(cmd.Commands))
-	for _, c := range cmd.Commands {
-		got = append(got, c.Name)
+	if !cmd.SkipFlagParsing {
+		t.Errorf("SkipFlagParsing must be true so brew argv flows through verbatim")
 	}
-	t.Errorf("brewCommand missing `services` subcommand; got %v", got)
+	if len(cmd.Commands) != 0 {
+		t.Errorf("pkgBrewCommand must not expose subcommands; the dispatcher routes internally. Got %d", len(cmd.Commands))
+	}
+	if cmd.Action == nil {
+		t.Errorf("pkgBrewCommand must have an Action (the dispatcher)")
+	}
 }
 
 func TestBrewInTapScope(t *testing.T) {

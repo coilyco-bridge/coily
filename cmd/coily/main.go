@@ -287,7 +287,6 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.gitCommand(),
 		r.dispatchCommand(),
 		r.pkgCommand(),
-		r.brewCommand(),
 		r.lintCommand(),
 		r.sessionCommand(),
 	}
