@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -199,4 +200,170 @@ func contains(haystack, needle string) bool {
 		}
 	}
 	return false
+}
+
+// TestUserHookCleanup_AllThreeStates covers coily#247: the runUserHookStep
+// cleanup must handle (a) pre-#185 (file + hook entry both present), (b)
+// post-#185 clean (neither), (c) partial. All paths preserve unrelated
+// settings.json state (env.PATH, theme, other hooks).
+func TestUserHookCleanup_AllThreeStates(t *testing.T) {
+	makeSettings := func() map[string]any {
+		return map[string]any{
+			"env": map[string]any{"PATH": "/opt/homebrew/bin:/usr/bin"},
+			"hooks": map[string]any{
+				"PreToolUse": []any{
+					map[string]any{
+						"matcher": "Bash",
+						"hooks": []any{
+							map[string]any{
+								"type":    "command",
+								"command": "$HOME/.claude/coily-binary-gate.sh",
+							},
+						},
+					},
+					map[string]any{
+						"matcher": "Edit",
+						"hooks": []any{
+							map[string]any{"type": "command", "command": "other-hook"},
+						},
+					},
+				},
+			},
+		}
+	}
+
+	writeJSON := func(t *testing.T, path string, v any) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatalf("mkdir: %v", err)
+		}
+		data, err := json.MarshalIndent(v, "", "  ")
+		if err != nil {
+			t.Fatalf("marshal: %v", err)
+		}
+		if err := os.WriteFile(path, data, 0o600); err != nil {
+			t.Fatalf("write: %v", err)
+		}
+	}
+	readJSON := func(t *testing.T, path string) map[string]any {
+		t.Helper()
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("read: %v", err)
+		}
+		var v map[string]any
+		if err := json.Unmarshal(data, &v); err != nil {
+			t.Fatalf("unmarshal: %v", err)
+		}
+		return v
+	}
+
+	t.Run("pre-185-both-present", func(t *testing.T) {
+		home := t.TempDir()
+		scriptPath := filepath.Join(home, ".claude", "coily-binary-gate.sh")
+		settingsPath := filepath.Join(home, ".claude", "settings.json")
+		_ = os.MkdirAll(filepath.Dir(scriptPath), 0o755)
+		_ = os.WriteFile(scriptPath, []byte("legacy"), 0o755)
+		writeJSON(t, settingsPath, makeSettings())
+		clean := userHookCleanup{ScriptPath: scriptPath, SettingsPath: settingsPath}
+		if err := clean.run(os.Stderr); err != nil {
+			t.Fatalf("run: %v", err)
+		}
+		if _, err := os.Stat(scriptPath); !os.IsNotExist(err) {
+			t.Errorf("script file still present: %v", err)
+		}
+		got := readJSON(t, settingsPath)
+		env, _ := got["env"].(map[string]any)
+		if env["PATH"] != "/opt/homebrew/bin:/usr/bin" {
+			t.Errorf("env.PATH clobbered: got %v", env)
+		}
+		hooks := got["hooks"].(map[string]any)
+		pre := hooks["PreToolUse"].([]any)
+		if len(pre) != 1 {
+			t.Fatalf("PreToolUse length = %d, want 1 (Edit should remain)", len(pre))
+		}
+		if pre[0].(map[string]any)["matcher"].(string) != "Edit" {
+			t.Errorf("surviving matcher = %v, want Edit", pre[0])
+		}
+	})
+
+	t.Run("post-185-clean", func(t *testing.T) {
+		home := t.TempDir()
+		clean := userHookCleanup{
+			ScriptPath:   filepath.Join(home, ".claude", "coily-binary-gate.sh"),
+			SettingsPath: filepath.Join(home, ".claude", "settings.json"),
+		}
+		if err := clean.run(os.Stderr); err != nil {
+			t.Fatalf("run: %v", err)
+		}
+	})
+
+	t.Run("partial-file-only", func(t *testing.T) {
+		home := t.TempDir()
+		scriptPath := filepath.Join(home, ".claude", "coily-binary-gate.sh")
+		_ = os.MkdirAll(filepath.Dir(scriptPath), 0o755)
+		_ = os.WriteFile(scriptPath, []byte("legacy"), 0o755)
+		clean := userHookCleanup{
+			ScriptPath:   scriptPath,
+			SettingsPath: filepath.Join(home, ".claude", "settings.json"),
+		}
+		if err := clean.run(os.Stderr); err != nil {
+			t.Fatalf("run: %v", err)
+		}
+		if _, err := os.Stat(scriptPath); !os.IsNotExist(err) {
+			t.Errorf("script file still present: %v", err)
+		}
+	})
+
+	t.Run("partial-settings-only", func(t *testing.T) {
+		home := t.TempDir()
+		settingsPath := filepath.Join(home, ".claude", "settings.json")
+		writeJSON(t, settingsPath, makeSettings())
+		clean := userHookCleanup{
+			ScriptPath:   filepath.Join(home, ".claude", "coily-binary-gate.sh"),
+			SettingsPath: settingsPath,
+		}
+		if err := clean.run(os.Stderr); err != nil {
+			t.Fatalf("run: %v", err)
+		}
+		got := readJSON(t, settingsPath)
+		hooks := got["hooks"].(map[string]any)
+		pre := hooks["PreToolUse"].([]any)
+		if len(pre) != 1 || pre[0].(map[string]any)["matcher"].(string) != "Edit" {
+			t.Errorf("PreToolUse after partial cleanup: %v", pre)
+		}
+	})
+
+	t.Run("drops-pretooluse-when-gate-is-only-entry", func(t *testing.T) {
+		home := t.TempDir()
+		settingsPath := filepath.Join(home, ".claude", "settings.json")
+		writeJSON(t, settingsPath, map[string]any{
+			"theme": "dark",
+			"hooks": map[string]any{
+				"PreToolUse": []any{
+					map[string]any{
+						"matcher": "Bash",
+						"hooks": []any{
+							map[string]any{"type": "command", "command": "coily-binary-gate.sh"},
+						},
+					},
+				},
+			},
+		})
+		clean := userHookCleanup{
+			ScriptPath:   filepath.Join(home, ".claude", "coily-binary-gate.sh"),
+			SettingsPath: settingsPath,
+		}
+		if err := clean.run(os.Stderr); err != nil {
+			t.Fatalf("run: %v", err)
+		}
+		got := readJSON(t, settingsPath)
+		if got["theme"] != "dark" {
+			t.Errorf("theme clobbered: got %v", got["theme"])
+		}
+		hooks, _ := got["hooks"].(map[string]any)
+		if pre, ok := hooks["PreToolUse"]; ok {
+			t.Errorf("PreToolUse should be absent after dropping only entry, got %v", pre)
+		}
+	})
 }

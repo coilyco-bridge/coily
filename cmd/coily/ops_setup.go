@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
@@ -118,20 +121,156 @@ func setupAction(ctx context.Context, c *cli.Command) error {
 	return nil
 }
 
-// runUserHookStep used to install ~/.claude/coily-binary-gate.sh, a
-// user-wide PreToolUse hook that rejected coily invocations from any
-// path outside the homebrew install set. As of coilysiren/coily#185
-// that check moved into `agent-guard hook pre-tool-use` (agent-guard#14)
-// and now fires from every per-repo hook coily writes via the new
-// shim. The user-wide hook is redundant; this step is a no-op kept
-// only so existing `coily setup` invocations don't surface a missing-
-// step error.
+// runUserHookStep cleans up the pre-#185 user-wide
+// ~/.claude/coily-binary-gate.sh hook. coily#185 moved the binary-path
+// check into `agent-guard hook pre-tool-use`, fired from the per-repo
+// hook coily writes via the new shim, but the legacy artifact stayed
+// on disk on hosts that ran `coily setup` before #185 shipped. This
+// step deletes the script and strips the matching PreToolUse entry
+// from ~/.claude/settings.json, leaving every other setting (env.PATH,
+// theme, permissions, other hooks) untouched. Idempotent: re-running
+// on a clean host is a no-op. Per coilysiren/coily#247.
 //
 // TODO: drop runUserHookStep and the --skip-user-hook flag in the
 // release after the migration window closes.
 func runUserHookStep() error {
-	fmt.Fprintln(os.Stderr, "    skipped (agent-guard hook owns the binary-path check now; see coilysiren/coily#185)")
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("user-hook cleanup: home dir: %w", err)
+	}
+	clean := userHookCleanup{
+		ScriptPath:   filepath.Join(home, ".claude", "coily-binary-gate.sh"),
+		SettingsPath: filepath.Join(home, ".claude", "settings.json"),
+	}
+	return clean.run(os.Stderr)
+}
+
+type userHookCleanup struct {
+	ScriptPath   string
+	SettingsPath string
+}
+
+func (c userHookCleanup) run(w *os.File) error {
+	scriptRemoved, err := c.removeScript()
+	if err != nil {
+		return err
+	}
+	entryRemoved, err := c.stripSettingsEntry()
+	if err != nil {
+		return err
+	}
+	switch {
+	case scriptRemoved && entryRemoved:
+		_, _ = fmt.Fprintln(w, "    cleaned: ~/.claude/coily-binary-gate.sh + settings.json PreToolUse entry")
+	case scriptRemoved:
+		_, _ = fmt.Fprintln(w, "    cleaned: ~/.claude/coily-binary-gate.sh (settings.json had no matching entry)")
+	case entryRemoved:
+		_, _ = fmt.Fprintln(w, "    cleaned: settings.json PreToolUse entry (script file already absent)")
+	default:
+		_, _ = fmt.Fprintln(w, "    nothing to clean (legacy user-wide hook is already gone)")
+	}
 	return nil
+}
+
+func (c userHookCleanup) removeScript() (bool, error) {
+	if err := os.Remove(c.ScriptPath); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+		return false, fmt.Errorf("user-hook cleanup: remove %s: %w", c.ScriptPath, err)
+	}
+	return true, nil
+}
+
+// stripSettingsEntry rewrites ~/.claude/settings.json to drop any
+// hooks.PreToolUse[*].hooks[*] entry whose command references
+// coily-binary-gate.sh. If an enclosing matcher object's hooks array
+// becomes empty, the matcher object itself is dropped. All other state
+// (env.PATH, theme, permissions, unrelated hooks) is preserved.
+// Returns true when at least one entry was removed.
+func (c userHookCleanup) stripSettingsEntry() (bool, error) {
+	data, err := os.ReadFile(c.SettingsPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+		return false, fmt.Errorf("user-hook cleanup: read %s: %w", c.SettingsPath, err)
+	}
+	var root map[string]any
+	if err := json.Unmarshal(data, &root); err != nil {
+		return false, fmt.Errorf("user-hook cleanup: parse %s: %w", c.SettingsPath, err)
+	}
+	removed := stripCoilyBinaryGate(root)
+	if !removed {
+		return false, nil
+	}
+	out, err := json.MarshalIndent(root, "", "  ")
+	if err != nil {
+		return false, fmt.Errorf("user-hook cleanup: marshal: %w", err)
+	}
+	out = append(out, '\n')
+	if err := os.WriteFile(c.SettingsPath, out, 0o600); err != nil {
+		return false, fmt.Errorf("user-hook cleanup: write %s: %w", c.SettingsPath, err)
+	}
+	return true, nil
+}
+
+// stripCoilyBinaryGate walks hooks.PreToolUse and prunes hook entries
+// whose command references coily-binary-gate.sh. Returns true when the
+// tree was modified. Pure on input shape: structural in-place edit so
+// the caller can decide whether to write.
+func stripCoilyBinaryGate(root map[string]any) bool {
+	hooks, _ := root["hooks"].(map[string]any)
+	if hooks == nil {
+		return false
+	}
+	preToolUse, _ := hooks["PreToolUse"].([]any)
+	if preToolUse == nil {
+		return false
+	}
+	var changed bool
+	kept := make([]any, 0, len(preToolUse))
+	for _, entryAny := range preToolUse {
+		entry, ok := entryAny.(map[string]any)
+		if !ok {
+			kept = append(kept, entryAny)
+			continue
+		}
+		inner, _ := entry["hooks"].([]any)
+		if inner == nil {
+			kept = append(kept, entryAny)
+			continue
+		}
+		filtered := make([]any, 0, len(inner))
+		for _, hAny := range inner {
+			h, ok := hAny.(map[string]any)
+			if !ok {
+				filtered = append(filtered, hAny)
+				continue
+			}
+			cmd, _ := h["command"].(string)
+			if strings.Contains(cmd, "coily-binary-gate.sh") {
+				changed = true
+				continue
+			}
+			filtered = append(filtered, hAny)
+		}
+		if len(filtered) == 0 {
+			changed = true
+			continue
+		}
+		entry["hooks"] = filtered
+		kept = append(kept, entry)
+	}
+	if !changed {
+		return false
+	}
+	if len(kept) == 0 {
+		delete(hooks, "PreToolUse")
+	} else {
+		hooks["PreToolUse"] = kept
+	}
+	return true
 }
 
 // installSkillSymlinks walks every coily-* directory the brew formula
