@@ -101,22 +101,23 @@ sudo-prefixed. Intended for the remote side of
 // buildSelfElevateArgv composes the outer-sudo re-exec argv. Pure helper
 // so the shape is unit-testable without a real sudo. Pinned form:
 //
-//	sudo --non-interactive <coilyPath> --commit-scope=<cwd> systemctl <verb> [<unit>]
+//	sudo --non-interactive <coilyPath> [--commit-scope=<toplevel>] systemctl <verb> [<unit>]
 //
 // No inner sudo, no shell, no `sudo -i`. --non-interactive is explicit so
 // a host missing the NOPASSWD grant fails fast instead of dangling on a
 // hidden password prompt (the coily#203 motivating bug).
 //
-// --commit-scope forwards the outer process's cwd to the sudo'd child
-// because sudo doesn't preserve cwd: without this, the child wakes up
-// in /root and scope.Resolve("auto", ...) fails with "not inside a git
-// repo." Passing the outer cwd lets the child resolve to the same git
-// toplevel the outer would have. Empty cwd is left out so callers
-// genuinely without a cwd (tests) keep the default-auto behavior.
-func buildSelfElevateArgv(coilyPath, cwd, name, unit string, needsUnit bool) []string {
+// --commit-scope is passed only when the caller resolved the outer cwd
+// to a real git toplevel. The inner cli-guard scope resolver treats
+// any explicit --commit-scope value as a strict assertion that the path
+// is a git toplevel; an explicit non-git path trips the gate rather
+// than falling through to _unrooted the way --commit-scope=auto does.
+// Omitting the flag for non-git cwds lets the inner take the same
+// auto -> _unrooted fallthrough the outer just took (coily#244).
+func buildSelfElevateArgv(coilyPath, toplevel, name, unit string, needsUnit bool) []string {
 	argv := []string{"sudo", "--non-interactive", coilyPath}
-	if cwd != "" {
-		argv = append(argv, "--commit-scope="+cwd)
+	if toplevel != "" {
+		argv = append(argv, "--commit-scope="+toplevel)
 	}
 	argv = append(argv, "systemctl", name)
 	if needsUnit {
@@ -144,10 +145,17 @@ func (r *Runner) systemctlSelfElevate(ctx context.Context, name, unit string, ne
 			return fmt.Errorf("systemctl %s: locate coily binary for sudo re-exec: %w", name, err)
 		}
 	}
+	// Resolve the outer cwd to its git toplevel before passing through.
+	// gitToplevel returns "" + error when cwd isn't inside any git repo,
+	// in which case buildSelfElevateArgv omits --commit-scope and the
+	// inner re-exec falls through to auto/_unrooted just like the outer
+	// did. Passing a non-git path explicitly would trip the strict-mode
+	// scope gate in the inner (coily#244).
 	cwd, _ := os.Getwd()
-	argv := buildSelfElevateArgv(coilyPath, cwd, name, unit, needsUnit)
+	toplevel, _ := gitToplevel(cwd)
+	argv := buildSelfElevateArgv(coilyPath, toplevel, name, unit, needsUnit)
 	if err := r.Runner.Exec(ctx, argv[0], argv[1:]...); err != nil {
-		return fmt.Errorf("systemctl %s: sudo re-exec failed (does this host grant `NOPASSWD: %s` for the invoking user?): %w", name, coilyPath, err)
+		return fmt.Errorf("systemctl %s: sudo re-exec failed: %w (hint: if the message above mentions `password is required`, this host doesn't grant `NOPASSWD: %s` for the invoking user; any other failure is from the inner root-coily, not sudo)", name, err, coilyPath)
 	}
 	return nil
 }

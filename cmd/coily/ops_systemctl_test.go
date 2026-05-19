@@ -11,37 +11,46 @@ import (
 // sudo on the coily binary and never an inner `sudo systemctl ...`.
 // --non-interactive is required so a missing NOPASSWD grant fails fast
 // instead of waiting on a hidden password prompt.
+//
+// The `toplevel` field represents the outer process's git toplevel
+// after gitToplevel() resolution (empty when the outer cwd is not
+// inside any git repo). #244 added the empty-toplevel branch: omitting
+// --commit-scope so the inner takes the auto -> _unrooted fallthrough.
 func TestBuildSelfElevateArgv(t *testing.T) {
 	cases := []struct {
 		name      string
 		unit      string
-		cwd       string
+		toplevel  string
 		needsUnit bool
 		want      []string
 	}{
 		{
 			name: "stop", unit: "sirens-discord-ops-update.timer",
-			cwd: "/home/kai/projects/coilysiren/infrastructure", needsUnit: true,
+			toplevel: "/home/kai/projects/coilysiren/infrastructure", needsUnit: true,
 			want: []string{"sudo", "--non-interactive", "/home/linuxbrew/.linuxbrew/bin/coily",
 				"--commit-scope=/home/kai/projects/coilysiren/infrastructure",
 				"systemctl", "stop", "sirens-discord-ops-update.timer"},
 		},
 		{
-			name: "daemon-reload",
-			cwd:  "/home/kai/projects/coilysiren/infrastructure", needsUnit: false,
+			name:     "daemon-reload",
+			toplevel: "/home/kai/projects/coilysiren/infrastructure", needsUnit: false,
 			want: []string{"sudo", "--non-interactive", "/home/linuxbrew/.linuxbrew/bin/coily",
 				"--commit-scope=/home/kai/projects/coilysiren/infrastructure",
 				"systemctl", "daemon-reload"},
 		},
 		{
-			name: "no-cwd", unit: "x.service", cwd: "", needsUnit: true,
+			// coily#244: outer cwd outside a git repo (e.g. /home/kai
+			// via `coily ssh kai-server -- coily systemctl ...`) means
+			// gitToplevel returns "". No --commit-scope is passed so
+			// the inner falls through to auto/_unrooted same as the outer.
+			name: "no-toplevel", unit: "x.service", toplevel: "", needsUnit: true,
 			want: []string{"sudo", "--non-interactive", "/home/linuxbrew/.linuxbrew/bin/coily",
-				"systemctl", "no-cwd", "x.service"},
+				"systemctl", "no-toplevel", "x.service"},
 		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := buildSelfElevateArgv("/home/linuxbrew/.linuxbrew/bin/coily", tc.cwd, tc.name, tc.unit, tc.needsUnit)
+			got := buildSelfElevateArgv("/home/linuxbrew/.linuxbrew/bin/coily", tc.toplevel, tc.name, tc.unit, tc.needsUnit)
 			if len(got) != len(tc.want) {
 				t.Fatalf("argv length = %d, want %d (got=%v)", len(got), len(tc.want), got)
 			}
@@ -56,6 +65,23 @@ func TestBuildSelfElevateArgv(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// TestBuildSelfElevateArgv_OmitsCommitScopeWhenNotInGitRepo pins the
+// coily#244 regression fix: when the caller's git-toplevel resolution
+// fails (cwd is not inside any git repo), the rendered argv must NOT
+// contain `--commit-scope=...`. Passing a non-git path explicitly trips
+// the inner cli-guard strict-mode scope gate, which surfaces as a
+// confusing "scope: cwd is not inside a git repo" error inside the
+// sudo'd child. Omitting the flag entirely lets the inner take the
+// same auto -> _unrooted fallthrough the outer just took.
+func TestBuildSelfElevateArgv_OmitsCommitScopeWhenNotInGitRepo(t *testing.T) {
+	argv := buildSelfElevateArgv("/home/linuxbrew/.linuxbrew/bin/coily", "", "disable", "repo-recall.service", true)
+	for _, a := range argv {
+		if strings.HasPrefix(a, "--commit-scope") {
+			t.Errorf("found %q in argv with empty toplevel; coily#244 forbids explicit scope when cwd has no git toplevel (full=%v)", a, argv)
+		}
 	}
 }
 
