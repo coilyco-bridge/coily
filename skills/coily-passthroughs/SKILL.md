@@ -1461,6 +1461,12 @@ Pass-through to flyctl with argv validation + audit log.
 
 List forgejo auth sources.
 
+## `coily ops forgejo admin user create`
+
+Create a forgejo user with a random password and forced first-login rotation.
+
+Flags: --admin, --email, --username
+
 ## `coily ops forgejo admin user list`
 
 List forgejo users.

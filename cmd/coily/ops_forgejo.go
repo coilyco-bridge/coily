@@ -16,22 +16,24 @@ import (
 // `coily ssh kubectl`. Namespace and pod selector are pinned in code: no
 // free-form passthrough, no flag overrides for the target.
 //
-// This is the readonly slice of #57 (#91): list and diagnostic verbs only.
-// Mutating verbs (admin user create, regenerate, dump, manager flush-queues,
-// etc.) land in followup issues.
+// Slices landed so far (parent #57):
+//   - #91 readonly: admin user list, admin auth list, doctor check
+//   - #241 onboard a peer admin: admin user create (random-password +
+//     must-change-password pinned on, no --password flag exposed)
 //
 // The harness deny-rule on raw `kubectl exec` stays. This wrapper is the
 // affordance, not a bypass.
 func (r *Runner) forgejoCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "forgejo",
-		Usage: "Run readonly forgejo CLI verbs against the kai-server forgejo pod.",
+		Usage: "Run forgejo CLI verbs against the kai-server forgejo pod.",
 		Description: `forgejo wraps the in-pod forgejo CLI. Each leaf is a fixed-shape
 k3s kubectl -n forgejo exec deploy/forgejo -- forgejo <verb...>, run via
 ssh to kai-server. Namespace and pod selector are pinned in code.
 
-Readonly slice (#91, parent #57):
+Verbs:
   coily ops forgejo admin user list
+  coily ops forgejo admin user create --username <name> --email <addr> [--admin]
   coily ops forgejo admin auth list
   coily ops forgejo doctor check --run <name>`,
 		Commands: []*cli.Command{
@@ -44,6 +46,7 @@ Readonly slice (#91, parent #57):
 						Usage: "Forgejo admin user verbs.",
 						Commands: []*cli.Command{
 							r.forgejoAdminUserListCommand(),
+							r.forgejoAdminUserCreateCommand(),
 						},
 					},
 					{
@@ -78,6 +81,64 @@ func (r *Runner) forgejoAdminUserListCommand() *cli.Command {
 						return fmt.Errorf("ops forgejo admin user list: takes no args, got %d", c.Args().Len())
 					}
 					return r.runForgejo(ctx, []string{"admin", "user", "list"})
+				},
+			},
+			r.Audit,
+		),
+	}
+}
+
+// forgejoAdminUserCreateCommand onboards a new forgejo user. --random-password
+// and --must-change-password are pinned on in code, not exposed as flags: the
+// generated password streams out of the pod on stdout, the operator hands it
+// to the new user out-of-band, and the user is forced to rotate on first
+// login. No --password flag is exposed, so the secret never reaches coily's
+// argv or audit log.
+func (r *Runner) forgejoAdminUserCreateCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "create",
+		Usage: "Create a forgejo user with a random password and forced first-login rotation.",
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: "username", Usage: "forgejo username", Required: true},
+			&cli.StringFlag{Name: "email", Usage: "user email address", Required: true},
+			&cli.BoolFlag{Name: "admin", Usage: "grant site-admin privileges"},
+		},
+		Action: r.WrapVerb(
+			verb.Spec{
+				Name: "ops.forgejo.admin.user.create",
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					args := map[string]string{
+						"--username": c.String("username"),
+						"--email":    c.String("email"),
+					}
+					if c.Bool("admin") {
+						args["--admin"] = "true"
+					}
+					return args, c.Args().Slice()
+				},
+				Action: func(ctx context.Context, c *cli.Command) error {
+					if c.Args().Len() != 0 {
+						return fmt.Errorf("ops forgejo admin user create: takes no positional args, got %d", c.Args().Len())
+					}
+					username := c.String("username")
+					email := c.String("email")
+					if err := validateForgejoUsername(username); err != nil {
+						return err
+					}
+					if err := validateForgejoEmail(email); err != nil {
+						return err
+					}
+					argv := []string{
+						"admin", "user", "create",
+						"--username", username,
+						"--email", email,
+						"--random-password",
+						"--must-change-password",
+					}
+					if c.Bool("admin") {
+						argv = append(argv, "--admin")
+					}
+					return r.runForgejo(ctx, argv)
 				},
 			},
 			r.Audit,
@@ -179,6 +240,73 @@ func renderForgejoCmd(forgejoArgs []string) string {
 // the old `coily ssh kubectl` path.
 func posixShellQuote(s string) string {
 	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
+}
+
+// validateForgejoUsername enforces forgejo's username character set
+// (alnum plus `-` `_` `.`) with a length cap and a leading-dash reject
+// to avoid argv-as-flag confusion. Real validation (uniqueness, reserved
+// names) is forgejo's job; this is the shell-safety + sanity layer.
+func validateForgejoUsername(name string) error {
+	if name == "" {
+		return fmt.Errorf("ops forgejo admin user create: --username is empty")
+	}
+	if len(name) > 40 {
+		return fmt.Errorf("ops forgejo admin user create: --username too long")
+	}
+	if strings.HasPrefix(name, "-") {
+		return fmt.Errorf("ops forgejo admin user create: --username must not start with '-'")
+	}
+	for _, r := range name {
+		switch {
+		case r >= 'a' && r <= 'z',
+			r >= 'A' && r <= 'Z',
+			r >= '0' && r <= '9',
+			r == '-', r == '_', r == '.':
+		default:
+			return fmt.Errorf("ops forgejo admin user create: --username contains invalid character %q", r)
+		}
+	}
+	return nil
+}
+
+// validateForgejoEmail is a loose shape check: non-empty, no shell-meta or
+// whitespace, exactly one `@` with non-empty local and domain parts, a `.`
+// in the domain. Forgejo does the real validation; this rejects the
+// argv-as-flag and shell-injection shapes before the remote shell sees it.
+func validateForgejoEmail(email string) error {
+	switch {
+	case email == "":
+		return fmt.Errorf("ops forgejo admin user create: --email is empty")
+	case len(email) > 254:
+		return fmt.Errorf("ops forgejo admin user create: --email too long")
+	case strings.HasPrefix(email, "-"):
+		return fmt.Errorf("ops forgejo admin user create: --email must not start with '-'")
+	}
+	if bad := firstInvalidEmailChar(email); bad != 0 {
+		return fmt.Errorf("ops forgejo admin user create: --email contains invalid character %q", bad)
+	}
+	at := strings.IndexByte(email, '@')
+	if at <= 0 || at != strings.LastIndexByte(email, '@') || at == len(email)-1 {
+		return fmt.Errorf("ops forgejo admin user create: --email must have exactly one '@' with non-empty local and domain parts")
+	}
+	if !strings.Contains(email[at+1:], ".") {
+		return fmt.Errorf("ops forgejo admin user create: --email domain must contain '.'")
+	}
+	return nil
+}
+
+func firstInvalidEmailChar(email string) rune {
+	for _, r := range email {
+		switch {
+		case r >= 'a' && r <= 'z',
+			r >= 'A' && r <= 'Z',
+			r >= '0' && r <= '9',
+			r == '-', r == '_', r == '.', r == '+', r == '@':
+		default:
+			return r
+		}
+	}
+	return 0
 }
 
 // validateForgejoDoctorCheckName rejects anything that isn't a sane forgejo
