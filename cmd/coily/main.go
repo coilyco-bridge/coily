@@ -219,6 +219,15 @@ func run(r *Runner, argv []string) error {
 				Sources: cli.EnvVars("COILY_COMMIT_SCOPE"),
 			},
 			&cli.StringFlag{
+				Name: "cwd",
+				Usage: "chdir to this path before any other processing. " +
+					"Internal flag used by `coily systemctl` self-elevation " +
+					"(coily#245) so the sudo'd child lands in the same git " +
+					"toplevel the outer was running in, satisfying the " +
+					"audit-row-binds-to-git-toplevel invariant symmetrically. " +
+					"Operators rarely need this directly.",
+			},
+			&cli.StringFlag{
 				Name: verb.AuditParentFlag,
 				Usage: "record this invocation's audit row as a child of <id>. " +
 					"Set by `coily ssh <alias> -- <args>` on the remote invocation so " +
@@ -227,6 +236,19 @@ func run(r *Runner, argv []string) error {
 					"Empty in the common single-host case.",
 				Sources: cli.EnvVars(verb.AuditParentEnvVar),
 			},
+		},
+		Before: func(ctx context.Context, c *cli.Command) (context.Context, error) {
+			// --cwd chdirs before any subcommand action so scope.Resolve
+			// (which reads os.Getwd) sees the post-chdir path. Powers
+			// the systemctl self-elevation invariant in coily#245: the
+			// sudo'd child lands in the outer's git toplevel before its
+			// audit row binds.
+			if dir := c.String("cwd"); dir != "" {
+				if err := os.Chdir(dir); err != nil {
+					return ctx, fmt.Errorf("coily: --cwd=%q: %w", dir, err)
+				}
+			}
+			return ctx, nil
 		},
 		Action: func(_ context.Context, c *cli.Command) error {
 			if c.Bool("list") {

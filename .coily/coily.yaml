@@ -50,7 +50,11 @@ ssh:
     kai-server:
       user: kai
       host: kai-server
-      working_dir: /home/kai/projects/coilysiren
+      # working_dir must be a git toplevel so coily systemctl's
+      # self-elevation invariant (coily#245) can bind the audit row
+      # symmetrically on the outer (kai) and the sudo'd inner (root).
+      # The coily checkout is the natural anchor on a coily-managed host.
+      working_dir: /home/kai/projects/coilysiren/coily
 
 # Catalog metadata for the cross-repo knowledge graph.
 # Schema: coilysiren/agentic-os-kai#420 (tracker).

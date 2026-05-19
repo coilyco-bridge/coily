@@ -6,61 +6,39 @@ import (
 	"testing"
 )
 
-// TestBuildSelfElevateArgv pins the coily#203 invariant: when `coily
-// systemctl <verb> <unit>` self-elevates, the rendered argv has outer
-// sudo on the coily binary and never an inner `sudo systemctl ...`.
-// --non-interactive is required so a missing NOPASSWD grant fails fast
-// instead of waiting on a hidden password prompt.
-//
-// The `scope` field is the outer's already-resolved --commit-scope flag
-// value, forwarded verbatim to the inner. #244 made this an explicit
-// passthrough rather than re-resolving from cwd, because the cli-guard
-// scope resolver only bypasses the git check for non-"auto" values.
+// TestBuildSelfElevateArgv pins the coily#203 + coily#245 invariants:
+// when `coily systemctl <verb> <unit>` self-elevates, the rendered argv
+// has outer sudo on the coily binary, never an inner `sudo systemctl
+// ...`, and carries --cwd=<outer-toplevel> so the sudo'd child chdirs
+// into the same git toplevel before its audit row binds. --non-interactive
+// is required so a missing NOPASSWD grant fails fast instead of waiting
+// on a hidden password prompt.
 func TestBuildSelfElevateArgv(t *testing.T) {
 	cases := []struct {
 		name      string
 		unit      string
-		scope     string
+		toplevel  string
 		needsUnit bool
 		want      []string
 	}{
 		{
 			name: "stop", unit: "sirens-discord-ops-update.timer",
-			scope: "/home/kai/projects/coilysiren/infrastructure", needsUnit: true,
+			toplevel: "/home/kai/projects/coilysiren/infrastructure", needsUnit: true,
 			want: []string{"sudo", "--non-interactive", "/home/linuxbrew/.linuxbrew/bin/coily",
-				"--commit-scope=/home/kai/projects/coilysiren/infrastructure",
+				"--cwd=/home/kai/projects/coilysiren/infrastructure",
 				"systemctl", "stop", "sirens-discord-ops-update.timer"},
 		},
 		{
-			name:  "daemon-reload",
-			scope: "/home/kai/projects/coilysiren/infrastructure", needsUnit: false,
+			name:     "daemon-reload",
+			toplevel: "/home/kai/projects/coilysiren/infrastructure", needsUnit: false,
 			want: []string{"sudo", "--non-interactive", "/home/linuxbrew/.linuxbrew/bin/coily",
-				"--commit-scope=/home/kai/projects/coilysiren/infrastructure",
+				"--cwd=/home/kai/projects/coilysiren/infrastructure",
 				"systemctl", "daemon-reload"},
-		},
-		{
-			// coily#244: caller in the "auto" / unset case maps to
-			// empty scope at the call site (see systemctlSelfElevate),
-			// so the inner falls back to its own auto resolution.
-			name: "empty-scope", unit: "x.service", scope: "", needsUnit: true,
-			want: []string{"sudo", "--non-interactive", "/home/linuxbrew/.linuxbrew/bin/coily",
-				"systemctl", "empty-scope", "x.service"},
-		},
-		{
-			// coily#244: coily ssh injects --commit-scope=<working_dir>
-			// (a non-git path like /home/kai/projects/coilysiren) on
-			// the outer. That value gets forwarded verbatim so the
-			// inner takes the same explicit-path bypass branch.
-			name: "ssh-working-dir", unit: "repo-recall.service",
-			scope: "/home/kai/projects/coilysiren", needsUnit: true,
-			want: []string{"sudo", "--non-interactive", "/home/linuxbrew/.linuxbrew/bin/coily",
-				"--commit-scope=/home/kai/projects/coilysiren",
-				"systemctl", "ssh-working-dir", "repo-recall.service"},
 		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := buildSelfElevateArgv("/home/linuxbrew/.linuxbrew/bin/coily", tc.scope, tc.name, tc.unit, tc.needsUnit)
+			got := buildSelfElevateArgv("/home/linuxbrew/.linuxbrew/bin/coily", tc.toplevel, tc.name, tc.unit, tc.needsUnit)
 			if len(got) != len(tc.want) {
 				t.Fatalf("argv length = %d, want %d (got=%v)", len(got), len(tc.want), got)
 			}
@@ -78,28 +56,14 @@ func TestBuildSelfElevateArgv(t *testing.T) {
 	}
 }
 
-// TestBuildSelfElevateArgv_OmitsCommitScopeWhenEmpty pins the coily#244
-// regression fix: when the caller passes empty scope (because the outer
-// had --commit-scope=auto, which the caller maps to ""), the rendered
-// argv must NOT contain `--commit-scope=...`. The inner then falls back
-// to its own default ("auto"), which is the right behavior for any
-// caller that genuinely has no scope to forward.
-func TestBuildSelfElevateArgv_OmitsCommitScopeWhenEmpty(t *testing.T) {
-	argv := buildSelfElevateArgv("/home/linuxbrew/.linuxbrew/bin/coily", "", "disable", "repo-recall.service", true)
-	for _, a := range argv {
-		if strings.HasPrefix(a, "--commit-scope") {
-			t.Errorf("found %q in argv with empty scope; coily#244 forbids --commit-scope when scope is empty (full=%v)", a, argv)
-		}
-	}
-}
-
 // TestSecurityClaim_SystemctlSelfElevatesNotInnerSudo backs the coily#203
 // design intent: coily is the security boundary, the broad
 // `(ALL) NOPASSWD: <coily-path>` sudoers rule is the trusted grant, and
 // per-unit sudoers carveouts duplicate the gate. The self-elevation
 // shape must therefore put sudo on coily, not on systemctl. Drift in
 // either direction (inner sudo, or unprefixed sudo on systemctl) trips
-// this test.
+// this test. The argv must also carry --cwd so the sudo'd child has a
+// git toplevel to bind to (coily#245).
 func TestSecurityClaim_SystemctlSelfElevatesNotInnerSudo(t *testing.T) {
 	argv := buildSelfElevateArgv("/some/path/coily", "/some/repo", "stop", "x.service", true)
 	if argv[0] != "sudo" {
@@ -108,7 +72,7 @@ func TestSecurityClaim_SystemctlSelfElevatesNotInnerSudo(t *testing.T) {
 	if !strings.HasSuffix(argv[2], "coily") {
 		t.Errorf("argv[2] = %q, want a coily binary path", argv[2])
 	}
-	var sawSystemctl bool
+	var sawSystemctl, sawCwd bool
 	for i, a := range argv {
 		if i > 0 && a == "sudo" {
 			t.Errorf("found inner sudo at argv[%d]; coily#203 forbids per-systemctl sudo carveouts", i)
@@ -116,9 +80,15 @@ func TestSecurityClaim_SystemctlSelfElevatesNotInnerSudo(t *testing.T) {
 		if a == "systemctl" {
 			sawSystemctl = true
 		}
+		if strings.HasPrefix(a, "--cwd=") {
+			sawCwd = true
+		}
 	}
 	if !sawSystemctl {
 		t.Errorf("argv missing systemctl token; got %v", argv)
+	}
+	if !sawCwd {
+		t.Errorf("argv missing --cwd; coily#245 requires it for inner to bind to a git toplevel (got %v)", argv)
 	}
 }
 
