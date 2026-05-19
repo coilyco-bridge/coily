@@ -221,6 +221,10 @@ Flags: --max, --scope, --since
 
 prepare-commit-msg hook: append Audit-log: trailers in place.
 
+## `coily hook pre-tool-use`
+
+PreToolUse hook for the Bash tool. Routes bare-binary invocations through coily wrappers with a recovery hint; rejects coily-binary invocations resolving outside the canonical install paths.
+
 ## `coily install-completion`
 
 Install shell tab-completion for coily.

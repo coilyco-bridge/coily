@@ -147,17 +147,21 @@ func TestApplyHookHandoffTrim_AlignedWithAgentGuardHookTable(t *testing.T) {
 	}
 }
 
-// TestCoilyRenderHookScript_IsAgentGuardShim asserts the new hook
-// body is the shim from coilysiren/coily#185 - a one-line exec into
-// `agent-guard hook pre-tool-use`, not the prior 159-line case-
-// statement deny script.
-func TestCoilyRenderHookScript_IsAgentGuardShim(t *testing.T) {
+// TestCoilyRenderHookScript_IsCoilyHookShim asserts the rendered hook
+// body is a one-line exec into `coily hook pre-tool-use`, NOT a cross-
+// consumer reference like the prior `exec agent-guard hook ...` shim.
+// Per coilysiren/coily#248 + cli-guard#74, coily and agent-guard are
+// peer cli-guard consumers; neither names the other in source.
+func TestCoilyRenderHookScript_IsCoilyHookShim(t *testing.T) {
 	body, err := coilyRenderHookScript(nil, nil)
 	if err != nil {
 		t.Fatalf("coilyRenderHookScript: %v", err)
 	}
-	if !strings.Contains(body, "exec agent-guard hook pre-tool-use") {
-		t.Errorf("expected hook body to exec into agent-guard, got:\n%s", body)
+	if !strings.Contains(body, "exec coily hook pre-tool-use") {
+		t.Errorf("expected hook body to exec into coily hook, got:\n%s", body)
+	}
+	if strings.Contains(body, "agent-guard") {
+		t.Errorf("hook body must not reference agent-guard (boundary violation, coily#248); got:\n%s", body)
 	}
 	if !strings.HasPrefix(body, "#!/bin/sh\n") {
 		t.Errorf("expected POSIX-sh shebang, got first line: %q", strings.SplitN(body, "\n", 2)[0])
@@ -165,8 +169,6 @@ func TestCoilyRenderHookScript_IsAgentGuardShim(t *testing.T) {
 	if strings.Contains(body, "case ") {
 		t.Errorf("hook body still contains a case statement; the 159-line legacy script should be gone:\n%s", body)
 	}
-	// Tight upper bound to catch accidental reintroduction of the
-	// old script body.
 	const maxLines = 15
 	if got := strings.Count(body, "\n"); got > maxLines {
 		t.Errorf("expected the hook shim to be tiny (<= %d lines), got %d:\n%s", maxLines, got, body)
@@ -174,9 +176,7 @@ func TestCoilyRenderHookScript_IsAgentGuardShim(t *testing.T) {
 }
 
 // TestCoilyLockdownDriver_WiresHookHandoff asserts the driver factory
-// in lockdown_driver.go has actually swapped in the new shim renderer.
-// Catches the case where a future edit reverts the override and
-// silently restores the legacy deny script.
+// has the coily-hook renderer wired, not a cross-consumer reference.
 func TestCoilyLockdownDriver_WiresHookHandoff(t *testing.T) {
 	drv := coilyLockdownDriver()
 	if drv.RenderHookScript == nil {
@@ -186,7 +186,10 @@ func TestCoilyLockdownDriver_WiresHookHandoff(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RenderHookScript: %v", err)
 	}
-	if !strings.Contains(body, "exec agent-guard hook pre-tool-use") {
-		t.Errorf("RenderHookScript no longer points at agent-guard; the lockdown_driver override has regressed.\nbody:\n%s", body)
+	if !strings.Contains(body, "exec coily hook pre-tool-use") {
+		t.Errorf("RenderHookScript should exec into coily hook (coily#248); got:\n%s", body)
+	}
+	if strings.Contains(body, "agent-guard") {
+		t.Errorf("RenderHookScript must not reference agent-guard; got:\n%s", body)
 	}
 }
