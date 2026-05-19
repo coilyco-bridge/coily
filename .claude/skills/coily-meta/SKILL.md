@@ -151,6 +151,21 @@ If a lockdown run in auto-mode locks the agent out of a path the operator later 
 
 When working inside the `coily` repo checkout, run the test suite via the brew-installed coily against the local checkout, not bare `go test`. Each repo declares its commands in `.coily/coily.yaml`. For coily itself: `cd <coily-checkout> && coily exec test [args...]`. Same for `vet`, `lint`, `lint-fix`, `cover`. The wrapper is audit-logged, obeys the lockdown deny list, and is the path the harness allows. Bare `go test` is denied by the deny-list pattern around the go toolchain. The `cd` is required because `coily exec` from the repo-parent cwd hits `exec_ambiguous_children`.
 
+### 3.5 Never prefix Bash with cd, export, or env when calling coily (or any allowlisted leading token)
+
+The Claude Code harness allowlist (`Bash(coily:*)`, `Bash(gh:*)`, etc.) matches the **leading token** of the command. `cd ~/foo && coily ...` starts with `cd`, not `coily`, so `Bash(coily:*)` does not apply and the harness prompts on every call. With dozens of probes that is a wall of prompts. Same trap for `export PATH=... && coily`, `env X=Y coily`, and `MSYS_NO_PATHCONV=1 coily`.
+
+Rules:
+
+- Invoke binaries bare: `coily ops gh auth status`, never `cd somewhere && coily ops gh auth status`.
+- To bind an audit row to a specific repo, use `coily --commit-scope=<repo-path> ...` instead of `cd <repo-path> && coily ...`. There is no opt-out by design (every audit row must bind to a real repo).
+- If you genuinely need to change dirs (rare, e.g. `coily exec` from the repo-parent), accept the prompt or ask Kai to widen the allowlist explicitly. Do not paper over by chaining.
+- The same rule applies to any other allowlisted leading token (`gh`, `aws`, `kubectl`, `docker`, etc.) - don't bury them behind `env` / `cd` / `PATH=`.
+
+Cross-platform: this is a harness-level rule, not a host-level one. The Linux specifics (PATH injection, linuxbrew location) stay in `kai-linux-env`; the harness-allowlist discipline lives here so it loads on Mac, Windows, and Linux sessions alike.
+
+**Pin:** [coily#180](https://github.com/coilysiren/coily/issues/180).
+
 ## 4. Shared rules and inventory
 
 Cross-cutting facts and rules that apply across every verb area.
