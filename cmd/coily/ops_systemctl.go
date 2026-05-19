@@ -101,13 +101,24 @@ sudo-prefixed. Intended for the remote side of
 // buildSelfElevateArgv composes the outer-sudo re-exec argv. Pure helper
 // so the shape is unit-testable without a real sudo. Pinned form:
 //
-//	sudo --non-interactive <coilyPath> systemctl <verb> [<unit>]
+//	sudo --non-interactive <coilyPath> --commit-scope=<cwd> systemctl <verb> [<unit>]
 //
 // No inner sudo, no shell, no `sudo -i`. --non-interactive is explicit so
 // a host missing the NOPASSWD grant fails fast instead of dangling on a
 // hidden password prompt (the coily#203 motivating bug).
-func buildSelfElevateArgv(coilyPath, name, unit string, needsUnit bool) []string {
-	argv := []string{"sudo", "--non-interactive", coilyPath, "systemctl", name}
+//
+// --commit-scope forwards the outer process's cwd to the sudo'd child
+// because sudo doesn't preserve cwd: without this, the child wakes up
+// in /root and scope.Resolve("auto", ...) fails with "not inside a git
+// repo." Passing the outer cwd lets the child resolve to the same git
+// toplevel the outer would have. Empty cwd is left out so callers
+// genuinely without a cwd (tests) keep the default-auto behavior.
+func buildSelfElevateArgv(coilyPath, cwd, name, unit string, needsUnit bool) []string {
+	argv := []string{"sudo", "--non-interactive", coilyPath}
+	if cwd != "" {
+		argv = append(argv, "--commit-scope="+cwd)
+	}
+	argv = append(argv, "systemctl", name)
 	if needsUnit {
 		argv = append(argv, unit)
 	}
@@ -133,7 +144,8 @@ func (r *Runner) systemctlSelfElevate(ctx context.Context, name, unit string, ne
 			return fmt.Errorf("systemctl %s: locate coily binary for sudo re-exec: %w", name, err)
 		}
 	}
-	argv := buildSelfElevateArgv(coilyPath, name, unit, needsUnit)
+	cwd, _ := os.Getwd()
+	argv := buildSelfElevateArgv(coilyPath, cwd, name, unit, needsUnit)
 	if err := r.Runner.Exec(ctx, argv[0], argv[1:]...); err != nil {
 		return fmt.Errorf("systemctl %s: sudo re-exec failed (does this host grant `NOPASSWD: %s` for the invoking user?): %w", name, coilyPath, err)
 	}

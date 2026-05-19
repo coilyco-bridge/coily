@@ -15,23 +15,33 @@ func TestBuildSelfElevateArgv(t *testing.T) {
 	cases := []struct {
 		name      string
 		unit      string
+		cwd       string
 		needsUnit bool
 		want      []string
 	}{
 		{
-			name: "stop", unit: "sirens-discord-ops-update.timer", needsUnit: true,
+			name: "stop", unit: "sirens-discord-ops-update.timer",
+			cwd: "/home/kai/projects/coilysiren/infrastructure", needsUnit: true,
 			want: []string{"sudo", "--non-interactive", "/home/linuxbrew/.linuxbrew/bin/coily",
+				"--commit-scope=/home/kai/projects/coilysiren/infrastructure",
 				"systemctl", "stop", "sirens-discord-ops-update.timer"},
 		},
 		{
-			name: "daemon-reload", needsUnit: false,
+			name: "daemon-reload",
+			cwd:  "/home/kai/projects/coilysiren/infrastructure", needsUnit: false,
 			want: []string{"sudo", "--non-interactive", "/home/linuxbrew/.linuxbrew/bin/coily",
+				"--commit-scope=/home/kai/projects/coilysiren/infrastructure",
 				"systemctl", "daemon-reload"},
+		},
+		{
+			name: "no-cwd", unit: "x.service", cwd: "", needsUnit: true,
+			want: []string{"sudo", "--non-interactive", "/home/linuxbrew/.linuxbrew/bin/coily",
+				"systemctl", "no-cwd", "x.service"},
 		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := buildSelfElevateArgv("/home/linuxbrew/.linuxbrew/bin/coily", tc.name, tc.unit, tc.needsUnit)
+			got := buildSelfElevateArgv("/home/linuxbrew/.linuxbrew/bin/coily", tc.cwd, tc.name, tc.unit, tc.needsUnit)
 			if len(got) != len(tc.want) {
 				t.Fatalf("argv length = %d, want %d (got=%v)", len(got), len(tc.want), got)
 			}
@@ -57,20 +67,24 @@ func TestBuildSelfElevateArgv(t *testing.T) {
 // either direction (inner sudo, or unprefixed sudo on systemctl) trips
 // this test.
 func TestSecurityClaim_SystemctlSelfElevatesNotInnerSudo(t *testing.T) {
-	argv := buildSelfElevateArgv("/some/path/coily", "stop", "x.service", true)
+	argv := buildSelfElevateArgv("/some/path/coily", "/some/repo", "stop", "x.service", true)
 	if argv[0] != "sudo" {
 		t.Errorf("argv[0] = %q, want \"sudo\" (outer sudo on coily)", argv[0])
 	}
 	if !strings.HasSuffix(argv[2], "coily") {
 		t.Errorf("argv[2] = %q, want a coily binary path", argv[2])
 	}
-	if argv[3] != "systemctl" {
-		t.Errorf("argv[3] = %q, want \"systemctl\" (no sudo between coily and systemctl)", argv[3])
-	}
-	for i := 1; i < len(argv); i++ {
-		if argv[i] == "sudo" {
+	var sawSystemctl bool
+	for i, a := range argv {
+		if i > 0 && a == "sudo" {
 			t.Errorf("found inner sudo at argv[%d]; coily#203 forbids per-systemctl sudo carveouts", i)
 		}
+		if a == "systemctl" {
+			sawSystemctl = true
+		}
+	}
+	if !sawSystemctl {
+		t.Errorf("argv missing systemctl token; got %v", argv)
 	}
 }
 
