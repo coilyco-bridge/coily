@@ -62,6 +62,7 @@ func (r *Runner) sshPassthroughAction(ctx context.Context, c *cli.Command) error
 
 	remoteArgv := append([]string{
 		"coily",
+		"--cwd=" + target.WorkingDir,
 		"--commit-scope=" + target.WorkingDir,
 		"--audit-parent=" + localID,
 	}, rest...)
