@@ -462,7 +462,16 @@ func runHostBootstrapStep(ctx context.Context, self, lockdownRoot string) error 
 	bundle.Stdout = os.Stdout
 	bundle.Stderr = os.Stderr
 	if err := bundle.Run(); err != nil {
-		return fmt.Errorf("setup: brew bundle install: %w", err)
+		// coilysiren/coily#275: brew bundle commonly fails on a single
+		// pre-existing /opt/homebrew/bin/<name> symlink collision (e.g.
+		// trufflehog installed out-of-band). Surface the error as a
+		// warning so the remaining setup steps (uv, lockdown, user hook)
+		// still run. Operator decides whether to `brew link --overwrite`
+		// the conflicting formula or leave the unmanaged binary in place.
+		fmt.Fprintf(os.Stderr, "    warning: brew bundle install failed: %v\n", err)
+		fmt.Fprintln(os.Stderr, "    hint: a pre-existing /opt/homebrew/bin/<name> symlink can block a formula install.")
+		fmt.Fprintln(os.Stderr, "          fix with `brew link --overwrite <name>` or remove the conflicting binary, then re-run `coily setup`.")
+		fmt.Fprintln(os.Stderr, "          continuing with remaining setup steps.")
 	}
 
 	fmt.Fprintln(os.Stderr, "    uv tool install pre-commit")
@@ -471,7 +480,10 @@ func runHostBootstrapStep(ctx context.Context, self, lockdownRoot string) error 
 	uv.Stdout = os.Stdout
 	uv.Stderr = os.Stderr
 	if err := uv.Run(); err != nil {
-		return fmt.Errorf("setup: uv tool install pre-commit: %w", err)
+		// Same shape as brew bundle above (coilysiren/coily#275): warn,
+		// don't abort, so lockdown + user-hook still land.
+		fmt.Fprintf(os.Stderr, "    warning: uv tool install pre-commit failed: %v\n", err)
+		fmt.Fprintln(os.Stderr, "    continuing with remaining setup steps.")
 	}
 	return nil
 }

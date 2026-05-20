@@ -384,6 +384,50 @@ func TestRunHostBootstrapStep_SkipsWhenBrewfileMissing(t *testing.T) {
 	}
 }
 
+// TestRunHostBootstrapStep_BrewBundleFailureIsWarning pins coilysiren/coily#275:
+// a `brew bundle install` non-zero exit (e.g. a single dep collision on
+// /opt/homebrew/bin/<name>) must surface as a warning and let the rest of
+// setup continue. The step also still invokes the uv tool install step.
+func TestRunHostBootstrapStep_BrewBundleFailureIsWarning(t *testing.T) {
+	root := t.TempDir()
+	brewDir := filepath.Join(root, "agentic-os", "brew")
+	if err := os.MkdirAll(brewDir, 0o755); err != nil {
+		t.Fatalf("mkdir brew: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(brewDir, "Brewfile"), []byte("brew \"jq\"\n"), 0o644); err != nil {
+		t.Fatalf("write Brewfile: %v", err)
+	}
+
+	// Fake self: exits non-zero for the `brew bundle install` invocation,
+	// success for everything else (the uv tool install).
+	log := filepath.Join(root, "invocations.log")
+	script := "#!/bin/sh\n" +
+		"for a in \"$@\"; do echo \"ARG=$a\" >> \"" + log + "\"; done\n" +
+		"echo --- >> \"" + log + "\"\n" +
+		"case \"$2\" in brew) exit 3 ;; esac\n" +
+		"exit 0\n"
+	self := filepath.Join(root, "coily")
+	if err := os.WriteFile(self, []byte(script), 0o755); err != nil {
+		t.Fatalf("write self: %v", err)
+	}
+
+	if err := runHostBootstrapStep(context.Background(), self, root); err != nil {
+		t.Fatalf("runHostBootstrapStep should warn, not fail: %v", err)
+	}
+
+	data, err := os.ReadFile(log)
+	if err != nil {
+		t.Fatalf("read log: %v", err)
+	}
+	got := string(data)
+	if !strings.Contains(got, "ARG=brew") {
+		t.Errorf("expected brew bundle invocation, got:\n%s", got)
+	}
+	if !strings.Contains(got, "ARG=uv") {
+		t.Errorf("expected uv tool install invocation to run despite brew failure, got:\n%s", got)
+	}
+}
+
 // TestRunHostBootstrapStep_InvokesCoilyPkgInAgenticOSDir pins coilysiren/coily#264:
 // when the Brewfile exists, runHostBootstrapStep self-execs
 // `coily pkg brew bundle install --file <brewfile>` and
