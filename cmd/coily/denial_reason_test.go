@@ -30,6 +30,7 @@ func TestReasonFor_PolicyDeniedNamesWorkarounds(t *testing.T) {
 		"--body-file",
 		"file://",
 		"--jq-file",
+		"--args-file",
 		"| jq",
 	} {
 		if !containsSubstr(got, want) {
