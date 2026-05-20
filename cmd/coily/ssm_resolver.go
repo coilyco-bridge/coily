@@ -30,16 +30,27 @@ func ssmResolver() mcporter.SecretResolver {
 	return mcporter.WithTTLCache(inner, time.Minute, filepath.Join(home, ".cache", "coily", "ssm.json"))
 }
 
-// resolveOneFromSSM inverts the `ssm-load` rule: lowercase the var
-// name, replace underscores with slashes, prepend a leading slash.
+// resolveOneFromSSM resolves an env-var name in three layers:
 //
-//	COILYSIREN_TAILNET_DOMAIN -> /coilysiren/tailnet/domain
+//  1. Parent-env passthrough. If the operator's shell already has the
+//     value set, use it. The mcporter.json `${VAR}` shape predates the
+//     SSM wrapper and many references (ELEVENLABS_API_KEY, OPENAI_API_KEY,
+//     ...) come from external tooling, not SSM. Preserving the parent-env
+//     path keeps those working.
+//  2. SSM lookup at the derived path. Inverts the `ssm-load` rule:
+//     lowercase, underscores -> slashes, leading slash.
+//     COILYSIREN_TAILNET_DOMAIN -> /coilysiren/tailnet/domain.
+//  3. ParameterNotFound soft-fail. Returns ("", nil) so the preflight
+//     doesn't break on references to servers the operator isn't even
+//     calling. mcporter will surface a clean error at server-use time
+//     if the missing value actually matters.
 //
-// Calls `aws ssm get-parameter --with-decryption` for the derived path
-// and returns the raw Parameter.Value string. AWS errors are
-// propagated verbatim so the operator sees the real cause (expired
-// SSO, missing param, etc.) instead of a wrapped mcporter failure.
+// Other AWS errors (expired SSO, missing perms, network) propagate so
+// the operator sees the real cause.
 func resolveOneFromSSM(name string) (string, error) {
+	if v := os.Getenv(name); v != "" {
+		return v, nil
+	}
 	path := ssmPathFromEnvName(name)
 	cmd := exec.Command("aws", "ssm", "get-parameter", //nolint:gosec // name is derived from a static [A-Za-z_][A-Za-z0-9_]* match; aws CLI runs locally with the operator's creds.
 		"--name", path,
@@ -51,6 +62,9 @@ func resolveOneFromSSM(name string) (string, error) {
 	cmd.Stderr = &stderr
 	out, err := cmd.Output()
 	if err != nil {
+		if strings.Contains(stderr.String(), "ParameterNotFound") {
+			return "", nil
+		}
 		return "", fmt.Errorf("ssm get-parameter %s: %w (%s)", path, err, strings.TrimSpace(stderr.String()))
 	}
 	return strings.TrimRight(string(out), "\n"), nil
