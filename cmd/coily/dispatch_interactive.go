@@ -102,6 +102,74 @@ var openWarpLaunch = func(ctx context.Context, r *Runner, url string) error {
 	return r.Runner.Exec(ctx, "open", url)
 }
 
+// runWorktreeAdd is the seam tests swap to avoid actually shelling out to
+// git. Default runs `git -C <repoPath> worktree add -B <branch>
+// <worktreePath>` through the shell runner.
+var runWorktreeAdd = func(ctx context.Context, r *Runner, repoPath, branch, worktreePath string) error {
+	_, err := r.Runner.Capture(ctx, "git", "-C", repoPath, "worktree", "add", "-B", branch, worktreePath)
+	return err
+}
+
+// dispatchWorktreeRootOverride lets tests redirect the worktree root to
+// a tempdir so they don't have to mutate ~/projects/coilysiren. Empty in
+// production. Read by dispatchWorktreeRoot.
+var dispatchWorktreeRootOverride = ""
+
+// dispatchWorktreeRoot is the parent directory under which each dispatch
+// gets its own worktree. Lives outside any repo so no per-repo .gitignore
+// churn. One subdirectory per repo, one worktree per issue.
+func dispatchWorktreeRoot() (string, error) {
+	if dispatchWorktreeRootOverride != "" {
+		return dispatchWorktreeRootOverride, nil
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, "projects", allowedOwner, ".dispatch-worktrees"), nil
+}
+
+// dispatchWorktreePath returns the worktree path for a given repo + issue
+// number. Format: ~/projects/coilysiren/.dispatch-worktrees/<repo>/issue-<N>.
+func dispatchWorktreePath(repo string, number int) (string, error) {
+	root, err := dispatchWorktreeRoot()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(root, repo, fmt.Sprintf("issue-%d", number)), nil
+}
+
+// dispatchWorktreeBranch returns the branch name for a given issue number.
+// Format: dispatch/issue-<N>. Predictable so re-dispatching the same issue
+// reuses the same branch (idempotency).
+func dispatchWorktreeBranch(number int) string {
+	return fmt.Sprintf("dispatch/issue-%d", number)
+}
+
+// ensureDispatchWorktree returns worktreePath after guaranteeing a git
+// worktree exists there. Idempotent: if a `.git` entry already lives at
+// worktreePath, returns the path without touching git. Otherwise creates
+// the parent dir and runs `git worktree add -B <branch>`. The `-B` flag
+// makes the branch creation idempotent too: a re-dispatch after the
+// worktree was manually removed will reset the branch rather than fail.
+func ensureDispatchWorktree(ctx context.Context, r *Runner, repoPath string, ref *issueRef) (string, error) {
+	worktreePath, err := dispatchWorktreePath(ref.Repo, ref.Number)
+	if err != nil {
+		return "", fmt.Errorf("resolve worktree path: %w", err)
+	}
+	if _, err := os.Stat(filepath.Join(worktreePath, ".git")); err == nil {
+		return worktreePath, nil
+	}
+	if err := os.MkdirAll(filepath.Dir(worktreePath), 0o755); err != nil {
+		return "", fmt.Errorf("mkdir worktree parent: %w", err)
+	}
+	branch := dispatchWorktreeBranch(ref.Number)
+	if err := runWorktreeAdd(ctx, r, repoPath, branch, worktreePath); err != nil {
+		return "", fmt.Errorf("git worktree add -B %s %s (in %s): %w", branch, worktreePath, repoPath, err)
+	}
+	return worktreePath, nil
+}
+
 // dispatchInteractiveCommand spins up a new Warp tab cwd'd into the target
 // repo with `claude "Work on issue <ref>"` already submitted as the first
 // turn. Hands control back to the operator immediately.
@@ -176,6 +244,10 @@ Soft-fails to a copy-paste fallback if Warp / open are unavailable.`,
 				Usage: "URI path that picks tab vs window fire. `tab` (default, opens a new tab via warpdotdev/Warp#9379) or `window` (fallback, opens a fresh window via the legacy launch_configurations path).",
 				Value: defaultDispatchSurface,
 			},
+			&cli.BoolFlag{
+				Name:  "no-worktree",
+				Usage: "skip git worktree creation and cd the dispatched session straight into the bare repo checkout. Escape hatch for sessions that must work against the canonical tree; concurrent dispatches into the same repo will race on the working tree.",
+			},
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
@@ -229,6 +301,21 @@ func interactiveTitleLine(ref *issueRef, issue *ghIssue) string {
 	return fmt.Sprintf("%s: %s", ref, strings.TrimSpace(issue.Title))
 }
 
+// resolveDispatchCwd returns the directory the dispatched session should
+// run in. With --no-worktree, that's the bare repo checkout. Otherwise
+// it's the per-issue worktree path: dry-run resolves the path without
+// touching git, normal mode creates the worktree (or reuses an existing
+// one).
+func resolveDispatchCwd(ctx context.Context, r *Runner, repoPath string, ref *issueRef, noWorktree, dryRun bool) (string, error) {
+	if noWorktree {
+		return repoPath, nil
+	}
+	if dryRun {
+		return dispatchWorktreePath(ref.Repo, ref.Number)
+	}
+	return ensureDispatchWorktree(ctx, r, repoPath, ref)
+}
+
 func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) error {
 	args := c.Args().Slice()
 	if len(args) != 1 {
@@ -246,8 +333,20 @@ func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) erro
 	channel := c.String("channel")
 	surface := c.String("surface")
 	repoPath, _ := localRepoPath(ref.Repo)
+	noWorktree := c.Bool("no-worktree")
 
 	url, err := dispatchURL(channel, surface, launchName)
+	if err != nil {
+		return fmt.Errorf("dispatch interactive: %w", err)
+	}
+
+	// Each dispatch lands in its own git worktree branched off main, so
+	// concurrent dispatches into the same repo never collide on a shared
+	// working tree (coilysiren/coily#285). --no-worktree opts out for the
+	// rare case a session must work against the canonical checkout.
+	// In dry-run we compute the path but never call git; in normal mode
+	// we create the worktree (or reuse it if already present).
+	cwd, err := resolveDispatchCwd(ctx, r, repoPath, ref, noWorktree, c.Bool("dry-run"))
 	if err != nil {
 		return fmt.Errorf("dispatch interactive: %w", err)
 	}
@@ -256,7 +355,7 @@ func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) erro
 		SchemaVersion: dispatchQueueSchemaVersion,
 		Ref:           ref.String(),
 		Title:         strings.TrimSpace(issue.Title),
-		Cwd:           repoPath,
+		Cwd:           cwd,
 		Prompt:        prompt,
 	}
 
@@ -265,7 +364,7 @@ func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) erro
 		fmt.Printf("# dispatch interactive (dry-run)\n")
 		fmt.Printf("issue:        %s\n", ref)
 		fmt.Printf("url:          %s\n", issue.URL)
-		fmt.Printf("cwd:          %s\n", repoPath)
+		fmt.Printf("cwd:          %s\n", cwd)
 		fmt.Printf("queue-dir:    %s\n", queueDir)
 		fmt.Printf("channel:      %s\n", channel)
 		fmt.Printf("surface:      %s\n", surface)
@@ -281,7 +380,7 @@ func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) erro
 	}
 
 	if err := openWarpLaunch(ctx, r, url); err != nil {
-		printInteractiveFallback(ref, repoPath, prompt, url, queuePath, err)
+		printInteractiveFallback(ref, cwd, prompt, url, queuePath, err)
 		return nil
 	}
 	return nil

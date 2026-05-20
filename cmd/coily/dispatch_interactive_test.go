@@ -249,3 +249,118 @@ func TestDispatchHasModeSubverbs(t *testing.T) {
 		}
 	}
 }
+
+// TestDispatchWorktreePath pins the layout
+// ~/projects/coilysiren/.dispatch-worktrees/<repo>/issue-<N>. Lives
+// outside any repo so no per-repo .gitignore churn (coilysiren/coily#285).
+func TestDispatchWorktreePath(t *testing.T) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatalf("UserHomeDir: %v", err)
+	}
+	got, err := dispatchWorktreePath("coily", 285)
+	if err != nil {
+		t.Fatalf("dispatchWorktreePath: %v", err)
+	}
+	want := filepath.Join(home, "projects", "coilysiren", ".dispatch-worktrees", "coily", "issue-285")
+	if got != want {
+		t.Errorf("dispatchWorktreePath(coily,285) = %q, want %q", got, want)
+	}
+}
+
+// TestDispatchWorktreeBranch pins the branch name shape
+// `dispatch/issue-<N>`. Predictable so re-dispatching the same issue
+// reuses the same branch (idempotency contract from #285).
+func TestDispatchWorktreeBranch(t *testing.T) {
+	if got, want := dispatchWorktreeBranch(285), "dispatch/issue-285"; got != want {
+		t.Errorf("dispatchWorktreeBranch(285) = %q, want %q", got, want)
+	}
+}
+
+// TestEnsureDispatchWorktree_CallsGit verifies the production path:
+// when no worktree exists at the target path, ensure runs
+// `git -C <repoPath> worktree add -B <branch> <worktreePath>` exactly
+// once with the expected arguments.
+func TestEnsureDispatchWorktree_CallsGit(t *testing.T) {
+	r := newTestRunner(t)
+	ref := &issueRef{Owner: "coilysiren", Repo: "coily", Number: 285}
+	repoPath := t.TempDir()
+
+	prevRoot := dispatchWorktreeRootOverride
+	dispatchWorktreeRootOverride = t.TempDir()
+	t.Cleanup(func() { dispatchWorktreeRootOverride = prevRoot })
+
+	var gotRepo, gotBranch, gotPath string
+	calls := 0
+	prev := runWorktreeAdd
+	runWorktreeAdd = func(_ context.Context, _ *Runner, gitDir, gitBranch, gitWT string) error {
+		calls++
+		gotRepo, gotBranch, gotPath = gitDir, gitBranch, gitWT
+		return nil
+	}
+	t.Cleanup(func() { runWorktreeAdd = prev })
+
+	wt, err := ensureDispatchWorktree(context.Background(), r, repoPath, ref)
+	if err != nil {
+		t.Fatalf("ensureDispatchWorktree: %v", err)
+	}
+	if calls != 1 {
+		t.Errorf("runWorktreeAdd called %d times, want 1", calls)
+	}
+	if gotRepo != repoPath {
+		t.Errorf("git -C dir = %q, want %q", gotRepo, repoPath)
+	}
+	if gotBranch != "dispatch/issue-285" {
+		t.Errorf("branch = %q, want dispatch/issue-285", gotBranch)
+	}
+	if !strings.HasSuffix(gotPath, filepath.Join("coily", "issue-285")) {
+		t.Errorf("worktree path = %q, want suffix coily/issue-285", gotPath)
+	}
+	if wt != gotPath {
+		t.Errorf("ensure returned %q, runWorktreeAdd saw %q", wt, gotPath)
+	}
+}
+
+// TestEnsureDispatchWorktree_Idempotent verifies the reuse path: when a
+// .git entry already exists under the target worktree path, ensure
+// returns the path without calling runWorktreeAdd. Reason: re-dispatching
+// the same issue must land in the same worktree rather than fail or
+// proliferate (idempotency contract from #285).
+func TestEnsureDispatchWorktree_Idempotent(t *testing.T) {
+	r := newTestRunner(t)
+	ref := &issueRef{Owner: "coilysiren", Repo: "coily", Number: 285}
+	repoPath := t.TempDir()
+
+	root := t.TempDir()
+	prevRoot := dispatchWorktreeRootOverride
+	dispatchWorktreeRootOverride = root
+	t.Cleanup(func() { dispatchWorktreeRootOverride = prevRoot })
+
+	// Simulate an existing worktree: <root>/coily/issue-285/.git
+	existing := filepath.Join(root, "coily", "issue-285")
+	if err := os.MkdirAll(existing, 0o755); err != nil {
+		t.Fatalf("mkdir existing worktree: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(existing, ".git"), []byte("gitdir: /elsewhere\n"), 0o644); err != nil {
+		t.Fatalf("write .git: %v", err)
+	}
+
+	calls := 0
+	prev := runWorktreeAdd
+	runWorktreeAdd = func(_ context.Context, _ *Runner, _, _, _ string) error {
+		calls++
+		return nil
+	}
+	t.Cleanup(func() { runWorktreeAdd = prev })
+
+	wt, err := ensureDispatchWorktree(context.Background(), r, repoPath, ref)
+	if err != nil {
+		t.Fatalf("ensureDispatchWorktree: %v", err)
+	}
+	if calls != 0 {
+		t.Errorf("runWorktreeAdd called %d times, want 0 (existing worktree must be reused)", calls)
+	}
+	if wt != existing {
+		t.Errorf("ensure returned %q, want %q", wt, existing)
+	}
+}
