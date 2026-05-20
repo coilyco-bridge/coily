@@ -60,7 +60,7 @@ var ptOps = []ptEntry{
 	{Bin: "kubectl", VerbName: "ops.kubectl", Egress: true},
 	{Bin: "flyctl", VerbName: "ops.flyctl", Egress: true},
 	{Bin: "gcloud", VerbName: "ops.gcloud", Egress: true},
-	{Bin: "mcporter", VerbName: "ops.mcporter", Egress: true, SecretResolver: ssmResolver()},
+	{Bin: "mcporter", VerbName: "ops.mcporter", Egress: true, ArgvRewriter: rewriteMcporterArgsFile, SecretResolver: ssmResolver()},
 }
 
 // ptTopLevel is the pass-through set mounted at the coily root. Each entry
