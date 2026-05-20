@@ -19,9 +19,11 @@ LDFLAGS := -s -w -X main.Version=$(VERSION)
 
 GO := go
 # gotest is a drop-in for `go test` that colorizes PASS/FAIL lines. Install
-# with `go install github.com/rakyll/gotest@latest`. CI overrides this back
-# to `go test` since color codes are noise in Actions logs.
-GO_TEST ?= gotest
+# with `go install github.com/rakyll/gotest@latest`. Falls back to plain
+# `go test` on hosts without gotest installed (fresh kai-server, CI, friends'
+# machines) so `coily exec test` works out of the box. CI may still override
+# explicitly since color codes are noise in Actions logs.
+GO_TEST ?= $(shell command -v gotest 2>/dev/null || echo go test)
 
 # Auto-help: each target documents itself with a `## description` comment on
 # the rule line. `make help` greps the Makefile for that pattern. coily lint
