@@ -3,7 +3,20 @@ package main
 import (
 	"os"
 	"strings"
+
+	"github.com/coilysiren/cli-guard/ghcache"
 )
+
+// invalidateGHWrite drops the ghcache entries a `method <path>` write
+// affects. Called pre-flight from each write-emitting rewriter so the
+// next read sees the post-write state. Pre-flight rather than post-
+// success because the rewriter only produces argv; the subprocess
+// runs later through the passthrough. If the subprocess fails, the
+// cache is just empty and the next read refetches - the same
+// correctness behavior as before any caching existed.
+func invalidateGHWrite(method, path string) {
+	ghcache.Invalidate(method, path)
+}
 
 // rewriteJQFile expands the coily-side `--jq-file <path>` (or
 // `--jq-file=<path>`) shorthand into gh's native `--jq <content>`.
@@ -228,6 +241,7 @@ func rewriteIssueCreate(rest []string, full []string) []string {
 	if declined || repo == "" || title == "" {
 		return full
 	}
+	invalidateGHWrite("POST", "/repos/"+repo+"/issues")
 	out := []string{"api", "-X", "POST", "repos/" + repo + "/issues",
 		"-f", "title=" + title,
 	}
@@ -248,6 +262,7 @@ func rewriteIssueOrPRComment(rest []string, full []string, endpointGroup string)
 	if declined || num == "" || repo == "" || body == "" {
 		return full
 	}
+	invalidateGHWrite("POST", "/repos/"+repo+"/"+endpointGroup+"/"+num+"/comments")
 	return []string{
 		"api", "-X", "POST",
 		"repos/" + repo + "/" + endpointGroup + "/" + num + "/comments",
@@ -268,6 +283,7 @@ func rewriteIssueClose(rest []string, full []string) []string {
 	if reason == "" {
 		reason = "completed"
 	}
+	invalidateGHWrite("PATCH", "/repos/"+repo+"/issues/"+num)
 	return []string{
 		"api", "-X", "PATCH",
 		"repos/" + repo + "/issues/" + num,
@@ -281,6 +297,7 @@ func rewriteIssueReopen(rest []string, full []string) []string {
 	if hasExtras || num == "" || repo == "" {
 		return full
 	}
+	invalidateGHWrite("PATCH", "/repos/"+repo+"/issues/"+num)
 	return []string{
 		"api", "-X", "PATCH",
 		"repos/" + repo + "/issues/" + num,
@@ -293,6 +310,7 @@ func rewritePRClose(rest []string, full []string) []string {
 	if hasExtras || num == "" || repo == "" {
 		return full
 	}
+	invalidateGHWrite("PATCH", "/repos/"+repo+"/pulls/"+num)
 	return []string{
 		"api", "-X", "PATCH",
 		"repos/" + repo + "/pulls/" + num,
@@ -305,6 +323,7 @@ func rewritePRReopen(rest []string, full []string) []string {
 	if hasExtras || num == "" || repo == "" {
 		return full
 	}
+	invalidateGHWrite("PATCH", "/repos/"+repo+"/pulls/"+num)
 	return []string{
 		"api", "-X", "PATCH",
 		"repos/" + repo + "/pulls/" + num,
@@ -325,6 +344,7 @@ func rewriteIssueEdit(rest []string, full []string) []string {
 	if title == "" && body == "" {
 		return full
 	}
+	invalidateGHWrite("PATCH", "/repos/"+repo+"/issues/"+num)
 	out := []string{"api", "-X", "PATCH", "repos/" + repo + "/issues/" + num}
 	if title != "" {
 		out = append(out, "-f", "title="+title)

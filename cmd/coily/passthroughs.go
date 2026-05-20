@@ -45,6 +45,7 @@ type ptEntry struct {
 	Egress        bool
 	ScopeArgvHint func(argv []string) string
 	ArgvRewriter  func(argv []string) []string
+	ReadCache     passthrough.ReadCacheClassifier
 }
 
 // ptOps is the pass-through set mounted under `coily ops <bin>`. Cloud +
@@ -53,7 +54,7 @@ type ptEntry struct {
 // user-visible path.
 var ptOps = []ptEntry{
 	{Bin: "aws", VerbName: "ops.aws", Egress: true},
-	{Bin: "gh", VerbName: "ops.gh", Egress: true, ScopeArgvHint: ghRepoScopeHint, ArgvRewriter: rewriteGHForRESTAndJQFile},
+	{Bin: "gh", VerbName: "ops.gh", Egress: true, ScopeArgvHint: ghRepoScopeHint, ArgvRewriter: rewriteGHForRESTAndJQFile, ReadCache: ghReadCacheClassifier},
 	{Bin: "kubectl", VerbName: "ops.kubectl", Egress: true},
 	{Bin: "flyctl", VerbName: "ops.flyctl", Egress: true},
 }
@@ -126,6 +127,9 @@ func (r *Runner) passthroughCommand(e ptEntry) *cli.Command {
 	}
 	if e.ArgvRewriter != nil {
 		opts = append(opts, passthrough.WithArgvRewriter(e.ArgvRewriter))
+	}
+	if e.ReadCache != nil {
+		opts = append(opts, passthrough.WithReadCache(e.ReadCache))
 	}
 	return passthrough.Command(e.Bin, r.Runner, r.Audit, opts...)
 }
