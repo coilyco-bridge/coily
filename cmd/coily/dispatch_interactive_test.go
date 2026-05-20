@@ -63,6 +63,48 @@ func TestDispatchInteractiveDefaults(t *testing.T) {
 	if defaultDispatchLaunchName != "claude-dispatch-interactive" {
 		t.Errorf("defaultDispatchLaunchName = %q, want claude-dispatch-interactive", defaultDispatchLaunchName)
 	}
+	if defaultDispatchChannel != "preview" {
+		t.Errorf("defaultDispatchChannel = %q, want preview (Preview is the Mac daily driver per coilysiren/agentic-os#107)", defaultDispatchChannel)
+	}
+}
+
+// TestLaunchURL_ChannelMapping pins the warp:// vs warppreview:// scheme
+// per channel. Stable always lands at warp://; Preview always at
+// warppreview://. There is no LaunchServices toggle that flips this.
+func TestLaunchURL_ChannelMapping(t *testing.T) {
+	cases := []struct {
+		channel string
+		want    string
+	}{
+		{"preview", "warppreview://launch/claude-dispatch-interactive"},
+		{"stable", "warp://launch/claude-dispatch-interactive"},
+	}
+	for _, tc := range cases {
+		got, err := launchURL(tc.channel, "claude-dispatch-interactive")
+		if err != nil {
+			t.Errorf("launchURL(%q): unexpected err: %v", tc.channel, err)
+			continue
+		}
+		if got != tc.want {
+			t.Errorf("launchURL(%q) = %q, want %q", tc.channel, got, tc.want)
+		}
+	}
+}
+
+// TestLaunchURL_RejectsUnknownChannel pins the "preview | stable" gate.
+// An unknown channel must error rather than silently fall through to a
+// default scheme, since picking the wrong channel opens the wrong app.
+func TestLaunchURL_RejectsUnknownChannel(t *testing.T) {
+	_, err := launchURL("garbage", "claude-dispatch-interactive")
+	if err == nil {
+		t.Fatal("launchURL(garbage) should error, got nil")
+	}
+	msg := err.Error()
+	for _, want := range []string{"preview", "stable", "invalid"} {
+		if !strings.Contains(msg, want) {
+			t.Errorf("launchURL(garbage) error = %q, want substring %q", msg, want)
+		}
+	}
 }
 
 // TestDispatchBare_ErrorsWithModeGate pins #270's "no default mode" rule.
