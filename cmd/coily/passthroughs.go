@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/coilysiren/cli-guard/egress"
+	"github.com/coilysiren/cli-guard/mcporter"
 	"github.com/coilysiren/cli-guard/passthrough"
 	"github.com/urfave/cli/v3"
 )
@@ -39,13 +40,14 @@ import (
 // verb's argv carries enough information to pick a sensible default. Today
 // only `ops gh` uses this, to derive the scope from --repo coilysiren/<name>.
 type ptEntry struct {
-	Bin           string
-	SkipPolicy    bool
-	VerbName      string
-	Egress        bool
-	ScopeArgvHint func(argv []string) string
-	ArgvRewriter  func(argv []string) []string
-	ReadCache     passthrough.ReadCacheClassifier
+	Bin            string
+	SkipPolicy     bool
+	VerbName       string
+	Egress         bool
+	ScopeArgvHint  func(argv []string) string
+	ArgvRewriter   func(argv []string) []string
+	ReadCache      passthrough.ReadCacheClassifier
+	SecretResolver mcporter.SecretResolver
 }
 
 // ptOps is the pass-through set mounted under `coily ops <bin>`. Cloud +
@@ -58,6 +60,7 @@ var ptOps = []ptEntry{
 	{Bin: "kubectl", VerbName: "ops.kubectl", Egress: true},
 	{Bin: "flyctl", VerbName: "ops.flyctl", Egress: true},
 	{Bin: "gcloud", VerbName: "ops.gcloud", Egress: true},
+	{Bin: "mcporter", VerbName: "ops.mcporter", Egress: true, SecretResolver: ssmResolver()},
 }
 
 // ptTopLevel is the pass-through set mounted at the coily root. Each entry
@@ -131,6 +134,9 @@ func (r *Runner) passthroughCommand(e ptEntry) *cli.Command {
 	}
 	if e.ReadCache != nil {
 		opts = append(opts, passthrough.WithReadCache(e.ReadCache))
+	}
+	if e.SecretResolver != nil {
+		opts = append(opts, passthrough.WithSecretResolver(e.SecretResolver))
 	}
 	return passthrough.Command(e.Bin, r.Runner, r.Audit, opts...)
 }

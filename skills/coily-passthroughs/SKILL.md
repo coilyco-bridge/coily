@@ -1483,6 +1483,10 @@ Pass-through to gh with argv validation + audit log.
 
 Pass-through to kubectl with argv validation + audit log.
 
+## `coily ops mcporter`
+
+Pass-through to mcporter with argv validation + audit log.
+
 ## `coily ops modio mods comments`
 
 GET /games/{game-id}/mods/{mod-id}/comments
