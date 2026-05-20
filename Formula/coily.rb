@@ -1,7 +1,7 @@
 class Coily < Formula
   desc "Operator CLI for Kai's homelab - audited wrapper over aws, kubectl, gh, and friends"
   homepage "https://github.com/coilysiren/coily"
-  url "ssh://git@github.com/coilysiren/coily.git", tag: "v1.15.0", revision: "7670230972d35631dfcd7772312d56472494779c"
+  url "ssh://git@github.com/coilysiren/coily.git", tag: "v1.15.1", revision: "0f331114c9ec142121442a6b70ff33074f0f4b47"
   license "MIT"
   head "https://github.com/coilysiren/coily.git", branch: "main"
 
