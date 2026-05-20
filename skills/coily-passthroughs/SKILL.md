@@ -53,7 +53,7 @@ Flags: --allowed-tools, --claude-bin, --dry-run, --permission-mode
 
 Open a new Warp tab with `claude "Work on issue <ref>"` pre-submitted.
 
-Flags: --channel, --dry-run, --launch-name, --scratch-path
+Flags: --channel, --dry-run, --launch-name, --scratch-path, --surface
 
 ## `coily docker`
 

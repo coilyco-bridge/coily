@@ -19,6 +19,7 @@ const (
 	defaultDispatchScratchPath = "/tmp/coily-dispatch-prompt.txt"
 	defaultDispatchLaunchName  = "claude-dispatch-interactive"
 	defaultDispatchChannel     = "preview"
+	defaultDispatchSurface     = "tab"
 )
 
 // channelScheme maps the --channel flag to the URL scheme that lands in
@@ -41,13 +42,35 @@ func channelScheme(channel string) (string, error) {
 	}
 }
 
-// launchURL builds the full warp(preview)://launch/<name> URL.
-func launchURL(channel, launchName string) (string, error) {
+// surfacePath maps the --surface flag to the URI path segment Warp uses
+// to pick between a new-tab fire (tab_config) and a new-window fire
+// (launch). tab is the default per coilysiren/coily#274. The tab_config
+// URI handler landed in warpdotdev/Warp#9379 and was first available in
+// Preview builds dated 2026-05-13 or later, Stable builds dated
+// 2026-05-15 or later; --surface window stays as the explicit fallback.
+func surfacePath(surface string) (string, error) {
+	switch surface {
+	case "tab":
+		return "tab_config", nil
+	case "window":
+		return "launch", nil
+	default:
+		return "", fmt.Errorf("invalid --surface %q (valid values: tab | window)", surface)
+	}
+}
+
+// dispatchURL builds the full warp(preview)://(tab_config|launch)/<name>
+// URL fired by `open`. Channel picks the scheme, surface picks the path.
+func dispatchURL(channel, surface, launchName string) (string, error) {
 	scheme, err := channelScheme(channel)
 	if err != nil {
 		return "", err
 	}
-	return scheme + "://launch/" + launchName, nil
+	path, err := surfacePath(surface)
+	if err != nil {
+		return "", err
+	}
+	return scheme + "://" + path + "/" + launchName, nil
 }
 
 // openWarpLaunch is the seam tests swap to avoid actually spawning Warp.
@@ -81,17 +104,23 @@ func (r *Runner) dispatchInteractiveCommand() *cli.Command {
 		ArgsUsage: "<owner/repo#N | issue-url>",
 		Description: `interactive validates the issue ref exists and is open, writes the prompt
 "Work on issue <ref>" to a scratch file at /tmp/coily-dispatch-prompt.txt
-(mode 0600), then fires open warppreview://launch/claude-dispatch-interactive
-to trigger the agentic-os Warp launch config that consumes the scratch file
-and execs claude inside the local checkout at ~/projects/coilysiren/<repo>.
+(mode 0600), then fires open warppreview://tab_config/claude-dispatch-interactive
+to trigger the agentic-os Warp config that consumes the scratch file and
+execs claude inside the local checkout at ~/projects/coilysiren/<repo>.
 
 Defaults to Warp Preview (--channel preview). Pass --channel stable to
-target Warp Stable instead. Preview is the Mac daily driver; stable is
+target Warp Stable instead. Preview is the Mac daily driver, stable is
 the explicit fallback for when Preview wedges.
 
+Defaults to a new tab inside the active window (--surface tab) via the
+tab_config URI handler from warpdotdev/Warp#9379. Pass --surface window
+to fall back to the legacy launch_configurations path which opens a
+fresh Warp window instead.
+
 Hands control back immediately. The dispatched session runs in the
-foreground in its own Warp tab; no headless retry loop, no audit polling.
-If you need an AFK fire-and-forget run, use 'coily dispatch headless'.
+foreground in its own Warp tab or window depending on --surface, with no
+headless retry loop and no audit polling. If you need an AFK
+fire-and-forget run, use 'coily dispatch headless'.
 
 Soft-fails to a copy-paste fallback if Warp / open are unavailable.`,
 		Flags: []cli.Flag{
@@ -106,13 +135,18 @@ Soft-fails to a copy-paste fallback if Warp / open are unavailable.`,
 			},
 			&cli.StringFlag{
 				Name:  "launch-name",
-				Usage: "override the Warp launch-config name fired via warp(preview)://launch/<name>.",
+				Usage: "override the Warp config name fired via warp(preview)://(tab_config|launch)/<name>. The same name resolves under both surfaces because the .toml and .yaml are siblings.",
 				Value: defaultDispatchLaunchName,
 			},
 			&cli.StringFlag{
 				Name:  "channel",
 				Usage: "Warp channel to fire the URL into. `preview` (default, daily driver) or `stable` (fallback).",
 				Value: defaultDispatchChannel,
+			},
+			&cli.StringFlag{
+				Name:  "surface",
+				Usage: "URI path that picks tab vs window fire. `tab` (default, opens a new tab via warpdotdev/Warp#9379) or `window` (fallback, opens a fresh window via the legacy launch_configurations path).",
+				Value: defaultDispatchSurface,
 			},
 		},
 		Action: r.WrapVerb(
@@ -124,6 +158,7 @@ Soft-fails to a copy-paste fallback if Warp / open are unavailable.`,
 						"--scratch-path": c.String("scratch-path"),
 						"--launch-name":  c.String("launch-name"),
 						"--channel":      c.String("channel"),
+						"--surface":      c.String("surface"),
 					}, c.Args().Slice()
 				},
 				CommitScopeArgvHint: func(argv []string) string {
@@ -169,9 +204,10 @@ func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) erro
 	scratchPath := c.String("scratch-path")
 	launchName := c.String("launch-name")
 	channel := c.String("channel")
+	surface := c.String("surface")
 	repoPath, _ := localRepoPath(ref.Repo)
 
-	url, err := launchURL(channel, launchName)
+	url, err := dispatchURL(channel, surface, launchName)
 	if err != nil {
 		return fmt.Errorf("dispatch interactive: %w", err)
 	}
@@ -183,7 +219,8 @@ func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) erro
 		fmt.Printf("cwd:          %s\n", repoPath)
 		fmt.Printf("scratch-path: %s\n", scratchPath)
 		fmt.Printf("channel:      %s\n", channel)
-		fmt.Printf("launch-url:   %s\n", url)
+		fmt.Printf("surface:      %s\n", surface)
+		fmt.Printf("dispatch-url: %s\n", url)
 		fmt.Printf("----- prompt -----\n%s\n----- end -----\n", prompt)
 		return nil
 	}

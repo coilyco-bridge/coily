@@ -66,43 +66,69 @@ func TestDispatchInteractiveDefaults(t *testing.T) {
 	if defaultDispatchChannel != "preview" {
 		t.Errorf("defaultDispatchChannel = %q, want preview (Preview is the Mac daily driver per coilysiren/agentic-os#107)", defaultDispatchChannel)
 	}
+	if defaultDispatchSurface != "tab" {
+		t.Errorf("defaultDispatchSurface = %q, want tab (tab_config opens a new tab via warpdotdev/Warp#9379, per coilysiren/coily#274)", defaultDispatchSurface)
+	}
 }
 
-// TestLaunchURL_ChannelMapping pins the warp:// vs warppreview:// scheme
-// per channel. Stable always lands at warp://; Preview always at
-// warppreview://. There is no LaunchServices toggle that flips this.
-func TestLaunchURL_ChannelMapping(t *testing.T) {
+// TestDispatchURL_ChannelSurfaceMatrix pins the four URL shapes coily
+// can produce: (preview, stable) × (tab, window). Stable always lands at
+// warp://, Preview always at warppreview://; tab routes via tab_config/,
+// window routes via launch/. No LaunchServices toggle flips channel; no
+// build-date sniff flips surface.
+func TestDispatchURL_ChannelSurfaceMatrix(t *testing.T) {
 	cases := []struct {
 		channel string
+		surface string
 		want    string
 	}{
-		{"preview", "warppreview://launch/claude-dispatch-interactive"},
-		{"stable", "warp://launch/claude-dispatch-interactive"},
+		{"preview", "tab", "warppreview://tab_config/claude-dispatch-interactive"},
+		{"preview", "window", "warppreview://launch/claude-dispatch-interactive"},
+		{"stable", "tab", "warp://tab_config/claude-dispatch-interactive"},
+		{"stable", "window", "warp://launch/claude-dispatch-interactive"},
 	}
 	for _, tc := range cases {
-		got, err := launchURL(tc.channel, "claude-dispatch-interactive")
+		got, err := dispatchURL(tc.channel, tc.surface, "claude-dispatch-interactive")
 		if err != nil {
-			t.Errorf("launchURL(%q): unexpected err: %v", tc.channel, err)
+			t.Errorf("dispatchURL(%q,%q): unexpected err: %v", tc.channel, tc.surface, err)
 			continue
 		}
 		if got != tc.want {
-			t.Errorf("launchURL(%q) = %q, want %q", tc.channel, got, tc.want)
+			t.Errorf("dispatchURL(%q,%q) = %q, want %q", tc.channel, tc.surface, got, tc.want)
 		}
 	}
 }
 
-// TestLaunchURL_RejectsUnknownChannel pins the "preview | stable" gate.
-// An unknown channel must error rather than silently fall through to a
-// default scheme, since picking the wrong channel opens the wrong app.
-func TestLaunchURL_RejectsUnknownChannel(t *testing.T) {
-	_, err := launchURL("garbage", "claude-dispatch-interactive")
+// TestDispatchURL_RejectsUnknownChannel pins the "preview | stable"
+// gate. An unknown channel must error rather than silently fall through
+// to a default scheme, since picking the wrong channel opens the wrong
+// app.
+func TestDispatchURL_RejectsUnknownChannel(t *testing.T) {
+	_, err := dispatchURL("garbage", "tab", "claude-dispatch-interactive")
 	if err == nil {
-		t.Fatal("launchURL(garbage) should error, got nil")
+		t.Fatal("dispatchURL(garbage,tab) should error, got nil")
 	}
 	msg := err.Error()
 	for _, want := range []string{"preview", "stable", "invalid"} {
 		if !strings.Contains(msg, want) {
-			t.Errorf("launchURL(garbage) error = %q, want substring %q", msg, want)
+			t.Errorf("dispatchURL(garbage,tab) error = %q, want substring %q", msg, want)
+		}
+	}
+}
+
+// TestDispatchURL_RejectsUnknownSurface pins the "tab | window" gate.
+// An unknown surface must error rather than silently fall through to a
+// default path, since the URI paths route to different Warp behaviors
+// (tab_config = new tab, launch = new window).
+func TestDispatchURL_RejectsUnknownSurface(t *testing.T) {
+	_, err := dispatchURL("preview", "garbage", "claude-dispatch-interactive")
+	if err == nil {
+		t.Fatal("dispatchURL(preview,garbage) should error, got nil")
+	}
+	msg := err.Error()
+	for _, want := range []string{"tab", "window", "invalid"} {
+		if !strings.Contains(msg, want) {
+			t.Errorf("dispatchURL(preview,garbage) error = %q, want substring %q", msg, want)
 		}
 	}
 }
