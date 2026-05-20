@@ -166,22 +166,28 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 				"it without prompting. Working directory is set to %s and the audit "+
 				"row binds to that repo's commit-scope.\n\nExtra positional args "+
 				"are appended and validated against the same shell-metacharacter "+
-				"rules as privileged verbs. Repo verbs require the declaring "+
-				"coily.yaml to be committed and a synced upstream branch; "+
-				"unrelated working-tree dirt is captured in the audit row but "+
-				"does not refuse.",
+				"rules as privileged verbs unless the declaring command opts in "+
+				"with allow_metacharacters: true (audit row stamps policy_skipped "+
+				"so forensics still see the relaxed policy). Repo verbs require "+
+				"the declaring coily.yaml to be committed and a synced upstream "+
+				"branch; unrelated working-tree dirt is captured in the audit row "+
+				"but does not refuse.",
 			cfg.Path, strings.Join(rc.Argv, " "), rc.Name, repoRoot,
 		),
 		Action: r.WrapVerb(
 			verb.Spec{
 				Name:                verbName,
 				CommitScopeOverride: repoRoot,
+				SkipPolicy:          rc.AllowMetacharacters,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					positional := append([]string{}, rc.Argv...)
 					positional = append(positional, c.Args().Slice()...)
 					return nil, positional
 				},
 				OnComplete: func(rec *audit.Record) {
+					if rc.AllowMetacharacters {
+						rec.PolicySkipped = true
+					}
 					if capturedState == nil {
 						return
 					}
@@ -221,8 +227,12 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 func (r *Runner) buildPromptingChildCommand(name string, matches []childMatch) *cli.Command {
 	verbName := "repo." + name
 	repoPaths := make([]string, 0, len(matches))
+	allAllowMetacharacters := true
 	for _, m := range matches {
 		repoPaths = append(repoPaths, filepath.Dir(filepath.Dir(m.cfg.Path)))
+		if !m.cmd.AllowMetacharacters {
+			allAllowMetacharacters = false
+		}
 	}
 	var (
 		chosen        *childMatch
@@ -242,14 +252,18 @@ func (r *Runner) buildPromptingChildCommand(name string, matches []childMatch) *
 			len(matches), name, strings.Join(repoPaths, "\n  ")),
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      verbName,
-				SkipScope: true,
+				Name:       verbName,
+				SkipScope:  true,
+				SkipPolicy: allAllowMetacharacters,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return nil, c.Args().Slice()
 				},
 				OnComplete: func(rec *audit.Record) {
 					if chosen != nil {
 						rec.CommitScope = filepath.Dir(filepath.Dir(chosen.cfg.Path))
+						if chosen.cmd.AllowMetacharacters {
+							rec.PolicySkipped = true
+						}
 					}
 					if capturedState != nil {
 						rec.WorkingTreeStatus = capturedState.Status

@@ -17,7 +17,8 @@ var denialReasons = map[string]string{
 		"Workarounds for the high-volume cases: " +
 		"--body 'markdown' -> --body-file /tmp/body.md (gh native); " +
 		"--change-batch '{...}' -> --change-batch file:///tmp/batch.json (aws native); " +
-		"--jq '...' -> external pipe (coily ops gh api X | jq '...') or coily-side --jq-file /tmp/q.jq",
+		"--jq '...' -> external pipe (coily ops gh api X | jq '...') or coily-side --jq-file /tmp/q.jq; " +
+		"for user-defined `coily exec <verb>` invocations, opt the verb into `allow_metacharacters: true` in the declaring .coily/coily.yaml (audit row stamps policy_skipped so forensics still see it)",
 	"scope_unresolved": "every audit row binds to a real commit scope; --commit-scope is the explicit hand-off when cwd cannot resolve one",
 }
 

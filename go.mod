@@ -7,7 +7,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/coilysiren/cli-guard v0.0.0-20260520124226-39c39e1b7b33
+require github.com/coilysiren/cli-guard v0.0.0-20260520211811-c7669b9548b4
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

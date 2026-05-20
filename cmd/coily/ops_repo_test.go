@@ -217,6 +217,66 @@ func TestBuildChildRepoCommand_BindsAuditScopeToChild(t *testing.T) {
 	}
 }
 
+// TestBuildChildRepoCommand_AllowMetacharactersStampsAudit covers
+// cli-guard#81 / coily#283. A repo verb declared with
+// `allow_metacharacters: true` accepts a positional extra containing a
+// shell metacharacter (which would normally be rejected by the policy
+// gate) and the audit row carries `policy_skipped: true` so forensics
+// can still see that the row ran under the relaxed policy.
+func TestBuildChildRepoCommand_AllowMetacharactersStampsAudit(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not on PATH")
+	}
+	if _, err := exec.LookPath("true"); err != nil {
+		t.Skip("true not on PATH")
+	}
+
+	repoRoot := initSecurityClaimRepo(t)
+	cfgDir := filepath.Join(repoRoot, ".coily")
+	if err := os.MkdirAll(cfgDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	cfgPath := filepath.Join(cfgDir, "coily.yaml")
+	body := "commands:\n  play:\n    run: true\n    allow_metacharacters: true\n"
+	if err := os.WriteFile(cfgPath, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	mustGitForClaim(t, repoRoot, "add", ".coily/coily.yaml")
+	mustGitForClaim(t, repoRoot, "commit", "-m", "add coily.yaml with allow_metacharacters")
+	mustGitForClaim(t, repoRoot, "push")
+
+	cfg, err := repocfg.Load(cfgPath)
+	if err != nil {
+		t.Fatalf("repocfg.Load: %v", err)
+	}
+	if !cfg.Commands[0].AllowMetacharacters {
+		t.Fatal("loaded command did not carry AllowMetacharacters=true")
+	}
+
+	r := newSecurityClaimRunnerWithAudit(t)
+	cmd := r.buildChildRepoCommand(cfg, cfg.Commands[0])
+	root := wrapExecRoot(cmd)
+	// `$(rm -rf)` contains `$`, `(`, `)`, ` `, all in policy.ShellMeta. With
+	// the opt-in, exec succeeds (the wrapped binary is `true`, which ignores
+	// its argv). Without the opt-in, verb.Wrap would short-circuit with
+	// PolicyDenied.
+	// The `$` is in policy.ShellMeta. With the opt-in, exec succeeds (the
+	// wrapped binary is `true`, which ignores its argv). Without the opt-in,
+	// verb.Wrap would short-circuit with PolicyDenied. Pass the extra after
+	// `--` so urfave/cli treats it as a positional, not a flag.
+	if err := root.Run(t.Context(), []string{"coily", "play", "--", "strategy=$dangerous"}); err != nil {
+		t.Fatalf("play with metacharacter extra: %v", err)
+	}
+
+	rec := lastAuditRecord(t, r.Audit.Path)
+	if rec.Decision != audit.DecisionAccept {
+		t.Errorf("decision = %q, want accept (opt-in should have bypassed the gate)", rec.Decision)
+	}
+	if !rec.PolicySkipped {
+		t.Errorf("policy_skipped = false, want true (forensic field for the relaxed policy)")
+	}
+}
+
 // TestLoadRepoExecCommand_NoConfigStillBuildsExec proves the verb stays
 // visible in --help even when nothing is reachable from cwd's discovery
 // pool. The Action returns a UserError so the operator gets a clear
