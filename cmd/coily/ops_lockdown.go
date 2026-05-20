@@ -119,6 +119,7 @@ var wrapperAllows = map[string]string{
 	"Bash(kubectl:*)":   "Bash(coily ops kubectl:*)",
 	"Bash(gh:*)":        "Bash(coily ops gh:*)",
 	"Bash(flyctl:*)":    "Bash(coily ops flyctl:*)",
+	"Bash(gcloud:*)":    "Bash(coily ops gcloud:*)",
 	"Bash(ssh:*)":       "Bash(coily ssh:*)",
 	"Bash(brew:*)":      "Bash(coily pkg brew:*)",
 	"Bash(npm:*)":       "Bash(coily pkg npm:*)",

@@ -1471,6 +1471,10 @@ Run a forgejo doctor check (readonly; --fix not exposed).
 
 Flags: --run
 
+## `coily ops gcloud`
+
+Pass-through to gcloud with argv validation + audit log.
+
 ## `coily ops gh`
 
 Pass-through to gh with argv validation + audit log.

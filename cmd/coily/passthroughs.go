@@ -57,6 +57,7 @@ var ptOps = []ptEntry{
 	{Bin: "gh", VerbName: "ops.gh", Egress: true, ScopeArgvHint: ghRepoScopeHint, ArgvRewriter: rewriteGHForRESTAndJQFile, ReadCache: ghReadCacheClassifier},
 	{Bin: "kubectl", VerbName: "ops.kubectl", Egress: true},
 	{Bin: "flyctl", VerbName: "ops.flyctl", Egress: true},
+	{Bin: "gcloud", VerbName: "ops.gcloud", Egress: true},
 }
 
 // ptTopLevel is the pass-through set mounted at the coily root. Each entry
