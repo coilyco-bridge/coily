@@ -5,18 +5,30 @@ import (
 	"testing"
 )
 
-// TestUpgradeFormula_LockedToCoilyTap pins coilysiren/coily#19: the
-// upgrade verb's whole point is binding to coilysiren/tap/coily
-// specifically. Widening the formula to a knob would defeat the
-// "audited self-update" claim by letting an agent upgrade arbitrary
+// TestUpgradeFormulaCandidates_LockedToCoilysiren pins coilysiren/coily#19
+// + coilysiren/coily#271: the upgrade verb is bound to coily-the-formula
+// specifically, and the only knob is which coilysiren tap is providing
+// it. Widening either candidate to a non-coilysiren tap would defeat
+// the "audited self-update" claim by letting an agent upgrade arbitrary
 // formulae through the audited path; that's what `coily brew upgrade`
 // is for.
-func TestUpgradeFormula_LockedToCoilyTap(t *testing.T) {
-	if upgradeFormula != "coilysiren/tap/coily" {
-		t.Errorf("upgradeFormula = %q, want coilysiren/tap/coily; widening this needs a deliberate review", upgradeFormula)
+func TestUpgradeFormulaCandidates_LockedToCoilysiren(t *testing.T) {
+	candidates := []struct {
+		name    string
+		formula string
+	}{
+		{"per-repo tap", upgradeFormulaPerRepo},
+		{"umbrella tap", upgradeFormulaUmbrella},
 	}
-	if !strings.HasPrefix(upgradeFormula, "coilysiren/tap/") {
-		t.Error("upgradeFormula must live under coilysiren/tap/")
+	for _, c := range candidates {
+		t.Run(c.name, func(t *testing.T) {
+			if !strings.HasPrefix(c.formula, "coilysiren/") {
+				t.Errorf("%s = %q must live under coilysiren/", c.name, c.formula)
+			}
+			if !strings.HasSuffix(c.formula, "/coily") {
+				t.Errorf("%s = %q must name the coily formula", c.name, c.formula)
+			}
+		})
 	}
 }
 

@@ -144,16 +144,19 @@ func TestPkgBrewCommand_TopLevelShape(t *testing.T) {
 
 func TestBrewInTapScope(t *testing.T) {
 	cases := map[string]bool{
-		"coilysiren/tap/coily":       true,
-		"coilysiren/tap/repo-recall": true,
-		"coilysiren/tap/anything":    true,
-		"coily":                      true,
-		"repo-recall":                true,
-		"arize-phoenix":              true,
-		"ripgrep":                    false,
-		"":                           false,
-		"homebrew/core/wget":         false,
-		"someuser/tap/coily":         false,
+		"coilysiren/tap/coily":               true,
+		"coilysiren/tap/repo-recall":         true,
+		"coilysiren/tap/anything":            true,
+		"coilysiren/coily/coily":             true,
+		"coilysiren/repo-recall/repo-recall": true,
+		"coily":                              true,
+		"repo-recall":                        true,
+		"arize-phoenix":                      true,
+		"ripgrep":                            false,
+		"":                                   false,
+		"homebrew/core/wget":                 false,
+		"someuser/tap/coily":                 false,
+		"coilysiren/coily":                   false,
 	}
 	for f, want := range cases {
 		t.Run(f, func(t *testing.T) {

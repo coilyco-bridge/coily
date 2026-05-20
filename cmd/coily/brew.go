@@ -206,9 +206,9 @@ func (r *Runner) brewFormulaScopedAction(prefix, rest []string) (cli.ActionFunc,
 			for _, f := range formulae {
 				if !brewInTapScope(f) {
 					return exitcode.New(exitcode.PolicyDenied, "policy_denied",
-						fmt.Errorf("brew %s %q is outside coilysiren/tap/*; pass --allow-untapped to confirm", verbLabel, f),
-						"prefix the formula with coilysiren/tap/ if it lives in that tap, or add --allow-untapped to confirm an off-tap formula").
-						WithReason("brew state should be coilysiren/tap/* by default so the install graph is reviewable from one repo; --allow-untapped is the explicit opt-out for one-offs")
+						fmt.Errorf("brew %s %q is outside the known coilysiren taps; pass --allow-untapped to confirm", verbLabel, f),
+						"qualify the formula with a coilysiren/<tap>/ prefix (e.g. coilysiren/tap/, coilysiren/coily/), or add --allow-untapped to confirm an off-tap formula").
+						WithReason("brew state should live under a coilysiren-owned tap by default so the install graph is reviewable from coilysiren repos; --allow-untapped is the explicit opt-out for one-offs")
 				}
 			}
 		}
@@ -340,11 +340,18 @@ func splitBrewArgs(raw []string) (allow bool, forward, positionals []string) {
 	return allow, forward, positionals
 }
 
-// brewInTapScope is true when f is either a coilysiren/tap/* qualified
-// name or one of the bare formula names this tap publishes.
+// brewInTapScope is true when f is either a coilysiren/<tap>/<formula>
+// qualified name (umbrella `coilysiren/tap/*` or any per-repo tap like
+// `coilysiren/coily/coily`) or one of the bare formula names the
+// umbrella tap publishes. Widened from coilysiren/tap/* to all
+// coilysiren/* taps in coilysiren/coily#271 to cover the per-repo tap
+// release flow; the policy intent is "any coilysiren-owned tap".
 func brewInTapScope(f string) bool {
-	if strings.HasPrefix(f, "coilysiren/tap/") {
-		return true
+	if strings.HasPrefix(f, "coilysiren/") {
+		parts := strings.Split(f, "/")
+		if len(parts) == 3 && parts[1] != "" && parts[2] != "" {
+			return true
+		}
 	}
 	return scopedTapFormulae[f]
 }

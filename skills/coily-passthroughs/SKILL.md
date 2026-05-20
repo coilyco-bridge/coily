@@ -3211,7 +3211,7 @@ Pass-through to tailscale with argv validation + audit log.
 
 ## `coily upgrade`
 
-Self-update via brew (coilysiren/tap/coily).
+Self-update via brew (coilysiren tap, per-repo or umbrella).
 
 Flags: --dry
 
