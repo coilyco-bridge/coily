@@ -8,7 +8,7 @@ Workspace conventions load globally via `~/.claude/CLAUDE.md` -> `agentic-os-kai
 
 Edit coily from whichever session you're in. The commit-msg hook (every commit closes a same-repo issue) plus the brew pipeline carry the accountability. File the issue, commit referencing it, push, ride the pipeline.
 
-When sibling-repo work is blocked by a coily gap, **fix-coily-first**: pivot here, smallest fix that unblocks, commit + push, wait for the brew bump (~5 min), `brew upgrade coilysiren/tap/coily`, return to the original repo. Each blocker becomes an audited fix; the next op of the same shape inherits it. Time-critical exception: live incidents or deadline replies get the object-level work first via Kai's hands, coily fix as immediate follow-up.
+When sibling-repo work is blocked by a coily gap, **fix-coily-first**: pivot here, smallest fix that unblocks, commit + push, wait for the brew bump (~5 min), `brew upgrade coilysiren/coily/coily`, return to the original repo. Each blocker becomes an audited fix; the next op of the same shape inherits it. Time-critical exception: live incidents or deadline replies get the object-level work first via Kai's hands, coily fix as immediate follow-up.
 
 ## Never bypass the release pipeline
 
@@ -31,9 +31,9 @@ Every push to `main` triggers `.github/workflows/release.yml`, fully automated.
 1. `mathieudutour/github-tag-action` computes the next semver. `default_bump: patch`: every push releases at least a patch. `feat:` -> minor, `feat!:` / `BREAKING CHANGE:` -> major.
 2. Tag pushed. `main.Version` set at build time via ldflags (brew formula / windows-build job); no source-tree version bump.
 3. GitHub Release with auto-changelog.
-4. Two consumers fan out: `bump-tap` pushes updated `Formula/coily.rb` to `coilysiren/homebrew-tap` (brew builds from source on `brew upgrade`); `windows-build` cross-compiles + uploads `coily-windows-{amd64,arm64}.exe` + `.sha256` sidecars, `coilysiren/scoop-bucket` autoupdates from those URLs.
+4. Two consumers fan out: `bump-formula` rewrites this repo's `Formula/coily.rb` `url`+`tag`+`revision` line via the Contents API (web-flow signed, `[skip ci]` commit); `windows-build` cross-compiles + uploads `coily-windows-{amd64,arm64}.exe` + `.sha256` sidecars, `coilysiren/scoop-bucket` autoupdates.
 
-Loop-safe: `GITHUB_TOKEN`-created tags don't re-trigger workflows. Secret required: `HOMEBREW_TAP_TOKEN` fine-grained PAT scoped to `coilysiren/homebrew-tap` with Contents: Read and write. Formula and Scoop manifest are sources of truth on their respective tap/bucket repos; bump jobs touch only `url` / `sha256`.
+Loop-safe: `GITHUB_TOKEN`-created tags don't re-trigger workflows. Brew install is direct-tap (`brew tap coilysiren/coily https://github.com/coilysiren/coily`), no `homebrew-tap` mirror. Formula here and Scoop manifest in `coilysiren/scoop-bucket` are the sources of truth.
 
 Brew + scoop produce user-writable binaries (`/opt/homebrew/bin/coily`, `~/scoop/apps/coily/current/coily.exe`). The root-owned property of `make install` / `make install-windows` is the manual choice for hosts that need it.
 
@@ -43,7 +43,7 @@ After pushing to `main`, schedule a wake-up to land the new binary and re-baseli
 
 - **Cadence**: 300-360s after push.
 - **Verify CI**: `coily ops gh run list --repo coilysiren/coily --limit 1` should be `completed/success`. Re-schedule once at +180s if in progress; stop on failure.
-- **Upgrade host**: Mac `brew upgrade coilysiren/tap/coily`. Windows `scoop update coily`. No sudo on either.
+- **Upgrade host**: Mac `brew upgrade coilysiren/coily/coily`. Windows `scoop update coily`. No sudo on either.
 - **Re-baseline lockdown** only when the bumped commit touched `cli-guard/lockdown/`: `coily lockdown --apply --replace --recursive --path ~/projects/coilysiren`.
 - **kai-server**: `coily ssh kai-server -- coily systemctl start coily-update.service`. Oneshot.
 - **Skip** for docs-only pushes.

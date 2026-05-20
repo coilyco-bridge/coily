@@ -50,7 +50,7 @@ Three-layer precedence: Go defaults < `~/.coily/config.yaml` < `./.coily/config.
 
 ## Distribution
 
-No prebuilt binaries. Push to `main` triggers semver auto-bump + tag + GitHub Release + brew tap formula bump (direct push to `coilysiren/homebrew-tap`). `make install` (root-owned `/usr/local/bin`), `make install-windows` (admin `C:\Program Files\coily\`), `make deploy-server` (cross-compile + scp). Bootstrap: `brew install coilysiren/tap/coily`.
+No prebuilt binaries. Push to `main` triggers semver bump + tag + GH Release + in-repo `Formula/coily.rb` `url` rewrite via Contents API. `make install` (root-owned `/usr/local/bin`), `make install-windows` (admin `C:\Program Files\coily\`), `make deploy-server`. Bootstrap: `brew tap coilysiren/coily https://github.com/coilysiren/coily; brew install coilysiren/coily/coily`.
 
 ## Cross-cutting infrastructure
 
