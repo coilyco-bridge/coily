@@ -32,8 +32,7 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 ## Audit and logging
 
 - `coily audit {path,tail,finding}` + `coily git {trailer,trailer-hook,audit-show}`.
-- Append-only JSONL at `~/.local/state/coily/audit.jsonl` by default. Per-host log file; host captured but not indexed.
-- Row schema: timestamp, argv, decision, exit code, scope, verb, repo binding.
+- Append-only per-scope JSONL under `~/.coily/audit/`. Schema in [docs/audit.md](audit.md): argv, decision, exit code, scope, verb, `profile_decision` (static labels), `egress[]` (runtime).
 - Rotation by size, backups, age. Exit-code classification (upstream_failed / policy_rejected / generic).
 - Structured YAML error envelopes on stderr.
 
