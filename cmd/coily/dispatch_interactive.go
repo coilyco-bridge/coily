@@ -2,27 +2,47 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
-// Defaults for the coily <-> Warp seam. These three strings are the entire
-// shared knowledge between coily and the agentic-os launch config: a path
-// for the prompt scratch file, a Warp launch-config name, and a channel
-// picker. agentic-os reads the scratch file and runs claude; coily writes
-// the scratch file and fires the URL. Neither side knows what the other
-// contains beyond those strings.
+// Defaults for the coily <-> Warp seam. The shim at
+// agentic-os/warp/launch_configurations/claude-dispatch-interactive.sh
+// reads from /tmp/coily-dispatch-queue/, the URI fires
+// warp(preview)://(tab_config|launch)/claude-dispatch-interactive.
+// Neither side knows what the other contains beyond the queue dir, the
+// JSON schema, and the launch name (coilysiren/coily#280).
 const (
-	defaultDispatchScratchPath = "/tmp/coily-dispatch-prompt.txt"
-	defaultDispatchTitlePath   = "/tmp/coily-dispatch-title.txt"
-	defaultDispatchLaunchName  = "claude-dispatch-interactive"
-	defaultDispatchChannel     = "preview"
-	defaultDispatchSurface     = "tab"
+	defaultDispatchQueueDir   = "/tmp/coily-dispatch-queue"
+	defaultDispatchLaunchName = "claude-dispatch-interactive"
+	defaultDispatchChannel    = "preview"
+	defaultDispatchSurface    = "tab"
 )
+
+// dispatchQueueSchemaVersion lets the shim reject queue entries it does
+// not understand once the schema evolves. Bump when adding required
+// fields; the shim ignores forward-additive fields.
+const dispatchQueueSchemaVersion = 1
+
+// dispatchQueueEntry is the JSON payload coily writes for the shim to
+// consume. The shim reads ref, title, cwd, prompt via jq. Field tags
+// are the wire format - rename with care.
+type dispatchQueueEntry struct {
+	SchemaVersion int    `json:"schema_version"`
+	Ref           string `json:"ref"`
+	Title         string `json:"title"`
+	Cwd           string `json:"cwd"`
+	Prompt        string `json:"prompt"`
+}
 
 // channelScheme maps the --channel flag to the URL scheme that lands in
 // that Warp build. `warp://` always opens Stable, `warppreview://` always
@@ -86,29 +106,35 @@ var openWarpLaunch = func(ctx context.Context, r *Runner, url string) error {
 // repo with `claude "Work on issue <ref>"` already submitted as the first
 // turn. Hands control back to the operator immediately.
 //
-// Coily <-> Warp interface (#270). coily writes the minimal prompt
-// "Work on issue <ref>" to /tmp/coily-dispatch-prompt.txt with mode 0600,
-// then fires `open warppreview://launch/claude-dispatch-interactive` (or
-// `warp://...` if --channel=stable). The agentic-os launch config of the
-// same name parses the ref out of the scratch file to derive the local
-// repo path, cd's in, and execs claude with the prompt body. No
-// bidirectional coupling: the scratch path and the launch name are the
-// only shared knowledge.
+// Coily <-> Warp interface (coilysiren/coily#280). coily writes one JSON
+// file per dispatch under /tmp/coily-dispatch-queue/ named
+// <unix-nanos>-<8hex>.json, mode 0600, carrying ref / title / cwd /
+// prompt. Then fires `open warppreview://tab_config/claude-dispatch-interactive`
+// (or one of the four URL shapes from channel x surface). The shim at
+// agentic-os/warp/launch_configurations/claude-dispatch-interactive.sh
+// acquires a queue mutex, pops the oldest entry, echoes the title header,
+// and execs claude. The FIFO queue is what lets concurrent dispatches
+// land in separate tabs without racing on a single scratch path.
 //
 // Soft-fail: if `open` is unavailable or Warp does not respond, coily
 // prints a copy-paste fallback (the exact claude invocation the operator
-// can paste in a manually-opened tab) and exits 0. The scratch file is
-// left in place so the launch config can still consume it on retry.
+// can paste in a manually-opened tab) and exits 0. The queue entry is
+// left in place so the shim can still consume it on retry.
 func (r *Runner) dispatchInteractiveCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "interactive",
 		Usage:     "Open a new Warp tab with `claude \"Work on issue <ref>\"` pre-submitted.",
 		ArgsUsage: "<owner/repo#N | issue-url>",
-		Description: `interactive validates the issue ref exists and is open, writes the prompt
-"Work on issue <ref>" to a scratch file at /tmp/coily-dispatch-prompt.txt
-(mode 0600), then fires open warppreview://tab_config/claude-dispatch-interactive
-to trigger the agentic-os Warp config that consumes the scratch file and
+		Description: `interactive validates the issue ref exists and is open, writes a
+JSON queue entry under /tmp/coily-dispatch-queue/ carrying ref, title,
+cwd, and prompt (mode 0600), then fires
+open warppreview://tab_config/claude-dispatch-interactive to trigger the
+agentic-os shim that pops the queue, echoes the title header, and
 execs claude inside the local checkout at ~/projects/coilysiren/<repo>.
+
+Concurrent dispatches land in separate Warp tabs without racing on a
+single scratch path - the FIFO queue gives each shim its own entry
+(coilysiren/coily#280).
 
 Defaults to Warp Preview (--channel preview). Pass --channel stable to
 target Warp Stable instead. Preview is the Mac daily driver, stable is
@@ -128,17 +154,12 @@ Soft-fails to a copy-paste fallback if Warp / open are unavailable.`,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:  "dry-run",
-				Usage: "print the resolved issue + prompt + scratch path + URL, do not write the scratch file or fire open",
+				Usage: "print the resolved issue + queue entry + URL, do not write the queue entry or fire open",
 			},
 			&cli.StringFlag{
-				Name:  "scratch-path",
-				Usage: "override the prompt scratch-file path. Must match the path the Warp launch config reads.",
-				Value: defaultDispatchScratchPath,
-			},
-			&cli.StringFlag{
-				Name:  "title-path",
-				Usage: "override the title sidecar scratch-file path. The Warp launch config reads it to echo `<ref>: <title>` in the tab before exec'ing claude.",
-				Value: defaultDispatchTitlePath,
+				Name:  "queue-dir",
+				Usage: "override the dispatch queue directory. Must match the path the Warp shim reads.",
+				Value: defaultDispatchQueueDir,
 			},
 			&cli.StringFlag{
 				Name:  "launch-name",
@@ -162,11 +183,10 @@ Soft-fails to a copy-paste fallback if Warp / open are unavailable.`,
 				SkipPolicy: false,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
-						"--scratch-path": c.String("scratch-path"),
-						"--title-path":   c.String("title-path"),
-						"--launch-name":  c.String("launch-name"),
-						"--channel":      c.String("channel"),
-						"--surface":      c.String("surface"),
+						"--queue-dir":   c.String("queue-dir"),
+						"--launch-name": c.String("launch-name"),
+						"--channel":     c.String("channel"),
+						"--surface":     c.String("surface"),
 					}, c.Args().Slice()
 				},
 				CommitScopeArgvHint: func(argv []string) string {
@@ -189,12 +209,10 @@ Soft-fails to a copy-paste fallback if Warp / open are unavailable.`,
 	}
 }
 
-// interactivePrompt is the prompt the launch config consumes. The
-// launch-config script greps "coilysiren/<repo>#<N>" out of this string
-// to derive the cwd, so the ref stays in the first sentence as a
-// contract. The first-action instruction lands in the same prompt
-// because the agent otherwise skips the explicit issue fetch and works
-// from the bare ref line, missing body, comments, and labels
+// interactivePrompt is the prompt the shim execs claude with. Embeds
+// the first-action instruction so the dispatched agent fetches issue
+// body + comments before touching code; without the prime the agent
+// often skips the explicit fetch and works from the bare ref line
 // (coilysiren/coily#279).
 func interactivePrompt(ref *issueRef, issue *ghIssue) string {
 	return fmt.Sprintf(
@@ -223,8 +241,7 @@ func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) erro
 
 	prompt := interactivePrompt(ref, issue)
 	titleLine := interactiveTitleLine(ref, issue)
-	scratchPath := c.String("scratch-path")
-	titlePath := c.String("title-path")
+	queueDir := c.String("queue-dir")
 	launchName := c.String("launch-name")
 	channel := c.String("channel")
 	surface := c.String("surface")
@@ -235,49 +252,80 @@ func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) erro
 		return fmt.Errorf("dispatch interactive: %w", err)
 	}
 
+	entry := dispatchQueueEntry{
+		SchemaVersion: dispatchQueueSchemaVersion,
+		Ref:           ref.String(),
+		Title:         strings.TrimSpace(issue.Title),
+		Cwd:           repoPath,
+		Prompt:        prompt,
+	}
+
 	if c.Bool("dry-run") {
+		entryJSON, _ := json.MarshalIndent(entry, "", "  ")
 		fmt.Printf("# dispatch interactive (dry-run)\n")
 		fmt.Printf("issue:        %s\n", ref)
 		fmt.Printf("url:          %s\n", issue.URL)
 		fmt.Printf("cwd:          %s\n", repoPath)
-		fmt.Printf("scratch-path: %s\n", scratchPath)
-		fmt.Printf("title-path:   %s\n", titlePath)
+		fmt.Printf("queue-dir:    %s\n", queueDir)
 		fmt.Printf("channel:      %s\n", channel)
 		fmt.Printf("surface:      %s\n", surface)
 		fmt.Printf("dispatch-url: %s\n", url)
 		fmt.Printf("----- title -----\n%s\n----- end -----\n", titleLine)
-		fmt.Printf("----- prompt -----\n%s\n----- end -----\n", prompt)
+		fmt.Printf("----- queue entry -----\n%s\n----- end -----\n", string(entryJSON))
 		return nil
 	}
 
-	if err := writeDispatchScratchFile(scratchPath, prompt); err != nil {
-		return fmt.Errorf("dispatch interactive: write scratch file %s: %w", scratchPath, err)
-	}
-	if err := writeDispatchScratchFile(titlePath, titleLine); err != nil {
-		return fmt.Errorf("dispatch interactive: write title file %s: %w", titlePath, err)
+	queuePath, err := writeDispatchQueueEntry(queueDir, entry)
+	if err != nil {
+		return fmt.Errorf("dispatch interactive: write queue entry under %s: %w", queueDir, err)
 	}
 
 	if err := openWarpLaunch(ctx, r, url); err != nil {
-		printInteractiveFallback(ref, repoPath, prompt, url, err)
+		printInteractiveFallback(ref, repoPath, prompt, url, queuePath, err)
 		return nil
 	}
 	return nil
 }
 
-// writeDispatchScratchFile writes the prompt to path with mode 0600 so
-// only the running user can read it. The launch-config script deletes the
-// file after consuming it; on soft-fail we leave it in place for retry.
-func writeDispatchScratchFile(path, prompt string) error {
-	return os.WriteFile(path, []byte(prompt+"\n"), 0o600)
+// writeDispatchQueueEntry writes a single JSON file to dir named
+// <unix-nanos>-<8hex>.json with mode 0600. Atomic via tmp-write +
+// rename within the same directory: the shim must not see a partial
+// JSON payload if it pops the file before the write returns. Returns
+// the final path so the soft-fail message can name it.
+func writeDispatchQueueEntry(dir string, entry dispatchQueueEntry) (string, error) {
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return "", fmt.Errorf("mkdir queue dir: %w", err)
+	}
+	payload, err := json.Marshal(entry)
+	if err != nil {
+		return "", fmt.Errorf("marshal queue entry: %w", err)
+	}
+	suffix := make([]byte, 4)
+	if _, err := rand.Read(suffix); err != nil {
+		return "", fmt.Errorf("rand suffix: %w", err)
+	}
+	name := fmt.Sprintf("%d-%s.json", time.Now().UnixNano(), hex.EncodeToString(suffix))
+	finalPath := filepath.Join(dir, name)
+	tmpPath := finalPath + ".tmp"
+	if err := os.WriteFile(tmpPath, payload, 0o600); err != nil {
+		return "", fmt.Errorf("write tmp queue entry: %w", err)
+	}
+	if err := os.Rename(tmpPath, finalPath); err != nil {
+		_ = os.Remove(tmpPath)
+		return "", fmt.Errorf("rename tmp to final: %w", err)
+	}
+	return finalPath, nil
 }
 
 // printInteractiveFallback emits the exact command the operator can paste
 // in a manually-opened tab when the Warp URL fire fails. Soft-fail by
 // design: missing Warp shouldn't error the audit row, just inform the
-// operator that the automated path didn't fire.
-func printInteractiveFallback(ref *issueRef, repoPath, prompt, url string, openErr error) {
+// operator that the automated path didn't fire. The queue entry stays
+// on disk so a retry can consume it.
+func printInteractiveFallback(ref *issueRef, repoPath, prompt, url, queuePath string, openErr error) {
 	fmt.Fprintf(os.Stderr, "dispatch interactive: %s did not fire (%v).\n", url, openErr)
-	fmt.Fprintf(os.Stderr, "Paste this in a new tab cwd'd to %s:\n\n", repoPath)
+	fmt.Fprintf(os.Stderr, "Queue entry left at %s for the shim to consume on retry.\n", queuePath)
+	fmt.Fprintf(os.Stderr, "Or paste this in a new tab cwd'd to %s:\n\n", repoPath)
 	fmt.Fprintf(os.Stderr, "  cd %s && claude %q\n\n", repoPath, prompt)
 	fmt.Fprintf(os.Stderr, "Issue: %s\n", ref)
 }

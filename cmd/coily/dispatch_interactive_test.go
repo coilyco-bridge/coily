@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,11 +10,13 @@ import (
 )
 
 // TestInteractivePrompt_RefAndFirstAction pins the contract from #270 +
-// #279. The launch-config script greps the coilysiren/<repo>#<N> token
-// out of this string to derive cwd, so the ref stays in the first
-// sentence. The first-action instruction lands in the same prompt
-// because the agent otherwise skips the explicit issue fetch and works
-// from the bare ref line, missing body, comments, and labels.
+// #279. The shim greps the coilysiren/<repo>#<N> token out of the JSON
+// payload via jq, but the prompt body itself is what claude sees, so
+// the ref staying in the first sentence is a human-readability claim
+// rather than a parsing claim. The first-action instruction lands in
+// the same prompt because the agent otherwise skips the explicit issue
+// fetch and works from the bare ref line, missing body, comments, and
+// labels.
 func TestInteractivePrompt_RefAndFirstAction(t *testing.T) {
 	ref := &issueRef{Owner: "coilysiren", Repo: "coily", Number: 270}
 	issue := &ghIssue{
@@ -24,12 +27,9 @@ func TestInteractivePrompt_RefAndFirstAction(t *testing.T) {
 	}
 	got := interactivePrompt(ref, issue)
 
-	// Ref stays in the first sentence so the shim's grep keeps working.
 	if !strings.HasPrefix(got, "Work on issue coilysiren/coily#270.") {
 		t.Errorf("interactivePrompt prefix = %q, want \"Work on issue coilysiren/coily#270.\" lead", got)
 	}
-	// First-action instruction primes `coily ops gh issue view` with the
-	// resolved URL form (the owner/repo#N form is not accepted by gh).
 	for _, want := range []string{
 		"First action",
 		"coily ops gh issue view",
@@ -40,16 +40,14 @@ func TestInteractivePrompt_RefAndFirstAction(t *testing.T) {
 			t.Errorf("interactivePrompt missing %q, got %q", want, got)
 		}
 	}
-	// Single line: keeps the shim's PROMPT="$(cat ...)" round-trip
-	// trivial and the prompt readable in the Warp tab header.
 	if strings.Contains(got, "\n") {
 		t.Errorf("interactivePrompt should be single-line, got %q", got)
 	}
 }
 
 // TestInteractiveTitleLine pins the self-identifying header shape coily
-// writes to the title sidecar and the shim echoes in the tab. Format is
-// "<ref>: <title>", whitespace-trimmed (#279).
+// embeds in the queue entry's title field and the shim echoes in the
+// tab. Format is "<ref>: <title>", whitespace-trimmed (#279).
 func TestInteractiveTitleLine(t *testing.T) {
 	ref := &issueRef{Owner: "coilysiren", Repo: "coily", Number: 279}
 	issue := &ghIssue{
@@ -65,42 +63,81 @@ func TestInteractiveTitleLine(t *testing.T) {
 	}
 }
 
-// TestWriteDispatchScratchFile_ModeAndContents verifies the scratch file
-// is written with mode 0600 (only the running user can read it) and
-// carries the prompt body verbatim plus a trailing newline.
-func TestWriteDispatchScratchFile_ModeAndContents(t *testing.T) {
+// TestWriteDispatchQueueEntry_ModeAndJSON verifies the queue entry is
+// written under the queue dir with mode 0600, named
+// <unix-nanos>-<8hex>.json, and parseable as the shim's JSON schema.
+func TestWriteDispatchQueueEntry_ModeAndJSON(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "prompt.txt")
-	prompt := "Work on issue coilysiren/coily#270"
-
-	if err := writeDispatchScratchFile(path, prompt); err != nil {
-		t.Fatalf("writeDispatchScratchFile: %v", err)
+	entry := dispatchQueueEntry{
+		SchemaVersion: dispatchQueueSchemaVersion,
+		Ref:           "coilysiren/coily#280",
+		Title:         "concurrency race on scratch path",
+		Cwd:           "/Users/kai/projects/coilysiren/coily",
+		Prompt:        "Work on issue coilysiren/coily#280. First action: ...",
 	}
+	path, err := writeDispatchQueueEntry(dir, entry)
+	if err != nil {
+		t.Fatalf("writeDispatchQueueEntry: %v", err)
+	}
+
 	st, err := os.Stat(path)
 	if err != nil {
-		t.Fatalf("stat scratch: %v", err)
+		t.Fatalf("stat queue entry: %v", err)
 	}
 	if got, want := st.Mode().Perm(), os.FileMode(0o600); got != want {
-		t.Errorf("scratch mode = %o, want %o", got, want)
+		t.Errorf("queue entry mode = %o, want %o", got, want)
 	}
+	if !strings.HasSuffix(path, ".json") {
+		t.Errorf("queue entry path = %q, want .json suffix", path)
+	}
+	if filepath.Dir(path) != dir {
+		t.Errorf("queue entry dir = %q, want %q", filepath.Dir(path), dir)
+	}
+
 	b, err := os.ReadFile(path)
 	if err != nil {
-		t.Fatalf("read scratch: %v", err)
+		t.Fatalf("read queue entry: %v", err)
 	}
-	if got, want := string(b), prompt+"\n"; got != want {
-		t.Errorf("scratch contents = %q, want %q", got, want)
+	var got dispatchQueueEntry
+	if err := json.Unmarshal(b, &got); err != nil {
+		t.Fatalf("unmarshal queue entry: %v\nbody: %s", err, b)
+	}
+	if got != entry {
+		t.Errorf("queue entry roundtrip = %+v, want %+v", got, entry)
+	}
+}
+
+// TestWriteDispatchQueueEntry_UniqueFilenames verifies two back-to-back
+// writes produce distinct filenames so concurrent dispatches never
+// collide on the same queue path. Pins the singleton-fix from #280.
+func TestWriteDispatchQueueEntry_UniqueFilenames(t *testing.T) {
+	dir := t.TempDir()
+	entry := dispatchQueueEntry{
+		SchemaVersion: dispatchQueueSchemaVersion,
+		Ref:           "coilysiren/coily#280",
+		Title:         "concurrency race on scratch path",
+		Cwd:           "/Users/kai/projects/coilysiren/coily",
+		Prompt:        "Work on issue coilysiren/coily#280.",
+	}
+	seen := map[string]bool{}
+	for i := 0; i < 16; i++ {
+		path, err := writeDispatchQueueEntry(dir, entry)
+		if err != nil {
+			t.Fatalf("writeDispatchQueueEntry iteration %d: %v", i, err)
+		}
+		if seen[path] {
+			t.Errorf("duplicate queue path %q at iteration %d", path, i)
+		}
+		seen[path] = true
 	}
 }
 
 // TestDispatchInteractiveDefaults pins the seam strings between coily and
-// the agentic-os launch config. Changing either side without the other
-// breaks the contract.
+// the agentic-os shim. Changing either side without the other breaks
+// the contract.
 func TestDispatchInteractiveDefaults(t *testing.T) {
-	if defaultDispatchScratchPath != "/tmp/coily-dispatch-prompt.txt" {
-		t.Errorf("defaultDispatchScratchPath = %q, want /tmp/coily-dispatch-prompt.txt", defaultDispatchScratchPath)
-	}
-	if defaultDispatchTitlePath != "/tmp/coily-dispatch-title.txt" {
-		t.Errorf("defaultDispatchTitlePath = %q, want /tmp/coily-dispatch-title.txt (sidecar seam consumed by claude-dispatch-interactive.sh per coilysiren/coily#279)", defaultDispatchTitlePath)
+	if defaultDispatchQueueDir != "/tmp/coily-dispatch-queue" {
+		t.Errorf("defaultDispatchQueueDir = %q, want /tmp/coily-dispatch-queue (FIFO seam consumed by claude-dispatch-interactive.sh per coilysiren/coily#280)", defaultDispatchQueueDir)
 	}
 	if defaultDispatchLaunchName != "claude-dispatch-interactive" {
 		t.Errorf("defaultDispatchLaunchName = %q, want claude-dispatch-interactive", defaultDispatchLaunchName)
@@ -110,6 +147,9 @@ func TestDispatchInteractiveDefaults(t *testing.T) {
 	}
 	if defaultDispatchSurface != "tab" {
 		t.Errorf("defaultDispatchSurface = %q, want tab (tab_config opens a new tab via warpdotdev/Warp#9379, per coilysiren/coily#274)", defaultDispatchSurface)
+	}
+	if dispatchQueueSchemaVersion != 1 {
+		t.Errorf("dispatchQueueSchemaVersion = %d, want 1 (schema version pin so the shim can reject unknown versions cleanly)", dispatchQueueSchemaVersion)
 	}
 }
 
