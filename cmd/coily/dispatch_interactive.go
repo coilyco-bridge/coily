@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
@@ -17,6 +18,7 @@ import (
 // contains beyond those strings.
 const (
 	defaultDispatchScratchPath = "/tmp/coily-dispatch-prompt.txt"
+	defaultDispatchTitlePath   = "/tmp/coily-dispatch-title.txt"
 	defaultDispatchLaunchName  = "claude-dispatch-interactive"
 	defaultDispatchChannel     = "preview"
 	defaultDispatchSurface     = "tab"
@@ -134,6 +136,11 @@ Soft-fails to a copy-paste fallback if Warp / open are unavailable.`,
 				Value: defaultDispatchScratchPath,
 			},
 			&cli.StringFlag{
+				Name:  "title-path",
+				Usage: "override the title sidecar scratch-file path. The Warp launch config reads it to echo `<ref>: <title>` in the tab before exec'ing claude.",
+				Value: defaultDispatchTitlePath,
+			},
+			&cli.StringFlag{
 				Name:  "launch-name",
 				Usage: "override the Warp config name fired via warp(preview)://(tab_config|launch)/<name>. The same name resolves under both surfaces because the .toml and .yaml are siblings.",
 				Value: defaultDispatchLaunchName,
@@ -156,6 +163,7 @@ Soft-fails to a copy-paste fallback if Warp / open are unavailable.`,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
 						"--scratch-path": c.String("scratch-path"),
+						"--title-path":   c.String("title-path"),
 						"--launch-name":  c.String("launch-name"),
 						"--channel":      c.String("channel"),
 						"--surface":      c.String("surface"),
@@ -181,13 +189,26 @@ Soft-fails to a copy-paste fallback if Warp / open are unavailable.`,
 	}
 }
 
-// interactivePrompt is the minimal prompt the launch config consumes.
-// Discipline matches recall-dispatch: no preamble, no URL, no flair.
-// AGENTS.md in the target repo's cwd does the rest of the framing. The
+// interactivePrompt is the prompt the launch config consumes. The
 // launch-config script greps "coilysiren/<repo>#<N>" out of this string
-// to derive the cwd.
-func interactivePrompt(ref *issueRef) string {
-	return fmt.Sprintf("Work on issue %s", ref)
+// to derive the cwd, so the ref stays in the first sentence as a
+// contract. The first-action instruction lands in the same prompt
+// because the agent otherwise skips the explicit issue fetch and works
+// from the bare ref line, missing body, comments, and labels
+// (coilysiren/coily#279).
+func interactivePrompt(ref *issueRef, issue *ghIssue) string {
+	return fmt.Sprintf(
+		"Work on issue %s. First action: run `coily ops gh issue view %s --comments` and read the full body and comment thread before doing anything else.",
+		ref, issue.URL,
+	)
+}
+
+// interactiveTitleLine is the self-identifying header the shim echoes
+// in the dispatched tab before exec'ing claude. Gives the operator an
+// at-a-glance read on what the session is working on without waiting
+// for claude's first turn (coilysiren/coily#279).
+func interactiveTitleLine(ref *issueRef, issue *ghIssue) string {
+	return fmt.Sprintf("%s: %s", ref, strings.TrimSpace(issue.Title))
 }
 
 func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) error {
@@ -200,8 +221,10 @@ func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) erro
 		return err
 	}
 
-	prompt := interactivePrompt(ref)
+	prompt := interactivePrompt(ref, issue)
+	titleLine := interactiveTitleLine(ref, issue)
 	scratchPath := c.String("scratch-path")
+	titlePath := c.String("title-path")
 	launchName := c.String("launch-name")
 	channel := c.String("channel")
 	surface := c.String("surface")
@@ -218,15 +241,20 @@ func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) erro
 		fmt.Printf("url:          %s\n", issue.URL)
 		fmt.Printf("cwd:          %s\n", repoPath)
 		fmt.Printf("scratch-path: %s\n", scratchPath)
+		fmt.Printf("title-path:   %s\n", titlePath)
 		fmt.Printf("channel:      %s\n", channel)
 		fmt.Printf("surface:      %s\n", surface)
 		fmt.Printf("dispatch-url: %s\n", url)
+		fmt.Printf("----- title -----\n%s\n----- end -----\n", titleLine)
 		fmt.Printf("----- prompt -----\n%s\n----- end -----\n", prompt)
 		return nil
 	}
 
 	if err := writeDispatchScratchFile(scratchPath, prompt); err != nil {
 		return fmt.Errorf("dispatch interactive: write scratch file %s: %w", scratchPath, err)
+	}
+	if err := writeDispatchScratchFile(titlePath, titleLine); err != nil {
+		return fmt.Errorf("dispatch interactive: write title file %s: %w", titlePath, err)
 	}
 
 	if err := openWarpLaunch(ctx, r, url); err != nil {
