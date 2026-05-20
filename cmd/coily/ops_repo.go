@@ -13,9 +13,11 @@ import (
 	"strings"
 
 	"github.com/coilysiren/cli-guard/audit"
+	"github.com/coilysiren/cli-guard/egress"
 	"github.com/coilysiren/cli-guard/exitcode"
 	"github.com/coilysiren/cli-guard/gittree"
 	"github.com/coilysiren/cli-guard/repocfg"
+	"github.com/coilysiren/cli-guard/shell"
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
@@ -155,6 +157,7 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 	var (
 		capturedState *gittree.State
 		overrideUsed  bool
+		egressRows    []audit.EgressRow
 	)
 	return &cli.Command{
 		Name:      rc.Name,
@@ -188,6 +191,9 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 					if rc.AllowMetacharacters {
 						rec.PolicySkipped = true
 					}
+					if len(egressRows) > 0 {
+						rec.Egress = egressRows
+					}
 					if capturedState == nil {
 						return
 					}
@@ -208,7 +214,9 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 						rc.Name, repoRoot)
 					argv := append([]string{}, rc.Argv[1:]...)
 					argv = append(argv, c.Args().Slice()...)
-					return r.Runner.ExecIn(ctx, repoRoot, rc.Argv[0], argv...)
+					rows, execErr := execRepoCommand(ctx, r.Runner, rc.Egress, repoRoot, rc.Argv[0], argv...)
+					egressRows = rows
+					return execErr
 				},
 			},
 			r.Audit,
@@ -238,6 +246,7 @@ func (r *Runner) buildPromptingChildCommand(name string, matches []childMatch) *
 		chosen        *childMatch
 		capturedState *gittree.State
 		overrideUsed  bool
+		egressRows    []audit.EgressRow
 	)
 	return &cli.Command{
 		Name:      name,
@@ -265,6 +274,9 @@ func (r *Runner) buildPromptingChildCommand(name string, matches []childMatch) *
 							rec.PolicySkipped = true
 						}
 					}
+					if len(egressRows) > 0 {
+						rec.Egress = egressRows
+					}
 					if capturedState != nil {
 						rec.WorkingTreeStatus = capturedState.Status
 						rec.AuditOverride = overrideUsed
@@ -290,12 +302,45 @@ func (r *Runner) buildPromptingChildCommand(name string, matches []childMatch) *
 						pick.cmd.Name, repoRoot, len(matches))
 					argv := append([]string{}, pick.cmd.Argv[1:]...)
 					argv = append(argv, c.Args().Slice()...)
-					return r.Runner.ExecIn(ctx, repoRoot, pick.cmd.Argv[0], argv...)
+					rows, execErr := execRepoCommand(ctx, r.Runner, pick.cmd.Egress, repoRoot, pick.cmd.Argv[0], argv...)
+					egressRows = rows
+					return execErr
 				},
 			},
 			r.Audit,
 		),
 	}
+}
+
+// execRepoCommand runs a repo-declared command, optionally through a
+// per-invocation HTTP CONNECT proxy so the audit row's egress array
+// matches what passthrough verbs (ops.aws, ops.gh, pkg.uv, ...) already
+// emit. When egressOn is false this is a thin wrapper around
+// base.ExecIn. When true, a proxy starts in observe mode (every CONNECT
+// forwarded and logged; no allowlist), a shadow Runner injects
+// HTTPS_PROXY/HTTP_PROXY for this invocation, and the collected rows
+// return to the caller for the OnComplete hook to stamp onto the audit
+// record. Mirrors passthrough.withEgressAction for the cli-guard side
+// of the asymmetry; coilysiren/coily#281.
+func execRepoCommand(ctx context.Context, base *shell.Runner, egressOn bool, dir, bin string, argv ...string) ([]audit.EgressRow, error) {
+	if !egressOn {
+		return nil, base.ExecIn(ctx, dir, bin, argv...)
+	}
+	p := egress.New(nil, egress.ModeObserve)
+	proxyURL, err := p.Start(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("egress: start proxy: %w", err)
+	}
+	shadow := *base
+	shadow.Env = append([]string(nil), base.Env...)
+	shadow.Env = append(shadow.Env,
+		"HTTPS_PROXY="+proxyURL,
+		"HTTP_PROXY="+proxyURL,
+		"https_proxy="+proxyURL,
+		"http_proxy="+proxyURL,
+	)
+	execErr := shadow.ExecIn(ctx, dir, bin, argv...)
+	return p.Stop(), execErr
 }
 
 // runRepoGate runs the clean-tree gate for a repo verb. Returns the

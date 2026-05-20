@@ -277,6 +277,62 @@ func TestBuildChildRepoCommand_AllowMetacharactersStampsAudit(t *testing.T) {
 	}
 }
 
+// TestBuildChildRepoCommand_EgressOptInRoundTripsThroughExec covers
+// coily#281 / cli-guard#82. A repo verb declared with `audit.egress:
+// true` runs through the CONNECT-proxy path (the same one passthrough
+// verbs like ops.aws use) instead of bare ExecIn. The wrapped binary
+// here is `true`, which makes no outbound calls, so the egress array
+// stays empty and OnComplete's `len > 0` guard keeps the field off the
+// row. The point of this test is that the opt-in plumbs end-to-end:
+// loader parses audit.egress, buildChildRepoCommand routes through
+// execRepoCommand, the proxy starts and stops cleanly, exec succeeds.
+func TestBuildChildRepoCommand_EgressOptInRoundTripsThroughExec(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not on PATH")
+	}
+	if _, err := exec.LookPath("true"); err != nil {
+		t.Skip("true not on PATH")
+	}
+
+	repoRoot := initSecurityClaimRepo(t)
+	cfgDir := filepath.Join(repoRoot, ".coily")
+	if err := os.MkdirAll(cfgDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	cfgPath := filepath.Join(cfgDir, "coily.yaml")
+	body := "commands:\n  play:\n    run: true\n    audit:\n      egress: true\n"
+	if err := os.WriteFile(cfgPath, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	mustGitForClaim(t, repoRoot, "add", ".coily/coily.yaml")
+	mustGitForClaim(t, repoRoot, "commit", "-m", "add coily.yaml with audit.egress")
+	mustGitForClaim(t, repoRoot, "push")
+
+	cfg, err := repocfg.Load(cfgPath)
+	if err != nil {
+		t.Fatalf("repocfg.Load: %v", err)
+	}
+	if !cfg.Commands[0].Egress {
+		t.Fatal("loaded command did not carry Egress=true (loader regression)")
+	}
+
+	r := newSecurityClaimRunnerWithAudit(t)
+	cmd := r.buildChildRepoCommand(cfg, cfg.Commands[0])
+	root := wrapExecRoot(cmd)
+	if err := root.Run(t.Context(), []string{"coily", "play"}); err != nil {
+		t.Fatalf("play with egress opt-in: %v", err)
+	}
+
+	rec := lastAuditRecord(t, r.Audit.Path)
+	if rec.Decision != audit.DecisionAccept {
+		t.Errorf("decision = %q, want accept", rec.Decision)
+	}
+	if len(rec.Egress) != 0 {
+		t.Errorf("egress = %d rows, want 0 (true makes no outbound calls): %+v",
+			len(rec.Egress), rec.Egress)
+	}
+}
+
 // TestLoadRepoExecCommand_NoConfigStillBuildsExec proves the verb stays
 // visible in --help even when nothing is reachable from cwd's discovery
 // pool. The Action returns a UserError so the operator gets a clear

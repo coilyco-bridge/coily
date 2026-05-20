@@ -99,9 +99,24 @@ The de facto schema and the loader's accepted schema agree. No legacy keys, no t
 
 ## Audit trail asymmetry
 
-`coily exec <cmd>` writes a `repo.<cmd>` audit row with argv, exit code, commit scope, and working-tree status, but no `egress` field. Built-in passthrough verbs (`ops.aws`, `ops.gh`, `pkg.uv`, etc.) wrap their underlying binary in a CONNECT proxy and record every outbound HTTPS host in the row's `egress` array; `coily exec` spawns the declared `run` line directly with no proxy attached, so its outbound traffic is unobservable from the audit trail.
+`coily exec <cmd>` writes a `repo.<cmd>` audit row with argv, exit code, commit scope, and working-tree status. By default the row has no `egress` field; built-in passthrough verbs (`ops.aws`, `ops.gh`, `pkg.uv`, etc.) wrap their underlying binary in a CONNECT proxy and record every outbound HTTPS host in the row's `egress` array. A plain `coily exec` spawns the declared `run` line directly with no proxy attached, so its outbound traffic is unobservable from the audit trail.
 
-This matters for repo commands that call LLM APIs, cloud SDKs not under `ops.aws`, or tunneled services. A `repo.<cmd>` row that ran 150 outbound HTTPS calls looks identical in the audit log to one that ran zero. Read "no `egress` field" as "not observed", not "no traffic". See [coilysiren/coily#281](https://github.com/coilysiren/coily/issues/281).
+For repo commands that call LLM APIs, cloud SDKs not under `ops.aws`, or tunneled services, this is a forensics hole. A `repo.<cmd>` row that ran 150 outbound HTTPS calls looks identical in the audit log to one that ran zero.
+
+Opt in per command with `audit.egress: true` in the mapping form:
+
+```yaml
+commands:
+  play:
+    run: uv run python bot.py
+    description: Workshop battleships bot
+    audit:
+      egress: true
+```
+
+The opt-in starts the same per-invocation CONNECT proxy that passthrough verbs use, injects `HTTPS_PROXY` / `HTTP_PROXY` into the child's environment for the duration of that one call, and stamps the collected rows onto the audit record. Mode is observe (every host forwarded and logged; no allowlist). Works only for children that honor `HTTPS_PROXY`, so `docker` / `tailscale` / arbitrary tunneled protocols stay invisible; the field is best-effort by design.
+
+Default stays off so the historical "argv + exit code only" shape survives for commands that genuinely don't care. Read "no `egress` field" on an opted-out command as "not observed", not "no traffic". See [coilysiren/coily#281](https://github.com/coilysiren/coily/issues/281) and [coilysiren/cli-guard#82](https://github.com/coilysiren/cli-guard/issues/82).
 
 ## Out of scope for this doc
 
