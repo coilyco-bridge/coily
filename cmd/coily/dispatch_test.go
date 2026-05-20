@@ -45,7 +45,7 @@ func TestParseIssueRef(t *testing.T) {
 }
 
 func TestFirstIssueRef(t *testing.T) {
-	argv := []string{"coily", "dispatch", "--dry-run", "coilysiren/coily#136"}
+	argv := []string{"coily", "dispatch", "headless", "--dry-run", "coilysiren/coily#136"}
 	ref := firstIssueRef(argv)
 	if ref == nil {
 		t.Fatal("firstIssueRef returned nil; expected match")
@@ -56,7 +56,7 @@ func TestFirstIssueRef(t *testing.T) {
 }
 
 func TestFirstIssueRef_NoMatch(t *testing.T) {
-	argv := []string{"coily", "dispatch", "--dry-run"}
+	argv := []string{"coily", "dispatch", "headless", "--dry-run"}
 	if ref := firstIssueRef(argv); ref != nil {
 		t.Errorf("firstIssueRef = %+v, want nil", ref)
 	}

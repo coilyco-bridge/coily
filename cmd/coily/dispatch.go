@@ -15,20 +15,55 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// dispatchCommand fires a fresh top-level `claude -p` session bound to a
-// real open issue in coilysiren/*. The privileged-op claim that makes this
-// defensible: the prompt is not free text. It is derived from a GitHub
-// issue that exists in the org. An agent (or a person) cannot launder an
-// arbitrary prompt through it without first filing an issue, which leaves
-// its own public trail.
+// dispatchCommand is the umbrella verb. It refuses bare invocation and
+// requires an explicit mode subverb (`headless` or `interactive`). The
+// security claim that makes this verb defensible is unchanged from #136:
+// the prompt is derived from a real open coilysiren/* issue, not free text.
 //
-// See coilysiren/coily#136 for the design discussion.
+// Why force the mode choice. Both modes have valid uses. Headless is for
+// AFK queue work and bulk fan-out (subscription bill). Interactive is for
+// "this should be its own focused session but I want eyes on it" (Anthropic
+// API key bill, foreground supervision). A default would silently pick a
+// billing model and a supervision posture. Operator chooses on every call.
+//
+// See coilysiren/coily#270 for the split design.
 func (r *Runner) dispatchCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "dispatch",
-		Usage:     "Fire `claude -p` against a real open coilysiren/* issue.",
-		ArgsUsage: "<owner/repo#N | issue-url>",
+		Usage:     "Fire claude against a real open coilysiren/* issue. Mode required: headless | interactive.",
+		ArgsUsage: "<headless|interactive> <owner/repo#N | issue-url>",
 		Description: `dispatch resolves a GitHub issue reference, refuses anything outside the
+coilysiren/* org or any issue that is not open, then hands off to one of
+two mode subverbs:
+
+  coily dispatch headless    <ref>   Fire claude -p non-interactively in
+                                     the local checkout. Same as the prior
+                                     bare 'coily dispatch'. AFK queue work.
+  coily dispatch interactive <ref>   Open a new Warp tab cwd'd into the
+                                     repo with claude pre-submitted with
+                                     "Work on issue <ref>". Operator has
+                                     eyes on it.
+
+Bare 'coily dispatch <ref>' errors. Pick a mode.`,
+		Commands: []*cli.Command{
+			r.dispatchHeadlessCommand(),
+			r.dispatchInteractiveCommand(),
+		},
+		Action: func(_ context.Context, _ *cli.Command) error {
+			return fmt.Errorf("dispatch: specify mode: interactive | headless (see `coily dispatch --help`)")
+		},
+	}
+}
+
+// dispatchHeadlessCommand carries the original `coily dispatch` behavior:
+// fires `claude -p` against the issue in the local checkout, runs to
+// completion, exits.
+func (r *Runner) dispatchHeadlessCommand() *cli.Command {
+	return &cli.Command{
+		Name:      "headless",
+		Usage:     "Fire `claude -p` non-interactively against a real open coilysiren/* issue.",
+		ArgsUsage: "<owner/repo#N | issue-url>",
+		Description: `headless resolves a GitHub issue reference, refuses anything outside the
 coilysiren/* org or any issue that is not open, seeds a prompt from the
 issue title and body plus the standard git-workflow footer, then exec's
 claude -p inside the matching local checkout at
@@ -36,11 +71,6 @@ claude -p inside the matching local checkout at
 
 Refuses to run if the local checkout is missing - the operator clones
 the repo first, then re-runs dispatch.
-
-This is the only sanctioned path from inside a coily session to a fresh
-top-level claude session. The auto-mode classifier denies bare 'claude -p'
-because the prompt is unconstrained; here the prompt is derived from a
-real open org issue.
 
 The child claude session is launched with --permission-mode (default 'auto')
 and --allowedTools (default Bash,Read,Edit,Write,Glob,Grep,TodoWrite). Both
@@ -69,7 +99,7 @@ target repos that need a wider tool set can opt in without editing dispatch.`,
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:       "dispatch",
+				Name:       "dispatch.headless",
 				SkipPolicy: false,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
@@ -90,7 +120,7 @@ target repos that need a wider tool set can opt in without editing dispatch.`,
 					return p
 				},
 				Action: func(ctx context.Context, c *cli.Command) error {
-					return runDispatch(ctx, r, c)
+					return runDispatchHeadless(ctx, r, c)
 				},
 			},
 			r.Audit,
@@ -186,34 +216,45 @@ type ghIssue struct {
 	URL    string `json:"html_url"`
 }
 
-func runDispatch(ctx context.Context, r *Runner, c *cli.Command) error {
-	args := c.Args().Slice()
-	if len(args) != 1 {
-		return fmt.Errorf("dispatch: pass exactly one issue reference (got %d args)", len(args))
-	}
-	ref, err := parseIssueRef(args[0])
+// resolveDispatchIssue parses the ref, refuses non-coilysiren and
+// non-open issues, and returns both the ref and the fetched issue. Shared
+// by headless and interactive subverbs so the security claim and validation
+// shape stay identical.
+func resolveDispatchIssue(ctx context.Context, r *Runner, raw string) (*issueRef, *ghIssue, error) {
+	ref, err := parseIssueRef(raw)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 	if ref.Owner != allowedOwner {
-		return fmt.Errorf("dispatch: refusing to dispatch outside %s/* (got %s)", allowedOwner, ref.Owner)
+		return nil, nil, fmt.Errorf("dispatch: refusing to dispatch outside %s/* (got %s)", allowedOwner, ref.Owner)
+	}
+	issue, err := fetchIssue(ctx, r, ref)
+	if err != nil {
+		return nil, nil, err
+	}
+	if !strings.EqualFold(issue.State, "OPEN") {
+		return nil, nil, fmt.Errorf("dispatch: refusing to dispatch against non-open issue %s (state=%s)", ref, issue.State)
+	}
+	return ref, issue, nil
+}
+
+func runDispatchHeadless(ctx context.Context, r *Runner, c *cli.Command) error {
+	args := c.Args().Slice()
+	if len(args) != 1 {
+		return fmt.Errorf("dispatch headless: pass exactly one issue reference (got %d args)", len(args))
+	}
+	ref, issue, err := resolveDispatchIssue(ctx, r, args[0])
+	if err != nil {
+		return err
 	}
 
 	repoPath, err := localRepoPath(ref.Repo)
 	if err != nil {
-		return fmt.Errorf("dispatch: resolve local repo path: %w", err)
+		return fmt.Errorf("dispatch headless: resolve local repo path: %w", err)
 	}
 	if st, statErr := os.Stat(repoPath); statErr != nil || !st.IsDir() {
-		return fmt.Errorf("dispatch: local checkout missing at %s. Clone it first: gh repo clone %s/%s %s",
+		return fmt.Errorf("dispatch headless: local checkout missing at %s. Clone it first: gh repo clone %s/%s %s",
 			repoPath, ref.Owner, ref.Repo, repoPath)
-	}
-
-	issue, err := fetchIssue(ctx, r, ref)
-	if err != nil {
-		return err
-	}
-	if !strings.EqualFold(issue.State, "OPEN") {
-		return fmt.Errorf("dispatch: refusing to dispatch against non-open issue %s (state=%s)", ref, issue.State)
 	}
 
 	prompt := seedPrompt(ref, issue)
@@ -221,7 +262,7 @@ func runDispatch(ctx context.Context, r *Runner, c *cli.Command) error {
 	allowedTools := c.String("allowed-tools")
 
 	if c.Bool("dry-run") {
-		fmt.Printf("# dispatch (dry-run)\n")
+		fmt.Printf("# dispatch headless (dry-run)\n")
 		fmt.Printf("issue:           %s\n", ref)
 		fmt.Printf("url:             %s\n", issue.URL)
 		fmt.Printf("cwd:             %s\n", repoPath)
@@ -236,8 +277,8 @@ func runDispatch(ctx context.Context, r *Runner, c *cli.Command) error {
 }
 
 // buildDispatchClaudeArgv resolves the child claude binary and argv. Pulled
-// out of runDispatch so the per-flag conditionals don't push the latter past
-// the gocyclo threshold.
+// out of runDispatchHeadless so the per-flag conditionals don't push the
+// latter past the gocyclo threshold.
 func buildDispatchClaudeArgv(claudeBin, prompt, permMode, allowedTools string) (string, []string) {
 	if claudeBin == "" {
 		claudeBin = "claude"

@@ -43,11 +43,17 @@ Stream audit records as JSONL.
 
 Flags: --follow, --since
 
-## `coily dispatch`
+## `coily dispatch headless`
 
-Fire `claude -p` against a real open coilysiren/* issue.
+Fire `claude -p` non-interactively against a real open coilysiren/* issue.
 
 Flags: --allowed-tools, --claude-bin, --dry-run, --permission-mode
+
+## `coily dispatch interactive`
+
+Open a new Warp tab with `claude "Work on issue <ref>"` pre-submitted.
+
+Flags: --dry-run, --launch-name, --scratch-path
 
 ## `coily docker`
 
