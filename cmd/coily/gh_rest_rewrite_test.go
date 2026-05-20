@@ -171,20 +171,69 @@ func TestRewriteJQFile(t *testing.T) {
 
 // TestRewriteGHForRESTAndJQFile_Chained pins that the jq-file pass runs
 // before the REST rewriter, so a `gh issue view N --repo X/Y --jq-file Q`
-// becomes a REST api call with the expanded --jq value.
+// becomes a REST api call with the expanded --jq value. The view rewriter
+// now also forwards --jq / -q on its own (coilysiren/coily#278), so the
+// chained run is the combined path: --jq-file expands to --jq, then the
+// view rewrite preserves that --jq across the REST collapse.
 func TestRewriteGHForRESTAndJQFile_Chained(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "q.jq")
 	if err := os.WriteFile(path, []byte(".title"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	// gh issue view declines its --jq today (parseViewArgs only reads
-	// num+repo); the rewrite still expands --jq-file, then the REST
-	// rewriter routes the call. The substituted --jq lands on gh api.
 	got := rewriteGHForRESTAndJQFile([]string{"api", "/repos/x/y/issues/1", "--jq-file", path})
 	want := []string{"api", "/repos/x/y/issues/1", "--jq", ".title"}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("chained: got %v, want %v", got, want)
+	}
+}
+
+// TestRewriteGHForREST_ViewForwardsJQ covers coilysiren/coily#278: the
+// `gh issue view` / `gh pr view` / `gh repo view` REST rewrites must
+// forward a caller-supplied `--jq <expr>` or `-q <expr>` onto the
+// rewritten `gh api` call. Before the fix, the rewriter collapsed argv
+// to a fixed `gh api /repos/...` and silently dropped the filter, so
+// `coily ops gh issue view N --repo O/R --json body -q .body` returned
+// the full JSON envelope.
+func TestRewriteGHForREST_ViewForwardsJQ(t *testing.T) {
+	cases := []struct {
+		name string
+		in   []string
+		want []string
+	}{
+		{
+			name: "issue view long --jq",
+			in:   []string{"issue", "view", "1", "--repo", "x/y", "--json", "body", "--jq", ".body"},
+			want: []string{"api", "/repos/x/y/issues/1", "--jq", ".body"},
+		},
+		{
+			name: "issue view short -q",
+			in:   []string{"issue", "view", "1", "--repo", "x/y", "--json", "body", "-q", ".body"},
+			want: []string{"api", "/repos/x/y/issues/1", "--jq", ".body"},
+		},
+		{
+			name: "pr view long --jq",
+			in:   []string{"pr", "view", "9", "--repo", "x/y", "--jq", ".title"},
+			want: []string{"api", "/repos/x/y/pulls/9", "--jq", ".title"},
+		},
+		{
+			name: "repo view short -q",
+			in:   []string{"repo", "view", "x/y", "-q", ".description"},
+			want: []string{"api", "/repos/x/y", "--jq", ".description"},
+		},
+		{
+			name: "no jq: identity-shaped collapse",
+			in:   []string{"issue", "view", "1", "--repo", "x/y"},
+			want: []string{"api", "/repos/x/y/issues/1"},
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := rewriteGHForREST(tc.in)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("got %v, want %v", got, tc.want)
+			}
+		})
 	}
 }
 

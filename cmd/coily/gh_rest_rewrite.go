@@ -211,25 +211,56 @@ func dispatchPRVerb(verb string, rest, argv []string) []string {
 // endpointGroup is "issues" or "pulls". Declines on --web (different
 // output channel), --comments (needs a second call), or a missing
 // number/repo. --json is recognized but ignored: REST returns the full
-// object and callers can --jq against it.
+// object and callers can --jq against it. A `--jq <expr>` (or `-q`)
+// from the original argv is forwarded to the rewritten `gh api` call
+// so the caller's filter survives the rewrite. coilysiren/coily#278.
 func rewriteIssueOrPRView(rest []string, full []string, endpointGroup string) []string {
-	num, repo, declined := parseViewArgs(rest)
-	if declined || num == "" || repo == "" {
+	p := walkFlags(rest)
+	if p.declined {
 		return full
 	}
-	return []string{"api", "/repos/" + repo + "/" + endpointGroup + "/" + num}
+	num := ""
+	if len(p.positional) > 0 {
+		num = p.positional[0]
+	}
+	repo := p.first("repo")
+	if num == "" || repo == "" {
+		return full
+	}
+	out := []string{"api", "/repos/" + repo + "/" + endpointGroup + "/" + num}
+	return appendJQ(out, p)
 }
 
 // rewriteRepoView rewrites `gh repo view O/R` to `gh api /repos/O/R`.
 // Declines on --web or when the positional isn't owner/repo shape (the
 // shorthand `gh repo view` with no positional resolves via the local
-// git remote, which gh handles for us).
+// git remote, which gh handles for us). A `--jq <expr>` (or `-q`) from
+// the original argv is forwarded so the caller's filter survives the
+// rewrite. coilysiren/coily#278.
 func rewriteRepoView(rest []string, full []string) []string {
-	repo, declined := parseRepoViewArgs(rest)
-	if declined || repo == "" {
+	p := walkFlags(rest)
+	if p.declined {
 		return full
 	}
-	return []string{"api", "/repos/" + repo}
+	if len(p.positional) == 0 {
+		return full
+	}
+	repo := p.positional[0]
+	if !strings.Contains(repo, "/") {
+		return full
+	}
+	return appendJQ([]string{"api", "/repos/" + repo}, p)
+}
+
+// appendJQ forwards a `--jq <expr>` from the original view argv onto the
+// rewritten `gh api` argv. `gh api` accepts `--jq` natively so the
+// filter applies to the REST response. No-op when the caller did not
+// pass `--jq` / `-q`.
+func appendJQ(out []string, p parsedArgs) []string {
+	if expr := p.first("jq"); expr != "" {
+		out = append(out, "--jq", expr)
+	}
+	return out
 }
 
 // rewriteIssueCreate maps `gh issue create --repo O/R --title T [--body B]
@@ -374,6 +405,7 @@ var flagAliases = map[string]string{
 	"-F": "body-file",
 	"-l": "label",
 	"-a": "assignee",
+	"-q": "jq",
 }
 
 // untranslatableSet names flags whose presence forces us to decline the
@@ -550,44 +582,5 @@ func parseEditArgs(rest []string) (num, repo, title, body string, hasUntranslata
 		}
 		body = content
 	}
-	return
-}
-
-// parseViewArgs scans argv for `gh issue view N --repo O/R` or `gh pr view
-// N --repo O/R`. --web and --comments live in untranslatableSet so any
-// presence forces a decline. --json is recognized but ignored (REST always
-// returns the full object).
-func parseViewArgs(rest []string) (num, repo string, declined bool) {
-	p := walkFlags(rest)
-	if p.declined {
-		declined = true
-		return
-	}
-	if len(p.positional) > 0 {
-		num = p.positional[0]
-	}
-	repo = p.first("repo")
-	return
-}
-
-// parseRepoViewArgs scans argv for `gh repo view O/R`. The positional must
-// be owner/repo shape; the no-positional form (resolve from local git
-// remote) declines because we don't replicate that resolution. --web is
-// already in untranslatableSet.
-func parseRepoViewArgs(rest []string) (repo string, declined bool) {
-	p := walkFlags(rest)
-	if p.declined {
-		declined = true
-		return
-	}
-	if len(p.positional) == 0 {
-		return
-	}
-	first := p.positional[0]
-	if !strings.Contains(first, "/") {
-		declined = true
-		return
-	}
-	repo = first
 	return
 }
