@@ -97,6 +97,12 @@ session-lattice, sirens-discord-ops, website
 
 The de facto schema and the loader's accepted schema agree. No legacy keys, no typos, no aspirational fields.
 
+## Audit trail asymmetry
+
+`coily exec <cmd>` writes a `repo.<cmd>` audit row with argv, exit code, commit scope, and working-tree status, but no `egress` field. Built-in passthrough verbs (`ops.aws`, `ops.gh`, `pkg.uv`, etc.) wrap their underlying binary in a CONNECT proxy and record every outbound HTTPS host in the row's `egress` array; `coily exec` spawns the declared `run` line directly with no proxy attached, so its outbound traffic is unobservable from the audit trail.
+
+This matters for repo commands that call LLM APIs, cloud SDKs not under `ops.aws`, or tunneled services. A `repo.<cmd>` row that ran 150 outbound HTTPS calls looks identical in the audit log to one that ran zero. Read "no `egress` field" as "not observed", not "no traffic". See [coilysiren/coily#281](https://github.com/coilysiren/coily/issues/281).
+
 ## Out of scope for this doc
 
 * Runtime enforcement of unknown-key rejection. Tracked separately in [#105](https://github.com/coilysiren/coily/issues/105).
