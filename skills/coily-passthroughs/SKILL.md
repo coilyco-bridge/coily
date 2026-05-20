@@ -3165,7 +3165,7 @@ Record the active lockdown profile for this Claude Code session.
 
 Run the post-upgrade rituals: completion, lockdown re-baseline, and user hook.
 
-Flags: --lockdown-root, --skip-completion, --skip-lockdown, --skip-skills, --skip-user-hook
+Flags: --lockdown-root, --skip-completion, --skip-host-bootstrap, --skip-lockdown, --skip-skills, --skip-user-hook
 
 ## `coily ssh`
 

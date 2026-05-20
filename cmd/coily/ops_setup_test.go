@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/urfave/cli/v3"
@@ -366,4 +368,71 @@ func TestUserHookCleanup_AllThreeStates(t *testing.T) {
 			t.Errorf("PreToolUse should be absent after dropping only entry, got %v", pre)
 		}
 	})
+}
+
+// TestRunHostBootstrapStep_SkipsWhenBrewfileMissing pins coilysiren/coily#264:
+// no Brewfile under <lockdown-root>/agentic-os/brew means the step prints a
+// skip and returns nil. Same shape as runLockdownStep on a missing root.
+func TestRunHostBootstrapStep_SkipsWhenBrewfileMissing(t *testing.T) {
+	root := t.TempDir()
+	self := filepath.Join(root, "coily")
+	if err := os.WriteFile(self, []byte("#!/bin/sh\nexit 99\n"), 0o755); err != nil {
+		t.Fatalf("write self: %v", err)
+	}
+	if err := runHostBootstrapStep(context.Background(), self, root); err != nil {
+		t.Fatalf("runHostBootstrapStep: %v", err)
+	}
+}
+
+// TestRunHostBootstrapStep_InvokesCoilyPkgInAgenticOSDir pins coilysiren/coily#264:
+// when the Brewfile exists, runHostBootstrapStep self-execs
+// `coily pkg brew bundle install --file <brewfile>` and
+// `coily pkg uv tool install pre-commit --with pre-commit-uv`, both with
+// cmd.Dir set to the agentic-os checkout so commit-scope resolves.
+func TestRunHostBootstrapStep_InvokesCoilyPkgInAgenticOSDir(t *testing.T) {
+	root := t.TempDir()
+	brewDir := filepath.Join(root, "agentic-os", "brew")
+	if err := os.MkdirAll(brewDir, 0o755); err != nil {
+		t.Fatalf("mkdir brew: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(brewDir, "Brewfile"), []byte("brew \"jq\"\n"), 0o644); err != nil {
+		t.Fatalf("write Brewfile: %v", err)
+	}
+
+	// Fake self records argv and cwd of each invocation. One line per arg,
+	// CWD marker per invocation, --- separator between invocations.
+	log := filepath.Join(root, "invocations.log")
+	script := "#!/bin/sh\n" +
+		"echo \"CWD=$PWD\" >> \"" + log + "\"\n" +
+		"for a in \"$@\"; do echo \"ARG=$a\" >> \"" + log + "\"; done\n" +
+		"echo --- >> \"" + log + "\"\n"
+	self := filepath.Join(root, "coily")
+	if err := os.WriteFile(self, []byte(script), 0o755); err != nil {
+		t.Fatalf("write self: %v", err)
+	}
+
+	if err := runHostBootstrapStep(context.Background(), self, root); err != nil {
+		t.Fatalf("runHostBootstrapStep: %v", err)
+	}
+
+	data, err := os.ReadFile(log)
+	if err != nil {
+		t.Fatalf("read log: %v", err)
+	}
+	got := string(data)
+	agenticOS := filepath.Join(root, "agentic-os")
+	brewfile := filepath.Join(brewDir, "Brewfile")
+	wants := []string{
+		"CWD=" + agenticOS,
+		"ARG=pkg", "ARG=brew", "ARG=bundle", "ARG=install", "ARG=--file", "ARG=" + brewfile,
+		"ARG=uv", "ARG=tool", "ARG=pre-commit", "ARG=--with", "ARG=pre-commit-uv",
+	}
+	for _, w := range wants {
+		if !strings.Contains(got, w) {
+			t.Errorf("log missing %q\nlog:\n%s", w, got)
+		}
+	}
+	if strings.Count(got, "CWD="+agenticOS) != 2 {
+		t.Errorf("expected 2 invocations with CWD=%s, got log:\n%s", agenticOS, got)
+	}
 }

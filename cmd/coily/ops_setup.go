@@ -27,14 +27,18 @@ func (r *Runner) setupCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "setup",
 		Usage: "Run the post-upgrade rituals: completion, lockdown re-baseline, and user hook.",
-		Description: `setup runs four idempotent steps in order:
+		Description: `setup runs five idempotent steps in order:
 
   1. coily install-completion         (refresh shell tab-completion)
   2. <prefix>/share/coily/skills/*    (symlink every staged coily-* skill
                                        into ~/.claude/skills/ so the harness
                                        picks them up)
-  3. coily lockdown --recursive ...   (re-baseline allow/deny lists under the lockdown root)
-  4. ~/.claude/coily-binary-gate.sh   (user-level PreToolUse hook that
+  3. host-bootstrap                   (brew bundle install against
+                                       <lockdown-root>/agentic-os/brew/Brewfile
+                                       + uv tool install pre-commit; idempotent
+                                       no-op on a satisfied host)
+  4. coily lockdown --recursive ...   (re-baseline allow/deny lists under the lockdown root)
+  5. ~/.claude/coily-binary-gate.sh   (user-level PreToolUse hook that
                                        rejects dev coily binaries from any
                                        cwd; complements per-repo lockdown)
 
@@ -64,6 +68,10 @@ tree (friends' machines, alternate layouts) silent.`,
 			&cli.BoolFlag{
 				Name:  "skip-user-hook",
 				Usage: "skip the user-level PreToolUse hook install",
+			},
+			&cli.BoolFlag{
+				Name:  "skip-host-bootstrap",
+				Usage: "skip the host-bootstrap step (brew bundle install + uv pre-commit)",
 			},
 		},
 		Action: r.WrapVerb(
@@ -99,6 +107,13 @@ func setupAction(ctx context.Context, c *cli.Command) error {
 	if !c.Bool("skip-skills") {
 		fmt.Fprintln(os.Stderr, "==> skills")
 		if err := installSkillSymlinks(self); err != nil {
+			return err
+		}
+	}
+
+	if !c.Bool("skip-host-bootstrap") {
+		fmt.Fprintln(os.Stderr, "==> host-bootstrap")
+		if err := runHostBootstrapStep(ctx, self, c.String("lockdown-root")); err != nil {
 			return err
 		}
 	}
@@ -407,6 +422,58 @@ func migrateLegacySkillSymlink(dest, _ string) {
 // for one call.
 func filepathHasPrefix(s, prefix string) bool {
 	return len(s) >= len(prefix) && s[:len(prefix)] == prefix
+}
+
+// runHostBootstrapStep brings a fresh host to Brewfile parity and installs
+// the uv-managed pre-commit toolchain. Two idempotent self-execs:
+//
+//  1. coily pkg brew bundle install --file <agentic-os>/brew/Brewfile
+//  2. coily pkg uv tool install pre-commit --with pre-commit-uv
+//
+// Both inner commands run with cmd.Dir set to the agentic-os checkout so the
+// commit-scope resolver lands cleanly. If the Brewfile is missing the step
+// prints a skip and returns nil, same pattern as runLockdownStep on missing
+// lockdown roots — keeps friends' machines and alternate layouts silent.
+//
+// Per coilysiren/coily#264 and as step 4 of coilysiren/agentic-os-kai#615.
+// Originally framed as a `coily ssh bootstrap` verb in agentic-os-kai#493,
+// but coilysiren/coily#187 step 8 deleted per-verb ssh wrappers; the
+// replacement is `coily ssh kai-server -- coily setup`.
+func runHostBootstrapStep(ctx context.Context, self, lockdownRoot string) error {
+	if lockdownRoot == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return fmt.Errorf("setup: home dir: %w", err)
+		}
+		lockdownRoot = filepath.Join(home, "projects", "coilysiren")
+	}
+	agenticOS := filepath.Join(lockdownRoot, "agentic-os")
+	brewfile := filepath.Join(agenticOS, "brew", "Brewfile")
+	if _, err := os.Stat(brewfile); os.IsNotExist(err) {
+		fmt.Fprintf(os.Stderr, "    skipped: %s does not exist\n", brewfile)
+		return nil
+	} else if err != nil {
+		return fmt.Errorf("setup: stat brewfile: %w", err)
+	}
+
+	fmt.Fprintln(os.Stderr, "    brew bundle install")
+	bundle := exec.CommandContext(ctx, self, "pkg", "brew", "bundle", "install", "--file", brewfile)
+	bundle.Dir = agenticOS
+	bundle.Stdout = os.Stdout
+	bundle.Stderr = os.Stderr
+	if err := bundle.Run(); err != nil {
+		return fmt.Errorf("setup: brew bundle install: %w", err)
+	}
+
+	fmt.Fprintln(os.Stderr, "    uv tool install pre-commit")
+	uv := exec.CommandContext(ctx, self, "pkg", "uv", "tool", "install", "pre-commit", "--with", "pre-commit-uv")
+	uv.Dir = agenticOS
+	uv.Stdout = os.Stdout
+	uv.Stderr = os.Stderr
+	if err := uv.Run(); err != nil {
+		return fmt.Errorf("setup: uv tool install pre-commit: %w", err)
+	}
+	return nil
 }
 
 func runLockdownStep(ctx context.Context, self, lockdownRoot string) error {
