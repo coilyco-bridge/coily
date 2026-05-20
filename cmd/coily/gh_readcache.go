@@ -1,6 +1,9 @@
 package main
 
-import "strings"
+import (
+	"strings"
+	"time"
+)
 
 // ghReadCacheClassifier inspects the post-rewrite argv that the gh
 // pass-through is about to hand to gh. Recognizes the shapes the REST
@@ -15,40 +18,45 @@ import "strings"
 // deliberately strict; on doubt it declines and the pass-through runs
 // the subprocess as today.
 //
+// The returned maxAge is the per-invocation cap stashed by
+// rewriteGHForRESTAndJQFile via --max-age / COILY_GH_MAX_AGE
+// (coilysiren/coily#267). -1 (no cap) when neither was set, so the
+// pre-flag behavior is preserved.
+//
 // Designed to feed cli-guard's passthrough.WithReadCache. See
 // coilysiren/coily#266 and cli-guard#76.
-func ghReadCacheClassifier(argv []string) (string, bool) {
+func ghReadCacheClassifier(argv []string) (string, time.Duration, bool) {
 	if len(argv) < 2 || argv[0] != "api" {
-		return "", false
+		return "", 0, false
 	}
 	path := ""
 	for i := 1; i < len(argv); i++ {
 		tok := argv[i]
 		if isBodyFlag(tok) {
-			return "", false
+			return "", 0, false
 		}
 		if method, consumed, ok := readMethodFlag(argv, i); ok {
 			if strings.ToUpper(method) != "GET" {
-				return "", false
+				return "", 0, false
 			}
 			i += consumed
 			continue
 		}
 		if strings.HasPrefix(tok, "-") {
 			// Unknown flag - decline rather than guess.
-			return "", false
+			return "", 0, false
 		}
 		// First non-flag positional is the path. Subsequent positionals
 		// are unexpected for the `api <path>` shape; decline.
 		if path != "" {
-			return "", false
+			return "", 0, false
 		}
 		path = tok
 	}
 	if path == "" {
-		return "", false
+		return "", 0, false
 	}
-	return path, true
+	return path, loadGHMaxAge(), true
 }
 
 // isBodyFlag reports whether tok is one of gh api's body-bearing

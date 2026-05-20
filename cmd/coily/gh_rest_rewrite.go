@@ -60,11 +60,22 @@ func rewriteJQFile(argv []string) []string {
 	return out
 }
 
-// rewriteGHForRESTAndJQFile chains the jq-file substitution before the
-// REST rewriter so the substituted argv flows through both passes.
-// Wired as the gh entry's ArgvRewriter in passthroughs.go.
+// rewriteGHForRESTAndJQFile chains the per-invocation passes that
+// must run before the gh subprocess sees argv: --max-age extraction
+// (coilysiren/coily#267), jq-file expansion (coily#165), and the REST
+// rewriter (coily#138). Wired as the gh entry's ArgvRewriter in
+// passthroughs.go.
+//
+// Order matters. --max-age strip runs first so the duration is stashed
+// before downstream passes mutate the slice. The jq-file pass runs next
+// so the metachar gate has already cleared the file content. The REST
+// rewriter runs last on the already-substituted argv.
 func rewriteGHForRESTAndJQFile(argv []string) []string {
-	return rewriteGHForREST(rewriteJQFile(argv))
+	stripped, d, ok := resolveGHMaxAge(argv)
+	if ok {
+		stashGHMaxAge(d)
+	}
+	return rewriteGHForREST(rewriteJQFile(stripped))
 }
 
 // readBodyFile reads the contents of `path` for `--body-file` translation.
