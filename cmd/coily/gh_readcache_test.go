@@ -111,7 +111,7 @@ func TestGHReadCacheClassifier(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			gotPath, gotOK := ghReadCacheClassifier(tc.argv)
+			gotPath, _, gotOK := ghReadCacheClassifier(tc.argv)
 			if gotOK != tc.wantOK {
 				t.Errorf("ok=%v want %v (path=%q)", gotOK, tc.wantOK, gotPath)
 			}
