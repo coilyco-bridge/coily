@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -39,6 +40,11 @@ import (
 // that fires when the operator did not set the flag (or env var) and the
 // verb's argv carries enough information to pick a sensible default. Today
 // only `ops gh` uses this, to derive the scope from --repo coilysiren/<name>.
+//
+// PreflightGate, when non-nil, runs against the raw argv before the
+// passthrough executes. A non-nil return aborts the invocation with that
+// error and the wrapped binary never runs. Today only `ops gh` uses this,
+// to keep GitHub Actions / CI status playwright-only (coilysiren/coily#305).
 type ptEntry struct {
 	Bin            string
 	SkipPolicy     bool
@@ -48,6 +54,7 @@ type ptEntry struct {
 	ArgvRewriter   func(argv []string) []string
 	ReadCache      passthrough.ReadCacheClassifier
 	SecretResolver mcporter.SecretResolver
+	PreflightGate  func(argv []string) error
 }
 
 // ptOps is the pass-through set mounted under `coily ops <bin>`. Cloud +
@@ -56,7 +63,7 @@ type ptEntry struct {
 // user-visible path.
 var ptOps = []ptEntry{
 	{Bin: "aws", VerbName: "ops.aws", Egress: true},
-	{Bin: "gh", VerbName: "ops.gh", Egress: true, ScopeArgvHint: ghRepoScopeHint, ArgvRewriter: rewriteGHForRESTAndJQFile, ReadCache: ghReadCacheClassifier},
+	{Bin: "gh", VerbName: "ops.gh", Egress: true, ScopeArgvHint: ghRepoScopeHint, ArgvRewriter: rewriteGHForRESTAndJQFile, ReadCache: ghReadCacheClassifier, PreflightGate: ghActionsGate},
 	{Bin: "kubectl", VerbName: "ops.kubectl", Egress: true},
 	{Bin: "flyctl", VerbName: "ops.flyctl", Egress: true},
 	{Bin: "gcloud", VerbName: "ops.gcloud", Egress: true},
@@ -138,7 +145,25 @@ func (r *Runner) passthroughCommand(e ptEntry) *cli.Command {
 	if e.SecretResolver != nil {
 		opts = append(opts, passthrough.WithSecretResolver(e.SecretResolver))
 	}
-	return passthrough.Command(e.Bin, r.Runner, r.Audit, opts...)
+	cmd := passthrough.Command(e.Bin, r.Runner, r.Audit, opts...)
+	if e.PreflightGate != nil {
+		cmd.Action = withPreflightGate(cmd.Action, e.PreflightGate)
+	}
+	return cmd
+}
+
+// withPreflightGate wraps a passthrough action so `gate` runs against the
+// raw argv first. A non-nil gate result aborts before the wrapped binary
+// (or its audit row) ever runs - the gate is a hard refusal, not a policy
+// the passthrough negotiates. Used to keep GitHub Actions status
+// playwright-only (coilysiren/coily#305).
+func withPreflightGate(inner cli.ActionFunc, gate func(argv []string) error) cli.ActionFunc {
+	return func(ctx context.Context, c *cli.Command) error {
+		if err := gate(c.Args().Slice()); err != nil {
+			return err
+		}
+		return inner(ctx, c)
+	}
 }
 
 // ghRepoScopeHint reads --repo coilysiren/<name> out of `coily ops gh` argv

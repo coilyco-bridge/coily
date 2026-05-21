@@ -22,7 +22,7 @@ The release pipeline is what `coily lockdown` trusts. Bypassing puts an unaudite
 
 ## Default to `coily ops gh`, not raw `gh`
 
-For any GitHub op in Kai's workspace, reach for `coily ops gh ...` first. Same flags, same behavior, routed through audit + lockdown. Note: `--jq`, not `-q`. Raw `gh` is the fallback only when coily isn't installed (CI, fresh machine pre-bootstrap).
+For any GitHub op in Kai's workspace, reach for `coily ops gh ...` first. Same flags, same behavior, routed through audit + lockdown. Note: `--jq`, not `-q`. Raw `gh` is the fallback only when coily isn't installed (CI, fresh machine pre-bootstrap). Exception: the Actions surface hard-errors, CI status is playwright-only (coily#305).
 
 ## Release framework
 
@@ -42,7 +42,7 @@ Brew + scoop produce user-writable binaries (`/opt/homebrew/bin/coily`, `~/scoop
 After pushing to `main`, schedule a wake-up to land the new binary and re-baseline lockdown. Release pipeline takes ~1-3 min.
 
 - **Cadence**: 300-360s after push.
-- **Verify CI**: `coily ops gh run list --repo coilysiren/coily --limit 1` should be `completed/success`. Re-schedule once at +180s if in progress; stop on failure.
+- **Verify CI**: Actions status is playwright-only (coily#305). Drive the Playwright MCP to `github.com/coilysiren/coily/actions`, latest run should be `completed/success`. Re-schedule once at +180s if in progress; stop on failure.
 - **Upgrade host**: Mac `brew upgrade coilysiren/coily/coily`. Windows `scoop update coily`. No sudo on either.
 - **Re-baseline lockdown** only when the bumped commit touched `cli-guard/lockdown/`: `coily lockdown --apply --replace --recursive --path ~/projects/coilysiren`.
 - **kai-server**: `coily ssh kai-server -- coily systemctl start coily-update.service`. Oneshot.
