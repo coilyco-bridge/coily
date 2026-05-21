@@ -28,6 +28,7 @@ func (r *Runner) opsCommand() *cli.Command {
 		r.forgejoCommand(),
 		r.claudeRemoteControlCommand(),
 		r.personalDashboardCommand(),
+		r.ciCommand(),
 	)
 	return &cli.Command{
 		Name:  "ops",

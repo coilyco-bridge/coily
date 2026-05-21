@@ -1,8 +1,8 @@
 # Coily features
 
-Baseline of what coily ships. Update bullets in the same commit as the change so this file mirrors the binary.
+What coily ships. Update in the same commit as the change so this file mirrors the binary.
 
-Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh, kubectl, ssh, docker, tailscale, package managers, game-server systemd) in named verbs, validates argv, writes a JSONL audit row per invocation. No `coily shell` / `coily run` / `coily ssh exec` escape hatch.
+Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh, kubectl, ssh, docker, tailscale, package managers, game-server systemd) in named verbs, validates argv, writes a JSONL audit row per invocation.
 
 ## Architecture
 
@@ -23,9 +23,11 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 
 **SSH**: `coily ssh <alias> -- coily <argv>`. Free-form passthrough; remote coily's lockdown is the security boundary. Audit rows chain across hosts via `--audit-parent`. See [coily#187](https://github.com/coilysiren/coily/issues/187).
 
-**Game-server ops**: `coily gaming {eco,core-keeper,icarus,factorio}` (status/tail/start/stop/restart common to all). Eco adds `world {get-seed,set-seed,randomize,snapshot}` + `mod {list,push}`. Factorio adds `update` (steamcmd), `saves`, `mods`, `players`.
+**Game-server ops**: `coily gaming {eco,core-keeper,icarus,factorio}` (common lifecycle verbs). Eco adds `world {get-seed,set-seed,randomize,snapshot}` + `mod {list,push}`. Factorio adds `update`, `saves`, `mods`, `players`.
 
 **REST API wrappers**: `coily ops {modio,discord,sentry,trello,forgejo}`.
+
+**CI watcher**: `coily ops ci <owner/repo> [--watch]` reads Actions status off the `github.com` page, on a rate-limit pool separate from REST. See [coily#289](https://github.com/coilysiren/coily/issues/289).
 
 **Repo-defined**: `coily exec <cmd> [-- extra-args]`. Loaded from `.coily/coily.yaml`. Gated on clean+synced tree; `--audit-override-dirty` bypasses with audit tag. Verb prefix `repo.<cmd>`.
 
@@ -49,7 +51,7 @@ Three-layer precedence: Go defaults < `~/.coily/config.yaml` < `./.coily/config.
 
 ## Distribution
 
-No prebuilt binaries. Push to `main` triggers semver bump + tag + GH Release + in-repo `Formula/coily.rb` `url` rewrite via Contents API. `make install` (root-owned `/usr/local/bin`), `make install-windows` (admin `C:\Program Files\coily\`), `make deploy-server`. Bootstrap: `brew tap coilysiren/coily https://github.com/coilysiren/coily; brew install coilysiren/coily/coily`.
+No prebuilt binaries. Push to `main` triggers semver bump + tag + GH Release + in-repo `Formula/coily.rb` `url` rewrite via Contents API. `make install`, `make install-windows`, `make deploy-server`. Bootstrap: `brew tap coilysiren/coily https://github.com/coilysiren/coily; brew install coilysiren/coily/coily`.
 
 ## Cross-cutting infrastructure
 
@@ -57,7 +59,7 @@ All cross-cutting infrastructure lives in the sibling `cli-guard` module: `cli-g
 
 ## Testing + docs
 
-`make test` (gotest) / `vet` / `build` / `dev` / `clean`. Security claims test verifies prose against runtime. Docs: README, AGENTS, SECURITY, docs/unresolved.md, and `coily --list` / `--tree` / `<verb> --help`.
+`make test` / `vet` / `build` / `dev` / `clean`. A security-claims test verifies prose against runtime. Docs: README, AGENTS, SECURITY, docs/unresolved.md, `coily --list` / `--tree` / `--help`.
 
 ## Known limitations
 
