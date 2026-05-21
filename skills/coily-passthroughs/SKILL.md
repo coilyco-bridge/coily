@@ -21,12 +21,6 @@ Render a static HTML aggregation of the audit log.
 
 Flags: --out, --since
 
-## `coily audit finding`
-
-Walk an agent through filing a finding GitHub issue about a flagged audit event.
-
-Flags: --id, --slug, --ts, --verb
-
 ## `coily audit open`
 
 Open the rendered audit dashboard in the default browser.

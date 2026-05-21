@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/coilysiren/cli-guard/audit"
@@ -97,4 +98,32 @@ func (r *Runner) WrapVerb(spec verb.Spec, writer *audit.Writer) cli.ActionFunc {
 		spec.ResolveInvokeCWD = resolveInvokeCWD
 	}
 	return verb.Wrap(spec, writer)
+}
+
+// resolveInvokeCWD picks the directory a coily verb should treat as the
+// operator's working directory, so an audit row binds to where the
+// operator actually invoked from. Preference order:
+//
+//  1. $COILY_INVOKE_CWD - explicit override.
+//  2. $OLDPWD - the shell's prior directory, set when a wrapper cd's.
+//  3. os.Getwd() - subprocess cwd, the previous default.
+//
+// Any candidate that doesn't resolve to a real directory is skipped,
+// so a stale env var doesn't poison the lookup.
+func resolveInvokeCWD() string {
+	for _, env := range []string{"COILY_INVOKE_CWD", "OLDPWD"} {
+		v := strings.TrimSpace(os.Getenv(env))
+		if v == "" {
+			continue
+		}
+		// #nosec G304 -- read-only stat for cwd routing; no file open or
+		// write follows.
+		if info, err := os.Stat(filepath.Clean(v)); err == nil && info.IsDir() {
+			return v
+		}
+	}
+	if cwd, err := os.Getwd(); err == nil {
+		return cwd
+	}
+	return ""
 }

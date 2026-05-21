@@ -36,7 +36,6 @@ func (r *Runner) auditCommand() *cli.Command {
 		Commands: []*cli.Command{
 			r.auditPathCommand(),
 			r.auditTailCommand(),
-			r.auditFindingCommand(),
 			r.auditDashboardCommand(),
 			r.auditOpenCommand(),
 		},

@@ -1,80 +1,53 @@
 ---
 name: coily-meta
-description: Design surface for coily (the operator CLI). Meta-improvement loop, security-boundary discipline, agent discipline, per-verb anti-signals. Findings live as GitHub issues with label `finding`. Always fires on "investigate", "triage", "debug". Triggers - coily, coily audit, audit finding, investigate, triage, debug.
+description: Design surface for coily (the operator CLI). Meta-improvement loop, security-boundary discipline, agent discipline, per-verb anti-signals. Always fires on "investigate", "triage", "debug". Triggers - coily, coily audit, investigate, triage, debug.
 ---
 
 # coily-meta
 
-The single skill for coily's design surface. Replaces the prior spread of `coily-*-meta`, `coily-*-usage`, and the cross-cutting discipline skills. Findings are GitHub issues on coilysiren/coily with label `finding`, not files on disk.
+The single skill for coily's design surface. Replaces the prior spread of `coily-*-meta`, `coily-*-usage`, and the cross-cutting discipline skills.
 
 Composes with: the runtime layer in `cmd/coily/` and `cli-guard/`, the audit trail at `~/.coily/audit/*.jsonl`, the prose surface in `SECURITY.md`.
 
 ## 1. The meta-improvement loop
 
-The loop that produces and maintains everything else in this skill. Five steps, each with a where-it-lives so the data does not pool in one place.
+The loop that produces and maintains everything else in this skill. Observe a signal, promote a rule, verify it in code.
 
 ### 1.1 Observe
 
 A concrete signal arrives. One of:
 
-- **Audit-log sweep.** A scan of `~/.coily/audit/*.jsonl` (and Claude session-history denied-Bash entries) over a window finds a pattern - a verb invoked at unexpected scope, a deny rate that suggests a missing gate, a near-miss the gate caught but the next operator might not. Run `scripts/sweep.py` for the structured report.
 - **Incident.** A coily verb did something the operator did not intend, or did not do something the operator did intend. Real or near-miss.
+- **Audit-log review.** Reading `~/.coily/audit/*.jsonl` (and Claude session-history denied-Bash entries) over a window finds a pattern - a verb invoked at unexpected scope, a deny rate that suggests a missing gate, a near-miss the gate caught but the next operator might not.
 - **Catalogue review.** Reading existing anti-signals or sequencing rules below and noticing an implicit inverse, an unstated assumption, or a silent gap.
 - **Friend report.** Someone running coily on their own host hit a shape that does not match Kai's experience.
 
 The observation is a fact about the system, not yet a rule.
 
-### 1.2 File the finding (as a GitHub issue)
+### 1.2 Promote to a rule
 
-A finding is a GitHub issue on coilysiren/coily with label `finding`. Body schema:
+When the observation produces or grounds a rule, edit this skill:
 
-```markdown
-## What was observed
-
-<concrete, scoped to one shape; cite the audit row's ts, id, verb, argv>
-
-## Why it slipped
-
-<what gap in the gate, the audit, the docs, or the threat model let this through>
-
-## Rule it produced
-
-<one-line claim; may be empty if this finding is data, not a rule>
-```
-
-Title: `finding: <one-line summary>`. Label: `finding`.
-
-The body should capture the observation as it was made: the audit row's facts, what was observed, why it slipped, the rule it implies. After that, edits and comments are both fine - GitHub issues are mutable and resolution updates (linked commits, "fixed in vX.Y.Z", reframing) are useful trail.
-
-`coily audit finding` walks an agent through the file step from a single audit-row id.
-
-### 1.3 Promote to a rule
-
-When the finding produces or grounds a rule, edit this skill:
-
-- **Anti-signal:** add a one-line entry to section 4 (shared) or 9 (per-verb), with `**Pin:**` linking the finding issue (and any follow-up issue).
-- **Sequencing rule:** add a three-line entry (rule / Why / How to apply) to section 4 (shared) or 9 (per-verb), with the Why citing the finding.
+- **Anti-signal:** add a one-line entry to section 4 (shared) or 9 (per-verb), with a `**Pin:**` line linking the issue or test that grounds it.
+- **Sequencing rule:** add a three-line entry (rule / Why / How to apply) to section 4 (shared) or 9 (per-verb).
 
 Generic rules (apply to all `coily-ops-*`, not just one verb) live in section 4 (shared). Per-verb rules live in section 9. See section 2 (authoring) for the hoist test.
 
-A finding can also fail to promote: the observation was real but did not generalize. That is fine. The finding stays as the closed issue. The next finding may rhyme with it and the pair may then warrant a rule.
+An observation can also fail to promote: it was real but did not generalize. That is fine. A later observation may rhyme with it and the pair may then warrant a rule.
 
-### 1.4 File the forward action (when applicable)
+If the observation implies a code change, a doc change, or a sequencing rule addition that is not yet in this file, file a GitHub issue on the appropriate repo (usually coilysiren/coily) for that work.
 
-If the finding implies a code change, a doc change, or a sequencing rule addition that is not yet in this file, the forward action is a separate GitHub issue on the appropriate repo (usually coilysiren/coily). Link both issues at each other. The forward-action issue is the source of truth for "what happens next." The finding remains the source of truth for "what was observed."
+### 1.3 Verify (when applicable)
 
-### 1.5 Verify (when applicable)
+If the rule is verifiable at runtime - a `TestSecurityClaim_*` test, a CI check, a generated allowlist - the verification lives in the coily codebase. The Pin line points at the test. Until a test exists the rule is not "validated," it stays "pinned to issue."
 
-If the rule is verifiable at runtime - a `TestSecurityClaim_*` test, a CI check, a generated allowlist - the verification lives in the coily codebase. The Pin line points at the test. If the forward-action issue closes without a test, the rule does not promote to "validated." It stays "pinned to issue."
+This is the only step that crosses out of this skill into code. Steps 1.1-1.2 are skill-resident. Step 1.3 is code-resident.
 
-This is the only step that crosses out of this skill into code. Steps 1.1-1.4 are skill-resident. Step 1.5 is code-resident.
+### 1.4 Vocabulary
 
-### 1.6 Vocabulary
-
-- **Raw → rollup → consumer.** The data layering this loop follows. Finding issues are raw. This skill is the rollup. The agent invoking a coily verb is the consumer that inherits the rolled-up trust.
-- **Continuous comprehension.** The property of always carrying an accurate, current model of the system in non-human substrate. Finding issues preserve raw data. The bounded sections below preserve the model. When they drift, comprehension has decayed.
+- **Continuous comprehension.** The property of always carrying an accurate, current model of the system in non-human substrate. The bounded sections below preserve the model. When they drift, comprehension has decayed.
 - **Anti-signal codification.** The highest-leverage rule output. Negatively-framed instructions ("do not waste time on X, even though it looks right") encode expensive-earned knowledge.
-- **Failure-shape as the unit of organization.** Section 9 is split by verb area because the area maps to a real component boundary in the cli, not because of finding-storage concerns.
+- **Failure-shape as the unit of organization.** Section 9 is split by verb area because the area maps to a real component boundary in the cli.
 
 ## 2. Authoring conventions
 
@@ -85,16 +58,16 @@ Conventions for editing this skill.
 Two-line shape:
 
 - Lead line: the claim or pointer.
-- `**Pin:**` line: links to the finding issue, the forward-action issue, or the test that grounds the entry. Omit the Pin line when the entry is seeded but not yet grounded. Absence-of-Pin means seeded.
+- `**Pin:**` line: links to the issue or test that grounds the entry. Omit the Pin line when the entry is seeded but not yet grounded. Absence-of-Pin means seeded.
 
-Do not write a status field. Finding issues describe followups in comments. If you want to know whether a Pin is still live, open the issue.
+Do not write a status field. If you want to know whether a Pin is still live, open the issue.
 
 ### 2.2 Rule entries (sequencing rules)
 
 Three-line shape:
 
 - Lead line: the rule, as an imperative or claim.
-- `**Why:**` line: the originating finding, issue, or constraint. Where the why is empirical, link the finding issue rather than restating the evidence inline.
+- `**Why:**` line: the originating issue or constraint. Where the why is empirical, link the issue rather than restating the evidence inline.
 - `**How to apply:**` line: when the rule fires.
 
 ### 2.3 Hoist vs. stamp
@@ -111,21 +84,21 @@ Every rule and anti-signal exists because something happened that produced it. C
 
 ### 2.5 Bias toward Python helpers
 
-When the loop needs to parse files, walk a directory, query a JSONL or SQLite, or do any structured data manipulation, write a script in `scripts/` and have this skill call it. Pure prompt instructions are fine for narrative steps. Python is right for anything where determinism, speed, or testability matter. `scripts/sweep.py` is the canonical example.
+When the loop needs to parse files, walk a directory, query a JSONL or SQLite, or do any structured data manipulation, write a script in `scripts/` and have this skill call it. Pure prompt instructions are fine for narrative steps. Python is right for anything where determinism, speed, or testability matter.
 
 ### 2.6 Retire a rule
 
-When the runtime fact that produced it changes (the verb is removed, the iam policy is restructured, the gate now catches what it did not before), delete the entry from this skill and file a new finding issue noting the retirement. The deleted entry's git history is the audit trail.
+When the runtime fact that produced it changes (the verb is removed, the iam policy is restructured, the gate now catches what it did not before), delete the entry from this skill. The deleted entry's git history is the audit trail; note the retirement in the commit message.
 
-A rule pinned to a closed forward-action issue with a passing test is not retired. It is validated and stays in the catalogue.
+A rule pinned to a closed issue with a passing test is not retired. It is validated and stays in the catalogue.
 
 ## 3. Agent discipline
 
 How agents behave when working in or around a coily-managed environment.
 
-### 3.1 Bare-command denials route through coily, then file a finding
+### 3.1 Bare-command denials route through coily
 
-When the harness denies a bare external command (`gh`, `aws`, `kubectl`, `docker`, `tailscale`, etc.), retry through the coily wrapper (`coily ops gh ...`, `coily ops aws ...`, `coily ops kubectl ...`, `coily docker ...`, `coily tailscale ...`). The wrapper is the audited path the harness wants the agent on. Whenever a denial fires, also run `coily audit finding` so the loop sees the friction.
+When the harness denies a bare external command (`gh`, `aws`, `kubectl`, `docker`, `tailscale`, etc.), retry through the coily wrapper (`coily ops gh ...`, `coily ops aws ...`, `coily ops kubectl ...`, `coily docker ...`, `coily tailscale ...`). The wrapper is the audited path the harness wants the agent on.
 
 This is the exception to the "denial means stop" rule below: routing through the audited wrapper is the authorized recovery, not an escape hatch. Hand-edits of `.claude/settings*.json` and lateral workarounds (different flag, `go run`, etc.) are still off-limits.
 
@@ -203,14 +176,14 @@ Per-host, per-repo JSONL at `~/.coily/audit/<owner>-<repo>.jsonl`. One row per c
 - **Removing a verb removes its policy entry and any cross-references in the same commit, never a follow-up.**
   **Why:** orphan policy entries become stale documentation that lies about the surface. Orphan references send future readers to dead pointers.
   **How to apply:** any coily-verb deletion PR.
-- **A new top-level verb requires a `cli-guard/policy` entry, a `TestSecurityClaim_*` test if it makes a security-boundary claim, and an anti-signal entry in section 9 once it earns a finding.**
+- **A new top-level verb requires a `cli-guard/policy` entry, a `TestSecurityClaim_*` test if it makes a security-boundary claim, and an anti-signal entry in section 9 once an observation warrants one.**
   **Why:** the boundary is the composition of code + test + skill. Shipping any one without the others creates a degradation gap.
   **How to apply:** any PR that adds a new top-level coily verb or sub-verb group.
 
 ### 4.4 Cross-cutting anti-signals
 
 - **"scope auto-detect is transparent to the operator."** False. The `--commit-scope auto` default fails closed when cwd is not inside a tracked tree. Many ops verbs (game-server restarts, SSM parameter rotations, k8s queries) have nothing to do with the cwd's repo identity but still get rejected. The `_unrooted.jsonl` audit file accumulated 485 rows in 35 days. The error names the fix but does not apply it.
-  **Pin:** finding [coily#229](https://github.com/coilysiren/coily/issues/229), forward [coily#59](https://github.com/coilysiren/coily/issues/59).
+  **Pin:** [coily#229](https://github.com/coilysiren/coily/issues/229), forward [coily#59](https://github.com/coilysiren/coily/issues/59).
 
 ### 4.5 Coily design invariants
 
@@ -242,7 +215,7 @@ The boundary is real if and only if all three hold. Drop any one and the boundar
 - **"Drop the feature, then build the replacement."** False. Replace-before-drop preserves the boundary mid-flight. Drop-then-replace creates a window where the boundary is degraded.
 - **"Prose in `SECURITY.md` reflects current runtime."** Not unless a `TestSecurityClaim_*` test pins it. Doc-runtime drift is the default.
 - **"Context-free shell-metachar policy is the right default."** False given coily's direct-exec model. The metachar gate's threat model is "what if argv is shell-evaluated downstream"; coily executes via direct exec, no shell. For known content-flag values (jq expressions, markdown bodies, JSON literals) the metachars are inert in the actual execution path. Cost in the 35-day window: `gh.run.list` 96.6% rejected on jq's `|`, `gh issue` body args rejected on markdown `>`, `aws route53 change-resource-record-sets` rejected on JSON `{`.
-  **Pin:** finding [coily#227](https://github.com/coilysiren/coily/issues/227), forward [coily#60](https://github.com/coilysiren/coily/issues/60).
+  **Pin:** [coily#227](https://github.com/coilysiren/coily/issues/227), forward [coily#60](https://github.com/coilysiren/coily/issues/60).
 
 ### 5.3 Sequencing rules for boundary changes
 
@@ -279,7 +252,7 @@ When the user says "investigate", "investigation", "investigative", "triage", "d
 1. **Version-pin every implicated component.** For any error from third-party code (mods, libraries, MCP servers, plugins, language runtimes), identify the package + version, look up the latest release, scan recent changelog entries for the symptom. A patched-upstream bug needs an upgrade, not an investigation.
 2. **Articulate the failure mechanism in plain language with `file:line` causality.** If you cannot say in one sentence what physically goes wrong, you do not understand the bug yet. Stop generating fixes.
 3. **Enumerate input partitions that reach the failing code path.** Which fail, which pass. The shape of the partition is usually the bug.
-4. **Check for case-library precedent before generating.** Read section 9 (per-verb anti-signals) and the `finding`-labeled issues for the implicated area before proposing a new theory.
+4. **Check for case-library precedent before generating.** Read section 9 (per-verb anti-signals) for the implicated area before proposing a new theory.
 5. **Adversarial self-review post-fix.** Try to construct an input that would still break the proposed fix.
 6. **Stop if the mechanism cannot be articulated.** Do not open a PR, do not push a fix, do not declare the investigation closed. Bounce back to step 2.
 7. **Triage opaqueness vs. bug, by priority.** Decide whether the error itself carried enough context. If not, the opaqueness is its own bug. Low-priority + opaque error: fix the opaqueness first (better message, structured fields, component chain). Medium: fix both in parallel. High: fix the bug now, file a follow-up issue for the opaqueness work immediately. Anti-signal: "the error is annoying but I know what it means" is the most common excuse to skip the opaqueness fix.
@@ -301,9 +274,8 @@ This skill is a reference doc and a routing surface. It does not embed orchestra
 
 ## 8. Where the data lives
 
-- **Findings.** GitHub issues on coilysiren/coily with label `finding`. Index: `gh issue list --repo coilysiren/coily --label finding --state all`. Body captures the observation; resolution and followup land in comments or body edits as the trail accumulates.
-- **Audit rows.** `~/.coily/audit/<owner>-<repo>.jsonl`. Per-host, append-only. Not copied into this skill or its issues.
-- **Aggregations across findings.** Write a Python helper in `scripts/`. Do not hand-curate aggregated views into this skill.
+- **Audit rows.** `~/.coily/audit/<owner>-<repo>.jsonl`. Per-host, append-only. Not copied into this skill.
+- **Aggregations across audit rows.** Write a Python helper in `scripts/`. Do not hand-curate aggregated views into this skill.
 - **This skill.** Bounded. Anti-signals, sequencing rules, references. No raw data, no per-day logs, no aggregated reports.
 
 ## 9. Per-verb anti-signals
@@ -318,7 +290,7 @@ Canonical instance of the security-boundary discipline. When that discipline col
 - **"iam allow is sufficient, the coily gate is belt-and-suspenders."** False. iam policies drift wider than the runtime needs. The coily gate enforces the intended surface, narrower than what iam permits. Drop coily and the effective surface jumps to iam-wide.
 - **"read-only aws verbs do not need an audit row."** False. Read-only verbs still exfiltrate. The audit row is the trail, not the gate. Trails apply to reads.
 - **"audit row is sufficient for read-only verbs."** False. The trail documents the leak. It does not prevent it.
-  **Pin:** finding [coily#219](https://github.com/coilysiren/coily/issues/219), forward [coily#58](https://github.com/coilysiren/coily/issues/58).
+  **Pin:** [coily#219](https://github.com/coilysiren/coily/issues/219), forward [coily#58](https://github.com/coilysiren/coily/issues/58).
 - **"if it's denied at the iam edge, coily does not need to deny it."** False. iam denials happen after the request is sent. Coily denials happen before. The pre-send denial keeps an opaque-but-rejected attempt out of CloudTrail and out of the threat model "what was tried."
 
 References: `cmd/coily/ops_aws.go`, audit-row verb prefix `ops.aws.`.
@@ -328,7 +300,7 @@ References: `cmd/coily/ops_aws.go`, audit-row verb prefix `ops.aws.`.
 High-volume (~1000 audit rows in a 35-day window), the single largest source of friction-driven workarounds. Anti-signals come from real audit-log evidence.
 
 - **"the wrapper exists, therefore the agent uses it."** False. The agent uses the path of least denial. Raw `gh` denied by Claude Code's permission boundary, without the deny message naming the wrapper, is the path the agent learns. 113 raw `gh` denials in 35d while `coily ops gh` was actively exercised 1000+ times. Lockdown is the mechanism that closes this. Rollout is the gap.
-  **Pin:** finding [coily#221](https://github.com/coilysiren/coily/issues/221), forward [coily#61](https://github.com/coilysiren/coily/issues/61).
+  **Pin:** [coily#221](https://github.com/coilysiren/coily/issues/221), forward [coily#61](https://github.com/coilysiren/coily/issues/61).
 
 References: `cmd/coily/ops_gh.go`, audit-row verb prefix `gh.` (currently) or `ops.gh.` (post-#50).
 
@@ -337,7 +309,7 @@ References: `cmd/coily/ops_gh.go`, audit-row verb prefix `gh.` (currently) or `o
 Lower-volume than gh or aws but failure-dense (100% failure rate on `kubectl.get` in the 35-day window). Exposes the pass-through-stderr-loss pattern that likely affects every pass-through verb.
 
 - **"the audit row's `error` field captures the underlying tool's error."** False for pass-through verbs. For verbs accepted by the gate but failing downstream, the field captures only the Go process exit (`error: "exit status 1"`). The downstream tool's stderr is not durable. This affects every pass-through, not just kubectl, but kubectl shows it cleanest.
-  **Pin:** finding [coily#225](https://github.com/coilysiren/coily/issues/225), forward [coily#63](https://github.com/coilysiren/coily/issues/63).
+  **Pin:** [coily#225](https://github.com/coilysiren/coily/issues/225), forward [coily#63](https://github.com/coilysiren/coily/issues/63).
 
 References: `cmd/coily/ops_kubectl.go`, audit-row verb prefix `kubectl.` (currently) or `ops.kubectl.` (post-#50).
 
@@ -346,9 +318,9 @@ References: `cmd/coily/ops_kubectl.go`, audit-row verb prefix `kubectl.` (curren
 Lower-volume than the `ops` passthroughs but failure-dense at hosts where the per-unit sudoers fragment does not strict-match every verb in the closed set. The cleanest demonstration of the boundary-vs-perimeter question.
 
 - **"per-unit sudoers carveouts are the gate."** False. coily is the gate. Per-unit NOPASSWD lists in `/etc/sudoers.d/<repo>` duplicate the closed verb set already enforced inside coily, and drift via sudoers strict-match: a fragment that lists `restart` + `status` for one service silently fails to cover `stop` / `disable` / `daemon-reload`, or covers `<service>.service` but not the matching `.timer`. The duplication is the failure mode, not the safety.
-  **Pin:** finding [coily#233](https://github.com/coilysiren/coily/issues/233), forward [coily#203](https://github.com/coilysiren/coily/issues/203).
+  **Pin:** [coily#233](https://github.com/coilysiren/coily/issues/233), forward [coily#203](https://github.com/coilysiren/coily/issues/203).
 - **"inner sudo works on every host."** False on non-tty sessions (Claude Code Bash tool, systemd-spawned shells, cron) when the host lacks a per-unit NOPASSWD rule that strict-matches the full argv. Sudo refuses to prompt without a tty and the verb fails with `sudo: a terminal is required to read the password`.
-  **Pin:** finding [coily#233](https://github.com/coilysiren/coily/issues/233), forward [coily#203](https://github.com/coilysiren/coily/issues/203).
+  **Pin:** [coily#233](https://github.com/coilysiren/coily/issues/233), forward [coily#203](https://github.com/coilysiren/coily/issues/203).
 
 Friend-shippable host fleet rule: every coily-managed host carries `(ALL) NOPASSWD: /home/linuxbrew/.linuxbrew/bin/coily` (or the equivalent install path). Hosts without that grant fall back to per-unit sudoers and the strict-match failure mode is in play.
 
@@ -359,7 +331,7 @@ References: `cmd/coily/ops_systemctl.go`, `cmd/coily/ops_systemctl_test.go`, clo
 Operates the eco-server systemd unit on kai-server via the ssh transport. Failures typically split into transport-layer (ssh, sudo, key path) and game-server-state.
 
 - **"remote-side transport errors surface usefully through coily."** False. They surface verbatim. Verbatim is fidelity, not actionability. `coily eco status` failed 6/6 with `ssh: no authentication method available (ssh-agent unreachable and no key path)` - correct, faithful, not actionable.
-  **Pin:** finding [coily#218](https://github.com/coilysiren/coily/issues/218), forward [coily#62](https://github.com/coilysiren/coily/issues/62).
+  **Pin:** [coily#218](https://github.com/coilysiren/coily/issues/218), forward [coily#62](https://github.com/coilysiren/coily/issues/62).
 
 References: `cmd/coily/ops_eco.go`, `cmd/coily/ops_eco_mod.go`, `cli-guard/ssh` for the transport layer, audit-row verb prefix `eco.` or `gaming.eco.`.
 
@@ -373,7 +345,5 @@ References: `cmd/coily/ops_eco.go`, `cmd/coily/ops_eco_mod.go`, `cli-guard/ssh` 
 - `cmd/coily/security_claims_test.go` (`TestSecurityClaim_*`) - prose-vs-runtime gate.
 - `SECURITY.md` (in coily root) - the prose surface. Load-bearing claims live here.
 - `~/.coily/audit/*.jsonl` - per-repo audit trails.
-- `scripts/sweep.py` - structured-report generator for audit-log scans, called from step 1.1.
-- [`gh issue list --repo coilysiren/coily --label finding`](https://github.com/coilysiren/coily/issues?q=label%3Afinding) - the finding index.
 - [coily#55](https://github.com/coilysiren/coily/issues/55) - off-host audit shadow placeholder.
 - [coily#215](https://github.com/coilysiren/coily/issues/215) - the consolidation that produced this skill shape.
