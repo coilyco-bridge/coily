@@ -1,8 +1,12 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestParseIssueRef(t *testing.T) {
@@ -107,6 +111,53 @@ func TestDispatchDefaults(t *testing.T) {
 			t.Errorf("defaultDispatchAllowedTools missing %q (got %q)", tool, defaultDispatchAllowedTools)
 		}
 	}
+}
+
+// TestDispatchLogPath pins the headless log path shape: rooted under the
+// override, namespaced by repo, named issue-<N>-<timestamp>.log.
+func TestDispatchLogPath(t *testing.T) {
+	root := t.TempDir()
+	dispatchLogRootOverride = root
+	defer func() { dispatchLogRootOverride = "" }()
+
+	got, err := dispatchLogPath("coily", 302)
+	if err != nil {
+		t.Fatalf("dispatchLogPath: %v", err)
+	}
+	if dir := filepath.Dir(got); dir != filepath.Join(root, "coily") {
+		t.Errorf("log dir = %q, want %q", dir, filepath.Join(root, "coily"))
+	}
+	base := filepath.Base(got)
+	if !strings.HasPrefix(base, "issue-302-") || !strings.HasSuffix(base, ".log") {
+		t.Errorf("log file = %q, want issue-302-<timestamp>.log", base)
+	}
+}
+
+// TestSpawnDetachedClaude verifies the detached spawn actually runs the
+// child, redirects its stdio to the log file, and returns without
+// waiting. Uses `sh` as a stand-in for the claude binary.
+func TestSpawnDetachedClaude(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("test uses a POSIX shell as the claude stand-in")
+	}
+	logPath := filepath.Join(t.TempDir(), "nested", "issue-302.log")
+	pid, err := spawnDetachedClaude(t.TempDir(), logPath, "sh",
+		[]string{"-c", "echo detached-ok"}, nil)
+	if err != nil {
+		t.Fatalf("spawnDetachedClaude: %v", err)
+	}
+	if pid <= 0 {
+		t.Errorf("pid = %d, want positive", pid)
+	}
+	// The child writes asynchronously; poll the log briefly.
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		if b, readErr := os.ReadFile(logPath); readErr == nil && strings.Contains(string(b), "detached-ok") {
+			return
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	t.Errorf("log %s never received the child's output", logPath)
 }
 
 func TestAllowedOwner(t *testing.T) {

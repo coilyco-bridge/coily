@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/coilysiren/cli-guard/ghcache"
 	"github.com/coilysiren/cli-guard/ghratelimit"
@@ -36,9 +38,9 @@ func (r *Runner) dispatchCommand() *cli.Command {
 coilysiren/* org or any issue that is not open, then hands off to one of
 two mode subverbs:
 
-  coily dispatch headless    <ref>   Fire claude -p non-interactively in
-                                     the local checkout. Same as the prior
-                                     bare 'coily dispatch'. AFK queue work.
+  coily dispatch headless    <ref>   Spawn a detached claude -p in the
+                                     local checkout, log to a file, return
+                                     immediately. AFK queue work.
   coily dispatch interactive <ref>   Open a new Warp tab cwd'd into the
                                      repo with claude pre-submitted with
                                      "Work on issue <ref>". Operator has
@@ -61,19 +63,28 @@ Bare 'coily dispatch <ref>' errors. Pick a mode.`,
 	}
 }
 
-// dispatchHeadlessCommand carries the original `coily dispatch` behavior:
-// fires `claude -p` against the issue in the local checkout, runs to
-// completion, exits.
+// dispatchHeadlessCommand fires `claude -p` against the issue in the
+// local checkout as a fully detached, fire-and-forget child: new session,
+// own process group, stdio to a per-dispatch log file. coily resolves the
+// issue, spawns the child, prints its PID and log path, and returns
+// immediately (coilysiren/coily#302).
 func (r *Runner) dispatchHeadlessCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "headless",
-		Usage:     "Fire `claude -p` non-interactively against a real open coilysiren/* issue.",
+		Usage:     "Spawn a detached `claude -p` against a real open coilysiren/* issue.",
 		ArgsUsage: "<owner/repo#N | issue-url>",
 		Description: `headless resolves a GitHub issue reference, refuses anything outside the
 coilysiren/* org or any issue that is not open, seeds a prompt from the
-issue title and body plus the standard git-workflow footer, then exec's
+issue title and body plus the standard git-workflow footer, then spawns
 claude -p inside the matching local checkout at
 ~/projects/coilysiren/<repo>.
+
+The child is fully detached: it runs in a new session with its own
+process group, its stdio goes to a per-dispatch log file under
+~/projects/coilysiren/.dispatch-logs/<repo>/ rather than the parent
+terminal, and coily does not wait on it. dispatch prints the child PID
+and log path and returns immediately - the run survives coily's terminal
+closing. This is what makes headless truly fire-and-forget.
 
 Refuses to run if the local checkout is missing - the operator clones
 the repo first, then re-runs dispatch.
@@ -285,7 +296,95 @@ func runDispatchHeadless(ctx context.Context, r *Runner, c *cli.Command) error {
 	}
 
 	bin, argv := buildDispatchClaudeArgv(c.String("claude-bin"), prompt, permMode, allowedTools)
-	return r.Runner.ExecIn(ctx, repoPath, bin, argv...)
+
+	logPath, err := dispatchLogPath(ref.Repo, ref.Number)
+	if err != nil {
+		return fmt.Errorf("dispatch headless: resolve log path: %w", err)
+	}
+	pid, err := spawnDetachedClaude(repoPath, logPath, bin, argv, r.Runner.Env)
+	if err != nil {
+		return fmt.Errorf("dispatch headless: %w", err)
+	}
+	fmt.Printf("dispatch headless: spawned claude for %s (pid %d)\n", ref, pid)
+	fmt.Printf("  cwd: %s\n", repoPath)
+	fmt.Printf("  log: %s\n", logPath)
+	fmt.Printf("  detached - survives this terminal closing. Follow with: tail -f %s\n", logPath)
+	return nil
+}
+
+// dispatchLogRootOverride lets tests redirect the headless dispatch log
+// root to a tempdir. Empty in production. Read by dispatchLogRoot.
+var dispatchLogRootOverride = ""
+
+// dispatchLogRoot is the parent directory for headless dispatch logs.
+// Lives alongside the dispatch-worktree root, outside any repo, so the
+// detached child's stdio lands somewhere stable rather than the parent
+// tty (coilysiren/coily#302).
+func dispatchLogRoot() (string, error) {
+	if dispatchLogRootOverride != "" {
+		return dispatchLogRootOverride, nil
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, "projects", allowedOwner, ".dispatch-logs"), nil
+}
+
+// dispatchLogPath returns the per-dispatch log file path. Format:
+// <root>/<repo>/issue-<N>-<YYYYMMDD-HHMMSS>.log. The timestamp keeps
+// re-dispatches of the same issue from clobbering an earlier run's log.
+func dispatchLogPath(repo string, number int) (string, error) {
+	root, err := dispatchLogRoot()
+	if err != nil {
+		return "", err
+	}
+	name := fmt.Sprintf("issue-%d-%s.log", number, time.Now().Format("20060102-150405"))
+	return filepath.Join(root, repo, name), nil
+}
+
+// spawnDetachedClaude starts `claude -p` fully detached from coily: a new
+// session (see detachSysProcAttr), its own process group, stdio
+// redirected to logPath instead of the parent tty, and no Wait(). The
+// child survives the parent terminal closing - that is what makes
+// headless dispatch fire-and-forget (coilysiren/coily#302). Returns the
+// child PID. Seam: tests swap it to avoid spawning a real process.
+var spawnDetachedClaude = func(repoPath, logPath, bin string, argv, env []string) (int, error) {
+	if err := os.MkdirAll(filepath.Dir(logPath), 0o755); err != nil {
+		return 0, fmt.Errorf("mkdir dispatch log dir: %w", err)
+	}
+	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
+	if err != nil {
+		return 0, fmt.Errorf("open dispatch log %s: %w", logPath, err)
+	}
+	defer logFile.Close()
+
+	binPath, err := exec.LookPath(bin)
+	if err != nil {
+		return 0, fmt.Errorf("resolve %s on PATH: %w", bin, err)
+	}
+
+	// Plain exec.Command, not CommandContext: the child must outlive the
+	// coily process, so it must not be bound to coily's context.
+	cmd := exec.Command(binPath, argv...)
+	cmd.Dir = repoPath
+	cmd.Stdin = nil
+	cmd.Stdout = logFile
+	cmd.Stderr = logFile
+	cmd.SysProcAttr = detachSysProcAttr()
+	if env != nil {
+		cmd.Env = append(os.Environ(), env...)
+	}
+	if err := cmd.Start(); err != nil {
+		return 0, fmt.Errorf("start detached claude: %w", err)
+	}
+	pid := cmd.Process.Pid
+	// Release the child handle so coily does not have to Wait() and the
+	// child is reparented to init rather than zombied when coily exits.
+	if err := cmd.Process.Release(); err != nil {
+		return pid, fmt.Errorf("release detached claude (pid %d): %w", pid, err)
+	}
+	return pid, nil
 }
 
 // buildDispatchClaudeArgv resolves the child claude binary and argv. Pulled
