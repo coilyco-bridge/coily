@@ -4,6 +4,17 @@
 
 That's the goal in one sentence. The rest of this document is the rationale behind each of those three properties and the design guardrails that preserve them.
 
+## Reporting a vulnerability
+
+Found a hole in the boundary? That is exactly the thing this project most wants to hear about.
+
+- **Public** - open an issue on this repo.
+- **Private** - use GitHub's private vulnerability reporting on this repo (the Security tab, "Report a vulnerability").
+
+coily is a personal project with a single maintainer, so there is no formal SLA. Confirmed findings get written up in the "Known boundary holes" section below.
+
+coily does not accept external pull requests, including fixes for security issues - see [CONTRIBUTING.md](CONTRIBUTING.md). Report the finding; the maintainer applies the fix. A security boundary that takes patches from outside the boundary is not one.
+
 ## Framing
 
 The unlock for lights-out engineering is not the cleverness of the agent. It is the clarity of the boundaries inside which the agent can work. Every wrapped tool validates argv unconditionally. Every denial names the recovery command. Every audit row carries a session id. The agent feels slower for two days, then suddenly the failure modes are all things humans can read and route, instead of opaque retries.

@@ -14,8 +14,8 @@ Both invocations land in `~/.coily/audit/<repo>.jsonl` as structured rows.
 
 This repo exists for three reasons.
 
-1. **One audited surface for every privileged tool.** External pass-throughs (`coily ops aws ...`, `coily ops gh ...`, `coily ops kubectl ...`) live under `ops`; standalone pass-throughs (`coily docker`, `coily tailscale`) plus package managers (`coily pkg pnpm`, `coily pkg uv`, `coily pkg cargo`, `coily pkg brew`) all forward verbatim, gated by argv shell-metacharacter rejection and an audit row. The upstream tool's own `--help` is the source of truth for verb shape. `coily brew` is a separate top-level for the four mutating brew verbs, scoped to `coilysiren/tap/*` by default.
-2. **Safety boundary for AI agents.** Claude Code's `deny: "Bash(kubectl delete:*)"` is prefix-matched and bypassed by `sh -c`, `env`, `python -c subprocess`, Makefile shell-outs, etc. coily inverts the model: narrow allowlist (`Bash(coily:*)`) funnels privileged ops through one Go binary that re-validates structured args, rejects metacharacter injection, enforces its own policy. Full reasoning in [SECURITY.md](SECURITY.md).
+1. **One audited surface for every privileged tool.** External pass-throughs (`coily ops aws/gh/kubectl ...`), standalone pass-throughs (`coily docker`, `coily tailscale`), and package managers (`coily pkg pnpm/uv/cargo/brew`) all forward verbatim, gated by argv shell-metacharacter rejection and an audit row. `coily brew` is a separate top-level for the four mutating brew verbs, scoped to `coilysiren/tap/*` by default.
+2. **Safety boundary for AI agents.** Claude Code's `deny: "Bash(kubectl delete:*)"` is prefix-matched and bypassed by `sh -c`, `env`, `python -c subprocess`, Makefile shell-outs, etc. coily inverts the model: a narrow allowlist (`Bash(coily:*)`) funnels privileged ops through one Go binary that re-validates structured args and rejects metacharacter injection. Full reasoning in [SECURITY.md](SECURITY.md).
 3. **Auditors love to see me coming.** Every invocation is appended to a structured JSONL log with session metadata.
 
 ## Install
@@ -66,7 +66,11 @@ commands:
 
 ## Prior art
 
-coily is a personal-scale remix of [Teleport](https://github.com/gravitational/teleport) (scoped invocation + JSONL audit, minus cluster + UI), [mise](https://github.com/jdx/mise) (one CLI multiplexing N tools behind consistent verbs), and [Dagger](https://github.com/dagger/dagger) (validate structured arguments in a real language, don't just shell out).
+coily is a personal-scale remix of [Teleport](https://github.com/gravitational/teleport) (scoped invocation + JSONL audit), [mise](https://github.com/jdx/mise) (one CLI multiplexing many tools), and [Dagger](https://github.com/dagger/dagger) (validate structured args, don't just shell out).
+
+## Contributing
+
+coily does not accept external pull requests - it is a security boundary, and an external change is an attack surface. See [CONTRIBUTING.md](CONTRIBUTING.md); contribute to [agent-guard](https://github.com/coilysiren/agent-guard) instead. Issues welcome.
 
 ## See also
 
