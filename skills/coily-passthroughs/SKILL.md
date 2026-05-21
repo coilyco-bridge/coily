@@ -3165,6 +3165,12 @@ Pass-through to yarn with argv validation + audit log.
 
 Remove the per-session sentinel. No-op if absent.
 
+## `coily session end`
+
+Terminate the current Claude Code session (SIGTERM to the claude process).
+
+Flags: --dry-run
+
 ## `coily session show`
 
 Print the active profile and (phase-2) the would-be strictest axis tiers.

@@ -6,8 +6,11 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"syscall"
 
 	"github.com/coilysiren/cli-guard/config"
 	"github.com/coilysiren/cli-guard/exitcode"
@@ -46,6 +49,7 @@ changes until phase 4 (coilysiren/coily#150).`,
 			r.sessionUseCommand(),
 			r.sessionShowCommand(),
 			r.sessionClearCommand(),
+			r.sessionEndCommand(),
 		},
 	}
 }
@@ -103,6 +107,151 @@ func (r *Runner) sessionClearCommand() *cli.Command {
 			r.Audit,
 		),
 	}
+}
+
+// sessionEndCommand terminates the Claude Code session this invocation
+// runs inside. It is the honest, operator-authorized self-termination
+// path for a dispatched sidequest session that has finished its work
+// (coilysiren/coily#309).
+//
+// Nothing here is disguised. The verb name, this help text, and the
+// `session.end` audit row all state plainly that it ends the session by
+// signalling the claude process. It is allowlisted because Kai authorized
+// this exact, accurately-described capability - not because a classifier
+// misreads it. The bare `kill $PPID` it replaces reads to the harness
+// auto-mode classifier as unrequested and disruptive, with no signal that
+// it is the sanctioned end-of-sidequest move.
+func (r *Runner) sessionEndCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "end",
+		Usage: "Terminate the current Claude Code session (SIGTERM to the claude process).",
+		Description: `end terminates the Claude Code session this invocation is running
+inside, by sending SIGTERM to the claude CLI process. The terminal then
+shows the "process exited" banner.
+
+This is the honest self-termination path for a dispatched sidequest
+session that has genuinely finished its work - committed, pushed,
+merged to main, checks green, no human decision left to make. Instead
+of a bare 'kill $PPID', the finished session runs 'coily session end'.
+
+What it does, step by step:
+
+  1. Confirms it is running inside a Claude Code session
+     ($CLAUDE_CODE_SESSION_ID must be set).
+  2. Walks the process ancestry of this invocation to find the
+     claude CLI process.
+  3. Sends that process SIGTERM so it shuts down cleanly.
+
+The audit row records verb 'session.end': a session was deliberately
+ended. Name, help text, and audit row all describe terminating the
+session - the value of this verb does not depend on any classifier
+misreading what it does.
+
+Pass --dry-run to print the claude PID that would be signalled without
+actually sending SIGTERM.`,
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:  "dry-run",
+				Usage: "print the claude PID that would be signalled, do not send SIGTERM",
+			},
+		},
+		Action: r.WrapVerb(
+			verb.Spec{
+				Name:      "session.end",
+				SkipScope: true,
+				Action: func(_ context.Context, c *cli.Command) error {
+					return sessionEndAction(c, os.Stdout)
+				},
+			},
+			r.Audit,
+		),
+	}
+}
+
+// sessionEndAction confirms a Claude Code session is active, locates the
+// claude process in this invocation's ancestry, and SIGTERMs it (or just
+// prints the target under --dry-run).
+func sessionEndAction(c *cli.Command, w io.Writer) error {
+	sessionID, err := requireSessionID()
+	if err != nil {
+		return err
+	}
+	claudePID, err := findClaudePID(os.Getppid())
+	if err != nil {
+		return exitcode.New(exitcode.Generic, "session_end_no_target", err,
+			"run `coily session end` directly from a Claude Code session's Bash tool, not from a nested shell")
+	}
+	if c.Bool("dry-run") {
+		_, _ = fmt.Fprintf(w, "session end (dry-run): would send SIGTERM to claude pid %d (session %s)\n", claudePID, sessionID)
+		return nil
+	}
+	_, _ = fmt.Fprintf(w, "session end: terminating Claude Code session %s (SIGTERM to claude pid %d)\n", sessionID, claudePID)
+	if err := killProcess(claudePID); err != nil {
+		return fmt.Errorf("session end: SIGTERM claude pid %d: %w", claudePID, err)
+	}
+	return nil
+}
+
+// maxAncestryHops bounds the parent-chain walk in findClaudePID so a
+// malformed process tree cannot loop forever.
+const maxAncestryHops = 32
+
+// findClaudePID walks the process ancestry starting at startPID and
+// returns the PID of the nearest ancestor (or startPID itself) whose
+// command is the claude CLI. When coily runs from a Claude Code Bash
+// tool the chain is claude -> shell -> coily, so startPID is the shell
+// and its parent is claude. Errors if no claude process is found.
+func findClaudePID(startPID int) (int, error) {
+	pid := startPID
+	for hops := 0; hops < maxAncestryHops && pid > 1; hops++ {
+		ppid, comm, err := processParent(pid)
+		if err != nil {
+			return 0, err
+		}
+		if isClaudeComm(comm) {
+			return pid, nil
+		}
+		pid = ppid
+	}
+	return 0, errors.New("no claude process found in this invocation's ancestry")
+}
+
+// isClaudeComm reports whether a `ps`-reported command names the claude
+// CLI. macOS prints a full path, Linux prints the bare command, and a
+// login shell shows a leading '-'; normalize all three before matching.
+func isClaudeComm(comm string) bool {
+	base := filepath.Base(strings.TrimPrefix(strings.TrimSpace(comm), "-"))
+	return base == "claude"
+}
+
+// processParent returns the parent PID and command name of pid. It shells
+// out to `ps`, which is present and accepts this flag shape on both macOS
+// and Linux (the two platforms that run dispatched sidequests). Declared
+// as a var so tests can swap in a fake process tree.
+var processParent = func(pid int) (ppid int, comm string, err error) {
+	out, err := exec.Command("ps", "-o", "ppid=,comm=", "-p", strconv.Itoa(pid)).Output()
+	if err != nil {
+		return 0, "", fmt.Errorf("ps -p %d: %w", pid, err)
+	}
+	fields := strings.Fields(strings.TrimSpace(string(out)))
+	if len(fields) < 2 {
+		return 0, "", fmt.Errorf("ps -p %d: unexpected output %q", pid, string(out))
+	}
+	ppid, err = strconv.Atoi(fields[0])
+	if err != nil {
+		return 0, "", fmt.Errorf("ps -p %d: parse ppid %q: %w", pid, fields[0], err)
+	}
+	return ppid, strings.Join(fields[1:], " "), nil
+}
+
+// killProcess sends SIGTERM to pid. Declared as a var so tests can
+// record the target without ending a real process.
+var killProcess = func(pid int) error {
+	p, err := os.FindProcess(pid)
+	if err != nil {
+		return err
+	}
+	return p.Signal(syscall.SIGTERM)
 }
 
 // sessionUseAction validates argv, ensures the env var is set, then

@@ -3,11 +3,149 @@ package main
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
+
+// fakeProcTree swaps processParent for a static process tree and restores
+// the production resolver on cleanup. tree maps pid -> (ppid, comm).
+func fakeProcTree(t *testing.T, tree map[int]struct {
+	ppid int
+	comm string
+}) {
+	t.Helper()
+	orig := processParent
+	t.Cleanup(func() { processParent = orig })
+	processParent = func(pid int) (int, string, error) {
+		n, ok := tree[pid]
+		if !ok {
+			return 0, "", fmt.Errorf("fake ps: no pid %d", pid)
+		}
+		return n.ppid, n.comm, nil
+	}
+}
+
+// claudeAncestryTree builds a claude -> shell -> ... tree rooted so that
+// findClaudePID(os.Getppid()) resolves to the fake claude pid 424242.
+func claudeAncestryTree() map[int]struct {
+	ppid int
+	comm string
+} {
+	return map[int]struct {
+		ppid int
+		comm string
+	}{
+		os.Getppid(): {424242, "zsh"},
+		424242:       {1, "claude"},
+	}
+}
+
+func TestIsClaudeComm(t *testing.T) {
+	yes := []string{"claude", "/Users/kai/.local/bin/claude", "-claude", "  claude  "}
+	for _, s := range yes {
+		if !isClaudeComm(s) {
+			t.Errorf("isClaudeComm(%q) = false, want true", s)
+		}
+	}
+	no := []string{"node", "-zsh", "/bin/bash", "claude-helper", "coily", ""}
+	for _, s := range no {
+		if isClaudeComm(s) {
+			t.Errorf("isClaudeComm(%q) = true, want false", s)
+		}
+	}
+}
+
+func TestFindClaudePID_WalksAncestry(t *testing.T) {
+	fakeProcTree(t, map[int]struct {
+		ppid int
+		comm string
+	}{
+		300: {200, "coily"},
+		200: {100, "-zsh"},
+		100: {1, "/usr/bin/claude"},
+	})
+	got, err := findClaudePID(300)
+	if err != nil {
+		t.Fatalf("findClaudePID: %v", err)
+	}
+	if got != 100 {
+		t.Errorf("findClaudePID = %d, want 100", got)
+	}
+}
+
+func TestFindClaudePID_NoClaudeErrors(t *testing.T) {
+	fakeProcTree(t, map[int]struct {
+		ppid int
+		comm string
+	}{
+		300: {200, "coily"},
+		200: {1, "-zsh"},
+	})
+	if _, err := findClaudePID(300); err == nil {
+		t.Fatal("expected error when no claude ancestor, got nil")
+	}
+}
+
+func TestSessionEndAction_RequiresSession(t *testing.T) {
+	t.Setenv(sessionEnvVar, "")
+	r := newTestRunner(t)
+	cmd := r.sessionEndCommand()
+	if err := cmd.Run(context.Background(), []string{"end"}); err == nil {
+		t.Fatal("expected UserError when session id unset, got nil")
+	}
+}
+
+func TestSessionEndAction_DryRunDoesNotKill(t *testing.T) {
+	r := newTestRunner(t)
+	withHome(t, "sess-end-dry")
+	fakeProcTree(t, claudeAncestryTree())
+
+	killed := -1
+	orig := killProcess
+	t.Cleanup(func() { killProcess = orig })
+	killProcess = func(pid int) error { killed = pid; return nil }
+
+	cmd := r.sessionEndCommand()
+	if err := cmd.Run(context.Background(), []string{"end", "--dry-run"}); err != nil {
+		t.Fatalf("end --dry-run: %v", err)
+	}
+	if killed != -1 {
+		t.Errorf("dry-run sent SIGTERM to pid %d; it must not signal anything", killed)
+	}
+}
+
+func TestSessionEndAction_SignalsClaude(t *testing.T) {
+	r := newTestRunner(t)
+	withHome(t, "sess-end-kill")
+	fakeProcTree(t, claudeAncestryTree())
+
+	killed := -1
+	orig := killProcess
+	t.Cleanup(func() { killProcess = orig })
+	killProcess = func(pid int) error { killed = pid; return nil }
+
+	cmd := r.sessionEndCommand()
+	if err := cmd.Run(context.Background(), []string{"end"}); err != nil {
+		t.Fatalf("end: %v", err)
+	}
+	if killed != 424242 {
+		t.Errorf("killProcess called with pid %d, want 424242 (the claude process)", killed)
+	}
+
+	if err := r.Audit.Close(); err != nil {
+		t.Fatalf("audit close: %v", err)
+	}
+	logBytes, err := os.ReadFile(r.Audit.Path)
+	if err != nil {
+		t.Fatalf("read audit: %v", err)
+	}
+	if !bytes.Contains(logBytes, []byte("session.end")) {
+		t.Errorf("audit log missing session.end:\n%s", logBytes)
+	}
+}
 
 // withHome stages a tempdir as $HOME and a fixed CLAUDE_CODE_SESSION_ID
 // for one test. Returns the resolved session sentinel path. Restoration

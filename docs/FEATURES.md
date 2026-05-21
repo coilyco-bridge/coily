@@ -1,8 +1,8 @@
 # Coily features
 
-Baseline of what coily ships. Update bullets in the same commit as the change so this file mirrors the binary.
+Baseline of what coily ships. Update in the same commit as the change so this file mirrors the binary.
 
-Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh, kubectl, ssh, docker, tailscale, package managers, game-server systemd) in named verbs, validates argv, writes a JSONL audit row per invocation. No `coily shell` / `coily run` / `coily ssh exec` escape hatch.
+Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh, kubectl, ssh, docker, tailscale, package managers, game-server systemd) in named verbs, validates argv, and writes a JSONL audit row per invocation. No escape hatch.
 
 ## Architecture
 
@@ -22,6 +22,8 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 **Package managers**: `coily pkg pnpm|npm|yarn|bun|uv|pip|pipx|poetry|cargo|gem|bundle|brew|glama|skillsmp`. `coily brew install|uninstall|upgrade|reinstall` is a separate top-level scoped to `coilysiren/tap/*` by default.
 
 **SSH**: `coily ssh <alias> -- coily <argv>`. Free-form passthrough; remote coily's lockdown is the security boundary. Audit rows chain across hosts via `--audit-parent`. See [coily#187](https://github.com/coilysiren/coily/issues/187).
+
+**Session**: `coily session {use,show,clear,end}`. Per-session lockdown-profile sentinel. `end` self-terminates a finished sidequest, SIGTERM to claude ([coily#309](https://github.com/coilysiren/coily/issues/309)).
 
 **Game-server ops**: `coily gaming {eco,core-keeper,icarus,factorio}` (status/tail/start/stop/restart common to all). Eco adds `world {get-seed,set-seed,randomize,snapshot}` + `mod {list,push}`. Factorio adds `update` (steamcmd), `saves`, `mods`, `players`.
 
@@ -45,7 +47,7 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 
 ## Configuration + secrets
 
-Three-layer precedence: Go defaults < `~/.coily/config.yaml` < `./.coily/config.yaml`. Sections: `kai_server`, `audit`, `aws`, `eco`, `factorio`. Env: `$COILY_AUDIT_LOG`, `$COILY_COMMIT_SCOPE`, `$COILY_REPO_CONFIG`, `$COILY_CACHE_DIR`. AWS / kubectl / gh creds from their canonical files; Discord / Sentry / Trello / mod.io from SSM.
+Three-layer precedence: Go defaults < `~/.coily/config.yaml` < `./.coily/config.yaml`. Sections: `kai_server`, `audit`, `aws`, `eco`, `factorio`. Env: `$COILY_AUDIT_LOG`, `$COILY_COMMIT_SCOPE`, `$COILY_REPO_CONFIG`, `$COILY_CACHE_DIR`. AWS / kubectl / gh creds from canonical files, the REST APIs from SSM.
 
 ## Distribution
 
@@ -53,15 +55,15 @@ No prebuilt binaries. Push to `main` triggers semver bump + tag + GH Release + i
 
 ## Cross-cutting infrastructure
 
-All cross-cutting infrastructure lives in the sibling `cli-guard` module: `cli-guard/shell` (subprocess), `cli-guard/gittree` (clean/dirty/ahead/behind), `cli-guard/ttlcache` (cwd-to-toplevel memo), `cli-guard/ssh` (`golang.org/x/crypto/ssh` + known_hosts + ssh-agent + SFTP). coily itself has no `pkg/` tree.
+All cross-cutting infrastructure lives in the sibling `cli-guard` module: `cli-guard/shell` (subprocess), `cli-guard/gittree` (git state), `cli-guard/ttlcache` (cwd-to-toplevel memo), `cli-guard/ssh` (x/crypto/ssh + known_hosts + ssh-agent + SFTP). coily has no `pkg/`.
 
 ## Testing + docs
 
-`make test` (gotest) / `vet` / `build` / `dev` / `clean`. Security claims test verifies prose against runtime. Docs: README, AGENTS, SECURITY, docs/unresolved.md, and `coily --list` / `--tree` / `<verb> --help`.
+`make test` / `vet` / `build` / `dev` / `clean`. Security claims test verifies prose against runtime. Docs: README, AGENTS, SECURITY, docs/unresolved.md, and `coily --list` / `--tree` / `<verb> --help`.
 
 ## Known limitations
 
-No `coily self-update` in v1. Upstream binaries resolved via `$PATH`, not SHA256-pinned. Claude Desktop on Windows doesn't enforce Bash deny list. No confirmation tokens (removed 2026-04-24: false security).
+No `coily self-update` in v1. Upstream binaries resolved via `$PATH`, not SHA256-pinned. Claude Desktop on Windows doesn't enforce Bash deny list.
 
 ## See also
 
