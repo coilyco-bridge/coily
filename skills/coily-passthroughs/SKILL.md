@@ -255,6 +255,12 @@ Flags: --format, --out
 
 Pass-through to aws with argv validation + audit log.
 
+## `coily ops ci`
+
+Watch GitHub Actions run status, read off the github.com web budget.
+
+Flags: --branch, --interval, --json, --limit, --watch
+
 ## `coily ops claude-remote-control restart`
 
 Restart the claude-remote-control unit.
