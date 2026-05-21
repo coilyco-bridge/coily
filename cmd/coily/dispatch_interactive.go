@@ -374,6 +374,13 @@ func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) erro
 		return nil
 	}
 
+	// Pre-trust the cwd so the dispatched session never stalls on the
+	// folder-trust prompt. Soft-fail: a missed trust prime is a papercut,
+	// not a reason to drop the dispatch (coilysiren/coily#290).
+	if err := ensureClaudeFolderTrust(cwd); err != nil {
+		fmt.Fprintf(os.Stderr, "dispatch interactive: could not pre-trust %s in ~/.claude.json (%v); the dispatched session may show the folder-trust prompt.\n", cwd, err)
+	}
+
 	queuePath, err := writeDispatchQueueEntry(queueDir, entry)
 	if err != nil {
 		return fmt.Errorf("dispatch interactive: write queue entry under %s: %w", queueDir, err)

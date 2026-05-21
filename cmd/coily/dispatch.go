@@ -272,6 +272,12 @@ func runDispatchHeadless(ctx context.Context, r *Runner, c *cli.Command) error {
 		return nil
 	}
 
+	// Pre-trust the checkout so the headless child never stalls on the
+	// folder-trust prompt. Soft-fail (coilysiren/coily#290).
+	if err := ensureClaudeFolderTrust(repoPath); err != nil {
+		fmt.Fprintf(os.Stderr, "dispatch headless: could not pre-trust %s in ~/.claude.json (%v).\n", repoPath, err)
+	}
+
 	bin, argv := buildDispatchClaudeArgv(c.String("claude-bin"), prompt, permMode, allowedTools)
 	return r.Runner.ExecIn(ctx, repoPath, bin, argv...)
 }
