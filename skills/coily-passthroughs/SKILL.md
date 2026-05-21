@@ -55,6 +55,10 @@ Open a new Warp tab with `claude "Work on issue <ref>"` pre-submitted.
 
 Flags: --channel, --dry-run, --launch-name, --no-worktree, --queue-dir, --surface
 
+## `coily dispatch reap`
+
+Remove dispatch worktrees whose branch is already merged into main.
+
 ## `coily docker`
 
 Pass-through to docker with argv validation + audit log.

@@ -25,7 +25,7 @@ func TestInteractivePrompt_RefAndFirstAction(t *testing.T) {
 		URL:    "https://github.com/coilysiren/coily/issues/270",
 		State:  "open",
 	}
-	got := interactivePrompt(ref, issue)
+	got := interactivePrompt(ref, issue, false)
 
 	if !strings.HasPrefix(got, "Work on issue coilysiren/coily#270.") {
 		t.Errorf("interactivePrompt prefix = %q, want \"Work on issue coilysiren/coily#270.\" lead", got)
@@ -40,8 +40,37 @@ func TestInteractivePrompt_RefAndFirstAction(t *testing.T) {
 			t.Errorf("interactivePrompt missing %q, got %q", want, got)
 		}
 	}
-	if strings.Contains(got, "\n") {
-		t.Errorf("interactivePrompt should be single-line, got %q", got)
+}
+
+// TestInteractivePrompt_MergeBack pins #300: in worktree mode the prompt
+// must tell the dispatched agent to land its branch on main itself,
+// otherwise the dispatch/issue-N branch sits unmerged forever. The
+// --no-worktree variant runs in the bare checkout on main, so it must
+// NOT carry the merge-back paragraph.
+func TestInteractivePrompt_MergeBack(t *testing.T) {
+	ref := &issueRef{Owner: "coilysiren", Repo: "coily", Number: 300}
+	issue := &ghIssue{
+		Number: 300,
+		Title:  "close the worktree lifecycle",
+		URL:    "https://github.com/coilysiren/coily/issues/300",
+		State:  "open",
+	}
+
+	withWorktree := interactivePrompt(ref, issue, false)
+	for _, want := range []string{
+		"dispatch/issue-300",
+		"merge that branch into `main`",
+		"push origin main",
+		"Never force-push",
+	} {
+		if !strings.Contains(withWorktree, want) {
+			t.Errorf("worktree-mode prompt missing %q, got %q", want, withWorktree)
+		}
+	}
+
+	noWorktree := interactivePrompt(ref, issue, true)
+	if strings.Contains(noWorktree, "force-push") || strings.Contains(noWorktree, "\n") {
+		t.Errorf("--no-worktree prompt must stay single-line with no merge-back, got %q", noWorktree)
 	}
 }
 

@@ -286,11 +286,25 @@ Soft-fails to a copy-paste fallback if Warp / open are unavailable.`,
 // body + comments before touching code; without the prime the agent
 // often skips the explicit fetch and works from the bare ref line
 // (coilysiren/coily#279).
-func interactivePrompt(ref *issueRef, issue *ghIssue) string {
-	return fmt.Sprintf(
+//
+// In worktree mode it also embeds the merge-back instruction: the
+// dispatched session runs on a dispatch/issue-N branch, so it must land
+// the work on main itself once green, otherwise the branch sits
+// unmerged forever (coilysiren/coily#300). --no-worktree dispatches run
+// in the bare checkout on main already, so they skip that paragraph.
+func interactivePrompt(ref *issueRef, issue *ghIssue, noWorktree bool) string {
+	var b strings.Builder
+	fmt.Fprintf(&b,
 		"Work on issue %s. First action: run `coily ops gh issue view %s --comments` and read the full body and comment thread before doing anything else.",
-		ref, issue.URL,
-	)
+		ref, issue.URL)
+	if !noWorktree {
+		branch := dispatchWorktreeBranch(ref.Number)
+		mainPath := fmt.Sprintf("~/projects/%s/%s", allowedOwner, ref.Repo)
+		fmt.Fprintf(&b,
+			"\n\nThis session runs in a git worktree on branch `%s`. When the work is complete and verified (tests, linters, and builds green), land it autonomously without checking in first: merge that branch into `main` and push. Run `git -C %s merge %s` then `git -C %s push origin main`. Resolve any merge conflicts yourself. Never force-push. Leave the worktree directory in place - the next `coily dispatch` reaps it once the merge lands.",
+			branch, mainPath, branch, mainPath)
+	}
+	return b.String()
 }
 
 // interactiveTitleLine is the self-identifying header the shim echoes
@@ -326,14 +340,26 @@ func runDispatchInteractive(ctx context.Context, r *Runner, c *cli.Command) erro
 		return err
 	}
 
-	prompt := interactivePrompt(ref, issue)
+	noWorktree := c.Bool("no-worktree")
+	prompt := interactivePrompt(ref, issue, noWorktree)
 	titleLine := interactiveTitleLine(ref, issue)
 	queueDir := c.String("queue-dir")
 	launchName := c.String("launch-name")
 	channel := c.String("channel")
 	surface := c.String("surface")
 	repoPath, _ := localRepoPath(ref.Repo)
-	noWorktree := c.Bool("no-worktree")
+
+	// Reap merged worktrees from prior dispatches before creating this
+	// one, so worktree sprawl stays self-limiting (coilysiren/coily#300).
+	// Soft-fail: a reaper hiccup must never block the dispatch. Skipped
+	// under --dry-run, which touches nothing.
+	if !c.Bool("dry-run") {
+		if removed, reapErr := reapDispatchWorktrees(ctx, r); reapErr != nil {
+			fmt.Fprintf(os.Stderr, "dispatch interactive: worktree reap skipped (%v)\n", reapErr)
+		} else if len(removed) > 0 {
+			fmt.Fprintf(os.Stderr, "dispatch interactive: reaped %d merged worktree(s)\n", len(removed))
+		}
+	}
 
 	url, err := dispatchURL(channel, surface, launchName)
 	if err != nil {

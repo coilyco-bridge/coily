@@ -44,10 +44,16 @@ two mode subverbs:
                                      "Work on issue <ref>". Operator has
                                      eyes on it.
 
+It also carries one maintenance verb:
+
+  coily dispatch reap                Remove dispatch worktrees whose
+                                     branch is already merged into main.
+
 Bare 'coily dispatch <ref>' errors. Pick a mode.`,
 		Commands: []*cli.Command{
 			r.dispatchHeadlessCommand(),
 			r.dispatchInteractiveCommand(),
+			r.dispatchReapCommand(),
 		},
 		Action: func(_ context.Context, _ *cli.Command) error {
 			return fmt.Errorf("dispatch: specify mode: interactive | headless (see `coily dispatch --help`)")
