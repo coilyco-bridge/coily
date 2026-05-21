@@ -87,6 +87,8 @@ Refusal should name the failing condition so Kai can re-dictate, not just "could
 coily dispatch headless coilysiren/<repo>#<N>   # claude -p, fire-and-forget, no human eyes
 ```
 
+**Headless detaches by design.** `coily dispatch headless` spawns the child `claude -p` as a detached process and returns within a second - the work survives the terminal closing and runs lights-out. The dispatch call returning is not the work finishing. The dispatch output names the child pid and a log path. If the caller needs to report back when the work actually lands, do not assume a completion signal arrives on its own - watch the pid (`while ps -p <pid> >/dev/null 2>&1; do sleep 15; done`) and read the log tail once it exits.
+
 Pick **interactive** only when one of these holds:
 
 * **Supervision phrasing.** Kai says "open one for me", "let me iterate on this", "spin this up", "HITL this", "give me a session on it" - she is signalling she will have eyes on. Interactive dispatch collapses ~20 seconds of mechanical friction (open URL, new terminal, paste issue) into a new Warp tab cwd'd into the repo with claude pre-submitted and context collection already running.
