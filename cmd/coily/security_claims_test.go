@@ -35,15 +35,20 @@ import (
 
 // newSecurityClaimRunner builds a Runner sufficient for command-tree
 // walking. Loads the layered config (defaults + any host overlays) so verb
-// builders that dereference r.Cfg do not panic. Audit and SSH stay nil;
-// tests in this file do not invoke Actions.
+// builders that dereference r.Cfg do not panic. A shell.Runner is supplied
+// because dispatchCommand wires it into dispatch.New at tree-build time, and
+// dispatch.New refuses a nil Runner. Audit and SSH stay nil; tests in this
+// file do not invoke Actions.
 func newSecurityClaimRunner(t *testing.T) *Runner {
 	t.Helper()
 	cfg, err := LoadConfig()
 	if err != nil {
 		t.Fatalf("LoadConfig: %v", err)
 	}
-	return &Runner{Cfg: cfg}
+	return &Runner{
+		Cfg:    cfg,
+		Runner: &shell.Runner{Stdout: os.Stdout, Stderr: os.Stderr, Stdin: os.Stdin},
+	}
 }
 
 // TestSecurityClaim_PolicyRejectsAllShellMetacharacters covers the

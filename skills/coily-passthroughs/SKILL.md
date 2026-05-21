@@ -39,7 +39,7 @@ Flags: --follow, --since
 
 ## `coily dispatch headless`
 
-Spawn a detached `claude -p` against a real open coilysiren/* issue.
+Spawn a detached `claude -p` against a real open issue.
 
 Flags: --allowed-tools, --claude-bin, --dry-run, --permission-mode
 
