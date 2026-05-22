@@ -135,8 +135,8 @@ var wrapperAllows = map[string]string{
 }
 
 // applyHookHandoffTrim drops `Bash(<token>:*)` deny entries (and the
-// matching `wrapperAllows` explicit allows) for every bare binary the
-// agent-guard PreToolUse hook now gates via its routing-hint table.
+// matching `wrapperAllows` explicit allows) for every bare binary
+// coily's PreToolUse hook now gates via its routing-hint table.
 // The hook is the primary gate for those binaries; keeping the bare
 // deny in place makes Claude Code CLI's built-in deny matcher fire
 // first and clobber the hook's recovery hint, which was the audit-
@@ -185,10 +185,10 @@ func applyHookHandoffTrim(d *lockdown.Defaults) *lockdown.Defaults {
 // has a sanctioned coily wrapper. See wrapperAllows. Returns a fresh
 // *Defaults so the cached embedded value is not mutated.
 //
-// After the agent-guard hook handoff (coilysiren/coily#183), this
-// only matters for entries whose bare deny survives applyHookHandoffTrim
+// After the hook handoff (coilysiren/coily#183), this only matters
+// for entries whose bare deny survives applyHookHandoffTrim
 // - currently `Bash(flyctl:*)` and any future wrapped verbs not yet
-// covered by the agent-guard hook table.
+// covered by coily's hook route table.
 func applyWrapperAllows(d *lockdown.Defaults) *lockdown.Defaults {
 	out := &lockdown.Defaults{
 		Allow: append([]string(nil), d.Allow...),

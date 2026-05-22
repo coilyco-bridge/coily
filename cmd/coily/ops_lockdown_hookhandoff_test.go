@@ -10,8 +10,8 @@ import (
 
 // TestApplyHookHandoffTrim_DropsWrappedBareDenies pins the contract
 // from coilysiren/coily#183 and coilysiren/coily#185: for every token
-// in wrapperRecovery (the bare binaries the agent-guard PreToolUse
-// hook gates), the bare `Bash(<token>:*)` deny entry must not survive
+// in wrapperRecovery (the bare binaries coily's PreToolUse hook
+// gates), the bare `Bash(<token>:*)` deny entry must not survive
 // the trim pass. Otherwise Claude Code CLI's built-in deny matcher
 // fires first and clobbers the hook's recovery hint.
 func TestApplyHookHandoffTrim_DropsWrappedBareDenies(t *testing.T) {
@@ -55,9 +55,9 @@ func TestApplyHookHandoffTrim_DropsExplicitWrapperAllows(t *testing.T) {
 }
 
 // TestApplyHookHandoffTrim_PreservesUnwrappedDenies asserts that bare
-// denies for binaries with no agent-guard hook entry are preserved.
+// denies for binaries with no coily hook route are preserved.
 // flyctl is the canonical example today: coily wraps it via
-// `coily ops flyctl`, but the agent-guard hook table does not yet
+// `coily ops flyctl`, but coily's hook route table does not yet
 // route flyctl. The bare deny must stay so an unwrapped invocation
 // still gets blocked.
 func TestApplyHookHandoffTrim_PreservesUnwrappedDenies(t *testing.T) {
@@ -103,46 +103,7 @@ func TestApplyHookHandoffTrim_PreservesShellInterpreterDenies(t *testing.T) {
 			continue
 		}
 		if !containsString(got.Deny, want) {
-			t.Errorf("expected %q to survive trim (no agent-guard wrapper exists), but it was dropped", want)
-		}
-	}
-}
-
-// TestApplyHookHandoffTrim_AlignedWithAgentGuardHookTable asserts the
-// trim set (keys of wrapperRecovery) matches the agent-guard hook's
-// own routing-hint table for the coily flavor. Drift between the two
-// is a bug: a token in one but not the other means either the hook
-// emits a hint nobody honors (table-only entry), or the harness
-// silently denies without a hint (recovery-only entry).
-//
-// The agent-guard table is duplicated here as test data, mirroring
-// coilyRoutes in agent-guard/cmd/agent-guard/hook.go. When
-// agent-guard#13 externalizes the table into YAML, this duplication
-// becomes a YAML-load and the discipline becomes a compile-time
-// constraint.
-func TestApplyHookHandoffTrim_AlignedWithAgentGuardHookTable(t *testing.T) {
-	agentGuardCoilyRoutes := []string{
-		"gh", "aws", "kubectl", "docker", "tailscale", "ssh", "scp",
-		"brew", "make", "just", "task", "invoke",
-		"npm", "pnpm", "yarn", "bun",
-		"pip", "pipx", "poetry", "uv",
-		"cargo", "gem", "bundle", "nix",
-	}
-	for _, token := range agentGuardCoilyRoutes {
-		if _, ok := wrapperRecovery[token]; !ok {
-			t.Errorf("agent-guard's coily routing table covers %q but coily's wrapperRecovery does not. The trim pass will not drop Bash(%s:*) from deny, so the hook's recovery hint will be clobbered on CLI.", token, token)
-		}
-	}
-	for token := range wrapperRecovery {
-		found := false
-		for _, k := range agentGuardCoilyRoutes {
-			if k == token {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Errorf("coily's wrapperRecovery covers %q but agent-guard's coily routing table does not. The trim pass will drop Bash(%s:*) from deny and the hook will not catch it.", token, token)
+			t.Errorf("expected %q to survive trim (no coily wrapper exists), but it was dropped", want)
 		}
 	}
 }

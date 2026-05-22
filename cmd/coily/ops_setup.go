@@ -138,7 +138,7 @@ func setupAction(ctx context.Context, c *cli.Command) error {
 
 // runUserHookStep cleans up the pre-#185 user-wide
 // ~/.claude/coily-binary-gate.sh hook. coily#185 moved the binary-path
-// check into `agent-guard hook pre-tool-use`, fired from the per-repo
+// check into `coily hook pre-tool-use`, fired from the per-repo
 // hook coily writes via the new shim, but the legacy artifact stayed
 // on disk on hosts that ran `coily setup` before #185 shipped. This
 // step deletes the script and strips the matching PreToolUse entry

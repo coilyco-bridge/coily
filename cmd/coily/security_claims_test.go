@@ -530,7 +530,7 @@ func recordedSubcommands(c *cli.Command) []string {
 //
 // Note: as of coilysiren/coily#183 + coilysiren/coily#185, applyHookHandoffTrim
 // removes these entries from the *rendered* per-repo settings.json so the
-// agent-guard PreToolUse hook becomes the primary gate (and surfaces the
+// coily PreToolUse hook becomes the primary gate (and surfaces the
 // recovery hint on CLI, where the built-in deny matcher would otherwise
 // clobber it). This test still asserts the canonical defaults shipped by
 // cli-guard contain the denies; the post-trim render shape is asserted by
