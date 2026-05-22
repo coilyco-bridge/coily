@@ -39,6 +39,9 @@ commands:
   tidy:
     run: make tidy
     description: Run go mod tidy.
+  build:
+    run: make build
+    description: Build ./bin/coily (prod tags, for install).
 
 # Free-form ssh-passthrough target list. Schema: coilysiren/coily#187 phase 2.
 # `coily ssh <alias> -- <coily args>` resolves <alias> here, ssh's into the
