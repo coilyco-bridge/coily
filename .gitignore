@@ -20,7 +20,7 @@ vendor/
 *.swp
 .DS_Store
 
-# Claude Code per-machine state. Skills under .claude/skills/ ARE tracked
+# Claude Code per-machine state. Skills under .agents/skills/ ARE tracked
 # (this repo is the canonical home for the coily meta-aggregator skill,
 # which encodes coily's operational role across hosts. The general
 # pattern of skills-in-agentic-os-kai still holds for everything else; coily
@@ -28,7 +28,7 @@ vendor/
 # otherwise be a runbook for). Matches agentic-os-kai/.gitignore for parity.
 .claude/settings.local.json
 .claude/worktrees/
-.claude/skills/*/scripts/venv/
+.agents/skills/*/scripts/venv/
 
 # Windows/Cygwin crash dumps
 *.stackdump

@@ -24,8 +24,8 @@ class Coily < Formula
     # coily checkout. Source binary `coily install-skill` stays dev-only on
     # purpose - the threat model is about runtime self-steering, not the
     # brew install path.
-    skills_src = Dir[".claude/skills/coily-*"]
-    odie "no coily-* skills found under .claude/skills/" if skills_src.empty?
+    skills_src = Dir[".agents/skills/coily-*"]
+    odie "no coily-* skills found under .agents/skills/" if skills_src.empty?
     (pkgshare/"skills").install skills_src
   end
 
