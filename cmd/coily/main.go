@@ -276,6 +276,7 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.versionCommand(),
 		r.upgradeCommand(),
 		r.whoamiCommand(),
+		r.agentNameCommand(),
 		r.lockdownCommand(),
 		r.installCompletionCommand(),
 		r.setupCommand(),

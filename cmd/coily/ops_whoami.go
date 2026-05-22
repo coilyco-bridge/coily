@@ -146,22 +146,43 @@ func ghWhoami(ctx context.Context, r *shell.Runner) any {
 	return out
 }
 
-// agentWhoami builds the agent self-name block: claude-<os>-<hostname>-<tag>.
-// Pure local lookup, no subprocess, so it never errors.
-func agentWhoami() any {
+// agentIdentity is this agent's self-name and the parts it is built from.
+type agentIdentity struct {
+	name, agent, osSlug, hostname, tag string
+}
+
+// resolveAgentIdentity builds the agent self-name from a session id:
+// claude-<os>-<hostname>-<tag>. The tag is dropped when sessionID is empty.
+// Pure local lookup, no subprocess, so it never errors. This is the
+// canonical name computation - the agent-name verb and the whoami agent
+// block both route through here.
+func resolveAgentIdentity(sessionID string) agentIdentity {
 	osSlug := agentOSSlug(runtime.GOOS)
 	host := agentShortHostname()
-	tag := agentSessionTag()
+	tag := agentSessionTag(sessionID)
 	parts := []string{"claude", osSlug, host}
 	if tag != "" {
 		parts = append(parts, tag)
 	}
+	return agentIdentity{
+		name:     strings.Join(parts, "-"),
+		agent:    "claude",
+		osSlug:   osSlug,
+		hostname: host,
+		tag:      tag,
+	}
+}
+
+// agentWhoami builds the agent self-name block for whoami output. The
+// session id comes from $CLAUDE_CODE_SESSION_ID, set in Bash-tool context.
+func agentWhoami() any {
+	id := resolveAgentIdentity(os.Getenv(sessionEnvVar))
 	return map[string]any{
-		"name":        strings.Join(parts, "-"),
-		"agent":       "claude",
-		"os":          osSlug,
-		"hostname":    host,
-		"session_tag": tag,
+		"name":        id.name,
+		"agent":       id.agent,
+		"os":          id.osSlug,
+		"hostname":    id.hostname,
+		"session_tag": id.tag,
 	}
 }
 
@@ -192,10 +213,10 @@ func agentShortHostname() string {
 	return h
 }
 
-// agentSessionTag returns the last 4 lowercase alphanumeric chars of the
-// Claude Code session id, the stable per-session suffix of the agent name.
-func agentSessionTag() string {
-	sid := strings.ToLower(strings.TrimSpace(os.Getenv(sessionEnvVar)))
+// agentSessionTag returns the last 4 lowercase alphanumeric chars of a
+// session id, the stable per-session suffix of the agent name.
+func agentSessionTag(sessionID string) string {
+	sid := strings.ToLower(strings.TrimSpace(sessionID))
 	var b []rune
 	for _, r := range sid {
 		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {

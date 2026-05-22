@@ -15,6 +15,12 @@ Auto-generated lookup table of every coily verb. Regenerate with `coily lockdown
 
 Format: full path, one-line summary, comma-separated flag names. No flag descriptions; click into `coily <path> --help` for those.
 
+## `coily agent-name`
+
+Print this agent's self-name: claude-<os>-<hostname>-<tag>.
+
+Flags: --session-id
+
 ## `coily audit dashboard`
 
 Render a static HTML aggregation of the audit log.

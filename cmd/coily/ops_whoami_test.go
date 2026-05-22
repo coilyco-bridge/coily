@@ -28,27 +28,40 @@ func TestAgentSessionTag(t *testing.T) {
 		{"strips non-alnum", "x-y/z.q-w-e-r-t", "wert"},
 	}
 	for _, c := range cases {
-		t.Setenv(sessionEnvVar, c.sid)
-		if got := agentSessionTag(); got != c.want {
-			t.Errorf("%s: agentSessionTag() = %q, want %q", c.name, got, c.want)
+		if got := agentSessionTag(c.sid); got != c.want {
+			t.Errorf("%s: agentSessionTag(%q) = %q, want %q", c.name, c.sid, got, c.want)
 		}
 	}
 }
 
-func TestAgentWhoamiName(t *testing.T) {
-	t.Setenv(sessionEnvVar, "")
-	noTag, _ := agentWhoami().(map[string]any)
-	if noTag["session_tag"] != "" {
-		t.Errorf("session_tag should be empty with no session id, got %q", noTag["session_tag"])
+func TestResolveAgentIdentity(t *testing.T) {
+	noTag := resolveAgentIdentity("")
+	if noTag.tag != "" {
+		t.Errorf("tag should be empty with no session id, got %q", noTag.tag)
+	}
+	if noTag.name == "" || noTag.name[len(noTag.name)-1:] == "-" {
+		t.Errorf("name %q should not be empty or trail a dash", noTag.name)
 	}
 
-	t.Setenv(sessionEnvVar, "deadbeef-0000-1111-2222-333344445e7f")
-	withTag, _ := agentWhoami().(map[string]any)
-	if withTag["session_tag"] != "5e7f" {
-		t.Errorf("session_tag = %q, want 5e7f", withTag["session_tag"])
+	withTag := resolveAgentIdentity("deadbeef-0000-1111-2222-333344445e7f")
+	if withTag.tag != "5e7f" {
+		t.Errorf("tag = %q, want 5e7f", withTag.tag)
 	}
-	name, _ := withTag["name"].(string)
-	if name == "" || name[len(name)-5:] != "-5e7f" {
-		t.Errorf("name %q should end with the session tag", name)
+	if got := withTag.name; len(got) < 5 || got[len(got)-5:] != "-5e7f" {
+		t.Errorf("name %q should end with the session tag", got)
+	}
+}
+
+func TestAgentWhoamiBlock(t *testing.T) {
+	t.Setenv(sessionEnvVar, "deadbeef-0000-1111-2222-333344445e7f")
+	block, ok := agentWhoami().(map[string]any)
+	if !ok {
+		t.Fatalf("agentWhoami() did not return a map")
+	}
+	if block["session_tag"] != "5e7f" {
+		t.Errorf("session_tag = %q, want 5e7f", block["session_tag"])
+	}
+	if block["agent"] != "claude" {
+		t.Errorf("agent = %q, want claude", block["agent"])
 	}
 }
