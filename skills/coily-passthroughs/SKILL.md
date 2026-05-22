@@ -215,11 +215,63 @@ Tail icarus-server journal logs (journalctl -u icarus-server -f).
 
 Flags: --follow, --lines
 
+## `coily git add`
+
+git add - stage changes.
+
 ## `coily git audit-show`
 
 Resolve an Audit-log trailer back to its full audit record.
 
 Flags: --scope, --since
+
+## `coily git branch`
+
+git branch - list or manage branches.
+
+## `coily git checkout`
+
+git checkout - switch branches or restore files.
+
+## `coily git commit`
+
+git commit - record staged changes.
+
+## `coily git diff`
+
+git diff - show changes.
+
+## `coily git fetch`
+
+git fetch - download objects and refs from a remote.
+
+## `coily git log`
+
+git log - show commit history.
+
+## `coily git pull`
+
+git pull - fetch and integrate.
+
+## `coily git push`
+
+git push - update remote refs.
+
+## `coily git restore`
+
+git restore - restore working-tree files.
+
+## `coily git show`
+
+git show - show a commit or object.
+
+## `coily git stash`
+
+git stash - shelve working-tree changes.
+
+## `coily git status`
+
+git status - show the working tree state.
 
 ## `coily git trailer`
 

@@ -21,25 +21,28 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// gitCommand groups verbs that manipulate git commit metadata using the
-// coily audit log: emit Audit-log: trailers, resolve them.
+// gitCommand groups the git verbs coily fronts: the audit-trailer
+// integration (trailer, trailer-hook, audit-show) plus thin passthroughs
+// for the heavy-rotation git commands (status, log, diff, pull, push, ...).
 //
-// Both subcommands are SkipScope: they're meta - operating on the audit
-// log itself - and the prepare-commit-msg hook calls `coily git trailer`
-// from inside the repo regardless of the global --commit-scope.
+// The audit-trailer subcommands are SkipScope: they're meta - operating on
+// the audit log itself - and the prepare-commit-msg hook calls `coily git
+// trailer` from inside the repo regardless of the global --commit-scope.
+// The passthrough subcommands bind scope like any other passthrough.
 func (r *Runner) gitCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "git",
-		Usage: "Audit-log integration for git commits.",
-		Description: `git groups the verbs that connect coily's audit log to git commit
-trailers. The 'trailer' subcommand emits the Audit-log: lines for the
-commit being authored; the 'audit-show' subcommand resolves a trailer
-back to its underlying record.`,
-		Commands: []*cli.Command{
+		Usage: "git passthroughs plus audit-log integration for commits.",
+		Description: `git fronts the everyday git commands (status, log, diff, add, commit,
+fetch, pull, push, branch, checkout, stash, restore) as audited
+passthroughs, and carries the audit-trailer integration: 'trailer'
+emits the Audit-log: lines for the commit being authored, 'audit-show'
+resolves a trailer back to its underlying record.`,
+		Commands: append([]*cli.Command{
 			r.gitTrailerCommand(),
 			r.gitAuditShowCommand(),
 			r.gitTrailerHookCommand(),
-		},
+		}, r.gitPassthroughCommands()...),
 	}
 }
 
