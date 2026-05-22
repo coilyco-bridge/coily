@@ -3269,6 +3269,10 @@ Disable <unit>.
 
 Enable <unit>.
 
+## `coily systemctl reload`
+
+Reload <unit> config in place, graceful, no restart.
+
 ## `coily systemctl restart`
 
 Restart <unit>.

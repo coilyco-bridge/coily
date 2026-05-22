@@ -106,7 +106,7 @@ func TestSystemctlCommand_HasAllVerbs(t *testing.T) {
 		got = append(got, c.Name)
 	}
 	sort.Strings(got)
-	want := []string{"daemon-reload", "disable", "enable", "restart", "start", "status", "stop"}
+	want := []string{"daemon-reload", "disable", "enable", "reload", "restart", "start", "status", "stop"}
 	if len(got) != len(want) {
 		t.Fatalf("verbs = %v, want %v", got, want)
 	}
