@@ -20,8 +20,8 @@ import (
 // status reads cached state from systemd; running it under sudo trips
 // "a terminal is required to read the password" on non-tty sessions
 // even though the read itself is unprivileged (coilysiren/coily#144).
-// Mutating verbs (start/stop/restart/enable/disable/daemon-reload) stay
-// sudo-prefixed because they write to runtime state or
+// Mutating verbs (start/stop/restart/reload/enable/disable/daemon-reload)
+// stay sudo-prefixed because they write to runtime state or
 // /etc/systemd/system.
 var systemctlVerbs = []struct {
 	Name      string
@@ -36,6 +36,7 @@ var systemctlVerbs = []struct {
 	{"start", "Start <unit>.", true, false, func(u string) []string { return []string{"systemctl", "start", u} }},
 	{"stop", "Stop <unit>.", true, false, func(u string) []string { return []string{"systemctl", "stop", u} }},
 	{"restart", "Restart <unit>.", true, false, func(u string) []string { return []string{"systemctl", "restart", u} }},
+	{"reload", "Reload <unit> config in place, graceful, no restart.", true, false, func(u string) []string { return []string{"systemctl", "reload", u} }},
 	{"enable", "Enable <unit>.", true, false, func(u string) []string { return []string{"systemctl", "enable", u} }},
 	{"disable", "Disable <unit>.", true, false, func(u string) []string { return []string{"systemctl", "disable", u} }},
 	{"daemon-reload", "Run systemctl daemon-reload.", false, false, func(string) []string { return []string{"systemctl", "daemon-reload"} }},
@@ -89,8 +90,8 @@ func (r *Runner) systemctlCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "systemctl",
 		Usage: "Run a fixed-shape systemctl verb on the local host.",
-		Description: `Closed verb set (status/start/stop/restart/enable/
-disable/daemon-reload). Status runs unprivileged (sudo trips a tty
+		Description: `Closed verb set (status/start/stop/restart/reload/
+enable/disable/daemon-reload). Status runs unprivileged (sudo trips a tty
 prompt on non-tty sessions, coilysiren/coily#144); mutating verbs are
 sudo-prefixed. Intended for the remote side of
 ` + "`coily ssh <alias> -- coily systemctl <verb> <unit>`" + `.`,
