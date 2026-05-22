@@ -60,6 +60,7 @@ var wrapperRecovery = map[string]string{
 	"cargo":  "coily pkg cargo",
 	"gem":    "coily pkg gem",
 	"bundle": "coily pkg bundle",
+	"nix":    "coily pkg nix",
 	"brew":   "coily pkg brew",
 
 	// Build runners. The audited replacement is a named verb in

@@ -3185,6 +3185,10 @@ Retrieve the MCP server details by its unique identifier.
 
 Send MCP tool usage data to the server.
 
+## `coily pkg nix`
+
+Pass-through to nix with argv validation + audit log.
+
 ## `coily pkg npm`
 
 Pass-through to npm with argv validation + audit log.

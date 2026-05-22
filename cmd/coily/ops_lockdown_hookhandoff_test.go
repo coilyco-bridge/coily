@@ -126,7 +126,7 @@ func TestApplyHookHandoffTrim_AlignedWithAgentGuardHookTable(t *testing.T) {
 		"brew", "make", "just", "task", "invoke",
 		"npm", "pnpm", "yarn", "bun",
 		"pip", "pipx", "poetry", "uv",
-		"cargo", "gem", "bundle",
+		"cargo", "gem", "bundle", "nix",
 	}
 	for _, token := range agentGuardCoilyRoutes {
 		if _, ok := wrapperRecovery[token]; !ok {

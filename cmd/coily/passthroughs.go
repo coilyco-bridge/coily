@@ -104,6 +104,11 @@ var ptPkg = []ptEntry{
 	{Bin: "cargo", Egress: true},
 	{Bin: "gem", Egress: true},
 	{Bin: "bundle", Egress: true},
+	// nix is a universal package manager, not language-scoped. Added for
+	// the kai-server Tangled-knot build (coilysiren/infrastructure#260
+	// family): the knot is built via `nix build`, and the auto-deploy
+	// timer runs nix under audit.
+	{Bin: "nix", Egress: true},
 	// brew is NOT a thin passthrough: it has its own scoped wrapper
 	// at pkgBrewCommand (coily#253) that handles formula-scoped,
 	// tap-scoped, and touch-everything verbs alongside read-only
