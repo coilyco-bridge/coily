@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"runtime"
 	"strings"
 
 	"github.com/coilysiren/cli-guard/ghidcache"
@@ -17,11 +19,15 @@ import (
 func (r *Runner) whoamiCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "whoami",
-		Usage: "Print the authenticated identity coily sees across aws, kubectl, and gh.",
+		Usage: "Print the authenticated identity coily sees across aws, kubectl, gh, plus the agent self-name.",
 		Description: `whoami asks each underlying tool "who am I?" and unifies the results into a
 single yaml block. Useful for confirming which AWS account coily is pointed
 at before a write op, seeing which kubectl context is current, and checking
 which GitHub identity gh is authenticated as.
+
+The agent block prints this agent's self-name in the form
+claude-<os>-<hostname>-<tag>, where <tag> is the last 4 chars of the
+Claude Code session id. Codex and OpenClaw swap the claude- prefix.
 
 Non-fatal. If any tool is not configured or returns an error, its block
 reports the error but the other tools still run.`,
@@ -41,6 +47,7 @@ func (r *Runner) whoamiAction(ctx context.Context, _ *cli.Command) error {
 		"aws":     awsWhoami(ctx, r.Runner),
 		"kubectl": kubectlWhoami(ctx, r.Runner),
 		"gh":      ghWhoami(ctx, r.Runner),
+		"agent":   agentWhoami(),
 	}
 	b, err := yaml.Marshal(out)
 	if err != nil {
@@ -137,6 +144,68 @@ func ghWhoami(ctx context.Context, r *shell.Runner) any {
 		}
 	}
 	return out
+}
+
+// agentWhoami builds the agent self-name block: claude-<os>-<hostname>-<tag>.
+// Pure local lookup, no subprocess, so it never errors.
+func agentWhoami() any {
+	osSlug := agentOSSlug(runtime.GOOS)
+	host := agentShortHostname()
+	tag := agentSessionTag()
+	parts := []string{"claude", osSlug, host}
+	if tag != "" {
+		parts = append(parts, tag)
+	}
+	return map[string]any{
+		"name":        strings.Join(parts, "-"),
+		"agent":       "claude",
+		"os":          osSlug,
+		"hostname":    host,
+		"session_tag": tag,
+	}
+}
+
+// agentOSSlug maps runtime.GOOS to the friendly slug used in the name.
+func agentOSSlug(goos string) string {
+	switch goos {
+	case "darwin":
+		return "macos"
+	case "windows":
+		return "windows"
+	case "linux":
+		return "linux"
+	default:
+		return goos
+	}
+}
+
+// agentShortHostname returns the lowercased hostname with any domain stripped.
+func agentShortHostname() string {
+	h, err := os.Hostname()
+	if err != nil || strings.TrimSpace(h) == "" {
+		return "unknown-host"
+	}
+	h = strings.ToLower(strings.TrimSpace(h))
+	if i := strings.IndexByte(h, '.'); i >= 0 {
+		h = h[:i]
+	}
+	return h
+}
+
+// agentSessionTag returns the last 4 lowercase alphanumeric chars of the
+// Claude Code session id, the stable per-session suffix of the agent name.
+func agentSessionTag() string {
+	sid := strings.ToLower(strings.TrimSpace(os.Getenv(sessionEnvVar)))
+	var b []rune
+	for _, r := range sid {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+			b = append(b, r)
+		}
+	}
+	if len(b) < 4 {
+		return string(b)
+	}
+	return string(b[len(b)-4:])
 }
 
 func errBlock(msg string, err error) map[string]string {

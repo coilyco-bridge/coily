@@ -3239,4 +3239,4 @@ Print the build version and exit.
 
 ## `coily whoami`
 
-Print the authenticated identity coily sees across aws, kubectl, and gh.
+Print the authenticated identity coily sees across aws, kubectl, gh, plus the agent self-name.
