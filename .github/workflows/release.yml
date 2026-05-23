@@ -140,3 +140,89 @@ jobs:
             -f content="$new_b64" \
             -f sha="$cur_sha" \
             -f branch=main
+
+  bump-scoop:
+    # Rewrite coilysiren/scoop-bucket's bucket/coily.json to point at the
+    # just-cut tag + freshly-uploaded Windows asset hashes. Mirrors
+    # bump-formula but writes cross-repo, so it uses SCOOP_BUCKET_TOKEN
+    # (a fine-grained PAT scoped to coilysiren/scoop-bucket Contents:
+    # write) instead of GITHUB_TOKEN, which cannot reach across repos.
+    # The Contents API commit is web-flow signed and clears the
+    # signed-commits ruleset on the bucket repo. Commit message carries
+    # [skip ci] for parity with bump-formula. Soft-skips if the secret is
+    # not set, so the workflow doesn't fail before the PAT is wired up.
+    needs: [release, windows-build]
+    if: ${{ needs.release.outputs.tag != '' }}
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ needs.release.outputs.tag }}
+      VERSION: ${{ needs.release.outputs.version }}
+      BUCKET_REPO: coilysiren/scoop-bucket
+      SCOOP_TOKEN: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+      SOURCE_REPO: ${{ github.repository }}
+      DEFAULT_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Skip if SCOOP_BUCKET_TOKEN not configured
+        id: gate
+        run: |
+          set -euo pipefail
+          if [ -z "${SCOOP_TOKEN:-}" ]; then
+            echo "::warning::SCOOP_BUCKET_TOKEN secret is not set; skipping scoop manifest bump. See coilysiren/coily#258."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch sha256 sidecars from release
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ env.DEFAULT_GH_TOKEN }}
+        run: |
+          set -euo pipefail
+          tmp=$(mktemp -d)
+          echo "TMP=$tmp" >> "$GITHUB_ENV"
+          for arch in amd64 arm64; do
+            asset="coily-windows-${arch}.exe.sha256"
+            gh release download "${TAG}" \
+              --repo "${SOURCE_REPO}" \
+              --pattern "$asset" \
+              --dir "$tmp"
+            hash=$(awk '{print $1}' "$tmp/$asset")
+            echo "HASH_${arch}=${hash}" >> "$GITHUB_ENV"
+          done
+
+      - name: Rewrite scoop manifest via Contents API
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ env.SCOOP_TOKEN }}
+        run: |
+          set -euo pipefail
+          path=bucket/coily.json
+          ver="${VERSION#v}"
+          ver="${ver:-${TAG#v}}"
+          tmp_file="${TMP}/coily.json"
+          curl -fsSL \
+            "https://raw.githubusercontent.com/${BUCKET_REPO}/main/${path}" \
+            > "$tmp_file"
+          python3 - "$tmp_file" "$ver" "$HASH_amd64" "$HASH_arm64" <<'PY'
+          import json, sys
+          path, ver, h64, harm = sys.argv[1:5]
+          with open(path) as f:
+              m = json.load(f)
+          m["version"] = ver
+          arch = m["architecture"]
+          arch["64bit"]["url"] = f"https://github.com/coilysiren/coily/releases/download/v{ver}/coily-windows-amd64.exe#/coily.exe"
+          arch["64bit"]["hash"] = h64
+          arch["arm64"]["url"] = f"https://github.com/coilysiren/coily/releases/download/v{ver}/coily-windows-arm64.exe#/coily.exe"
+          arch["arm64"]["hash"] = harm
+          with open(path, "w") as f:
+              json.dump(m, f, indent=4)
+              f.write("\n")
+          PY
+          cur_sha=$(gh api "repos/${BUCKET_REPO}/contents/${path}?ref=main" --jq .sha)
+          new_b64=$(base64 -w0 < "$tmp_file")
+          gh api -X PUT "repos/${BUCKET_REPO}/contents/${path}" \
+            -f message="chore(coily): bump to ${TAG} [skip ci]" \
+            -f content="$new_b64" \
+            -f sha="$cur_sha" \
+            -f branch=main
