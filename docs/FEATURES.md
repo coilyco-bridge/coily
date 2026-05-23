@@ -19,15 +19,17 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 
 **CLI passthroughs**: `coily ops aws|gh|kubectl`, `coily docker`, `coily tailscale`. kubectl has readonly/write gating via lockdown.
 
-**Package managers**: `coily pkg pnpm|npm|yarn|bun|uv|pip|pipx|poetry|cargo|gem|bundle|brew|glama|skillsmp`. `coily brew install|uninstall|upgrade|reinstall` is a separate top-level scoped to `coilysiren/tap/*` by default.
+**Package managers**: `coily pkg {pnpm,npm,yarn,bun,uv,pip,pipx,poetry,cargo,gem,bundle,brew,glama,skillsmp}`. `coily brew {install,uninstall,upgrade,reinstall}` is a separate top-level scoped to `coilysiren/tap/*`.
 
 **SSH**: `coily ssh <alias> -- coily <argv>`. Free-form passthrough; remote coily's lockdown is the security boundary. Audit rows chain across hosts via `--audit-parent`. See [coily#187](https://github.com/coilysiren/coily/issues/187).
 
 **Session**: `coily session {use,show,clear,end}`. Per-session lockdown-profile sentinel. `end` self-terminates a finished sidequest, SIGTERM to claude ([coily#309](https://github.com/coilysiren/coily/issues/309)).
 
-**Game-server ops**: `coily gaming {eco,core-keeper,icarus,factorio}` (status/tail/start/stop/restart common to all). Eco adds `world {get-seed,set-seed,randomize,snapshot}` + `mod {list,push}`. Factorio adds `update` (steamcmd), `saves`, `mods`, `players`.
+**Game-server ops**: `coily gaming {eco,core-keeper,icarus,factorio}` (status/tail/start/stop/restart common). Eco adds `world` + `mod` subverbs; Factorio adds `update`, `saves`, `mods`, `players`.
 
 **REST API wrappers**: `coily ops {modio,discord,sentry,trello,forgejo}`.
+
+**Agent Channel**: `coily channel {create,post,read,state,spec,events,close}` wraps the v2 protocol from coilysiren/backend ([coily#330](https://github.com/coilysiren/coily/issues/330)).
 
 **Repo-defined**: `coily exec <cmd> [-- extra-args]`. Loaded from `.coily/coily.yaml`. Gated on clean+synced tree; `--audit-override-dirty` bypasses with audit tag. Verb prefix `repo.<cmd>`.
 
@@ -47,11 +49,11 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 
 ## Configuration + secrets
 
-Three-layer precedence: Go defaults < `~/.coily/config.yaml` < `./.coily/config.yaml`. Sections: `kai_server`, `audit`, `aws`, `eco`, `factorio`. Env: `$COILY_AUDIT_LOG`, `$COILY_COMMIT_SCOPE`, `$COILY_REPO_CONFIG`, `$COILY_CACHE_DIR`. AWS / kubectl / gh creds from canonical files, the REST APIs from SSM.
+Three-layer precedence: Go defaults < `~/.coily/config.yaml` < `./.coily/config.yaml`. Sections: `kai_server`, `audit`, `aws`, `eco`, `factorio`, `channel`. Env: `$COILY_AUDIT_LOG`, `$COILY_COMMIT_SCOPE`, `$COILY_REPO_CONFIG`, `$COILY_CACHE_DIR`. AWS / kubectl / gh creds from canonical files, the REST APIs from SSM.
 
 ## Distribution
 
-No prebuilt binaries. Push to `main` triggers semver bump + tag + GH Release + in-repo `Formula/coily.rb` `url` rewrite via Contents API. `make install` (root-owned `/usr/local/bin`), `make install-windows` (admin `C:\Program Files\coily\`), `make deploy-server`. Bootstrap: `brew tap coilysiren/coily https://github.com/coilysiren/coily; brew install coilysiren/coily/coily`.
+No prebuilt binaries. Push to `main` triggers semver bump + tag + GH Release + `Formula/coily.rb` rewrite. `make install`, `make install-windows`, `make deploy-server`. Bootstrap via `brew tap coilysiren/coily`.
 
 ## Cross-cutting infrastructure
 
