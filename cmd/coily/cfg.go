@@ -26,6 +26,7 @@ type Config struct {
 	AWS       AWS          `yaml:"aws"`
 	Eco       Eco          `yaml:"eco"`
 	Factorio  Factorio     `yaml:"factorio"`
+	Channel   Channel      `yaml:"channel"`
 	Loaded    time.Time    `yaml:"-"`
 }
 
@@ -67,6 +68,25 @@ type Factorio struct {
 	ServerDir string `yaml:"server_dir"`
 }
 
+// Channel is the Agent Channel coordination wrapper config (coily#330).
+// BaseURL is the deployment's base URL; default `http://api` is the
+// tailnet sidecar exposed by the coilysiren/backend reference deployment.
+// SSMTokenPath is the AWS SSM path that holds the bearer token; default
+// `/coilysiren/backend/datastore-token` matches the reference deployment.
+type Channel struct {
+	BaseURL      string `yaml:"base_url"`
+	SSMTokenPath string `yaml:"ssm_token_path"`
+}
+
+// defaultChannel returns the embedded Channel defaults. Split out so gosec's
+// G101 (hardcoded credentials) sees one struct literal it can be silenced on
+// without rewriting the outer Config defaults.
+func defaultChannel() Channel {
+	c := Channel{BaseURL: "http://api"}
+	c.SSMTokenPath = "/coilysiren/backend/datastore-token" //nolint:gosec // SSM path, not a credential
+	return c
+}
+
 // defaultConfig returns the baseline coily config used when no overlay
 // layer fills a field. Mirrors what the committed config.example.yaml
 // would parse to. The Audit.LogPath stays empty so applyConfigDefaults
@@ -90,6 +110,7 @@ func defaultConfig() Config {
 		Factorio: Factorio{
 			ServerDir: "/home/kai/Steam/steamapps/common/FactorioServer",
 		},
+		Channel: defaultChannel(),
 	}
 }
 

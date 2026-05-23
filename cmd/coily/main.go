@@ -291,6 +291,7 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.hookCommand(),
 		r.lintCommand(),
 		r.sessionCommand(),
+		r.channelCommand(),
 	}
 	cmds = append(cmds, r.passthroughCommands(ptTopLevel)...)
 	return cmds

@@ -43,6 +43,42 @@ Stream audit records as JSONL.
 
 Flags: --follow, --since
 
+## `coily channel close`
+
+Mark a channel closed. Events stay readable.
+
+## `coily channel create`
+
+Create a channel. Returns the fresh 4-char id and URL.
+
+Flags: --created-by, --title
+
+## `coily channel events`
+
+List a channel's events (newest first), optionally filtered by kind.
+
+Flags: --kind, --limit
+
+## `coily channel post`
+
+Append an event to a channel. Payload from --payload (literal | @file | -).
+
+Flags: --author, --kind, --payload
+
+## `coily channel read`
+
+Read the whole channel (self-describing onboarding view).
+
+Flags: --format
+
+## `coily channel spec`
+
+Read the newest spec event's payload (the channel charter).
+
+## `coily channel state`
+
+Read the newest state event's payload.
+
 ## `coily dispatch headless`
 
 Spawn a detached `claude -p` against a real open issue.
