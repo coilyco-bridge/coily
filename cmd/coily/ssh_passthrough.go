@@ -83,6 +83,11 @@ func (r *Runner) sshPassthroughAction(ctx context.Context, c *cli.Command) error
 		Action: func(ctx context.Context, _ *cli.Command) error {
 			return r.SSH.Stream(ctx, target.Host, target.User, remoteCmd, os.Stdout, os.Stderr)
 		},
+		// Persist the operator's actual intent (the remote sub-coily argv)
+		// on the local audit row, so a forensic walk of the local log alone
+		// can answer "what was actually run on the remote host" without
+		// pivoting to the remote audit log via AuditParent. coilysiren/coily#328.
+		OnComplete: stampRemoteArgv(rest),
 	}
 	return r.WrapVerb(spec, r.Audit)(ctx, c)
 }
@@ -125,6 +130,16 @@ func (r *Runner) resolveSSHTarget(alias string) (repocfg.SSHTarget, error) {
 		"ssh passthrough: alias %q not found; known aliases: %s",
 		alias, strings.Join(have, ", "),
 	)
+}
+
+// stampRemoteArgv returns a verb.Spec.OnComplete callback that records the
+// post-`--` argv slice on the local audit row as Record.RemoteArgv. A defensive
+// copy keeps the audit row independent of the caller's slice (the original
+// `rest` slice is still referenced by spec.ArgsFunc). coilysiren/coily#328.
+func stampRemoteArgv(rest []string) func(*audit.Record) {
+	return func(rec *audit.Record) {
+		rec.RemoteArgv = append([]string{}, rest...)
+	}
 }
 
 // joinPOSIX POSIX-quotes each argv element and joins with spaces so the

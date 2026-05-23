@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/coilysiren/cli-guard/audit"
 )
 
 func TestPosixQuote(t *testing.T) {
@@ -24,6 +26,38 @@ func TestPosixQuote(t *testing.T) {
 		if got != want {
 			t.Errorf("posixQuote(%q) = %q, want %q", in, got, want)
 		}
+	}
+}
+
+// TestStampRemoteArgv_PopulatesRecordField asserts the OnComplete callback
+// installed by sshPassthroughAction sets Record.RemoteArgv to the post-`--`
+// argv slice. This is the contract that makes a forensic walk of the local
+// audit log alone answer "what did the operator run on the remote host."
+// coilysiren/coily#328.
+func TestStampRemoteArgv_PopulatesRecordField(t *testing.T) {
+	rest := []string{"systemctl", "restart", "forgejo"}
+	rec := &audit.Record{}
+	stampRemoteArgv(rest)(rec)
+	if len(rec.RemoteArgv) != 3 {
+		t.Fatalf("RemoteArgv len = %d, want 3 (%v)", len(rec.RemoteArgv), rec.RemoteArgv)
+	}
+	for i, want := range rest {
+		if rec.RemoteArgv[i] != want {
+			t.Errorf("RemoteArgv[%d] = %q, want %q", i, rec.RemoteArgv[i], want)
+		}
+	}
+}
+
+// TestStampRemoteArgv_DefensivelyCopies verifies the audit row carries an
+// independent slice. spec.ArgsFunc still references the same underlying
+// rest slice for argv validation; mutating one must not affect the other.
+func TestStampRemoteArgv_DefensivelyCopies(t *testing.T) {
+	rest := []string{"systemctl", "restart", "forgejo"}
+	rec := &audit.Record{}
+	stampRemoteArgv(rest)(rec)
+	rest[0] = "stop"
+	if rec.RemoteArgv[0] != "systemctl" {
+		t.Errorf("RemoteArgv was not a defensive copy: %v", rec.RemoteArgv)
 	}
 }
 
