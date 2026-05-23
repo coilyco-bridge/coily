@@ -518,6 +518,7 @@ func writeRecordsYAML(w io.Writer, records []audit.Record) error {
 	policy := decision.RedactPolicy()
 	for _, rec := range records {
 		safeArgv := audit.RedactArgv(rec.Argv, audit.DataSecurityHigh, policy)
+		safeRemoteArgv := audit.RedactArgv(rec.RemoteArgv, audit.DataSecurityHigh, policy)
 		view := map[string]any{
 			"trailer": rec.Trailer(),
 			"record": map[string]any{
@@ -526,6 +527,7 @@ func writeRecordsYAML(w io.Writer, records []audit.Record) error {
 				"ts_iso":       time.Unix(rec.Timestamp, 0).UTC().Format(time.RFC3339),
 				"verb":         rec.Verb,
 				"argv":         safeArgv,
+				"remote_argv":  safeRemoteArgv,
 				"decision":     rec.Decision,
 				"exit_code":    rec.ExitCode,
 				"duration_ms":  rec.DurationMS,
