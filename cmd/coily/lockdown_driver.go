@@ -62,6 +62,7 @@ var wrapperRecovery = map[string]string{
 	"bundle": "coily pkg bundle",
 	"nix":    "coily pkg nix",
 	"brew":   "coily pkg brew",
+	"scoop":  "coily pkg scoop",
 
 	// Build runners. The audited replacement is a named verb in
 	// .coily/coily.yaml dispatched via `coily exec <verb>`.

@@ -3209,6 +3209,10 @@ Pass-through to pnpm with argv validation + audit log.
 
 Pass-through to poetry with argv validation + audit log.
 
+## `coily pkg scoop`
+
+Scoped wrapper around scoop. Mirrors scoop's argv shape.
+
 ## `coily pkg skillsmp ai-search`
 
 GET /ai-search - semantic search across skills.

@@ -11,6 +11,7 @@ func (r *Runner) pkgCommand() *cli.Command {
 	cmds := r.passthroughCommands(ptPkg)
 	cmds = append(cmds,
 		r.pkgBrewCommand(),
+		r.pkgScoopCommand(),
 		r.glamaCommand(),
 		r.skillsmpCommand(),
 	)
