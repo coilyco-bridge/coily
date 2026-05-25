@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 
@@ -384,16 +385,18 @@ func (r *Runner) forgejoPRReviewCommand() *cli.Command {
 			&cli.IntFlag{Name: "number", Usage: "PR number", Required: true},
 			&cli.StringFlag{Name: "event", Usage: "APPROVE | REQUEST_CHANGES | COMMENT", Required: true},
 			&cli.StringFlag{Name: "body-file", Usage: "optional path to review body markdown"},
+			&cli.StringFlag{Name: "comments-file", Usage: "optional path to a JSON array of inline per-line comments"},
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
 				Name: "ops.forgejo.pr.review",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
-						"--repo":      c.String("repo"),
-						"--number":    strconv.Itoa(c.Int("number")),
-						"--event":     c.String("event"),
-						"--body-file": c.String("body-file"),
+						"--repo":          c.String("repo"),
+						"--number":        strconv.Itoa(c.Int("number")),
+						"--event":         c.String("event"),
+						"--body-file":     c.String("body-file"),
+						"--comments-file": c.String("comments-file"),
 					}, c.Args().Slice()
 				},
 				Action: func(ctx context.Context, c *cli.Command) error {
@@ -445,24 +448,83 @@ func parseForgejoPRReviewArgs(c *cli.Command) (string, string, int, forgejoPRRev
 	if err != nil {
 		return "", "", 0, forgejoPRReviewBody{}, err
 	}
+	body, err := buildForgejoPRReviewBody(c)
+	if err != nil {
+		return "", "", 0, forgejoPRReviewBody{}, err
+	}
+	return owner, repo, num, body, nil
+}
+
+// buildForgejoPRReviewBody assembles the review payload from --event,
+// --body-file, --comments-file. Split out so parseForgejoPRReviewArgs
+// stays under the cyclop cap.
+func buildForgejoPRReviewBody(c *cli.Command) (forgejoPRReviewBody, error) {
 	event := c.String("event")
 	switch event {
 	case "APPROVE", "REQUEST_CHANGES", "COMMENT":
 	default:
-		return "", "", 0, forgejoPRReviewBody{}, fmt.Errorf("ops forgejo pr review: --event must be APPROVE | REQUEST_CHANGES | COMMENT, got %q", event)
+		return forgejoPRReviewBody{}, fmt.Errorf("ops forgejo pr review: --event must be APPROVE | REQUEST_CHANGES | COMMENT, got %q", event)
 	}
 	body := forgejoPRReviewBody{Event: event}
 	if bp := c.String("body-file"); bp != "" {
-		b, rerr := readForgejoBodyFile(bp, "ops forgejo pr review")
-		if rerr != nil {
-			return "", "", 0, forgejoPRReviewBody{}, rerr
+		b, err := readForgejoBodyFile(bp, "ops forgejo pr review")
+		if err != nil {
+			return forgejoPRReviewBody{}, err
 		}
 		body.Body = b
 	}
-	if event == "COMMENT" && body.Body == "" {
-		return "", "", 0, forgejoPRReviewBody{}, fmt.Errorf("ops forgejo pr review: --event COMMENT requires --body-file")
+	if cp := c.String("comments-file"); cp != "" {
+		comments, err := loadForgejoPRReviewComments(cp)
+		if err != nil {
+			return forgejoPRReviewBody{}, err
+		}
+		body.Comments = comments
 	}
-	return owner, repo, num, body, nil
+	if event == "COMMENT" && body.Body == "" && len(body.Comments) == 0 {
+		return forgejoPRReviewBody{}, fmt.Errorf("ops forgejo pr review: --event COMMENT requires --body-file or --comments-file")
+	}
+	return body, nil
+}
+
+// loadForgejoPRReviewComments reads a JSON array of inline review
+// comments from disk and validates each entry. Forgejo's API silently
+// drops malformed entries, so we fail loudly here instead.
+func loadForgejoPRReviewComments(path string) ([]forgejoPRReviewCommentBody, error) {
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("ops forgejo pr review: read --comments-file %s: %w", path, err)
+	}
+	var out []forgejoPRReviewCommentBody
+	if err := json.Unmarshal(raw, &out); err != nil {
+		return nil, fmt.Errorf("ops forgejo pr review: parse --comments-file %s: %w", path, err)
+	}
+	if len(out) == 0 {
+		return nil, fmt.Errorf("ops forgejo pr review: --comments-file %s contained zero comments", path)
+	}
+	for i, com := range out {
+		if err := validateForgejoPRReviewComment(com, i); err != nil {
+			return nil, err
+		}
+	}
+	return out, nil
+}
+
+func validateForgejoPRReviewComment(com forgejoPRReviewCommentBody, idx int) error {
+	if strings.TrimSpace(com.Path) == "" {
+		return fmt.Errorf("ops forgejo pr review: --comments-file[%d]: path is empty", idx)
+	}
+	if strings.TrimSpace(com.Body) == "" {
+		return fmt.Errorf("ops forgejo pr review: --comments-file[%d]: body is empty", idx)
+	}
+	if com.OldPosition < 0 || com.NewPosition < 0 {
+		return fmt.Errorf("ops forgejo pr review: --comments-file[%d]: positions must be >= 0", idx)
+	}
+	hasOld := com.OldPosition > 0
+	hasNew := com.NewPosition > 0
+	if hasOld == hasNew {
+		return fmt.Errorf("ops forgejo pr review: --comments-file[%d]: exactly one of old_position / new_position must be > 0", idx)
+	}
+	return nil
 }
 
 // validateForgejoBranchName applies the same defensive shape as the tag
@@ -506,8 +568,19 @@ type forgejoPRMergeBody struct {
 }
 
 type forgejoPRReviewBody struct {
-	Event string `json:"event"`
-	Body  string `json:"body,omitempty"`
+	Event    string                       `json:"event"`
+	Body     string                       `json:"body,omitempty"`
+	Comments []forgejoPRReviewCommentBody `json:"comments,omitempty"`
+}
+
+// forgejoPRReviewCommentBody is a single inline review comment. Exactly
+// one of OldPosition / NewPosition must be > 0 (forgejo treats 0 as
+// "not on that side"). Path is the tree path; Body is the comment text.
+type forgejoPRReviewCommentBody struct {
+	Path        string `json:"path"`
+	OldPosition int    `json:"old_position"`
+	NewPosition int    `json:"new_position"`
+	Body        string `json:"body"`
 }
 
 type forgejoPRSummary struct {
