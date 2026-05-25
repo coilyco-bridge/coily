@@ -25,7 +25,7 @@ permissions:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: docker
     outputs:
       tag: ${{ steps.tag.outputs.new_tag }}
       version: ${{ steps.tag.outputs.new_version }}
@@ -50,7 +50,7 @@ jobs:
   bump-formula:
     needs: release
     if: ${{ needs.release.outputs.tag != '' }}
-    runs-on: ubuntu-latest
+    runs-on: docker
     permissions:
       contents: write
     steps:
