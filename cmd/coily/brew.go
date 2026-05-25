@@ -232,10 +232,10 @@ func (r *Runner) brewTapScopedAction(prefix, rest []string) (cli.ActionFunc, fun
 		verbLabel := strings.Join(prefix, " ")
 		if !allow && len(positionals) > 0 {
 			for _, t := range positionals {
-				if !strings.HasPrefix(t, "coilysiren/") {
+				if !brewTapPositionalAllowed(t) {
 					return exitcode.New(exitcode.PolicyDenied, "policy_denied",
 						fmt.Errorf("brew %s %q is outside coilysiren/*; pass --allow-untapped to confirm", verbLabel, t),
-						"name a coilysiren/<repo> tap, or add --allow-untapped to confirm an off-org tap").
+						"name a coilysiren/<repo> tap or a forgejo.coilysiren.me/coilysiren/<repo> URL, or add --allow-untapped to confirm an off-org tap").
 						WithReason("brew-tap state should be coilysiren/* by default so the registered-tap graph is reviewable from one org; --allow-untapped is the explicit opt-out")
 				}
 			}
@@ -338,6 +338,19 @@ func splitBrewArgs(raw []string) (allow bool, forward, positionals []string) {
 		}
 	}
 	return allow, forward, positionals
+}
+
+// brewTapPositionalAllowed accepts the positionals to `brew tap` /
+// `brew untap`: either a `coilysiren/<repo>` tap name or a tap source
+// URL under forgejo.coilysiren.me/coilysiren/. Forgejo is the canonical
+// source of truth for the brew taps (per-repo Formula clone URLs point
+// at forgejo); the tap-name prefix still covers the bare `brew untap
+// coilysiren/<repo>` form.
+func brewTapPositionalAllowed(t string) bool {
+	if strings.HasPrefix(t, "coilysiren/") {
+		return true
+	}
+	return strings.HasPrefix(t, "https://forgejo.coilysiren.me/coilysiren/")
 }
 
 // brewInTapScope is true when f is either a coilysiren/<tap>/<formula>

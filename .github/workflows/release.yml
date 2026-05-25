@@ -7,7 +7,7 @@ name: release
 # satisfies the signed-commits ruleset).
 #
 # Brew install path is direct-repo (no aggregator tap):
-#   brew tap coilysiren/coily https://github.com/coilysiren/coily
+#   brew tap coilysiren/coily https://forgejo.coilysiren.me/coilysiren/coily
 #   brew install coilysiren/coily/coily
 #
 # `main.Version` is set at build time via ldflags by the Formula, so the
@@ -131,7 +131,7 @@ jobs:
           curl -fsSL \
             "https://raw.githubusercontent.com/${REPO}/main/${path}" \
             > "$tmp/coily.rb"
-          new_line="  url \"ssh://git@github.com/${REPO}.git\", tag: \"${TAG}\", revision: \"${NEW_REVISION}\""
+          new_line="  url \"https://forgejo.coilysiren.me/${REPO}.git\", tag: \"${TAG}\", revision: \"${NEW_REVISION}\""
           sed -i "s|^  url \".*|${new_line}|" "$tmp/coily.rb"
           cur_sha=$(gh api "repos/${REPO}/contents/${path}?ref=main" --jq .sha)
           new_b64=$(base64 -w0 < "$tmp/coily.rb")
