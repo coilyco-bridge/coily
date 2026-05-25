@@ -35,8 +35,10 @@ Verbs:
   coily ops forgejo admin user list
   coily ops forgejo admin user create --username <name> --email <addr> [--admin]
   coily ops forgejo admin auth list
-  coily ops forgejo doctor check --run <name>`,
+  coily ops forgejo doctor check --run <name>
+  coily ops forgejo issue create --repo <owner/name> --title <t> --body-file <path>`,
 		Commands: []*cli.Command{
+			r.forgejoIssueCommand(),
 			{
 				Name:  "admin",
 				Usage: "Forgejo admin verbs.",

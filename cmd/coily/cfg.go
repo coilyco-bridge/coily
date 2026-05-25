@@ -27,7 +27,27 @@ type Config struct {
 	Eco       Eco          `yaml:"eco"`
 	Factorio  Factorio     `yaml:"factorio"`
 	Channel   Channel      `yaml:"channel"`
+	Forgejo   Forgejo      `yaml:"forgejo"`
 	Loaded    time.Time    `yaml:"-"`
+}
+
+// Forgejo is the config for `coily ops forgejo issue ...` API verbs that
+// hit the forgejo HTTP API (distinct from the in-pod `forgejo` CLI verbs
+// in ops_forgejo.go, which go through k3s kubectl exec). BaseURL is the
+// forgejo deployment's public origin; SSMTokenPath is the AWS SSM path
+// holding the bearer API token (scope `write:repository`). See
+// coilysiren/coily#69 for the rollout.
+type Forgejo struct {
+	BaseURL      string `yaml:"base_url"`
+	SSMTokenPath string `yaml:"ssm_token_path"`
+}
+
+// defaultForgejo returns the embedded Forgejo defaults. Same gosec G101
+// dance as defaultChannel: split out so the //nolint sits on one line.
+func defaultForgejo() Forgejo {
+	f := Forgejo{BaseURL: "https://forgejo.coilysiren.me"}
+	f.SSMTokenPath = "/forgejo/api-token" //nolint:gosec // SSM path, not a credential
+	return f
 }
 
 // KaiServer is the connection config for the home server that
@@ -111,6 +131,7 @@ func defaultConfig() Config {
 			ServerDir: "/home/kai/Steam/steamapps/common/FactorioServer",
 		},
 		Channel: defaultChannel(),
+		Forgejo: defaultForgejo(),
 	}
 }
 
