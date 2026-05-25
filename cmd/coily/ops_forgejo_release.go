@@ -1,11 +1,16 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -30,6 +35,7 @@ func (r *Runner) forgejoReleaseCommand() *cli.Command {
 			r.forgejoReleaseViewCommand(),
 			r.forgejoReleaseEditCommand(),
 			r.forgejoReleaseDeleteCommand(),
+			r.forgejoReleaseUploadAssetCommand(),
 		},
 	}
 }
@@ -425,6 +431,179 @@ func printForgejoReleaseList(respBody []byte) error {
 	}
 	for _, rel := range out {
 		fmt.Printf("%s\t#%d\t%s\t%s\t%s\n", rel.HTMLURL, rel.ID, rel.TagName, releaseStateTag(rel.Draft, rel.Prerelease), rel.Name)
+	}
+	return nil
+}
+
+func (r *Runner) forgejoReleaseUploadAssetCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "upload-asset",
+		Usage: "Upload an attachment file to a forgejo release.",
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: "repo", Usage: "target repo as owner/name", Required: true},
+			&cli.IntFlag{Name: "id", Usage: "release id (see `release list`)", Required: true},
+			&cli.StringFlag{Name: "file", Usage: "path to the asset file on disk", Required: true},
+			&cli.StringFlag{Name: "name", Usage: "override the on-server asset filename (defaults to basename of --file)"},
+		},
+		Action: r.WrapVerb(
+			verb.Spec{
+				Name: "ops.forgejo.release.upload-asset",
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					return map[string]string{
+						"--repo": c.String("repo"),
+						"--id":   strconv.Itoa(c.Int("id")),
+						"--file": c.String("file"),
+						"--name": c.String("name"),
+					}, c.Args().Slice()
+				},
+				Action: func(ctx context.Context, c *cli.Command) error {
+					return r.runForgejoReleaseUploadAsset(ctx, c)
+				},
+			},
+			r.Audit,
+		),
+	}
+}
+
+func (r *Runner) runForgejoReleaseUploadAsset(ctx context.Context, c *cli.Command) error {
+	if c.Args().Len() != 0 {
+		return fmt.Errorf("ops forgejo release upload-asset: takes no positional args, got %d", c.Args().Len())
+	}
+	owner, repo, err := parseForgejoRepoSlug(c.String("repo"))
+	if err != nil {
+		return err
+	}
+	id := c.Int("id")
+	if id <= 0 {
+		return fmt.Errorf("ops forgejo release upload-asset: --id must be >= 1, got %d", id)
+	}
+	filePath := c.String("file")
+	info, err := os.Stat(filePath)
+	if err != nil {
+		return fmt.Errorf("ops forgejo release upload-asset: stat --file %s: %w", filePath, err)
+	}
+	if info.IsDir() {
+		return fmt.Errorf("ops forgejo release upload-asset: --file %s is a directory", filePath)
+	}
+	if info.Size() == 0 {
+		return fmt.Errorf("ops forgejo release upload-asset: --file %s is empty", filePath)
+	}
+	assetName := strings.TrimSpace(c.String("name"))
+	if assetName == "" {
+		assetName = filepath.Base(filePath)
+	}
+	if err := validateForgejoAssetName(assetName); err != nil {
+		return err
+	}
+
+	q := url.Values{}
+	q.Set("name", assetName)
+	apiPath := fmt.Sprintf("/api/v1/repos/%s/%s/releases/%d/assets?%s", owner, repo, id, q.Encode())
+
+	respBody, err := r.forgejoAPIPostMultipart(ctx, "ops forgejo release upload-asset", apiPath, filePath, assetName)
+	if err != nil {
+		return err
+	}
+	var out struct {
+		ID            int    `json:"id"`
+		Name          string `json:"name"`
+		Size          int64  `json:"size"`
+		BrowserDLURL  string `json:"browser_download_url"`
+		DownloadCount int    `json:"download_count"`
+	}
+	if err := json.Unmarshal(respBody, &out); err != nil {
+		return fmt.Errorf("ops forgejo release upload-asset: decode response: %w", err)
+	}
+	fmt.Printf("%s asset #%d %s (%d bytes)\n", out.BrowserDLURL, out.ID, out.Name, out.Size)
+	return nil
+}
+
+// forgejoAPIPostMultipart streams a single file as the `attachment` part
+// of a multipart/form-data POST. Sibling of forgejoAPIDo for the one
+// forgejo endpoint that doesn't take JSON. Reuses forgejoAPIToken so the
+// token-fetch + audit-row binding stays consistent across verbs.
+func (r *Runner) forgejoAPIPostMultipart(ctx context.Context, prefix, apiPath, filePath, assetName string) ([]byte, error) {
+	base := strings.TrimSuffix(r.Cfg.Forgejo.BaseURL, "/")
+	if base == "" {
+		return nil, fmt.Errorf("%s: forgejo.base_url not set in config", prefix)
+	}
+	ssmPath := r.Cfg.Forgejo.SSMTokenPath
+	if ssmPath == "" {
+		return nil, fmt.Errorf("%s: forgejo.ssm_token_path not set in config", prefix)
+	}
+	token, err := r.forgejoAPIToken(ctx, prefix, ssmPath)
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := os.Open(filePath) //nolint:gosec // path is operator-supplied via --file, validated for non-empty + non-dir upstream
+	if err != nil {
+		return nil, fmt.Errorf("%s: open --file %s: %w", prefix, filePath, err)
+	}
+	defer func() { _ = f.Close() }()
+
+	var buf bytes.Buffer
+	mw := multipart.NewWriter(&buf)
+	part, err := mw.CreateFormFile("attachment", assetName)
+	if err != nil {
+		return nil, fmt.Errorf("%s: build multipart form: %w", prefix, err)
+	}
+	if _, err := io.Copy(part, f); err != nil {
+		return nil, fmt.Errorf("%s: stream file into form: %w", prefix, err)
+	}
+	if err := mw.Close(); err != nil {
+		return nil, fmt.Errorf("%s: close multipart writer: %w", prefix, err)
+	}
+
+	target := base + apiPath
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, target, &buf)
+	if err != nil {
+		return nil, fmt.Errorf("%s: build request: %w", prefix, err)
+	}
+	req.Header.Set("Authorization", "token "+token)
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Content-Type", mw.FormDataContentType())
+
+	client := &http.Client{Timeout: forgejoAPIHTTPTimeout}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("%s: POST %s: %w", prefix, target, err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusCreated {
+		return nil, fmt.Errorf("%s: POST %s returned HTTP %d: %s", prefix, target, resp.StatusCode, strings.TrimSpace(string(respBody)))
+	}
+	return respBody, nil
+}
+
+// validateForgejoAssetName rejects shapes that would either confuse the
+// forgejo filename normalizer or smuggle path components. Allows alnum,
+// dash, underscore, dot, plus, equals; rejects leading dash and any
+// slash or backslash.
+func validateForgejoAssetName(name string) error {
+	if name == "" {
+		return fmt.Errorf("ops forgejo release upload-asset: --name is empty")
+	}
+	if len(name) > 200 {
+		return fmt.Errorf("ops forgejo release upload-asset: --name too long (max 200)")
+	}
+	if strings.HasPrefix(name, "-") {
+		return fmt.Errorf("ops forgejo release upload-asset: --name must not start with '-'")
+	}
+	if strings.ContainsAny(name, "/\\") {
+		return fmt.Errorf("ops forgejo release upload-asset: --name must not contain '/' or '\\'")
+	}
+	for _, r := range name {
+		switch {
+		case r >= 'a' && r <= 'z',
+			r >= 'A' && r <= 'Z',
+			r >= '0' && r <= '9',
+			r == '-', r == '_', r == '.', r == '+', r == '=':
+		default:
+			return fmt.Errorf("ops forgejo release upload-asset: --name contains invalid character %q", r)
+		}
 	}
 	return nil
 }
