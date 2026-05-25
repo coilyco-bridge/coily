@@ -39,12 +39,14 @@ Verbs:
   coily ops forgejo issue create --repo <owner/name> --title <t> --body-file <path>
   coily ops forgejo label create --repo <owner/name> --name <n> --color <hex>
   coily ops forgejo release create --repo <owner/name> --tag <tag> [--body-file <path>]
-  coily ops forgejo repo view --repo <owner/name>`,
+  coily ops forgejo repo view --repo <owner/name>
+  coily ops forgejo pr list --repo <owner/name>`,
 		Commands: []*cli.Command{
 			r.forgejoIssueCommand(),
 			r.forgejoLabelCommand(),
 			r.forgejoReleaseCommand(),
 			r.forgejoRepoCommand(),
+			r.forgejoPRCommand(),
 			{
 				Name:  "admin",
 				Usage: "Forgejo admin verbs.",
