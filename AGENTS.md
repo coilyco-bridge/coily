@@ -26,14 +26,16 @@ For any GitHub op in Kai's workspace, reach for `coily ops gh ...` first. Same f
 
 ## Release framework
 
-Every push to `main` triggers `.github/workflows/release.yml`, fully automated.
+Every push to `main` on forgejo triggers `.forgejo/workflows/release.yml`, fully automated. Forgejo is the canonical source of truth; the github mirror is read-only / archival.
 
-1. `mathieudutour/github-tag-action` computes the next semver. `default_bump: patch`: every push releases at least a patch. `feat:` -> minor, `feat!:` / `BREAKING CHANGE:` -> major.
-2. Tag pushed. `main.Version` set at build time via ldflags (brew formula / windows-build job); no source-tree version bump.
-3. GitHub Release with auto-changelog.
-4. Two consumers fan out: `bump-formula` rewrites this repo's `Formula/coily.rb` `url`+`tag`+`revision` line via the Contents API (web-flow signed, `[skip ci]` commit); `windows-build` cross-compiles + uploads `coily-windows-{amd64,arm64}.exe` + `.sha256` sidecars, `coilysiren/scoop-bucket` autoupdates.
+1. `coilysiren/agentic-os/actions/tag-bump` parses conventional commits and computes the next semver. `default_bump: patch`: every push releases at least a patch. `feat:` -> minor, `feat!:` / `BREAKING CHANGE:` -> major. Tag is created via forgejo Tags API.
+2. `main.Version` set at build time via ldflags (brew formula); no source-tree version bump.
+3. `coilysiren/agentic-os/actions/create-release` posts the release with auto-changelog to forgejo Releases.
+4. `coilysiren/agentic-os/actions/bump-formula` rewrites `Formula/coily.rb`'s `url`+`tag`+`revision` line via forgejo Contents API and commits as the auto-issued forgejo Actions token (unsigned bot commit, `[skip ci]` marker).
 
-Loop-safe: `GITHUB_TOKEN`-created tags don't re-trigger workflows. Brew install is direct-tap (`brew tap coilysiren/coily https://github.com/coilysiren/coily`), no `homebrew-tap` mirror. Formula here and Scoop manifest in `coilysiren/scoop-bucket` are the sources of truth.
+Loop-safe: forgejo's auto-token-created commits don't re-trigger workflows when the message carries `[skip ci]`. Brew install is direct-tap from forgejo (`brew tap coilysiren/coily https://forgejo.coilysiren.me/coilysiren/coily`). Formula here is the source of truth.
+
+**Not yet on forgejo (residual on github):** Windows `.exe` cross-build + `coilysiren/scoop-bucket` autoupdate. Scoop migration tracked separately; until that lands, Windows users on the brew flow get nothing from a forgejo-only release and need to fall back to `make install-windows`.
 
 Brew + scoop produce user-writable binaries (`/opt/homebrew/bin/coily`, `~/scoop/apps/coily/current/coily.exe`). The root-owned property of `make install` / `make install-windows` is the manual choice for hosts that need it.
 
@@ -42,7 +44,7 @@ Brew + scoop produce user-writable binaries (`/opt/homebrew/bin/coily`, `~/scoop
 After pushing to `main`, schedule a wake-up to land the new binary and re-baseline lockdown. Release pipeline takes ~1-3 min.
 
 - **Cadence**: 300-360s after push.
-- **Verify CI**: Actions status is playwright-only (coily#305). Drive the Playwright MCP to `github.com/coilysiren/coily/actions`, latest run should be `completed/success`. Re-schedule once at +180s if in progress; stop on failure.
+- **Verify CI**: `coily ops forgejo` doesn't have an Actions verb yet, so check via the forgejo UI at `forgejo.coilysiren.me/coilysiren/coily/actions` or via the API: `curl https://forgejo.coilysiren.me/api/v1/repos/coilysiren/coily/actions/tasks | jq '.workflow_runs[0]'`. Latest run should be `completed/success`. Re-schedule once at +180s if in progress; stop on failure.
 - **Upgrade host**: Mac `brew upgrade coilysiren/coily/coily`. Windows `scoop update coily`. No sudo on either.
 - **Re-baseline lockdown** only when the bumped commit touched `cli-guard/lockdown/`: `coily lockdown --apply --replace --recursive --path ~/projects/coilysiren`.
 - **kai-server**: `coily ssh kai-server -- coily systemctl start coily-update.service`. Oneshot.

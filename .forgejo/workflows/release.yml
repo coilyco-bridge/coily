@@ -1,0 +1,71 @@
+name: release
+
+# Forgejo-canonical release pipeline. Triggers on push to main against
+# the forgejo repo (forgejo.coilysiren.me/coilysiren/coily). Cuts the
+# tag + release on forgejo, rewrites Formula/coily.rb to pin the new
+# tag+revision via forgejo Contents API.
+#
+# Brew install path is forgejo direct-repo:
+#   brew tap coilysiren/coily https://forgejo.coilysiren.me/coilysiren/coily
+#   brew install coilysiren/coily/coily
+#
+# main.Version is set at build time via ldflags by the Formula, so the
+# git tag is the only version artifact.
+#
+# Shared composite actions live at coilysiren/agentic-os/actions/*.
+# Bump-scoop + Windows .exe builds are not migrated yet (depend on
+# scoop-bucket migration to forgejo, tracked separately).
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.new_tag }}
+      version: ${{ steps.tag.outputs.new_version }}
+      changelog: ${{ steps.tag.outputs.changelog }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - id: tag
+        uses: coilysiren/agentic-os/actions/tag-bump@main
+        with:
+          default_bump: patch
+
+      - if: ${{ steps.tag.outputs.new_tag != '' }}
+        uses: coilysiren/agentic-os/actions/create-release@main
+        with:
+          tag: ${{ steps.tag.outputs.new_tag }}
+          name: ${{ steps.tag.outputs.new_tag }}
+          body: ${{ steps.tag.outputs.changelog }}
+
+  bump-formula:
+    needs: release
+    if: ${{ needs.release.outputs.tag != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+
+      - id: rev
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: coilysiren/agentic-os/actions/bump-formula@main
+        with:
+          formula_path: Formula/coily.rb
+          tag: ${{ needs.release.outputs.tag }}
+          revision: ${{ steps.rev.outputs.revision }}
