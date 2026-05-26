@@ -213,14 +213,10 @@ func applyWrapperAllows(d *lockdown.Defaults) *lockdown.Defaults {
 // entries when the lockdown driver's attached Coordinate names a high
 // or max data_security tier. Phase 5 of coilysiren/coily#150.
 //
-// At high (and stricter):
-//   - Block Claude Code's Read of the coilyco-vault tree. Private
-//     personal context should not surface inside a session whose
-//     active profile names "data_security=high" or stricter.
-//
-// At max:
-//   - Block bash patterns that paste $-prefixed env vars into
-//     subprocess stdin via echo, the classic "leak the secret" shape.
+// At high (and stricter): block Claude Code's Read of the coilyco-vault
+// tree via the portable tilde form. Private personal context should not
+// surface inside a session whose active profile names
+// "data_security=high" or stricter.
 //
 // Returns a fresh *Defaults so the original (which the package may
 // cache between calls) is not mutated.
@@ -237,15 +233,8 @@ func applyDataSecurityDenies(d *lockdown.Defaults, drv *lockdown.Driver) *lockdo
 		Deny:  append([]string(nil), d.Deny...),
 	}
 	out.Deny = append(out.Deny,
-		"Read(/Users/kai/projects/coilysiren/coilyco-vault/**)",
 		"Read(~/projects/coilysiren/coilyco-vault/**)",
 	)
-	if tier == "max" {
-		out.Deny = append(out.Deny,
-			"Bash(echo*$*)",
-			"Bash(printf*$*)",
-		)
-	}
 	return out
 }
 

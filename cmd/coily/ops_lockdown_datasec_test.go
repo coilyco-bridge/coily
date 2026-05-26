@@ -33,25 +33,32 @@ func TestApplyDataSecurityDenies_HighAddsVaultDenies(t *testing.T) {
 	}
 }
 
-func TestApplyDataSecurityDenies_MaxAddsBashEchoDenies(t *testing.T) {
+func TestApplyDataSecurityDenies_MaxIncludesVaultDeny(t *testing.T) {
 	d := &lockdown.Defaults{Deny: []string{"base"}}
 	drv := &lockdown.Driver{Coordinate: &profile.Coordinate{DataSecurity: profile.DataSecurityMax}}
 	got := applyDataSecurityDenies(d, drv)
-	foundEcho := false
 	foundVault := false
 	for _, e := range got.Deny {
-		if strings.HasPrefix(e, "Bash(echo") {
-			foundEcho = true
-		}
 		if strings.Contains(e, "coilyco-vault") {
 			foundVault = true
 		}
 	}
-	if !foundEcho {
-		t.Errorf("max should add Bash echo denies, got %v", got.Deny)
-	}
 	if !foundVault {
-		t.Errorf("max should still include vault deny, got %v", got.Deny)
+		t.Errorf("max should include vault deny, got %v", got.Deny)
+	}
+}
+
+// TestApplyDataSecurityDenies_VaultPathIsPortable pins the post-cli-guard#14
+// invariant: only the portable ~/ form ships; the hardcoded /Users/kai/ form
+// is gone (broke on every non-Mac host).
+func TestApplyDataSecurityDenies_VaultPathIsPortable(t *testing.T) {
+	d := &lockdown.Defaults{Deny: []string{"base"}}
+	drv := &lockdown.Driver{Coordinate: &profile.Coordinate{DataSecurity: profile.DataSecurityHigh}}
+	got := applyDataSecurityDenies(d, drv)
+	for _, e := range got.Deny {
+		if strings.Contains(e, "/Users/kai/") {
+			t.Errorf("vault deny still contains hardcoded /Users/kai/ path: %s", e)
+		}
 	}
 }
 
