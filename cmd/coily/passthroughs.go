@@ -63,7 +63,7 @@ type ptEntry struct {
 // user-visible path.
 var ptOps = []ptEntry{
 	{Bin: "aws", VerbName: "ops.aws", Egress: true},
-	{Bin: "gh", VerbName: "ops.gh", Egress: true, ScopeArgvHint: ghRepoScopeHint, ArgvRewriter: rewriteGHForRESTAndJQFile, ReadCache: ghReadCacheClassifier, PreflightGate: ghActionsGate},
+	{Bin: "gh", VerbName: "ops.gh", Egress: true, ScopeArgvHint: ghRepoScopeHint, ArgvRewriter: rewriteGHForRESTAndJQFile, ReadCache: ghReadCacheClassifier, PreflightGate: ghPreflightGate},
 	{Bin: "kubectl", VerbName: "ops.kubectl", Egress: true},
 	{Bin: "flyctl", VerbName: "ops.flyctl", Egress: true},
 	{Bin: "gcloud", VerbName: "ops.gcloud", Egress: true},

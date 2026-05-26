@@ -95,6 +95,12 @@ Flags: --channel, --dry-run, --launch-name, --no-worktree, --queue-dir, --surfac
 
 Remove dispatch worktrees whose branch is already merged into main.
 
+## `coily dispatch status`
+
+Show pid + log tail for a headless dispatch.
+
+Flags: --follow, --pid, --tail
+
 ## `coily docker`
 
 Pass-through to docker with argv validation + audit log.
@@ -1568,6 +1574,198 @@ List forgejo users.
 Run a forgejo doctor check (readonly; --fix not exposed).
 
 Flags: --run
+
+## `coily ops forgejo issue close`
+
+Set a forgejo issue's state to closed.
+
+Flags: --number, --repo
+
+## `coily ops forgejo issue comment`
+
+Add a comment to a forgejo issue.
+
+Flags: --body-file, --number, --repo
+
+## `coily ops forgejo issue create`
+
+Create a forgejo issue via the API.
+
+Flags: --body-file, --repo, --title
+
+## `coily ops forgejo issue delete`
+
+Delete a forgejo issue (forgejo requires site-admin).
+
+Flags: --number, --repo
+
+## `coily ops forgejo issue edit`
+
+Edit an existing forgejo issue's title and/or body.
+
+Flags: --body-file, --number, --repo, --title
+
+## `coily ops forgejo issue list`
+
+List forgejo issues in a repo.
+
+Flags: --limit, --repo, --state
+
+## `coily ops forgejo issue reopen`
+
+Set a forgejo issue's state to open.
+
+Flags: --number, --repo
+
+## `coily ops forgejo issue view`
+
+View a single forgejo issue.
+
+Flags: --number, --repo
+
+## `coily ops forgejo label create`
+
+Create a forgejo label.
+
+Flags: --color, --description-file, --name, --repo
+
+## `coily ops forgejo label delete`
+
+Delete a forgejo label by id.
+
+Flags: --id, --repo
+
+## `coily ops forgejo label edit`
+
+Edit a forgejo label by id.
+
+Flags: --color, --description-file, --id, --name, --repo
+
+## `coily ops forgejo label list`
+
+List forgejo labels in a repo.
+
+Flags: --repo
+
+## `coily ops forgejo pr close`
+
+Set a forgejo PR's state to closed.
+
+Flags: --number, --repo
+
+## `coily ops forgejo pr comment`
+
+Add a conversation comment to a forgejo PR (uses the issue comments endpoint).
+
+Flags: --body-file, --number, --repo
+
+## `coily ops forgejo pr create`
+
+Create a forgejo pull request.
+
+Flags: --base, --body-file, --head, --repo, --title
+
+## `coily ops forgejo pr list`
+
+List forgejo pull requests in a repo.
+
+Flags: --limit, --repo, --state
+
+## `coily ops forgejo pr merge`
+
+Merge a forgejo pull request.
+
+Flags: --message-file, --method, --number, --repo, --title
+
+## `coily ops forgejo pr reopen`
+
+Set a forgejo PR's state to open.
+
+Flags: --number, --repo
+
+## `coily ops forgejo pr review`
+
+Submit a review (APPROVE, REQUEST_CHANGES, COMMENT) on a forgejo PR.
+
+Flags: --body-file, --comments-file, --event, --number, --repo
+
+## `coily ops forgejo pr view`
+
+View a single forgejo pull request.
+
+Flags: --number, --repo
+
+## `coily ops forgejo release create`
+
+Create a forgejo release.
+
+Flags: --body-file, --draft, --name, --prerelease, --repo, --tag, --target
+
+## `coily ops forgejo release delete`
+
+Delete a forgejo release by id.
+
+Flags: --id, --repo
+
+## `coily ops forgejo release edit`
+
+Edit an existing forgejo release.
+
+Flags: --body-file, --draft, --id, --name, --prerelease, --repo, --tag
+
+## `coily ops forgejo release list`
+
+List forgejo releases in a repo.
+
+Flags: --limit, --repo
+
+## `coily ops forgejo release upload-asset`
+
+Upload an attachment file to a forgejo release.
+
+Flags: --file, --id, --name, --repo
+
+## `coily ops forgejo release view`
+
+View a single forgejo release.
+
+Flags: --id, --repo
+
+## `coily ops forgejo repo archive`
+
+Archive a forgejo repo (sets archived=true).
+
+Flags: --repo
+
+## `coily ops forgejo repo delete`
+
+Delete a forgejo repo (admin-gated server-side).
+
+Flags: --repo
+
+## `coily ops forgejo repo edit`
+
+Edit a forgejo repo's metadata.
+
+Flags: --description-file, --has-issues, --has-wiki, --private, --repo
+
+## `coily ops forgejo repo fork`
+
+Fork a forgejo repo to the authenticated user or a named org.
+
+Flags: --organization, --repo
+
+## `coily ops forgejo repo list`
+
+Search forgejo repos by name.
+
+Flags: --limit, --query
+
+## `coily ops forgejo repo view`
+
+View a single forgejo repo.
+
+Flags: --repo
 
 ## `coily ops gcloud`
 
