@@ -1,0 +1,33 @@
+name: mirror-to-github
+
+# Forgejo is the canonical source for coily. GitHub is a read-only
+# mirror. This workflow pushes Forgejo's main and tags to GitHub on
+# every push event so the mirror tracks. No-ops cleanly when the
+# GITHUB_MIRROR_PAT secret is absent, so the workflow can land before
+# the secret is provisioned. See docs/release-pipeline.md.
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+jobs:
+  mirror:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Mirror to GitHub
+        env:
+          PAT: ${{ secrets.GITHUB_MIRROR_PAT }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PAT}" ]; then
+            echo "mirror-to-github: GITHUB_MIRROR_PAT secret not set; skipping." >&2
+            exit 0
+          fi
+          git remote add github "https://x-access-token:${PAT}@github.com/coilysiren/coily.git"
+          git push --force github main
+          git push --force --tags github
