@@ -47,6 +47,7 @@ Verbs:
 			r.forgejoReleaseCommand(),
 			r.forgejoRepoCommand(),
 			r.forgejoPRCommand(),
+			r.forgejoActionsCommand(),
 			{
 				Name:  "admin",
 				Usage: "Forgejo admin verbs.",

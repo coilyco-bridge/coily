@@ -1555,6 +1555,18 @@ Flags: --body, --thread_id, --with_components
 
 Pass-through to flyctl with argv validation + audit log.
 
+## `coily ops forgejo actions task list`
+
+List recent Forgejo Actions tasks for a repo.
+
+Flags: --limit, --repo
+
+## `coily ops forgejo actions task logs`
+
+Print the decoded log for a Forgejo Actions task.
+
+Flags: --id, --repo
+
 ## `coily ops forgejo admin auth list`
 
 List forgejo auth sources.
