@@ -13,8 +13,6 @@ name: release
 # git tag is the only version artifact.
 #
 # Shared composite actions live at coilysiren/agentic-os/actions/*.
-# Bump-scoop + Windows .exe builds are not migrated yet (depend on
-# scoop-bucket migration to forgejo, tracked separately).
 
 on:
   push:
@@ -30,6 +28,7 @@ jobs:
       tag: ${{ steps.tag.outputs.new_tag }}
       version: ${{ steps.tag.outputs.new_version }}
       changelog: ${{ steps.tag.outputs.changelog }}
+      release_id: ${{ steps.create.outputs.release_id }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -40,7 +39,8 @@ jobs:
         with:
           default_bump: patch
 
-      - if: ${{ steps.tag.outputs.new_tag != '' }}
+      - id: create
+        if: ${{ steps.tag.outputs.new_tag != '' }}
         uses: coilysiren/agentic-os/actions/create-release@main
         with:
           tag: ${{ steps.tag.outputs.new_tag }}
@@ -69,3 +69,48 @@ jobs:
           formula_path: Formula/coily.rb
           tag: ${{ needs.release.outputs.tag }}
           revision: ${{ steps.rev.outputs.revision }}
+
+  windows-assets:
+    needs: release
+    if: ${{ needs.release.outputs.tag != '' }}
+    runs-on: docker
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - id: build
+        shell: bash
+        env:
+          TAG: ${{ needs.release.outputs.tag }}
+          ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          out="coily-windows-${ARCH}.exe"
+          GOOS=windows GOARCH="$ARCH" \
+            go build -tags prod \
+            -ldflags "-s -w -X main.Version=${TAG}" \
+            -o "$out" ./cmd/coily
+          sha256sum "$out" | awk '{print $1}' > "$out.sha256"
+          echo "exe=$out" >> "$GITHUB_OUTPUT"
+          echo "sha=$out.sha256" >> "$GITHUB_OUTPUT"
+
+      - uses: coilysiren/agentic-os/actions/upload-release-asset@main
+        with:
+          release_id: ${{ needs.release.outputs.release_id }}
+          file: ${{ steps.build.outputs.exe }}
+
+      - uses: coilysiren/agentic-os/actions/upload-release-asset@main
+        with:
+          release_id: ${{ needs.release.outputs.release_id }}
+          file: ${{ steps.build.outputs.sha }}
