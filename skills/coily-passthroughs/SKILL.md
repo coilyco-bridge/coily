@@ -1659,6 +1659,48 @@ List forgejo labels in a repo.
 
 Flags: --repo
 
+## `coily ops forgejo milestone close`
+
+Set a forgejo milestone's state to closed.
+
+Flags: --number, --repo
+
+## `coily ops forgejo milestone create`
+
+Create a forgejo milestone.
+
+Flags: --description-file, --due-on, --repo, --title
+
+## `coily ops forgejo milestone delete`
+
+Delete a forgejo milestone by id.
+
+Flags: --number, --repo
+
+## `coily ops forgejo milestone edit`
+
+Edit an existing forgejo milestone.
+
+Flags: --description-file, --due-on, --number, --repo, --state, --title
+
+## `coily ops forgejo milestone list`
+
+List forgejo milestones in a repo.
+
+Flags: --repo, --state
+
+## `coily ops forgejo milestone reopen`
+
+Set a forgejo milestone's state to open.
+
+Flags: --number, --repo
+
+## `coily ops forgejo milestone view`
+
+View a single forgejo milestone.
+
+Flags: --number, --repo
+
 ## `coily ops forgejo pr close`
 
 Set a forgejo PR's state to closed.

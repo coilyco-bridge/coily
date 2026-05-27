@@ -38,12 +38,14 @@ Verbs:
   coily ops forgejo doctor check --run <name>
   coily ops forgejo issue create --repo <owner/name> --title <t> --body-file <path>
   coily ops forgejo label create --repo <owner/name> --name <n> --color <hex>
+  coily ops forgejo milestone create --repo <owner/name> --title <t> [--due-on YYYY-MM-DD]
   coily ops forgejo release create --repo <owner/name> --tag <tag> [--body-file <path>]
   coily ops forgejo repo view --repo <owner/name>
   coily ops forgejo pr list --repo <owner/name>`,
 		Commands: []*cli.Command{
 			r.forgejoIssueCommand(),
 			r.forgejoLabelCommand(),
+			r.forgejoMilestoneCommand(),
 			r.forgejoReleaseCommand(),
 			r.forgejoRepoCommand(),
 			r.forgejoPRCommand(),
