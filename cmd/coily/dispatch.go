@@ -1,6 +1,10 @@
 package main
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -64,14 +68,34 @@ func (r *Runner) dispatchCommand() *cli.Command {
 		Wrap: func(s verb.Spec) cli.ActionFunc {
 			return r.WrapVerb(s, r.Audit)
 		},
-		AllowedOwner: allowedOwner,
-		BinaryName:   "coily",
-		RepoPath:     localRepoPath,
-		WorktreeRoot: dispatchWorktreeRoot,
-		LogRoot:      dispatchLogRoot,
+		AllowedOwner:      allowedOwner,
+		BinaryName:        "coily",
+		RepoPath:          localRepoPath,
+		WorktreeRoot:      dispatchWorktreeRoot,
+		LogRoot:           dispatchLogRoot,
+		ForgejoBaseURL:    r.Cfg.Forgejo.BaseURL,
+		FetchForgejoIssue: r.fetchForgejoIssue,
 	})
 	if err != nil {
 		panic("coily: dispatch wiring invalid: " + err.Error())
 	}
 	return d.Command()
+}
+
+// fetchForgejoIssue resolves a forgejo issue via the same forgejoAPIDo
+// path the `coily ops forgejo issue view` verb uses. Wraps the response
+// into the platform-neutral dispatch.Issue shape. A 404 surfaces as an
+// error whose message contains "404" so the dispatch package can fall
+// back to GitHub for shortform refs.
+func (r *Runner) fetchForgejoIssue(ctx context.Context, owner, repo string, number int) (*dispatch.Issue, error) {
+	path := fmt.Sprintf("/api/v1/repos/%s/%s/issues/%d", owner, repo, number)
+	respBody, err := r.forgejoAPIDo(ctx, "dispatch forgejo", http.MethodGet, path, nil, http.StatusOK)
+	if err != nil {
+		return nil, err
+	}
+	var issue dispatch.Issue
+	if err := json.Unmarshal(respBody, &issue); err != nil {
+		return nil, fmt.Errorf("dispatch forgejo: parse %s: %w", path, err)
+	}
+	return &issue, nil
 }
