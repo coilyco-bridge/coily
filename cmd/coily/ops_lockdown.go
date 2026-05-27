@@ -232,10 +232,22 @@ func applyDataSecurityDenies(d *lockdown.Defaults, drv *lockdown.Driver) *lockdo
 		Allow: append([]string(nil), d.Allow...),
 		Deny:  append([]string(nil), d.Deny...),
 	}
-	out.Deny = append(out.Deny,
-		"Read(~/projects/coilysiren/coilyco-vault/**)",
-	)
+	out.Deny = append(out.Deny, vaultReadDenies()...)
 	return out
+}
+
+// vaultReadDenies returns both the portable tilde form and the
+// runtime-resolved absolute form of the coilyco-vault read deny.
+// Claude Code's permission matcher is a literal string compare, so
+// emitting only the tilde form lets the absolute path bypass the deny.
+func vaultReadDenies() []string {
+	denies := []string{"Read(~/projects/coilysiren/coilyco-vault/**)"}
+	home, err := os.UserHomeDir()
+	if err != nil || home == "" {
+		return denies
+	}
+	denies = append(denies, "Read("+home+"/projects/coilysiren/coilyco-vault/**)")
+	return denies
 }
 
 // lockdownInitConfigCommand writes the embedded default profiles

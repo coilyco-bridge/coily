@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -48,17 +49,57 @@ func TestApplyDataSecurityDenies_MaxIncludesVaultDeny(t *testing.T) {
 	}
 }
 
-// TestApplyDataSecurityDenies_VaultPathIsPortable pins the post-cli-guard#14
-// invariant: only the portable ~/ form ships; the hardcoded /Users/kai/ form
-// is gone (broke on every non-Mac host).
+// TestApplyDataSecurityDenies_VaultPathIsPortable pins the
+// post-cli-guard#14 invariant: no host-specific path is hardcoded.
+// The absolute form is derived from os.UserHomeDir() at render time,
+// not baked into source.
 func TestApplyDataSecurityDenies_VaultPathIsPortable(t *testing.T) {
 	d := &lockdown.Defaults{Deny: []string{"base"}}
 	drv := &lockdown.Driver{Coordinate: &profile.Coordinate{DataSecurity: profile.DataSecurityHigh}}
 	got := applyDataSecurityDenies(d, drv)
+	home, _ := os.UserHomeDir()
 	for _, e := range got.Deny {
-		if strings.Contains(e, "/Users/kai/") {
-			t.Errorf("vault deny still contains hardcoded /Users/kai/ path: %s", e)
+		if !strings.Contains(e, "coilyco-vault") {
+			continue
 		}
+		if strings.HasPrefix(e, "Read(~") {
+			continue
+		}
+		if home != "" && strings.Contains(e, home) {
+			continue
+		}
+		t.Errorf("vault deny is not portable (not ~/, not runtime home %q): %s", home, e)
+	}
+}
+
+// TestApplyDataSecurityDenies_EmitsBothPathForms pins coily#111: the
+// vault deny ships both the tilde form and the runtime-resolved
+// absolute form so Claude Code's literal string compare cannot be
+// bypassed by switching path representations.
+func TestApplyDataSecurityDenies_EmitsBothPathForms(t *testing.T) {
+	d := &lockdown.Defaults{Deny: []string{"base"}}
+	drv := &lockdown.Driver{Coordinate: &profile.Coordinate{DataSecurity: profile.DataSecurityHigh}}
+	got := applyDataSecurityDenies(d, drv)
+	wantTilde := "Read(~/projects/coilysiren/coilyco-vault/**)"
+	home, err := os.UserHomeDir()
+	if err != nil {
+		t.Skipf("os.UserHomeDir() unavailable: %v", err)
+	}
+	wantAbs := "Read(" + home + "/projects/coilysiren/coilyco-vault/**)"
+	foundTilde, foundAbs := false, false
+	for _, e := range got.Deny {
+		if e == wantTilde {
+			foundTilde = true
+		}
+		if e == wantAbs {
+			foundAbs = true
+		}
+	}
+	if !foundTilde {
+		t.Errorf("missing tilde form %q in %v", wantTilde, got.Deny)
+	}
+	if !foundAbs {
+		t.Errorf("missing absolute form %q in %v", wantAbs, got.Deny)
 	}
 }
 
