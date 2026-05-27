@@ -69,6 +69,7 @@ jobs:
           formula_path: Formula/coily.rb
           tag: ${{ needs.release.outputs.tag }}
           revision: ${{ steps.rev.outputs.revision }}
+          forgejo_token: ${{ secrets.FORGEJO_PAT }}
 
   windows-assets:
     needs: release
