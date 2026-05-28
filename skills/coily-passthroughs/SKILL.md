@@ -91,6 +91,12 @@ Spawn a detached worker allowed to recursively dispatch sub-workers (bounded fan
 
 Flags: --allowed-tools, --claims, --claude-bin, --depth, --dry-run, --permission-mode
 
+## `coily dispatch consult`
+
+Like interactive, but encouraged to pause and surface real judgment calls.
+
+Flags: --channel, --dry-run, --launch-name, --queue-dir, --surface
+
 ## `coily dispatch headless`
 
 Spawn a detached `claude -p` against a real open issue.
@@ -101,7 +107,7 @@ Flags: --allowed-tools, --claims, --claude-bin, --dry-run, --permission-mode
 
 Open a new Warp tab with `claude "Work on issue <ref>"` pre-submitted.
 
-Flags: --channel, --dry-run, --launch-name, --no-worktree, --posture, --queue-dir, --surface
+Flags: --channel, --dry-run, --launch-name, --queue-dir, --surface
 
 ## `coily dispatch reap`
 

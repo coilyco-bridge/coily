@@ -36,8 +36,8 @@ func localRepoPath(repo string) (string, error) {
 	return filepath.Join(home, "projects", allowedOwner, repo), nil
 }
 
-// dispatchWorktreeRoot is the parent directory under which each interactive
-// dispatch gets its own git worktree: ~/projects/coilysiren/.dispatch-worktrees.
+// dispatchWorktreeRoot is the parent dir under which each detached dispatch
+// (headless, cascade) gets its worktree (coily#145): .dispatch-worktrees.
 func dispatchWorktreeRoot() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {

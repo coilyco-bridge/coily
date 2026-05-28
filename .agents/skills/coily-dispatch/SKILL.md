@@ -116,7 +116,9 @@ Pick cascade on phrasing like "migrate all of A B C D", "fan this out across the
 
 **Explicit surface words always win.** If Kai says "headless", "AFK", "interactive", "supervised", "consult"/"ask me"/"weigh in", or "cascade"/"swarm"/"fan out", use that and skip the heuristic.
 
-Worktree placement, prompt seeding, the audit row, the ntfy notification, and (for headless) detaching the child process are all owned by `coily dispatch` itself - not this skill.
+**Isolation tracks the surface (coilysiren/coily#145).** The detached surfaces (`headless`, `cascade`) each run in their own per-issue git worktree+branch, so multiple concurrent workers in one repo never share a working tree - each lands by merging its branch into main when green. The supervised surfaces (`interactive`, `consult`) run directly on the default branch in the canonical checkout: no worktree, no merge dance, what-you-see-is-what-ships. This is invisible to ref normalization but worth knowing when reasoning about concurrent dispatches into one repo.
+
+Worktree placement, prompt seeding, the audit row, the ntfy notification, and (for headless/cascade) detaching the child process are all owned by `coily dispatch` itself - not this skill.
 
 ## Examples
 
