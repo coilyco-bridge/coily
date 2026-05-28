@@ -6,9 +6,22 @@ import (
 	"os"
 	"strings"
 
+	"github.com/coilysiren/cli-guard/audit"
 	"github.com/coilysiren/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
+
+// stampPolicySkipped marks the audit row to show the shell-metacharacter
+// gate was deliberately skipped for this verb. Used as the OnComplete for
+// the forgejo create/edit verbs: their free-text args (issue/PR/milestone
+// titles, label/release names) are marshaled into an HTTP JSON body via
+// forgejoAPIDo and never reach a shell or even execve, so the gate's threat
+// model (argv re-evaluated by a downstream shell) does not apply. Skipping
+// it lets a title like "feat(dispatch): x" through verbatim instead of
+// bouncing or being mangled, and the stamp keeps the audit trail honest
+// about the relaxed policy. Mirrors the allow_metacharacters opt-out for
+// user exec verbs (SECURITY.md).
+func stampPolicySkipped(rec *audit.Record) { rec.PolicySkipped = true }
 
 // forgejoCommand wraps the in-pod `forgejo` CLI on the kai-server k3s deploy.
 // Each leaf renders a fixed-shape `k3s kubectl -n forgejo exec deploy/forgejo

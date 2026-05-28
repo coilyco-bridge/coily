@@ -55,18 +55,9 @@ func (r *Runner) forgejoReleaseCreateCommand() *cli.Command {
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name: "ops.forgejo.release.create",
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					return map[string]string{
-						"--repo":       c.String("repo"),
-						"--tag":        c.String("tag"),
-						"--name":       cosmeticSanitizeValue(c.String("name")),
-						"--body-file":  c.String("body-file"),
-						"--target":     c.String("target"),
-						"--draft":      strconv.FormatBool(c.Bool("draft")),
-						"--prerelease": strconv.FormatBool(c.Bool("prerelease")),
-					}, c.Args().Slice()
-				},
+				Name:       "ops.forgejo.release.create",
+				SkipPolicy: true,
+				OnComplete: stampPolicySkipped,
 				Action: func(ctx context.Context, c *cli.Command) error {
 					return r.runForgejoReleaseCreate(ctx, c)
 				},
@@ -90,7 +81,7 @@ func (r *Runner) runForgejoReleaseCreate(ctx context.Context, c *cli.Command) er
 	}
 	body := forgejoReleaseCreateBody{
 		TagName:    tag,
-		Name:       strings.TrimSpace(r.cosmeticArg("ops.forgejo.release.create", "--name", c.String("name"))),
+		Name:       strings.TrimSpace(c.String("name")),
 		Target:     strings.TrimSpace(c.String("target")),
 		Draft:      c.Bool("draft"),
 		Prerelease: c.Bool("prerelease"),
@@ -215,18 +206,9 @@ func (r *Runner) forgejoReleaseEditCommand() *cli.Command {
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name: "ops.forgejo.release.edit",
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					return map[string]string{
-						"--repo":       c.String("repo"),
-						"--id":         strconv.Itoa(c.Int("id")),
-						"--name":       cosmeticSanitizeValue(c.String("name")),
-						"--body-file":  c.String("body-file"),
-						"--tag":        c.String("tag"),
-						"--draft":      strconv.FormatBool(c.Bool("draft")),
-						"--prerelease": strconv.FormatBool(c.Bool("prerelease")),
-					}, c.Args().Slice()
-				},
+				Name:       "ops.forgejo.release.edit",
+				SkipPolicy: true,
+				OnComplete: stampPolicySkipped,
 				Action: func(ctx context.Context, c *cli.Command) error {
 					return r.runForgejoReleaseEdit(ctx, c)
 				},
@@ -270,7 +252,7 @@ func (r *Runner) runForgejoReleaseEdit(ctx context.Context, c *cli.Command) erro
 func (r *Runner) buildForgejoReleasePatch(c *cli.Command) (forgejoReleaseEditBody, error) {
 	patch := forgejoReleaseEditBody{}
 	anySet := false
-	if v := strings.TrimSpace(r.cosmeticArg("ops.forgejo.release.edit", "--name", c.String("name"))); v != "" {
+	if v := strings.TrimSpace(c.String("name")); v != "" {
 		patch.Name = &v
 		anySet = true
 	}
