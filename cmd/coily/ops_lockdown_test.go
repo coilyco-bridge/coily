@@ -149,10 +149,8 @@ func TestLockdown_RecursiveNoReposErrors(t *testing.T) {
 }
 
 // TestLockdown_RecursiveReassertsAncestorDeny exercises the
-// recursion-root reassertion path. Reproduces the shape of the
-// 2026-05-08 finding: parent dir carries a broad allow that shadows
-// child-repo deny rules; --recursive --apply must merge the canonical
-// deny into the parent so deny-beats-allow neutralizes the shadow.
+// recursion-root reassertion path. The canonical deny merges in,
+// AND the shadowed Bash(gh issue *) allow gets pruned (cli-guard#26).
 func TestLockdown_RecursiveReassertsAncestorDeny(t *testing.T) {
 	root := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(root, ".claude"), 0o755); err != nil {
@@ -161,7 +159,7 @@ func TestLockdown_RecursiveReassertsAncestorDeny(t *testing.T) {
 	parentSettings := filepath.Join(root, ".claude", "settings.local.json")
 	original := `{
   "permissions": {
-    "allow": ["Bash(gh issue *)"]
+    "allow": ["Bash(gh issue *)", "Read(/Users/kai/.claude/**)"]
   }
 }`
 	if err := os.WriteFile(parentSettings, []byte(original), 0o600); err != nil {
@@ -181,8 +179,11 @@ func TestLockdown_RecursiveReassertsAncestorDeny(t *testing.T) {
 		t.Fatalf("read parent settings: %v", err)
 	}
 	body := string(got)
-	if !strings.Contains(body, "Bash(gh issue *)") {
-		t.Errorf("user allow was dropped from ancestor; got: %s", body)
+	if strings.Contains(body, "Bash(gh issue *)") {
+		t.Errorf("shadowed allow Bash(gh issue *) not pruned; got: %s", body)
+	}
+	if !strings.Contains(body, "Read(/Users/kai/.claude/**)") {
+		t.Errorf("non-Bash allow was dropped; got: %s", body)
 	}
 	if !strings.Contains(body, "Bash(gh:*)") {
 		t.Errorf("canonical deny not merged into ancestor; got: %s", body)

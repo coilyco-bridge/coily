@@ -392,10 +392,16 @@ func lockdownAction(_ context.Context, c *cli.Command) error {
 		return fmt.Errorf("lockdown: --replace requires --apply (use `coily lockdown --apply --replace`)")
 	}
 
-	d, err := lockdown.LoadDefaults()
+	base, err := lockdown.LoadDefaults()
 	if err != nil {
 		return err
 	}
+	drv := coilyLockdownDriver()
+	// ancestorDefaults: full deny list (no hook-handoff trim) so the
+	// recursion-root settings.local.json shadow-neutralizes every
+	// canonical deny. The parent has no hook to receive the handoff.
+	ancestorDefaults := applyDataSecurityDenies(base, drv)
+	stampDefaults := applyWrapperAllows(applyHookHandoffTrim(ancestorDefaults))
 
 	root := c.String("path")
 	local := c.Bool("local")
@@ -416,13 +422,13 @@ func lockdownAction(_ context.Context, c *cli.Command) error {
 	}
 
 	for _, dir := range dirs {
-		if err := lockdownOne(dir, local, apply, replace, d); err != nil {
+		if err := lockdownOne(dir, local, apply, replace, stampDefaults, drv); err != nil {
 			return err
 		}
 	}
 
 	if recursive {
-		if err := reassertAncestor(root, apply, d); err != nil {
+		if err := reassertAncestor(root, apply, ancestorDefaults); err != nil {
 			return err
 		}
 	}
@@ -461,12 +467,8 @@ func reassertAncestor(root string, apply bool, d *lockdown.Defaults) error {
 	return nil
 }
 
-func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults) error {
+func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults, drv *lockdown.Driver) error {
 	target := lockdown.TargetPath(dir, local)
-	drv := coilyLockdownDriver()
-	d = applyDataSecurityDenies(d, drv)
-	d = applyHookHandoffTrim(d)
-	d = applyWrapperAllows(d)
 	plan, err := lockdown.BuildPlan(target, d, drv)
 	if err != nil {
 		return err
