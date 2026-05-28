@@ -50,11 +50,12 @@ func (r *Runner) forgejoPRCreateCommand() *cli.Command {
 			verb.Spec{
 				Name: "ops.forgejo.pr.create",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					title, _ := cosmeticSanitize(c.String("title"))
 					return map[string]string{
 						"--repo":      c.String("repo"),
 						"--head":      c.String("head"),
 						"--base":      c.String("base"),
-						"--title":     c.String("title"),
+						"--title":     title,
 						"--body-file": c.String("body-file"),
 					}, c.Args().Slice()
 				},
@@ -83,7 +84,7 @@ func (r *Runner) runForgejoPRCreate(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	title := strings.TrimSpace(c.String("title"))
+	title := strings.TrimSpace(r.cosmeticArg("ops.forgejo.pr.create", "--title", c.String("title")))
 	if title == "" {
 		return fmt.Errorf("ops forgejo pr create: --title is empty")
 	}

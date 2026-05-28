@@ -60,7 +60,7 @@ func (r *Runner) forgejoReleaseCreateCommand() *cli.Command {
 					return map[string]string{
 						"--repo":       c.String("repo"),
 						"--tag":        c.String("tag"),
-						"--name":       c.String("name"),
+						"--name":       cosmeticSanitizeValue(c.String("name")),
 						"--body-file":  c.String("body-file"),
 						"--target":     c.String("target"),
 						"--draft":      strconv.FormatBool(c.Bool("draft")),
@@ -90,7 +90,7 @@ func (r *Runner) runForgejoReleaseCreate(ctx context.Context, c *cli.Command) er
 	}
 	body := forgejoReleaseCreateBody{
 		TagName:    tag,
-		Name:       strings.TrimSpace(c.String("name")),
+		Name:       strings.TrimSpace(r.cosmeticArg("ops.forgejo.release.create", "--name", c.String("name"))),
 		Target:     strings.TrimSpace(c.String("target")),
 		Draft:      c.Bool("draft"),
 		Prerelease: c.Bool("prerelease"),
@@ -220,7 +220,7 @@ func (r *Runner) forgejoReleaseEditCommand() *cli.Command {
 					return map[string]string{
 						"--repo":       c.String("repo"),
 						"--id":         strconv.Itoa(c.Int("id")),
-						"--name":       c.String("name"),
+						"--name":       cosmeticSanitizeValue(c.String("name")),
 						"--body-file":  c.String("body-file"),
 						"--tag":        c.String("tag"),
 						"--draft":      strconv.FormatBool(c.Bool("draft")),
@@ -248,7 +248,7 @@ func (r *Runner) runForgejoReleaseEdit(ctx context.Context, c *cli.Command) erro
 	if id <= 0 {
 		return fmt.Errorf("ops forgejo release edit: --id must be >= 1, got %d", id)
 	}
-	patch, err := buildForgejoReleasePatch(c)
+	patch, err := r.buildForgejoReleasePatch(c)
 	if err != nil {
 		return err
 	}
@@ -267,10 +267,10 @@ func (r *Runner) runForgejoReleaseEdit(ctx context.Context, c *cli.Command) erro
 // buildForgejoReleasePatch assembles the PATCH body from whichever
 // optional flags the operator set. Boolean flags use c.IsSet so the
 // caller can distinguish "leave alone" from "set to false."
-func buildForgejoReleasePatch(c *cli.Command) (forgejoReleaseEditBody, error) {
+func (r *Runner) buildForgejoReleasePatch(c *cli.Command) (forgejoReleaseEditBody, error) {
 	patch := forgejoReleaseEditBody{}
 	anySet := false
-	if v := strings.TrimSpace(c.String("name")); v != "" {
+	if v := strings.TrimSpace(r.cosmeticArg("ops.forgejo.release.edit", "--name", c.String("name"))); v != "" {
 		patch.Name = &v
 		anySet = true
 	}

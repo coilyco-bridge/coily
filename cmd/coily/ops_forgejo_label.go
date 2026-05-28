@@ -43,7 +43,7 @@ func (r *Runner) forgejoLabelCreateCommand() *cli.Command {
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
 						"--repo":             c.String("repo"),
-						"--name":             c.String("name"),
+						"--name":             cosmeticSanitizeValue(c.String("name")),
 						"--color":            c.String("color"),
 						"--description-file": c.String("description-file"),
 					}, c.Args().Slice()
@@ -56,7 +56,7 @@ func (r *Runner) forgejoLabelCreateCommand() *cli.Command {
 					if err != nil {
 						return err
 					}
-					name, err := validateForgejoLabelName(c.String("name"), "ops forgejo label create")
+					name, err := validateForgejoLabelName(r.cosmeticArg("ops.forgejo.label.create", "--name", c.String("name")), "ops forgejo label create")
 					if err != nil {
 						return err
 					}
@@ -141,7 +141,7 @@ func (r *Runner) forgejoLabelEditCommand() *cli.Command {
 					return map[string]string{
 						"--repo":             c.String("repo"),
 						"--id":               strconv.Itoa(c.Int("id")),
-						"--name":             c.String("name"),
+						"--name":             cosmeticSanitizeValue(c.String("name")),
 						"--color":            c.String("color"),
 						"--description-file": c.String("description-file"),
 					}, c.Args().Slice()
@@ -170,7 +170,7 @@ func (r *Runner) runForgejoLabelEdit(ctx context.Context, c *cli.Command) error 
 	if id <= 0 {
 		return fmt.Errorf("ops forgejo label edit: --id must be >= 1, got %d", id)
 	}
-	patch, err := buildForgejoLabelPatch(c)
+	patch, err := r.buildForgejoLabelPatch(c)
 	if err != nil {
 		return err
 	}
@@ -189,8 +189,8 @@ func (r *Runner) runForgejoLabelEdit(ctx context.Context, c *cli.Command) error 
 // buildForgejoLabelPatch reads the optional --name / --color /
 // --description-file flags and assembles the PATCH body. Returns an
 // error if none of them are set.
-func buildForgejoLabelPatch(c *cli.Command) (forgejoLabelEditBody, error) {
-	name := strings.TrimSpace(c.String("name"))
+func (r *Runner) buildForgejoLabelPatch(c *cli.Command) (forgejoLabelEditBody, error) {
+	name := strings.TrimSpace(r.cosmeticArg("ops.forgejo.label.edit", "--name", c.String("name")))
 	colorRaw := strings.TrimSpace(c.String("color"))
 	descPath := c.String("description-file")
 	if name == "" && colorRaw == "" && descPath == "" {

@@ -46,9 +46,10 @@ func (r *Runner) forgejoMilestoneCreateCommand() *cli.Command {
 			verb.Spec{
 				Name: "ops.forgejo.milestone.create",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					title, _ := cosmeticSanitize(c.String("title"))
 					return map[string]string{
 						"--repo":             c.String("repo"),
-						"--title":            c.String("title"),
+						"--title":            title,
 						"--description-file": c.String("description-file"),
 						"--due-on":           c.String("due-on"),
 					}, c.Args().Slice()
@@ -70,7 +71,7 @@ func (r *Runner) runForgejoMilestoneCreate(ctx context.Context, c *cli.Command) 
 	if err != nil {
 		return err
 	}
-	title := strings.TrimSpace(c.String("title"))
+	title := strings.TrimSpace(r.cosmeticArg("ops.forgejo.milestone.create", "--title", c.String("title")))
 	if title == "" {
 		return fmt.Errorf("ops forgejo milestone create: --title is empty")
 	}
@@ -203,10 +204,11 @@ func (r *Runner) forgejoMilestoneEditCommand() *cli.Command {
 			verb.Spec{
 				Name: "ops.forgejo.milestone.edit",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					title, _ := cosmeticSanitize(c.String("title"))
 					return map[string]string{
 						"--repo":             c.String("repo"),
 						"--number":           strconv.Itoa(c.Int("number")),
-						"--title":            c.String("title"),
+						"--title":            title,
 						"--description-file": c.String("description-file"),
 						"--due-on":           c.String("due-on"),
 						"--state":            c.String("state"),
@@ -233,7 +235,7 @@ func (r *Runner) runForgejoMilestoneEdit(ctx context.Context, c *cli.Command) er
 	if err != nil {
 		return err
 	}
-	patch, err := buildForgejoMilestonePatch(c)
+	patch, err := r.buildForgejoMilestonePatch(c)
 	if err != nil {
 		return err
 	}
@@ -251,8 +253,8 @@ func (r *Runner) runForgejoMilestoneEdit(ctx context.Context, c *cli.Command) er
 
 // buildForgejoMilestonePatch reads the optional edit flags and assembles
 // the PATCH body. Returns an error if none of them are set.
-func buildForgejoMilestonePatch(c *cli.Command) (forgejoMilestoneEditBody, error) {
-	title := strings.TrimSpace(c.String("title"))
+func (r *Runner) buildForgejoMilestonePatch(c *cli.Command) (forgejoMilestoneEditBody, error) {
+	title := strings.TrimSpace(r.cosmeticArg("ops.forgejo.milestone.edit", "--title", c.String("title")))
 	descPath := c.String("description-file")
 	dueRaw := strings.TrimSpace(c.String("due-on"))
 	stateRaw := strings.TrimSpace(c.String("state"))

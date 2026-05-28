@@ -60,9 +60,10 @@ func (r *Runner) forgejoIssueCreateCommand() *cli.Command {
 			verb.Spec{
 				Name: "ops.forgejo.issue.create",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					title, _ := cosmeticSanitize(c.String("title"))
 					return map[string]string{
 						"--repo":      c.String("repo"),
-						"--title":     c.String("title"),
+						"--title":     title,
 						"--body-file": c.String("body-file"),
 					}, c.Args().Slice()
 				},
@@ -74,7 +75,7 @@ func (r *Runner) forgejoIssueCreateCommand() *cli.Command {
 					if err != nil {
 						return err
 					}
-					title := strings.TrimSpace(c.String("title"))
+					title := strings.TrimSpace(r.cosmeticArg("ops.forgejo.issue.create", "--title", c.String("title")))
 					if title == "" {
 						return fmt.Errorf("ops forgejo issue create: --title is empty")
 					}
@@ -207,10 +208,11 @@ func (r *Runner) forgejoIssueEditCommand() *cli.Command {
 			verb.Spec{
 				Name: "ops.forgejo.issue.edit",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					title, _ := cosmeticSanitize(c.String("title"))
 					return map[string]string{
 						"--repo":      c.String("repo"),
 						"--number":    strconv.Itoa(c.Int("number")),
-						"--title":     c.String("title"),
+						"--title":     title,
 						"--body-file": c.String("body-file"),
 					}, c.Args().Slice()
 				},
@@ -226,7 +228,7 @@ func (r *Runner) forgejoIssueEditCommand() *cli.Command {
 					if err != nil {
 						return err
 					}
-					title := strings.TrimSpace(c.String("title"))
+					title := strings.TrimSpace(r.cosmeticArg("ops.forgejo.issue.edit", "--title", c.String("title")))
 					bodyPath := c.String("body-file")
 					if title == "" && bodyPath == "" {
 						return fmt.Errorf("ops forgejo issue edit: at least one of --title or --body-file is required")
