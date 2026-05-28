@@ -1,11 +1,11 @@
 ---
 name: coily-dispatch
-description: Normalize a dictated `coily dispatch` request into a canonical `owner/repo#N`, then pick headless or interactive mode. Use when Kai dictates a dispatch phrase aimed at a coilysiren repo, especially shapes that mangle in voice ("coily dispatch coily-siren coily-issue 125", "dispatch repo recall issue 42"). Triggers - coily dispatch, dispatch issue, dispatch ticket, fire dispatch, run dispatch, claude -p on issue, fan out issue, open one for me, spin this up, HITL this, let me iterate on this, voice-dictated GitHub ref aimed at coilysiren/*.
+description: Normalize a dictated `coily dispatch` request into a canonical `owner/repo#N`, then pick one of four surfaces (headless, interactive, consult, cascade). Use when Kai dictates a dispatch phrase aimed at a coilysiren repo, especially shapes that mangle in voice ("coily dispatch coily-siren coily-issue 125", "dispatch repo recall issue 42"). Triggers - coily dispatch, dispatch issue, dispatch ticket, fire dispatch, run dispatch, claude -p on issue, fan out issue, open one for me, spin this up, HITL this, let me iterate on this, voice-dictated GitHub ref aimed at coilysiren/*.
 ---
 
 # Coily dispatch
 
-`coily dispatch` is a privileged op (see [coilysiren/coily#136](https://github.com/coilysiren/coily/issues/136)). Mis-parsing a dictated ref silently spawns `claude` against the wrong issue. This skill does two jobs: normalize a dictated reference into a canonical `owner/repo#N`, and pick the dispatch mode (headless or interactive).
+`coily dispatch` is a privileged op (see [coilysiren/coily#136](https://github.com/coilysiren/coily/issues/136)). Mis-parsing a dictated ref silently spawns `claude` against the wrong issue. This skill does two jobs: normalize a dictated reference into a canonical `owner/repo#N`, and pick the dispatch surface (headless, interactive, consult, or cascade).
 
 ## Assumptions
 
@@ -77,9 +77,9 @@ Refuse if:
 
 Refusal should name the failing condition so Kai can re-dictate, not just "could not resolve".
 
-## Step 6: pick the mode
+## Step 6: pick the surface
 
-`coily dispatch` requires an explicit mode (coilysiren/coily#270): `headless`, `interactive`, or `cascade`. Bare `coily dispatch <ref>` errors.
+`coily dispatch` requires an explicit surface (coilysiren/coily#270, #144): `headless`, `interactive`, `consult`, or `cascade`. Bare `coily dispatch <ref>` errors. The old consult posture is now its own surface, not a flag (coilysiren/coily#144).
 
 **Default is headless.** By the time Kai dispatches an issue, the design is already done - it happened at the top of the session chain that produced the issue. The dispatched task is pre-decided work: "go execute the thing we already figured out." That does not need her in the loop. The PR is the review gate.
 
@@ -98,6 +98,14 @@ Pick **interactive** only when one of these holds:
 coily dispatch interactive coilysiren/<repo>#<N>   # new Warp tab, focused session, human supervises
 ```
 
+Pick **consult** when Kai wants a say mid-flight without a hard plan-mode gate. consult is the interactive surface (live Warp tab, auto mode, she supervises) with a raised interruption budget baked into the prompt: the agent is encouraged to surface real judgment calls (a naming choice, an irreversible decision, two viable designs with no clear winner) and wait for her rather than guess. It still moves by default on everything that does not need her - a soft expectation, not a read-only stop like plan mode.
+
+```bash
+coily dispatch consult coilysiren/<repo>#<N>   # live tab, encouraged to pause and ask
+```
+
+Pick consult on phrasing like "let me weigh in", "ask me before you decide", "check with me on the design". interactive (watch) never consults by design; consult raises the budget. headless and cascade are detached, so they never consult.
+
 Pick **cascade** for a large body of work that one headless run would reject as scope-too-large - a mass migration spanning several repos, or any branching tree of dependent work. cascade is headless plus permission to recursively dispatch its own sub-workers: it decomposes the task, files sub-issues per slice, and dispatches a worker each, down to leaf-sized headless workers. Recursion is bounded by a hard depth budget (`--depth`, default 3, max 5) so it cannot fork-bomb.
 
 ```bash
@@ -106,20 +114,7 @@ coily dispatch cascade coilysiren/<repo>#<N>   # detached, fans out into a bound
 
 Pick cascade on phrasing like "migrate all of A B C D", "fan this out across the repos", "split this up and run it", "swarm this" - a task Kai knows is simple but too large for one worker. A single bounded task is headless; a tree of dependent work is cascade. Leave `--depth` at the default unless Kai names a depth.
 
-**Explicit mode words always win.** If Kai says "headless", "AFK", "interactive", "supervised", or "cascade"/"swarm"/"fan out", use that and skip the heuristic.
-
-## Step 6b: pick the consult posture (interactive only)
-
-Surface (headless vs interactive) is *where* the run lives. **Consult posture** is *how readily it pauses to involve Kai* - a separate axis selected with `--posture` on `interactive` (coilysiren/coily#130). It is a prompt preamble, not a permission mode: no hard read-only stop like plan mode.
-
-* `--posture watch` (default) - auto mode, Kai may watch but is not consulted. The PR / merge is the review gate. This is the historical interactive behavior.
-* `--posture consult` - auto mode with a raised interruption budget. The dispatched agent is encouraged to surface real judgment calls (a naming choice, an irreversible decision, two viable designs) and wait for Kai rather than guess. Still moves by default on everything that does not need her.
-
-```bash
-coily dispatch interactive --posture consult coilysiren/<repo>#<N>   # live tab, encouraged to pause and ask
-```
-
-Pick `consult` when Kai signals she wants a say mid-flight ("let me weigh in", "ask me before you decide", "check with me on the design") without wanting a hard plan-mode gate. headless never consults by design; the flag is interactive-only.
+**Explicit surface words always win.** If Kai says "headless", "AFK", "interactive", "supervised", "consult"/"ask me"/"weigh in", or "cascade"/"swarm"/"fan out", use that and skip the heuristic.
 
 Worktree placement, prompt seeding, the audit row, the ntfy notification, and (for headless) detaching the child process are all owned by `coily dispatch` itself - not this skill.
 
@@ -130,6 +125,7 @@ Worktree placement, prompt seeding, the audit row, the ntfy notification, and (f
 * "fire dispatch on repo recall ticket 108" → `coily dispatch headless coilysiren/repo-recall#108`
 * "open one for me on session lattice 94" → `coily dispatch interactive coilysiren/session-lattice#94`
 * "let me iterate on the site issue 5" → `coily dispatch interactive coilysiren/website#5`
+* "open one on gauntlet 12 but check with me on the design" → `coily dispatch consult coilysiren/gauntlet#12`
 * "dispatch eco mods public 17" → `coily dispatch headless coilysiren/eco-mods-public#17`
 * "swarm the migration across infra 42" → `coily dispatch cascade coilysiren/infrastructure#42`
 
