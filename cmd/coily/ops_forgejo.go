@@ -25,8 +25,9 @@ import (
 // affordance, not a bypass.
 func (r *Runner) forgejoCommand() *cli.Command {
 	return &cli.Command{
-		Name:  "forgejo",
-		Usage: "Run forgejo CLI verbs against the kai-server forgejo pod.",
+		Name:    "forgejo",
+		Aliases: []string{"fj"},
+		Usage:   "Run forgejo CLI verbs against the kai-server forgejo pod.",
 		Description: `forgejo wraps the in-pod forgejo CLI. Each leaf is a fixed-shape
 k3s kubectl -n forgejo exec deploy/forgejo -- forgejo <verb...>, run via
 ssh to kai-server. Namespace and pod selector are pinned in code.
