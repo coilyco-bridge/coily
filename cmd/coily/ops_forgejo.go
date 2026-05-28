@@ -54,7 +54,9 @@ Verbs:
   coily ops forgejo label create --repo <owner/name> --name <n> --color <hex>
   coily ops forgejo milestone create --repo <owner/name> --title <t> [--due-on YYYY-MM-DD]
   coily ops forgejo release create --repo <owner/name> --tag <tag> [--body-file <path>]
-  coily ops forgejo repo view --repo <owner/name>
+  coily ops forgejo repo view --repo <owner/name> [--json]
+  coily ops forgejo repo topics list --repo <owner/name>
+  coily ops forgejo repo topics set --repo <owner/name> --topic <a> --topic <b>
   coily ops forgejo pr list --repo <owner/name>`,
 		Commands: []*cli.Command{
 			r.forgejoIssueCommand(),

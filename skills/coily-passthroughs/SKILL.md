@@ -1845,11 +1845,23 @@ Search forgejo repos by name.
 
 Flags: --limit, --query
 
+## `coily ops forgejo repo topics list`
+
+List a forgejo repo's topics (one per line).
+
+Flags: --repo
+
+## `coily ops forgejo repo topics set`
+
+Replace a forgejo repo's full topic set with --topic values.
+
+Flags: --repo, --topic
+
 ## `coily ops forgejo repo view`
 
 View a single forgejo repo.
 
-Flags: --repo
+Flags: --json, --repo
 
 ## `coily ops gcloud`
 

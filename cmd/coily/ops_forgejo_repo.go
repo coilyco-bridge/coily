@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -25,6 +26,7 @@ func (r *Runner) forgejoRepoCommand() *cli.Command {
 			r.forgejoRepoListCommand(),
 			r.forgejoRepoViewCommand(),
 			r.forgejoRepoEditCommand(),
+			r.forgejoRepoTopicsCommand(),
 			r.forgejoRepoForkCommand(),
 			r.forgejoRepoArchiveCommand(),
 			r.forgejoRepoDeleteCommand(),
@@ -81,6 +83,7 @@ func (r *Runner) forgejoRepoViewCommand() *cli.Command {
 		Usage: "View a single forgejo repo.",
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "repo", Usage: "target repo as owner/name", Required: true},
+			&cli.BoolFlag{Name: "json", Usage: "emit the raw forgejo repo JSON (carries description) instead of the summary line"},
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
@@ -100,6 +103,10 @@ func (r *Runner) forgejoRepoViewCommand() *cli.Command {
 					respBody, err := r.forgejoAPIDo(ctx, "ops forgejo repo view", http.MethodGet, path, nil, http.StatusOK)
 					if err != nil {
 						return err
+					}
+					if c.Bool("json") {
+						fmt.Println(string(respBody))
+						return nil
 					}
 					return printForgejoRepo(respBody)
 				},
@@ -316,6 +323,133 @@ func (r *Runner) forgejoRepoDeleteCommand() *cli.Command {
 			r.Audit,
 		),
 	}
+}
+
+// forgejoTopicRe mirrors forgejo's server-side topic constraint: starts with
+// an alphanumeric, then alphanumerics or hyphens, up to 35 chars total.
+var forgejoTopicRe = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,34}$`)
+
+func validateForgejoTopic(topic string) error {
+	if !forgejoTopicRe.MatchString(topic) {
+		return fmt.Errorf("invalid topic %q: must be lowercase alphanumeric or hyphen, start alphanumeric, max 35 chars", topic)
+	}
+	return nil
+}
+
+type forgejoRepoTopicsBody struct {
+	Topics []string `json:"topics"`
+}
+
+// forgejoRepoTopicsCommand is the `topics` subtree under `coily ops forgejo
+// repo`: list (read) and set (replace). Topics are the forgejo equivalent of
+// GitHub topics and the source of truth for repo-pointer skill triggers.
+func (r *Runner) forgejoRepoTopicsCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "topics",
+		Usage: "List or replace a forgejo repo's topics.",
+		Commands: []*cli.Command{
+			r.forgejoRepoTopicsListCommand(),
+			r.forgejoRepoTopicsSetCommand(),
+		},
+	}
+}
+
+func (r *Runner) forgejoRepoTopicsListCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "list",
+		Usage: "List a forgejo repo's topics (one per line).",
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: "repo", Usage: "target repo as owner/name", Required: true},
+		},
+		Action: r.WrapVerb(
+			verb.Spec{
+				Name: "ops.forgejo.repo.topics.list",
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					return map[string]string{"--repo": c.String("repo")}, c.Args().Slice()
+				},
+				Action: func(ctx context.Context, c *cli.Command) error {
+					if c.Args().Len() != 0 {
+						return fmt.Errorf("ops forgejo repo topics list: takes no positional args, got %d", c.Args().Len())
+					}
+					owner, repo, err := parseForgejoRepoSlug(c.String("repo"))
+					if err != nil {
+						return err
+					}
+					path := fmt.Sprintf("/api/v1/repos/%s/%s/topics", owner, repo)
+					respBody, err := r.forgejoAPIDo(ctx, "ops forgejo repo topics list", http.MethodGet, path, nil, http.StatusOK)
+					if err != nil {
+						return err
+					}
+					var out forgejoRepoTopicsBody
+					if err := json.Unmarshal(respBody, &out); err != nil {
+						return fmt.Errorf("decode forgejo topics response: %w", err)
+					}
+					for _, t := range out.Topics {
+						fmt.Println(t)
+					}
+					return nil
+				},
+			},
+			r.Audit,
+		),
+	}
+}
+
+func (r *Runner) forgejoRepoTopicsSetCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "set",
+		Usage: "Replace a forgejo repo's full topic set with --topic values.",
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: "repo", Usage: "target repo as owner/name", Required: true},
+			&cli.StringSliceFlag{Name: "topic", Usage: "a topic to set; repeatable. Replaces the existing set."},
+		},
+		Action: r.WrapVerb(
+			verb.Spec{
+				Name: "ops.forgejo.repo.topics.set",
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					return map[string]string{
+						"--repo":  c.String("repo"),
+						"--topic": strings.Join(c.StringSlice("topic"), ","),
+					}, c.Args().Slice()
+				},
+				Action: func(ctx context.Context, c *cli.Command) error {
+					return r.runForgejoRepoTopicsSet(ctx, c)
+				},
+			},
+			r.Audit,
+		),
+	}
+}
+
+func (r *Runner) runForgejoRepoTopicsSet(ctx context.Context, c *cli.Command) error {
+	if c.Args().Len() != 0 {
+		return fmt.Errorf("ops forgejo repo topics set: takes no positional args, got %d", c.Args().Len())
+	}
+	owner, repo, err := parseForgejoRepoSlug(c.String("repo"))
+	if err != nil {
+		return err
+	}
+	topics := c.StringSlice("topic")
+	for _, t := range topics {
+		if err := validateForgejoTopic(t); err != nil {
+			return fmt.Errorf("ops forgejo repo topics set: %w", err)
+		}
+	}
+	// A PUT with an empty list clears all topics. Marshal an explicit [] rather
+	// than null so forgejo reads it as "replace with empty set".
+	if topics == nil {
+		topics = []string{}
+	}
+	payload, err := json.Marshal(forgejoRepoTopicsBody{Topics: topics})
+	if err != nil {
+		return fmt.Errorf("ops forgejo repo topics set: marshal payload: %w", err)
+	}
+	path := fmt.Sprintf("/api/v1/repos/%s/%s/topics", owner, repo)
+	if _, err := r.forgejoAPIDo(ctx, "ops forgejo repo topics set", http.MethodPut, path, payload, http.StatusNoContent); err != nil {
+		return err
+	}
+	fmt.Printf("set %d topic(s) on %s/%s\n", len(topics), owner, repo)
+	return nil
 }
 
 type forgejoRepoEditBody struct {
