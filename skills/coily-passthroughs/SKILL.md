@@ -89,7 +89,7 @@ Flags: --allowed-tools, --claims, --claude-bin, --dry-run, --permission-mode
 
 Open a new Warp tab with `claude "Work on issue <ref>"` pre-submitted.
 
-Flags: --channel, --dry-run, --launch-name, --no-worktree, --queue-dir, --surface
+Flags: --channel, --dry-run, --launch-name, --no-worktree, --posture, --queue-dir, --surface
 
 ## `coily dispatch reap`
 

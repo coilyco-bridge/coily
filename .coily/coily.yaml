@@ -68,10 +68,8 @@ catalog:
   owner: kai
   lifecycle: production
   description: "CLI security boundary for privileged ops, escape-hatch-resistant with an audit trail."
-  dependsOn: []
-  providesApis:
-    - coily-cli
-    - audit-log
+  dependsOn:
+    - forgejo.coilysiren.me/coilysiren/cli-guard
   deploy:
     dev: local
     staging:
