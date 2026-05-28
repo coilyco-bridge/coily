@@ -69,7 +69,7 @@ jobs:
           formula_path: Formula/coily.rb
           tag: ${{ needs.release.outputs.tag }}
           revision: ${{ steps.rev.outputs.revision }}
-          forgejo_token: ${{ secrets.FORGEJO_PAT }}
+          forgejo_token: ${{ secrets.CI_RELEASE_TOKEN }}
 
   windows-assets:
     needs: release
@@ -115,3 +115,42 @@ jobs:
         with:
           release_id: ${{ needs.release.outputs.release_id }}
           file: ${{ steps.build.outputs.sha }}
+
+  # Fan the canonical .claude lockdown files out to every catalog repo.
+  # Keeps the committed (fail-closed) boundary in sync with this coily
+  # version. Idempotent, so it no-ops when the render is unchanged.
+  sync-lockdown:
+    needs: release
+    if: ${{ needs.release.outputs.tag != '' }}
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Check out catalog source
+        uses: actions/checkout@v6
+        with:
+          repository: coilysiren/agentic-os-kai
+          ref: main
+          path: .catalog
+          token: ${{ secrets.CI_RELEASE_TOKEN }}
+
+      - name: Render canonical lockdown files
+        shell: bash
+        run: |
+          set -euo pipefail
+          go build -tags prod -o /tmp/coily ./cmd/coily
+          mkdir -p /tmp/canon && git -C /tmp/canon init -q
+          /tmp/coily lockdown --apply --replace --path /tmp/canon
+
+      - name: Fan out to catalog repos
+        shell: bash
+        env:
+          FORGEJO_TOKEN: ${{ secrets.CI_RELEASE_TOKEN }}
+        run: bash scripts/sync-lockdown.sh /tmp/canon "${{ needs.release.outputs.tag }}" .catalog/data/catalog-graph.yaml
