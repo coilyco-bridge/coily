@@ -100,6 +100,19 @@ coily dispatch interactive coilysiren/<repo>#<N>   # new Warp tab, focused sessi
 
 **Explicit mode words always win.** If Kai says "headless", "AFK", "interactive", or "supervised", use that and skip the heuristic.
 
+## Step 6b: pick the consult posture (interactive only)
+
+Surface (headless vs interactive) is *where* the run lives. **Consult posture** is *how readily it pauses to involve Kai* - a separate axis selected with `--posture` on `interactive` (coilysiren/coily#130). It is a prompt preamble, not a permission mode: no hard read-only stop like plan mode.
+
+* `--posture watch` (default) - auto mode, Kai may watch but is not consulted. The PR / merge is the review gate. This is the historical interactive behavior.
+* `--posture consult` - auto mode with a raised interruption budget. The dispatched agent is encouraged to surface real judgment calls (a naming choice, an irreversible decision, two viable designs) and wait for Kai rather than guess. Still moves by default on everything that does not need her.
+
+```bash
+coily dispatch interactive --posture consult coilysiren/<repo>#<N>   # live tab, encouraged to pause and ask
+```
+
+Pick `consult` when Kai signals she wants a say mid-flight ("let me weigh in", "ask me before you decide", "check with me on the design") without wanting a hard plan-mode gate. headless never consults by design; the flag is interactive-only.
+
 Worktree placement, prompt seeding, the audit row, the ntfy notification, and (for headless) detaching the child process are all owned by `coily dispatch` itself - not this skill.
 
 ## Examples
