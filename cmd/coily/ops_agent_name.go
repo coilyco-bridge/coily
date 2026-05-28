@@ -18,7 +18,8 @@ func (r *Runner) agentNameCommand() *cli.Command {
 		Usage: "Print this agent's self-name: claude-<os>-<hostname>-<tag>.",
 		Description: `agent-name prints the stable self-name of the agent running this
 coily invocation, in the form claude-<os>-<hostname>-<tag>, where <tag>
-is the last 4 chars of the Claude Code session id.
+is a stable 4-char dictatable id (two letters then two digits) derived
+from the Claude Code session id.
 
 The session id is read from --session-id, or from $CLAUDE_CODE_SESSION_ID
 when the flag is absent. Status line and SessionStart hook integrations

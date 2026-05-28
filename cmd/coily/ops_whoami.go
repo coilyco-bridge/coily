@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -26,8 +27,9 @@ at before a write op, seeing which kubectl context is current, and checking
 which GitHub identity gh is authenticated as.
 
 The agent block prints this agent's self-name in the form
-claude-<os>-<hostname>-<tag>, where <tag> is the last 4 chars of the
-Claude Code session id. Codex and OpenClaw swap the claude- prefix.
+claude-<os>-<hostname>-<tag>, where <tag> is a stable 4-char dictatable
+id (two letters then two digits) derived from the Claude Code session id.
+Codex and OpenClaw swap the claude- prefix.
 
 Non-fatal. If any tool is not configured or returns an error, its block
 reports the error but the other tools still run.`,
@@ -213,20 +215,33 @@ func agentShortHostname() string {
 	return h
 }
 
-// agentSessionTag returns the last 4 lowercase alphanumeric chars of a
-// session id, the stable per-session suffix of the agent name.
+// Dictatable alphabet, lowercased to fit the all-lowercase agent name. Mirrors
+// the otel-a2a-relay channels generator (otel_a2a_relay_channels/ids.py) and
+// agentic-os docs/dictatable-id-alphabet.md, which drop the visually and
+// phonetically ambiguous characters from base32/base58.
+const (
+	tagLetters = "abcdefghjkmpqrstuvwxyz"
+	tagDigits  = "456789"
+)
+
+// agentSessionTag derives the stable per-session suffix of the agent name: a
+// dictatable id shaped as two letters then two digits (e.g. "ab45"), the same
+// shape o2r and backend channel ids use. Deterministic in the session id, so a
+// session always self-names the same way; the SHA-256 digest spreads adjacent
+// session ids apart instead of slicing raw UUID hex. Empty id yields an empty
+// tag, and the suffix is then dropped.
 func agentSessionTag(sessionID string) string {
-	sid := strings.ToLower(strings.TrimSpace(sessionID))
-	var b []rune
-	for _, r := range sid {
-		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
-			b = append(b, r)
-		}
+	sid := strings.TrimSpace(sessionID)
+	if sid == "" {
+		return ""
 	}
-	if len(b) < 4 {
-		return string(b)
-	}
-	return string(b[len(b)-4:])
+	h := sha256.Sum256([]byte(sid))
+	return string([]byte{
+		tagLetters[int(h[0])%len(tagLetters)],
+		tagLetters[int(h[1])%len(tagLetters)],
+		tagDigits[int(h[2])%len(tagDigits)],
+		tagDigits[int(h[3])%len(tagDigits)],
+	})
 }
 
 func errBlock(msg string, err error) map[string]string {
