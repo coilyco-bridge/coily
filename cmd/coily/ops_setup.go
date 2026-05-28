@@ -27,7 +27,7 @@ func (r *Runner) setupCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "setup",
 		Usage: "Run the post-upgrade rituals: completion, lockdown re-baseline, and user hook.",
-		Description: `setup runs five idempotent steps in order:
+		Description: `setup runs six idempotent steps in order:
 
   1. coily install-completion         (refresh shell tab-completion)
   2. <prefix>/share/coily/skills/*    (symlink every staged coily-* skill
@@ -38,7 +38,9 @@ func (r *Runner) setupCommand() *cli.Command {
                                        + uv tool install pre-commit; idempotent
                                        no-op on a satisfied host)
   4. coily lockdown --recursive ...   (re-baseline allow/deny lists under the lockdown root)
-  5. ~/.claude/coily-binary-gate.sh   (user-level PreToolUse hook that
+  5. coily lockdown --user            (merge canonical denies + prune shadowed
+                                       allows in ~/.claude/settings.json)
+  6. ~/.claude/coily-binary-gate.sh   (user-level PreToolUse hook that
                                        rejects dev coily binaries from any
                                        cwd; complements per-repo lockdown)
 
@@ -119,7 +121,6 @@ func setupAction(ctx context.Context, c *cli.Command) error {
 	}
 
 	if !c.Bool("skip-lockdown") {
-		fmt.Fprintln(os.Stderr, "==> lockdown")
 		if err := runLockdownStep(ctx, self, c.String("lockdown-root")); err != nil {
 			return err
 		}
@@ -488,7 +489,24 @@ func runHostBootstrapStep(ctx context.Context, self, lockdownRoot string) error 
 	return nil
 }
 
+// runLockdownStep runs both the recursive per-repo lockdown and the
+// user-level lockdown. coily#128 added the --user step.
 func runLockdownStep(ctx context.Context, self, lockdownRoot string) error {
+	fmt.Fprintln(os.Stderr, "==> lockdown")
+	if err := runRecursiveLockdown(ctx, self, lockdownRoot); err != nil {
+		return err
+	}
+	fmt.Fprintln(os.Stderr, "==> user-lockdown")
+	cmd := exec.CommandContext(ctx, self, "lockdown", "--apply", "--user")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("setup: user-lockdown: %w", err)
+	}
+	return nil
+}
+
+func runRecursiveLockdown(ctx context.Context, self, lockdownRoot string) error {
 	if lockdownRoot == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {

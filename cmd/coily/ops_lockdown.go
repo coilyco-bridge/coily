@@ -365,6 +365,10 @@ the recursion root cannot shadow per-repo deny rules with a broader allow.`,
 				Name:  "recursive",
 				Usage: "scan up to 4 directories below --path for git repos and lock down each",
 			},
+			&cli.BoolFlag{
+				Name:  "user",
+				Usage: "merge canonical denies + prune shadowed allows in ~/.claude/settings.json (exclusive with --path/--local/--recursive)",
+			},
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
@@ -387,9 +391,10 @@ func lockdownAction(_ context.Context, c *cli.Command) error {
 	apply := c.Bool("apply")
 	replace := c.Bool("replace")
 	recursive := c.Bool("recursive")
+	user := c.Bool("user")
 
-	if replace && !apply {
-		return fmt.Errorf("lockdown: --replace requires --apply (use `coily lockdown --apply --replace`)")
+	if err := validateLockdownFlags(c, apply, replace, user, recursive); err != nil {
+		return err
 	}
 
 	base, err := lockdown.LoadDefaults()
@@ -403,22 +408,16 @@ func lockdownAction(_ context.Context, c *cli.Command) error {
 	ancestorDefaults := applyDataSecurityDenies(base, drv)
 	stampDefaults := applyWrapperAllows(applyHookHandoffTrim(ancestorDefaults))
 
+	if user {
+		return lockdownUser(apply, ancestorDefaults)
+	}
+
 	root := c.String("path")
 	local := c.Bool("local")
 
-	var dirs []string
-	if recursive {
-		found, err := findGitRepos(root, recursiveScanDepth)
-		if err != nil {
-			return err
-		}
-		if len(found) == 0 {
-			return fmt.Errorf("lockdown: --recursive found no git repos within %d levels of %s", recursiveScanDepth, root)
-		}
-		dirs = found
-		fmt.Fprintf(os.Stderr, "recursive: found %d git repo(s) under %s\n", len(dirs), displayPath(root))
-	} else {
-		dirs = []string{root}
+	dirs, err := lockdownTargetDirs(root, recursive)
+	if err != nil {
+		return err
 	}
 
 	for _, dir := range dirs {
@@ -431,6 +430,60 @@ func lockdownAction(_ context.Context, c *cli.Command) error {
 		if err := reassertAncestor(root, apply, ancestorDefaults); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// validateLockdownFlags rejects illegal flag combinations early.
+func validateLockdownFlags(c *cli.Command, apply, replace, user, recursive bool) error {
+	if replace && !apply {
+		return fmt.Errorf("lockdown: --replace requires --apply (use `coily lockdown --apply --replace`)")
+	}
+	if user && (recursive || c.Bool("local") || c.IsSet("path")) {
+		return fmt.Errorf("lockdown: --user is exclusive with --path/--local/--recursive")
+	}
+	return nil
+}
+
+// lockdownTargetDirs resolves the per-repo target directories for the
+// non-user lockdown modes. Single-target for plain, recursive scan otherwise.
+func lockdownTargetDirs(root string, recursive bool) ([]string, error) {
+	if !recursive {
+		return []string{root}, nil
+	}
+	found, err := findGitRepos(root, recursiveScanDepth)
+	if err != nil {
+		return nil, err
+	}
+	if len(found) == 0 {
+		return nil, fmt.Errorf("lockdown: --recursive found no git repos within %d levels of %s", recursiveScanDepth, root)
+	}
+	fmt.Fprintf(os.Stderr, "recursive: found %d git repo(s) under %s\n", len(found), displayPath(root))
+	return found, nil
+}
+
+// lockdownUser merges canonical denies + prunes shadowed allows in
+// ~/.claude/settings.json. Same MergeDenyInto semantics as the
+// ancestor reassertion; targets a fixed path. See coily#128.
+func lockdownUser(apply bool, d *lockdown.Defaults) error {
+	home, err := os.UserHomeDir()
+	if err != nil || home == "" {
+		return fmt.Errorf("lockdown: --user: cannot resolve home directory: %w", err)
+	}
+	target := filepath.Join(home, ".claude", "settings.json")
+	disp := displayPath(target)
+	if !apply {
+		fmt.Fprintf(os.Stderr, "%s: would merge canonical deny list + prune shadowed allows (--user)\n", disp)
+		return nil
+	}
+	mutated, err := lockdown.MergeDenyInto(target, d)
+	if err != nil {
+		return err
+	}
+	if mutated {
+		fmt.Fprintf(os.Stderr, "%s: merged canonical denies + pruned shadowed allows (--user)\n", disp)
+	} else {
+		fmt.Fprintf(os.Stderr, "%s: already covers canonical denies and has no shadowed allows (--user)\n", disp)
 	}
 	return nil
 }

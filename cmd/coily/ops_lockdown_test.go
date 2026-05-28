@@ -32,6 +32,7 @@ func runLockdownFlags(t *testing.T, dir string, apply, replace, recursive bool) 
 					&cli.BoolFlag{Name: "apply"},
 					&cli.BoolFlag{Name: "replace"},
 					&cli.BoolFlag{Name: "recursive"},
+					&cli.BoolFlag{Name: "user"},
 					&cli.StringFlag{Name: "token"},
 				},
 				Action: lockdownAction,
@@ -47,6 +48,33 @@ func runLockdownFlags(t *testing.T, dir string, apply, replace, recursive bool) 
 	}
 	if recursive {
 		args = append(args, "--recursive")
+	}
+	return root.Run(context.Background(), args)
+}
+
+func runLockdownUser(t *testing.T, apply bool) error {
+	t.Helper()
+	root := &cli.Command{
+		Name: "test-root",
+		Commands: []*cli.Command{
+			{
+				Name: "lockdown",
+				Flags: []cli.Flag{
+					&cli.StringFlag{Name: "path", Value: "."},
+					&cli.BoolFlag{Name: "local"},
+					&cli.BoolFlag{Name: "apply"},
+					&cli.BoolFlag{Name: "replace"},
+					&cli.BoolFlag{Name: "recursive"},
+					&cli.BoolFlag{Name: "user"},
+					&cli.StringFlag{Name: "token"},
+				},
+				Action: lockdownAction,
+			},
+		},
+	}
+	args := []string{"test-root", "lockdown", "--user"}
+	if apply {
+		args = append(args, "--apply")
 	}
 	return root.Run(context.Background(), args)
 }
@@ -187,6 +215,77 @@ func TestLockdown_RecursiveReassertsAncestorDeny(t *testing.T) {
 	}
 	if !strings.Contains(body, "Bash(gh:*)") {
 		t.Errorf("canonical deny not merged into ancestor; got: %s", body)
+	}
+}
+
+// TestLockdown_UserApplyMergesAndPrunes pins coily#128: --user merges
+// canonical denies into ~/.claude/settings.json and prunes shadowed
+// allows, preserving non-permissions top-level keys.
+func TestLockdown_UserApplyMergesAndPrunes(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	settingsDir := filepath.Join(home, ".claude")
+	if err := os.MkdirAll(settingsDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	settingsPath := filepath.Join(settingsDir, "settings.json")
+	original := `{
+  "permissions": {
+    "allow": ["Bash(gh issue *)", "Bash(coily:*)", "Read(/Users/kai/.claude/**)"]
+  },
+  "hooks": {"Stop": []},
+  "enabledPlugins": {"foo": true}
+}`
+	if err := os.WriteFile(settingsPath, []byte(original), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := runLockdownUser(t, true); err != nil {
+		t.Fatalf("--user --apply errored: %v", err)
+	}
+	got, err := os.ReadFile(settingsPath)
+	if err != nil {
+		t.Fatalf("read back: %v", err)
+	}
+	body := string(got)
+	if strings.Contains(body, "Bash(gh issue *)") {
+		t.Errorf("shadowed allow Bash(gh issue *) not pruned; got: %s", body)
+	}
+	if !strings.Contains(body, "Bash(coily:*)") {
+		t.Errorf("non-shadowed allow Bash(coily:*) was dropped; got: %s", body)
+	}
+	if !strings.Contains(body, "Read(/Users/kai/.claude/**)") {
+		t.Errorf("non-Bash allow was dropped; got: %s", body)
+	}
+	if !strings.Contains(body, "Bash(gh:*)") {
+		t.Errorf("canonical deny not merged; got: %s", body)
+	}
+	if !strings.Contains(body, `"enabledPlugins"`) {
+		t.Errorf("top-level enabledPlugins key dropped; got: %s", body)
+	}
+	if !strings.Contains(body, `"hooks"`) {
+		t.Errorf("top-level hooks key dropped; got: %s", body)
+	}
+}
+
+// TestLockdown_UserDryRunDoesNotTouch proves --user without --apply is a no-op write.
+func TestLockdown_UserDryRunDoesNotTouch(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	settingsDir := filepath.Join(home, ".claude")
+	if err := os.MkdirAll(settingsDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	settingsPath := filepath.Join(settingsDir, "settings.json")
+	original := `{"permissions":{"allow":["Bash(gh issue *)"]}}`
+	if err := os.WriteFile(settingsPath, []byte(original), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := runLockdownUser(t, false); err != nil {
+		t.Fatalf("dry-run errored: %v", err)
+	}
+	got, _ := os.ReadFile(settingsPath)
+	if string(got) != original {
+		t.Errorf("dry-run mutated user settings file: got %q", string(got))
 	}
 }
 
