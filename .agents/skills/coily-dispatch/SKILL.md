@@ -79,7 +79,7 @@ Refusal should name the failing condition so Kai can re-dictate, not just "could
 
 ## Step 6: pick the mode
 
-`coily dispatch` requires an explicit mode (coilysiren/coily#270): `headless` or `interactive`. Bare `coily dispatch <ref>` errors.
+`coily dispatch` requires an explicit mode (coilysiren/coily#270): `headless`, `interactive`, or `cascade`. Bare `coily dispatch <ref>` errors.
 
 **Default is headless.** By the time Kai dispatches an issue, the design is already done - it happened at the top of the session chain that produced the issue. The dispatched task is pre-decided work: "go execute the thing we already figured out." That does not need her in the loop. The PR is the review gate.
 
@@ -98,7 +98,15 @@ Pick **interactive** only when one of these holds:
 coily dispatch interactive coilysiren/<repo>#<N>   # new Warp tab, focused session, human supervises
 ```
 
-**Explicit mode words always win.** If Kai says "headless", "AFK", "interactive", or "supervised", use that and skip the heuristic.
+Pick **cascade** for a large body of work that one headless run would reject as scope-too-large - a mass migration spanning several repos, or any branching tree of dependent work. cascade is headless plus permission to recursively dispatch its own sub-workers: it decomposes the task, files sub-issues per slice, and dispatches a worker each, down to leaf-sized headless workers. Recursion is bounded by a hard depth budget (`--depth`, default 3, max 5) so it cannot fork-bomb.
+
+```bash
+coily dispatch cascade coilysiren/<repo>#<N>   # detached, fans out into a bounded worker tree
+```
+
+Pick cascade on phrasing like "migrate all of A B C D", "fan this out across the repos", "split this up and run it", "swarm this" - a task Kai knows is simple but too large for one worker. A single bounded task is headless; a tree of dependent work is cascade. Leave `--depth` at the default unless Kai names a depth.
+
+**Explicit mode words always win.** If Kai says "headless", "AFK", "interactive", "supervised", or "cascade"/"swarm"/"fan out", use that and skip the heuristic.
 
 ## Step 6b: pick the consult posture (interactive only)
 
@@ -123,6 +131,7 @@ Worktree placement, prompt seeding, the audit row, the ntfy notification, and (f
 * "open one for me on session lattice 94" → `coily dispatch interactive coilysiren/session-lattice#94`
 * "let me iterate on the site issue 5" → `coily dispatch interactive coilysiren/website#5`
 * "dispatch eco mods public 17" → `coily dispatch headless coilysiren/eco-mods-public#17`
+* "swarm the migration across infra 42" → `coily dispatch cascade coilysiren/infrastructure#42`
 
 ## Out of scope
 

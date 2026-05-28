@@ -8,7 +8,7 @@ require (
 )
 
 require (
-	github.com/coilysiren/cli-guard v0.0.0-20260528042758-341ccd05dc48
+	github.com/coilysiren/cli-guard v0.0.0-20260528044929-b79162ea06c0
 	golang.org/x/net v0.53.0
 )
 
