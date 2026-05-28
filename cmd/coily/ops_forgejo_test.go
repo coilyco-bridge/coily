@@ -100,6 +100,20 @@ func TestForgejoLocalArgv_PinnedTarget(t *testing.T) {
 	}
 }
 
+// TestForgejoCommand_FJAlias pins the `fj` shorthand for `coily ops forgejo`.
+func TestForgejoCommand_FJAlias(t *testing.T) {
+	cmd := (&Runner{}).forgejoCommand()
+	found := false
+	for _, a := range cmd.Aliases {
+		if a == "fj" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("forgejo command missing 'fj' alias; got aliases %v", cmd.Aliases)
+	}
+}
+
 func TestValidateForgejoUsername(t *testing.T) {
 	ok := []string{"peer", "kai-siren", "k.s", "user_1", "AlphaBeta", "a"}
 	for _, n := range ok {
