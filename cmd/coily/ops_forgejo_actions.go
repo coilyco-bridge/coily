@@ -379,16 +379,16 @@ func (v *forgejoJobView) stepNames() []string {
 // maxAttempt returns the highest attempt number for the run, defaulting to 1
 // when forgejo reports none (the common single-attempt case).
 func (v *forgejoJobView) maxAttempt() int {
-	max := 0
+	highest := 0
 	for _, a := range v.State.Run.AllAttempts {
-		if a.Number > max {
-			max = a.Number
+		if a.Number > highest {
+			highest = a.Number
 		}
 	}
-	if max == 0 {
+	if highest == 0 {
 		return 1
 	}
-	return max
+	return highest
 }
 
 func printForgejoActionsTaskList(respBody []byte) error {
