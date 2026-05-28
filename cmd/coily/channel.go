@@ -18,6 +18,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"text/tabwriter"
 	"time"
 
 	"github.com/coilysiren/cli-guard/verb"
@@ -29,7 +30,7 @@ const channelHTTPTimeout = 60 * time.Second
 func (r *Runner) channelCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "channel",
-		Usage: "Agent Channel coordination (create/post/read/state/spec/events/close).",
+		Usage: "Agent Channel coordination (list/create/post/read/state/spec/events/close).",
 		Description: `channel wraps the v2 Agent Channel protocol exposed by the reference
 deployment in coilysiren/backend. The bearer token is resolved from AWS
 SSM at config channel.ssm_token_path (default /coilysiren/backend/
@@ -38,6 +39,7 @@ datastore-token); the base URL comes from config channel.base_url
 deployment).
 
 Verbs:
+  coily channel list   [--format json|table] [--all]
   coily channel create --title <s>
   coily channel post   <id> --kind <k> --author <a> [--payload <file|->]
   coily channel read   <id> [--format json|yaml|markdown]
@@ -48,6 +50,7 @@ Verbs:
 
 Protocol: https://github.com/coilysiren/otel-a2a-relay/blob/main/docs/channels-protocol.md`,
 		Commands: []*cli.Command{
+			r.channelListCommand(),
 			r.channelCreateCommand(),
 			r.channelPostCommand(),
 			r.channelReadCommand(),
@@ -56,6 +59,45 @@ Protocol: https://github.com/coilysiren/otel-a2a-relay/blob/main/docs/channels-p
 			r.channelEventsCommand(),
 			r.channelCloseCommand(),
 		},
+	}
+}
+
+func (r *Runner) channelListCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "list",
+		Usage: "List agent channels. Default shows only OPEN channels.",
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: "format", Usage: "table (default) or json (raw array passthrough)", Value: "table"},
+			&cli.BoolFlag{Name: "all", Usage: "include closed channels (default lists OPEN only)"},
+		},
+		Action: r.WrapVerb(
+			verb.Spec{
+				Name:      "channel.list",
+				SkipScope: true,
+				Action: func(ctx context.Context, c *cli.Command) error {
+					if c.Args().Len() != 0 {
+						return fmt.Errorf("channel list: takes no positional args, got %d", c.Args().Len())
+					}
+					format := c.String("format")
+					if format != "table" && format != "json" {
+						return fmt.Errorf("channel list: --format must be table or json, got %q", format)
+					}
+					q := url.Values{}
+					if !c.Bool("all") {
+						q.Set("include_closed", "false")
+					}
+					body, _, err := r.channelFetch(ctx, "GET", "/agent-channel", q, nil, "")
+					if err != nil {
+						return err
+					}
+					if format == "json" {
+						return renderChannelResponse(body, "application/json")
+					}
+					return renderChannelTable(body)
+				},
+			},
+			r.Audit,
+		),
 	}
 }
 
@@ -335,13 +377,25 @@ func readChannelPayload(spec string) (any, error) {
 // streamed verbatim when accept names yaml/markdown (the server already
 // formats it); JSON responses are pretty-printed.
 func (r *Runner) channelDo(ctx context.Context, method, path string, q url.Values, body []byte, accept string) error {
+	respBody, contentType, err := r.channelFetch(ctx, method, path, q, body, accept)
+	if err != nil {
+		return err
+	}
+	return renderChannelResponse(respBody, contentType)
+}
+
+// channelFetch issues one HTTP request against the configured Agent Channel
+// deployment, attaching the SSM-resolved bearer token, and returns the raw
+// response body plus its Content-Type. Split from channelDo so verbs that
+// reshape the response (list's table view) can reuse the transport.
+func (r *Runner) channelFetch(ctx context.Context, method, path string, q url.Values, body []byte, accept string) ([]byte, string, error) {
 	base := strings.TrimRight(r.Cfg.Channel.BaseURL, "/")
 	if base == "" {
-		return fmt.Errorf("channel: channel.base_url not set in config")
+		return nil, "", fmt.Errorf("channel: channel.base_url not set in config")
 	}
 	tokenPath := r.Cfg.Channel.SSMTokenPath
 	if tokenPath == "" {
-		return fmt.Errorf("channel: channel.ssm_token_path not set in config")
+		return nil, "", fmt.Errorf("channel: channel.ssm_token_path not set in config")
 	}
 	target := base + path
 	if len(q) > 0 {
@@ -353,7 +407,7 @@ func (r *Runner) channelDo(ctx context.Context, method, path string, q url.Value
 	}
 	req, err := http.NewRequestWithContext(ctx, method, target, rdr)
 	if err != nil {
-		return fmt.Errorf("channel: build request: %w", err)
+		return nil, "", fmt.Errorf("channel: build request: %w", err)
 	}
 	if len(body) > 0 {
 		req.Header.Set("Content-Type", "application/json")
@@ -365,25 +419,25 @@ func (r *Runner) channelDo(ctx context.Context, method, path string, q url.Value
 	}
 	token, err := r.channelToken(ctx, tokenPath)
 	if err != nil {
-		return err
+		return nil, "", err
 	}
 	req.Header.Set("Authorization", "Bearer "+token)
 
 	client := &http.Client{Timeout: channelHTTPTimeout}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("channel: %s %s: %w", method, path, err)
+		return nil, "", fmt.Errorf("channel: %s %s: %w", method, path, err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("channel: read response: %w", err)
+		return nil, "", fmt.Errorf("channel: read response: %w", err)
 	}
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("channel: HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
+		return nil, "", fmt.Errorf("channel: HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
 	}
-	return renderChannelResponse(respBody, resp.Header.Get("Content-Type"))
+	return respBody, resp.Header.Get("Content-Type"), nil
 }
 
 // renderChannelResponse pretty-prints JSON responses and streams everything
@@ -415,6 +469,65 @@ func renderChannelResponse(body []byte, contentType string) error {
 	}
 	_, err = fmt.Fprintln(os.Stdout, string(out))
 	return err
+}
+
+type channelRow struct {
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	CreatedBy string `json:"created_by"`
+	CreatedAt string `json:"created_at"`
+	ClosedAt  string `json:"closed_at"`
+}
+
+// parseChannelList accepts either a bare JSON array or a {"channels": [...]}
+// wrapper - both shapes the backend may emit - and returns the rows.
+func parseChannelList(body []byte) ([]channelRow, error) {
+	trimmed := bytes.TrimSpace(body)
+	if len(trimmed) == 0 {
+		return nil, nil
+	}
+	if trimmed[0] == '{' {
+		var wrapper struct {
+			Channels []channelRow `json:"channels"`
+		}
+		if err := json.Unmarshal(trimmed, &wrapper); err != nil {
+			return nil, fmt.Errorf("channel list: parse response: %w", err)
+		}
+		return wrapper.Channels, nil
+	}
+	var rows []channelRow
+	if err := json.Unmarshal(trimmed, &rows); err != nil {
+		return nil, fmt.Errorf("channel list: parse response: %w", err)
+	}
+	return rows, nil
+}
+
+// renderChannelTable prints channels as an aligned table. STATUS is derived
+// from closed_at (empty/null = OPEN).
+func renderChannelTable(body []byte) error {
+	rows, err := parseChannelList(body)
+	if err != nil {
+		return err
+	}
+	if len(rows) == 0 {
+		_, err := fmt.Fprintln(os.Stdout, "no channels")
+		return err
+	}
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	if _, err := fmt.Fprintln(w, "ID\tTITLE\tCREATED_BY\tCREATED_AT\tSTATUS"); err != nil {
+		return err
+	}
+	for _, row := range rows {
+		status := "OPEN"
+		if row.ClosedAt != "" {
+			status = "CLOSED"
+		}
+		if _, err := fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n",
+			row.ID, row.Title, row.CreatedBy, row.CreatedAt, status); err != nil {
+			return err
+		}
+	}
+	return w.Flush()
 }
 
 // channelToken resolves the bearer token from AWS SSM. Uses r.Runner.Capture

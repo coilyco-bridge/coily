@@ -59,6 +59,12 @@ List a channel's events (newest first), optionally filtered by kind.
 
 Flags: --kind, --limit
 
+## `coily channel list`
+
+List agent channels. Default shows only OPEN channels.
+
+Flags: --all, --format
+
 ## `coily channel post`
 
 Append an event to a channel. Payload from --payload (literal | @file | -).
@@ -78,6 +84,12 @@ Read the newest spec event's payload (the channel charter).
 ## `coily channel state`
 
 Read the newest state event's payload.
+
+## `coily dispatch cascade`
+
+Spawn a detached worker allowed to recursively dispatch sub-workers (bounded fan-out).
+
+Flags: --allowed-tools, --claims, --claude-bin, --depth, --dry-run, --permission-mode
 
 ## `coily dispatch headless`
 
@@ -111,7 +123,7 @@ Flags: --json
 
 Show pid + log tail for a headless dispatch.
 
-Flags: --follow, --pid, --tail
+Flags: --all, --follow, --pid, --since, --tail
 
 ## `coily docker`
 

@@ -20,7 +20,7 @@ func TestChannelCommand_TreeShape(t *testing.T) {
 	if cmd.Name != "channel" {
 		t.Fatalf("root name = %q, want channel", cmd.Name)
 	}
-	want := []string{"create", "post", "read", "state", "spec", "events", "close"}
+	want := []string{"list", "create", "post", "read", "state", "spec", "events", "close"}
 	got := make([]string, 0, len(cmd.Commands))
 	for _, sub := range cmd.Commands {
 		got = append(got, sub.Name)
@@ -67,6 +67,56 @@ func TestChannelID_Validation(t *testing.T) {
 			t.Error("channelID(32A): want rejection")
 		}
 	})
+}
+
+func TestParseChannelList_Shapes(t *testing.T) {
+	t.Run("bare_array", func(t *testing.T) {
+		rows, err := parseChannelList([]byte(`[{"id":"VHGC","title":"t","created_by":"a","created_at":"x","closed_at":null}]`))
+		if err != nil {
+			t.Fatalf("bare array: %v", err)
+		}
+		if len(rows) != 1 || rows[0].ID != "VHGC" || rows[0].ClosedAt != "" {
+			t.Errorf("bare array -> %#v", rows)
+		}
+	})
+	t.Run("wrapper", func(t *testing.T) {
+		rows, err := parseChannelList([]byte(`{"channels":[{"id":"ABCD","closed_at":"2026-01-01T00:00:00Z"}]}`))
+		if err != nil {
+			t.Fatalf("wrapper: %v", err)
+		}
+		if len(rows) != 1 || rows[0].ID != "ABCD" || rows[0].ClosedAt == "" {
+			t.Errorf("wrapper -> %#v", rows)
+		}
+	})
+	t.Run("empty", func(t *testing.T) {
+		rows, err := parseChannelList([]byte("  "))
+		if err != nil || rows != nil {
+			t.Errorf("empty -> %#v, %v", rows, err)
+		}
+	})
+	t.Run("invalid", func(t *testing.T) {
+		if _, err := parseChannelList([]byte("not json")); err == nil {
+			t.Error("invalid JSON: want error")
+		}
+	})
+}
+
+func TestRenderChannelTable_Status(t *testing.T) {
+	body := []byte(`[{"id":"OPEN","closed_at":null},{"id":"DONE","closed_at":"2026-01-01T00:00:00Z"}]`)
+	out := captureStdout(t, func() error { return renderChannelTable(body) })
+	if !strings.Contains(out, "OPEN") || !strings.Contains(out, "CLOSED") {
+		t.Errorf("table missing status columns:\n%s", out)
+	}
+	if !strings.Contains(out, "ID") || !strings.Contains(out, "STATUS") {
+		t.Errorf("table missing header:\n%s", out)
+	}
+}
+
+func TestRenderChannelTable_Empty(t *testing.T) {
+	out := captureStdout(t, func() error { return renderChannelTable([]byte(`[]`)) })
+	if !strings.Contains(out, "no channels") {
+		t.Errorf("empty table -> %q", out)
+	}
 }
 
 func TestReadChannelPayload_Shapes(t *testing.T) {
