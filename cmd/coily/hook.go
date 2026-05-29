@@ -21,7 +21,7 @@ import (
 // coilysiren/coily#248 + cli-guard#74: the per-repo lockdown-deny.sh
 // coily renders exec's `coily hook pre-tool-use`, which calls the
 // shared cli-guard/hook engine with coily's own integrity rules and
-// routing-hint Route table. agent-guard runs its own equivalent hook
+// routing-hint Route table. ward runs its own equivalent hook
 // in its own repos. The two peers do not reference each other in
 // source.
 func (r *Runner) hookCommand() *cli.Command {
@@ -79,7 +79,7 @@ func runCoilyPreToolUse(in *os.File, errOut *os.File, lookup hook.LookPath) erro
 
 // coilyIntegrityRules returns the integrity-rule set the hook engine
 // applies before route lookup. Coily owns its own binary path
-// expectations; agent-guard owns its own (if it cares).
+// expectations; ward owns its own (if it cares).
 func coilyIntegrityRules() []hook.IntegrityRule {
 	return []hook.IntegrityRule{
 		{Binary: "coily", AllowedPaths: coilyBinaryAllowedPaths},

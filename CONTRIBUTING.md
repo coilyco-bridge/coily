@@ -8,7 +8,7 @@ So the contribution model here is closed on purpose. Forking is encouraged - rea
 
 ## Where to contribute instead
 
-If you want to contribute to this kind of tooling, **[coilysiren/agent-guard](https://github.com/coilysiren/agent-guard)** is the place. agent-guard is the generalizable, contribution-friendly version of the same idea: a generic CLI guard for repos with external contributors. coily delegates its PreToolUse hook to agent-guard. Pull requests are welcome there.
+If you want to contribute to this kind of tooling, **[coilyco-flight-deck/ward](https://github.com/coilyco-flight-deck/ward)** is the place. ward is the contribution-friendly cli-guard consumer for repos with external contributors. coily and ward are peer consumers of the same [cli-guard](https://github.com/coilysiren/cli-guard) engine. Pull requests are welcome there.
 
 ## What is welcome here
 

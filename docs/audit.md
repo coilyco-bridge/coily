@@ -15,10 +15,10 @@ This doc is the canonical reference for the row schema. It pairs with the `audit
   "argv": ["coily", "ops", "gh", "issue", "view", "..."],
   "exit_code": 0,
   "duration_ms": 1090,
-  "repo_root": "/Users/kai/projects/coilysiren/agent-guard",
-  "cwd_subprocess": "/Users/kai/projects/coilysiren/agent-guard",
-  "cwd_at_invocation": "/Users/kai/projects/coilysiren/agent-guard",
-  "commit_scope": "/Users/kai/projects/coilysiren/agent-guard",
+  "repo_root": "/Users/kai/projects/coilyco-flight-deck/ward",
+  "cwd_subprocess": "/Users/kai/projects/coilyco-flight-deck/ward",
+  "cwd_at_invocation": "/Users/kai/projects/coilyco-flight-deck/ward",
+  "commit_scope": "/Users/kai/projects/coilyco-flight-deck/ward",
   "profile_decision": { ... },
   "egress": [ ... ]
 }

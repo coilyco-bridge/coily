@@ -110,8 +110,8 @@ func TestApplyHookHandoffTrim_PreservesShellInterpreterDenies(t *testing.T) {
 
 // TestCoilyRenderHookScript_IsCoilyHookShim asserts the rendered hook
 // body is a one-line exec into `coily hook pre-tool-use`, NOT a cross-
-// consumer reference like the prior `exec agent-guard hook ...` shim.
-// Per coilysiren/coily#248 + cli-guard#74, coily and agent-guard are
+// consumer reference like the legacy `exec <peer> hook ...` shim.
+// Per coilysiren/coily#248 + cli-guard#74, coily and ward are
 // peer cli-guard consumers; neither names the other in source.
 func TestCoilyRenderHookScript_IsCoilyHookShim(t *testing.T) {
 	body, err := coilyRenderHookScript(nil, nil)
@@ -121,8 +121,8 @@ func TestCoilyRenderHookScript_IsCoilyHookShim(t *testing.T) {
 	if !strings.Contains(body, "exec coily hook pre-tool-use") {
 		t.Errorf("expected hook body to exec into coily hook, got:\n%s", body)
 	}
-	if strings.Contains(body, "agent-guard") {
-		t.Errorf("hook body must not reference agent-guard (boundary violation, coily#248); got:\n%s", body)
+	if strings.Contains(body, "ward hook") {
+		t.Errorf("hook body must not shim into the ward peer consumer (boundary violation, coily#248); got:\n%s", body)
 	}
 	if !strings.HasPrefix(body, "#!/bin/sh\n") {
 		t.Errorf("expected POSIX-sh shebang, got first line: %q", strings.SplitN(body, "\n", 2)[0])
@@ -150,7 +150,7 @@ func TestCoilyLockdownDriver_WiresHookHandoff(t *testing.T) {
 	if !strings.Contains(body, "exec coily hook pre-tool-use") {
 		t.Errorf("RenderHookScript should exec into coily hook (coily#248); got:\n%s", body)
 	}
-	if strings.Contains(body, "agent-guard") {
-		t.Errorf("RenderHookScript must not reference agent-guard; got:\n%s", body)
+	if strings.Contains(body, "ward hook") {
+		t.Errorf("RenderHookScript must not shim into the ward peer consumer; got:\n%s", body)
 	}
 }

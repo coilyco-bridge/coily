@@ -70,7 +70,7 @@ coily is a personal-scale remix of [Teleport](https://github.com/gravitational/t
 
 ## Contributing
 
-coily does not accept external pull requests - it is a security boundary, and an external change is an attack surface. See [CONTRIBUTING.md](CONTRIBUTING.md); contribute to [agent-guard](https://github.com/coilysiren/agent-guard) instead. Issues welcome.
+coily does not accept external pull requests - it is a security boundary, and an external change is an attack surface. See [CONTRIBUTING.md](CONTRIBUTING.md); contribute to [ward](https://github.com/coilyco-flight-deck/ward) instead. Issues welcome.
 
 ## See also
 
