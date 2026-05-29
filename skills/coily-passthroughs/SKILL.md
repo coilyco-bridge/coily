@@ -1887,6 +1887,10 @@ GET /games/{game-id}/mods
 
 Flags: --limit, --offset
 
+## `coily ops netlify`
+
+Pass-through to netlify with argv validation + audit log.
+
 ## `coily ops personal-dashboard restart`
 
 Restart the personal-dashboard unit.

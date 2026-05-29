@@ -1,0 +1,3 @@
+# Normalize line endings: LF in the repo and in every working tree, so
+# gofmt/golangci-lint and shell-script hooks behave identically on Windows.
+* text=auto eol=lf

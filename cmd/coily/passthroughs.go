@@ -46,6 +46,9 @@ type ptEntry struct {
 	ReadCache      passthrough.ReadCacheClassifier
 	SecretResolver mcporter.SecretResolver
 	PreflightGate  func(argv []string) error
+	// EnvFromSSM maps an env-var name the wrapped binary reads to the SSM path
+	// holding its value; resolved at exec time, injected into the child (parent-env value wins).
+	EnvFromSSM map[string]string
 }
 
 // ptOps is the pass-through set mounted under `coily ops <bin>`. Cloud +
@@ -59,6 +62,7 @@ var ptOps = []ptEntry{
 	{Bin: "flyctl", VerbName: "ops.flyctl", Egress: true},
 	{Bin: "gcloud", VerbName: "ops.gcloud", Egress: true},
 	{Bin: "mcporter", VerbName: "ops.mcporter", Egress: true, ArgvRewriter: rewriteMcporterArgsFile, SecretResolver: ssmResolver()},
+	{Bin: "netlify", VerbName: "ops.netlify", Egress: true, EnvFromSSM: map[string]string{"NETLIFY_AUTH_TOKEN": "/coilysiren/netlify/token"}}, //nolint:gosec // G101 false positive: SSM path, not a secret
 }
 
 // ptTopLevel is the pass-through set mounted at the coily root. Each entry
@@ -137,6 +141,9 @@ func (r *Runner) passthroughCommand(e ptEntry) *cli.Command {
 	}
 	if e.SecretResolver != nil {
 		opts = append(opts, passthrough.WithSecretResolver(e.SecretResolver))
+	}
+	if len(e.EnvFromSSM) > 0 {
+		opts = append(opts, passthrough.WithEnvFunc(envFromSSMResolver(e.EnvFromSSM)))
 	}
 	cmd := passthrough.Command(e.Bin, r.Runner, r.Audit, opts...)
 	if e.PreflightGate != nil {

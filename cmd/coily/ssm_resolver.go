@@ -51,8 +51,13 @@ func resolveOneFromSSM(name string) (string, error) {
 	if v := os.Getenv(name); v != "" {
 		return v, nil
 	}
-	path := ssmPathFromEnvName(name)
-	cmd := exec.Command("aws", "ssm", "get-parameter", //nolint:gosec // name is derived from a static [A-Za-z_][A-Za-z0-9_]* match; aws CLI runs locally with the operator's creds.
+	return getSSMParameter(ssmPathFromEnvName(name))
+}
+
+// getSSMParameter fetches one decrypted SSM parameter by absolute path;
+// ParameterNotFound soft-fails to ("",nil) and exec.Command argv keeps the leading slash intact on msys (coily#156).
+func getSSMParameter(path string) (string, error) {
+	cmd := exec.Command("aws", "ssm", "get-parameter", //nolint:gosec // path is a static, code-supplied SSM name; aws CLI runs locally with the operator's creds.
 		"--name", path,
 		"--with-decryption",
 		"--query", "Parameter.Value",
@@ -67,7 +72,31 @@ func resolveOneFromSSM(name string) (string, error) {
 		}
 		return "", fmt.Errorf("ssm get-parameter %s: %w (%s)", path, err, strings.TrimSpace(stderr.String()))
 	}
-	return strings.TrimRight(string(out), "\n"), nil
+	// TrimSpace, not TrimRight("\n"): aws emits CRLF on Windows, and a trailing
+	// \r in a secret breaks HTTP-header consumers like NETLIFY_AUTH_TOKEN.
+	return strings.TrimSpace(string(out)), nil
+}
+
+// envFromSSMResolver builds the exec-time hook for a passthrough's EnvFromSSM map:
+// parent-env value wins, else fetch by path; a missing param is omitted so the var stays unset.
+func envFromSSMResolver(envFromSSM map[string]string) func() (map[string]string, error) {
+	return func() (map[string]string, error) {
+		out := make(map[string]string, len(envFromSSM))
+		for envVar, path := range envFromSSM {
+			if v := os.Getenv(envVar); v != "" {
+				out[envVar] = v
+				continue
+			}
+			v, err := getSSMParameter(path)
+			if err != nil {
+				return nil, err
+			}
+			if v != "" {
+				out[envVar] = v
+			}
+		}
+		return out, nil
+	}
 }
 
 // ssmPathFromEnvName inverts the `ssm-load` rule. Exported only via
