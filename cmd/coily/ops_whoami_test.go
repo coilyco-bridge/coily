@@ -62,8 +62,29 @@ func TestResolveAgentIdentity(t *testing.T) {
 	if withTag.tag != wantTag {
 		t.Errorf("tag = %q, want %q", withTag.tag, wantTag)
 	}
-	if got := withTag.name; !strings.HasSuffix(got, "-"+wantTag) {
-		t.Errorf("name %q should end with the session tag %q", got, wantTag)
+	// The pronoun slug is the trailing segment; the tag sits just before it.
+	if withTag.pronouns != "she-her" {
+		t.Errorf("pronouns = %q, want she-her", withTag.pronouns)
+	}
+	if got := withTag.name; !strings.HasSuffix(got, "-she-her") {
+		t.Errorf("name %q should end with the pronoun slug -she-her", got)
+	}
+	if got := withTag.name; !strings.Contains(got, "-"+wantTag+"-") {
+		t.Errorf("name %q should carry the session tag %q before the pronoun slug", got, wantTag)
+	}
+}
+
+func TestAgentPronounSlug(t *testing.T) {
+	cases := map[string]string{
+		"claude":   "she-her",
+		"codex":    "he-him",
+		"openclaw": "they-them",
+		"":         "they-them", // unrecognized harness defaults to they-them
+	}
+	for agent, want := range cases {
+		if got := agentPronounSlug(agent); got != want {
+			t.Errorf("agentPronounSlug(%q) = %q, want %q", agent, got, want)
+		}
 	}
 }
 
@@ -79,5 +100,8 @@ func TestAgentWhoamiBlock(t *testing.T) {
 	}
 	if block["agent"] != "claude" {
 		t.Errorf("agent = %q, want claude", block["agent"])
+	}
+	if block["pronouns"] != "she-her" {
+		t.Errorf("pronouns = %q, want she-her", block["pronouns"])
 	}
 }

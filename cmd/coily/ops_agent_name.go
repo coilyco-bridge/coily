@@ -15,11 +15,12 @@ import (
 func (r *Runner) agentNameCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "agent-name",
-		Usage: "Print this agent's self-name: claude-<os>-<hostname>-<tag>.",
+		Usage: "Print this agent's self-name: claude-<os>-<hostname>-<tag>-<pronouns>.",
 		Description: `agent-name prints the stable self-name of the agent running this
-coily invocation, in the form claude-<os>-<hostname>-<tag>, where <tag>
-is a stable 4-char dictatable id (two letters then two digits) derived
-from the Claude Code session id.
+coily invocation, in the form claude-<os>-<hostname>-<tag>-<pronouns>,
+where <tag> is a stable 4-char dictatable id (two letters then two digits)
+derived from the Claude Code session id and <pronouns> is the agent's
+pronoun slug (she-her for Claude).
 
 The session id is read from --session-id, or from $CLAUDE_CODE_SESSION_ID
 when the flag is absent. Status line and SessionStart hook integrations

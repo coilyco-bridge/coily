@@ -27,9 +27,11 @@ at before a write op, seeing which kubectl context is current, and checking
 which GitHub identity gh is authenticated as.
 
 The agent block prints this agent's self-name in the form
-claude-<os>-<hostname>-<tag>, where <tag> is a stable 4-char dictatable
-id (two letters then two digits) derived from the Claude Code session id.
-Codex and OpenClaw swap the claude- prefix.
+claude-<os>-<hostname>-<tag>-<pronouns>, where <tag> is a stable 4-char
+dictatable id (two letters then two digits) derived from the Claude Code
+session id and <pronouns> is the agent's pronoun slug (she-her for Claude).
+Codex and OpenClaw swap the claude- prefix and their pronouns - codex
+he-him, openclaw they-them.
 
 Non-fatal. If any tool is not configured or returns an error, its block
 reports the error but the other tools still run.`,
@@ -150,28 +152,47 @@ func ghWhoami(ctx context.Context, r *shell.Runner) any {
 
 // agentIdentity is this agent's self-name and the parts it is built from.
 type agentIdentity struct {
-	name, agent, osSlug, hostname, tag string
+	name, agent, osSlug, hostname, tag, pronouns string
+}
+
+// agentPronounSlug maps an agent to its pronoun slug, the trailing segment of
+// the self-name. Slug form (dash, not slash) so it stays a valid name token:
+// claude she-her, codex he-him. Everything else - openclaw and any
+// unrecognized harness - defaults to they-them.
+func agentPronounSlug(agent string) string {
+	switch agent {
+	case "claude":
+		return "she-her"
+	case "codex":
+		return "he-him"
+	default: // openclaw and any unrecognized harness
+		return "they-them"
+	}
 }
 
 // resolveAgentIdentity builds the agent self-name from a session id:
-// claude-<os>-<hostname>-<tag>. The tag is dropped when sessionID is empty.
-// Pure local lookup, no subprocess, so it never errors. This is the
-// canonical name computation - the agent-name verb and the whoami agent
-// block both route through here.
+// claude-<os>-<hostname>-<tag>-<pronouns>. The tag is dropped when sessionID
+// is empty; the pronoun slug is always present. Pure local lookup, no
+// subprocess, so it never errors. This is the canonical name computation -
+// the agent-name verb and the whoami agent block both route through here.
 func resolveAgentIdentity(sessionID string) agentIdentity {
 	osSlug := agentOSSlug(runtime.GOOS)
 	host := agentShortHostname()
 	tag := agentSessionTag(sessionID)
-	parts := []string{"claude", osSlug, host}
+	agent := "claude"
+	pronouns := agentPronounSlug(agent)
+	parts := []string{agent, osSlug, host}
 	if tag != "" {
 		parts = append(parts, tag)
 	}
+	parts = append(parts, pronouns)
 	return agentIdentity{
 		name:     strings.Join(parts, "-"),
-		agent:    "claude",
+		agent:    agent,
 		osSlug:   osSlug,
 		hostname: host,
 		tag:      tag,
+		pronouns: pronouns,
 	}
 }
 
@@ -185,6 +206,7 @@ func agentWhoami() any {
 		"os":          id.osSlug,
 		"hostname":    id.hostname,
 		"session_tag": id.tag,
+		"pronouns":    id.pronouns,
 	}
 }
 
