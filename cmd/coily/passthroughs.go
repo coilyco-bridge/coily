@@ -36,9 +36,9 @@ import (
 // PreflightGate, when non-nil, runs against the raw argv before the
 // passthrough executes. A non-nil return aborts the invocation with that
 // error and the wrapped binary never runs. `ops gh` uses this to keep
-// GitHub Actions / CI status playwright-only (coilysiren/coily#305); `pkg
-// uv` uses it to reject `uv run` against scratch-tier / repo-escaping
-// script paths (coily#10).
+// GitHub Actions / CI status playwright-only (coilysiren/coily#305); the
+// `pkg` run/exec tools use it (via pkgRunGate) to reject run/exec against
+// scratch-tier / repo-escaping script paths (coily#9, coily#10).
 type ptEntry struct {
 	Bin            string
 	SkipPolicy     bool
@@ -89,23 +89,31 @@ var ptTopLevel = []ptEntry{
 // Skipped intentionally:
 //   - deno, go install / go run: already denied at the lockdown layer and
 //     not used as package-installation paths in the workspace.
+//
+// PreflightGate: pkgRunGate(bin) wires the scratch-tier / repo-escaping
+// script-path gate (coily#9, coily#10) onto every tool whose run/exec verb
+// is a general-purpose interpreter. The set of gated bins is the registry
+// in pkg_run_gate.go (pkgRunSpecs); pkgRunGate returns nil for an
+// unregistered bin, so pip / cargo / gem stay ungated by design (install-
+// time setup-code exec and repo-defined run targets are other threat
+// classes).
 var ptPkg = []ptEntry{
-	{Bin: "pnpm", Egress: true},
-	{Bin: "npm", Egress: true},
-	{Bin: "yarn", Egress: true},
-	{Bin: "bun", Egress: true},
-	{Bin: "uv", Egress: true, PreflightGate: uvPreflightGate},
+	{Bin: "pnpm", Egress: true, PreflightGate: pkgRunGate("pnpm")},
+	{Bin: "npm", Egress: true, PreflightGate: pkgRunGate("npm")},
+	{Bin: "yarn", Egress: true, PreflightGate: pkgRunGate("yarn")},
+	{Bin: "bun", Egress: true, PreflightGate: pkgRunGate("bun")},
+	{Bin: "uv", Egress: true, PreflightGate: pkgRunGate("uv")},
 	{Bin: "pip", Egress: true},
-	{Bin: "pipx", Egress: true},
-	{Bin: "poetry", Egress: true},
+	{Bin: "pipx", Egress: true, PreflightGate: pkgRunGate("pipx")},
+	{Bin: "poetry", Egress: true, PreflightGate: pkgRunGate("poetry")},
 	{Bin: "cargo", Egress: true},
 	{Bin: "gem", Egress: true},
-	{Bin: "bundle", Egress: true},
+	{Bin: "bundle", Egress: true, PreflightGate: pkgRunGate("bundle")},
 	// nix is a universal package manager, not language-scoped. Added for
 	// the kai-server Tangled-knot build (coilysiren/infrastructure#260
 	// family): the knot is built via `nix build`, and the auto-deploy
 	// timer runs nix under audit.
-	{Bin: "nix", Egress: true},
+	{Bin: "nix", Egress: true, PreflightGate: pkgRunGate("nix")},
 	// brew is NOT a thin passthrough: it has its own scoped wrapper
 	// at pkgBrewCommand (coily#253) that handles formula-scoped,
 	// tap-scoped, and touch-everything verbs alongside read-only
