@@ -33,9 +33,6 @@ func TestLoadConfig_HasExpectedFields(t *testing.T) {
 	if c.KaiServer.TailscaleHost == "" {
 		t.Error("kai_server.tailscale_host is empty")
 	}
-	if c.KaiServer.SSHUser == "" {
-		t.Error("kai_server.ssh_user is empty")
-	}
 }
 
 // withIsolatedHome points $HOME at a temp dir, chdir's into another
@@ -136,7 +133,7 @@ func TestLoadConfig_LocalOnly(t *testing.T) {
 		t.Fatalf("mkdir: %v", err)
 	}
 	body := `kai_server:
-  ssh_user: alice
+  tailscale_host: alt-host
 `
 	if err := os.WriteFile(filepath.Join(ldir, "config.yaml"), []byte(body), 0o600); err != nil {
 		t.Fatalf("write: %v", err)
@@ -145,8 +142,8 @@ func TestLoadConfig_LocalOnly(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadConfig: %v", err)
 	}
-	if c.KaiServer.SSHUser != "alice" {
-		t.Errorf("KaiServer.SSHUser = %q, want alice", c.KaiServer.SSHUser)
+	if c.KaiServer.TailscaleHost != "alt-host" {
+		t.Errorf("KaiServer.TailscaleHost = %q, want alt-host", c.KaiServer.TailscaleHost)
 	}
 }
 

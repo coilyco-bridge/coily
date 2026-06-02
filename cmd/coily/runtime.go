@@ -10,15 +10,14 @@ import (
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/decision"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
-	coilyssh "forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/ssh"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
-// Runner owns the audit writer, shell runner, ssh client, and loaded config.
+// Runner owns the audit writer, shell runner, and loaded config.
 // Constructed once in main() and threaded into every cli.Command action via
 // methods on this struct. Tests construct a Runner directly with fakes for
-// Audit or SSH.
+// Audit.
 //
 // Cfg is the layered *Config (embedded defaults, overlaid by
 // ~/.coily/config.yaml, then ./.coily/config.yaml). Path fields like
@@ -28,7 +27,6 @@ type Runner struct {
 	Cfg    *Config
 	Runner *shell.Runner
 	Audit  *audit.Writer
-	SSH    *coilyssh.Client
 }
 
 // NewRunner builds the production Runner from layered config. Exits the
@@ -63,12 +61,6 @@ func NewRunner() *Runner {
 			Stdin:  os.Stdin,
 		},
 		Audit: aw,
-		// SSH wraps golang.org/x/crypto/ssh. When kai_server.ssh_key_path is
-		// set (e.g. on Windows where the MSYS agent is unreachable from the
-		// native Windows binary), auth uses that key. Otherwise it falls back
-		// to ssh-agent (SSH_AUTH_SOCK). Host keys verified against
-		// ~/.ssh/known_hosts either way. Library lives in cli-guard/ssh.
-		SSH: &coilyssh.Client{KeyPath: expandTilde(cfg.KaiServer.SSHKeyPath)},
 	}
 }
 

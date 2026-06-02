@@ -47,7 +47,7 @@ After pushing to `main`, schedule a wake-up to land the new binary and re-baseli
 - **Verify CI**: `coily ops forgejo` doesn't have an Actions verb yet, so check via the forgejo UI at `forgejo.coilysiren.me/coilysiren/coily/actions` or via the API: `curl https://forgejo.coilysiren.me/api/v1/repos/coilysiren/coily/actions/tasks | jq '.workflow_runs[0]'`. Latest run should be `completed/success`. Re-schedule once at +180s if in progress; stop on failure.
 - **Upgrade host**: Mac `brew upgrade coilysiren/coily/coily`. Windows `scoop update coily`. No sudo on either.
 - **Re-baseline lockdown** only when the bumped commit touched `cli-guard/lockdown/`: `coily lockdown --apply --replace --recursive --path ~/projects/coilysiren`.
-- **kai-server**: `coily ssh kai-server -- coily systemctl start coily-update.service`. Oneshot.
+- **kai-server**: run `coily systemctl start coily-update.service` on kai-server itself (oneshot); the SSH passthrough that drove this from a laptop was removed.
 - **Skip** for docs-only pushes.
 
 ## Commands

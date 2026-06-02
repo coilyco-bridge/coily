@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/exitcode"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )
@@ -147,15 +146,6 @@ func run(r *Runner, argv []string) error {
 					"RepoRoot matches the outer's. " +
 					"Operators rarely need this directly.",
 			},
-			&cli.StringFlag{
-				Name: verb.AuditParentFlag,
-				Usage: "record this invocation's audit row as a child of <id>. " +
-					"Set by `coily ssh <alias> -- <args>` on the remote invocation so " +
-					"the remote row links back to the local row (coilysiren/coily#187). " +
-					"Read from $COILY_AUDIT_PARENT if unset. " +
-					"Empty in the common single-host case.",
-				Sources: cli.EnvVars(verb.AuditParentEnvVar),
-			},
 		},
 		Before: func(ctx context.Context, c *cli.Command) (context.Context, error) {
 			// --cwd chdirs before any subcommand action so scope.RepoRoot
@@ -202,7 +192,6 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.setupCommand(),
 		r.gamingCommand(),
 		r.opsCommand(),
-		r.sshCommand(),
 		r.systemctlCommand(),
 		r.auditCommand(),
 		r.gitCommand(),

@@ -53,7 +53,7 @@ func TestWrapperAllowsParity_AllDenyEntriesCovered(t *testing.T) {
 		"Bash(tailscale:*)", "Bash(docker:*)", "Bash(aws:*)",
 		"Bash(kubectl:*)", "Bash(gh:*)", "Bash(flyctl:*)",
 		"Bash(gcloud:*)",
-		"Bash(ssh:*)", "Bash(brew:*)",
+		"Bash(brew:*)",
 		"Bash(npm:*)", "Bash(pnpm:*)", "Bash(yarn:*)",
 		"Bash(uv:*)", "Bash(pip:*)", "Bash(pipx:*)", "Bash(poetry:*)",
 		"Bash(cargo:*)", "Bash(gem:*)", "Bash(bundle:*)",

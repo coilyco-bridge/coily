@@ -36,7 +36,7 @@ import (
 // walking. Loads the layered config (defaults + any host overlays) so verb
 // builders that dereference r.Cfg do not panic. A shell.Runner is supplied
 // because dispatchCommand wires it into dispatch.New at tree-build time, and
-// dispatch.New refuses a nil Runner. Audit and SSH stay nil; tests in this
+// dispatch.New refuses a nil Runner. Audit stays nil; tests in this
 // file do not invoke Actions.
 func newSecurityClaimRunner(t *testing.T) *Runner {
 	t.Helper()
@@ -72,13 +72,12 @@ func TestSecurityClaim_PolicyRejectsAllShellMetacharacters(t *testing.T) {
 }
 
 // TestSecurityClaim_NoEscapeHatchVerbs covers SECURITY.md's "No coily shell /
-// coily run escape hatch, ever. Same rule applies to remote shells: no
-// coily ssh exec, no coily ops kubectl exec pass-through."
+// coily run escape hatch, ever. No coily ops kubectl exec pass-through."
 //
 // Walks the registered command tree built by the production Runner and fails
-// if any forbidden name lands as a top-level verb or under ssh. (Kubectl is
-// a passthrough that does not register subcommands in the tree; the deny
-// list at cli-guard/lockdown/defaults.yaml covers `kubectl exec` separately and is
+// if any forbidden name lands as a top-level verb. (Kubectl is a passthrough
+// that does not register subcommands in the tree; the deny list at
+// cli-guard/lockdown/defaults.yaml covers `kubectl exec` separately and is
 // asserted by TestSecurityClaim_LockdownDeniesKubectlExec.)
 func TestSecurityClaim_NoEscapeHatchVerbs(t *testing.T) {
 	r := newSecurityClaimRunner(t)
@@ -95,19 +94,6 @@ func TestSecurityClaim_NoEscapeHatchVerbs(t *testing.T) {
 	for _, c := range cmds {
 		if forbiddenTopLevel[c.Name] {
 			t.Errorf("forbidden top-level verb registered: coily %q (SECURITY.md: no escape hatch)", c.Name)
-		}
-	}
-
-	// Under coily ssh, no "exec" subcommand. The named systemctl/git/copy/
-	// deploy verbs are the supported ssh surface.
-	for _, c := range cmds {
-		if c.Name != "ssh" {
-			continue
-		}
-		for _, sub := range c.Commands {
-			if sub.Name == "exec" {
-				t.Errorf("forbidden subcommand registered: coily ssh exec (SECURITY.md: named verbs only)")
-			}
 		}
 	}
 }

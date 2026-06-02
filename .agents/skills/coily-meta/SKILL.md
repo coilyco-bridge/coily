@@ -151,7 +151,7 @@ The hosts coily operationally fronts. Each host has an owner, a destructive surf
 |---|---|---|---|---|
 | Operator laptop (Mac) | Operator | Verbs invoked here that mutate remote state. | `coily ops aws sts get-caller-identity`, `coily ops kubectl get`, `coily audit *`, `coily ops gh` reads. | Local `~/.coily/audit/<owner>-<repo>.jsonl` on the laptop. |
 | Operator laptop (Windows) | Operator | Same as Mac. | Same as Mac. | Local `%USERPROFILE%\.coily\audit\...` on the Windows host. |
-| kai-server (homelab) | Kai (or matching ssh user) | `coily ssh deploy`, `coily gaming * restart/stop`, `coily ssh systemctl restart <unit>`. Service-impacting for whoever is using the server. | `coily gaming * status`, `coily ssh kubectl get`, journalctl tails. | On the originating laptop, not on kai-server. The verb runs on kai-server via the ssh transport but is initiated from a laptop. |
+| kai-server (homelab) | Kai | `coily gaming * restart/stop`, `coily systemctl restart <unit>`, run on kai-server itself. Service-impacting for whoever is using the server. | `coily gaming * status`, journalctl tails. | Local `~/.coily/audit/...` on kai-server. These verbs run only on kai-server now; the SSH transport was removed. |
 | Friend's machine | The friend | Whatever coily verb runs there from the friend's own laptop. | Whatever the friend's coily reads. | On the friend's laptop. Not on Kai's. |
 | AWS / GitHub / mod.io / Trello / Discord | The respective service | `coily ops aws delete-*`, `coily ops gh repo delete`, etc. | Reads, list operations. | On the laptop that initiated. |
 
@@ -328,12 +328,12 @@ References: `cmd/coily/ops_systemctl.go`, `cmd/coily/ops_systemctl_test.go`, clo
 
 ### 9.5 `coily gaming eco`
 
-Operates the eco-server systemd unit on kai-server via the ssh transport. Failures typically split into transport-layer (ssh, sudo, key path) and game-server-state.
+Operates the eco-server systemd unit on kai-server. The SSH transport was removed, so these verbs run only on kai-server itself (a non-local `kai_server.tailscale_host` returns the "run this on kai-server directly" error). Failures are now local: sudo prompts, missing units, game-server-state.
 
-- **"remote-side transport errors surface usefully through coily."** False. They surface verbatim. Verbatim is fidelity, not actionability. `coily eco status` failed 6/6 with `ssh: no authentication method available (ssh-agent unreachable and no key path)` - correct, faithful, not actionable.
+- **"a non-local host errors clearly."** A laptop invocation against a remote-named host returns `remote execution over SSH was removed; run this on kai-server directly`, not a transport stack trace. Run the verb on the box.
   **Pin:** [coily#218](https://github.com/coilysiren/coily/issues/218), forward [coily#62](https://github.com/coilysiren/coily/issues/62).
 
-References: `cmd/coily/ops_eco.go`, `cmd/coily/ops_eco_mod.go`, `cli-guard/ssh` for the transport layer, audit-row verb prefix `eco.` or `gaming.eco.`.
+References: `cmd/coily/ops_eco.go`, `cmd/coily/ops_eco_mod.go`, audit-row verb prefix `eco.` or `gaming.eco.`.
 
 ## 10. References
 
@@ -341,7 +341,6 @@ References: `cmd/coily/ops_eco.go`, `cmd/coily/ops_eco_mod.go`, `cli-guard/ssh` 
 - `cli-guard/policy` - argv-validation gate (the runtime layer of the sequencing rules).
 - `cli-guard/audit` - audit-row writer.
 - `cli-guard/verb`, `cli-guard/scope` - the verb-to-policy binding.
-- `cli-guard/ssh` - transport layer for remote verbs.
 - `cmd/coily/security_claims_test.go` (`TestSecurityClaim_*`) - prose-vs-runtime gate.
 - `SECURITY.md` (in coily root) - the prose surface. Load-bearing claims live here.
 - `~/.coily/audit/*.jsonl` - per-repo audit trails.

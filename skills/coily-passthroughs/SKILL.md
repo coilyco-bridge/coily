@@ -3,8 +3,8 @@ name: coily-passthroughs
 description: |
   Use when a shell command is denied by Claude Code's permission system
   (e.g. "Permission to use Bash with command X has been denied"), when
-  reaching for aws, gh, kubectl, docker, tailscale, ssh, or scp against
-  Kai's homelab, AWS account, or coilysiren resources, or when checking
+  reaching for aws, gh, kubectl, docker, or tailscale against Kai's
+  homelab, AWS account, or coilysiren resources, or when checking
   whether a privileged op has a coily wrapper. The body is a flat lookup
   table of every coily command.
 ---
@@ -159,7 +159,7 @@ Flags: --follow, --lines
 
 ## `coily gaming eco mod push`
 
-scp a .zip to <server_dir> on kai-server and unzip -o it.
+copy a .zip into <server_dir> and unzip -o it (run on kai-server).
 
 Flags: --keep-remote, --server-dir, --src
 
@@ -3580,10 +3580,6 @@ Record the active lockdown profile for this Claude Code session.
 Run the post-upgrade rituals: completion, lockdown re-baseline, and user hook.
 
 Flags: --lockdown-root, --skip-completion, --skip-host-bootstrap, --skip-lockdown, --skip-skills, --skip-user-hook
-
-## `coily ssh`
-
-Free-form passthrough to a configured host alias.
 
 ## `coily systemctl daemon-reload`
 

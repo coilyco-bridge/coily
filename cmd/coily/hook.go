@@ -104,9 +104,6 @@ func coilyHookRoutes() []hook.Route {
 	for _, tok := range tokens {
 		target := wrapperRecovery[tok]
 		hint := fmt.Sprintf("use `%s ...` (audited wrapper).", target)
-		if tok == "ssh" {
-			hint += " For kai-server always `kai@kai-server`."
-		}
 		r := hook.Route{Token: tok, Hint: hint}
 		if tok == "gh" {
 			r.Extra = ghGraphQLTrapSuffix

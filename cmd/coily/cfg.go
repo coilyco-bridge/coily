@@ -50,17 +50,12 @@ func defaultForgejo() Forgejo {
 	return f
 }
 
-// KaiServer is the connection config for the home server that
-// `coily ssh` and the gaming / eco / factorio verbs target.
+// KaiServer identifies the home server that the gaming / eco / factorio /
+// forgejo / systemd verbs target. Those verbs run only on kai-server
+// itself now (the SSH transport was removed), so TailscaleHost is used
+// solely to confirm coily is running on that host via hostIsLocal.
 type KaiServer struct {
 	TailscaleHost string `yaml:"tailscale_host"`
-	SSHUser       string `yaml:"ssh_user"`
-	// SSHKeyPath is an optional path to a PEM private key used for
-	// ssh/sftp auth against kai-server. ~ is expanded. When empty,
-	// coily falls back to ssh-agent (SSH_AUTH_SOCK). On Windows the
-	// MSYS/cygwin agent is not reachable from the Windows-native
-	// binary, so an explicit key path is the working path there.
-	SSHKeyPath string `yaml:"ssh_key_path"`
 }
 
 // AWS holds the named profile that `coily ops aws` passes through to
@@ -115,7 +110,6 @@ func defaultConfig() Config {
 	return Config{
 		KaiServer: KaiServer{
 			TailscaleHost: "kai-server",
-			SSHUser:       "kai",
 		},
 		Audit: config.Audit{
 			MaxSizeMB:  10,

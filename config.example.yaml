@@ -7,14 +7,11 @@
 # `git remote get-url origin`. See cli-guard/config/paths.go.
 
 kai_server:
-  # Tailscale hostname for the homelab box. Resolved dynamically via tailscale SDK at runtime;
-  # embed the name here, not the IP.
+  # Hostname of the homelab box. The gaming / eco / factorio / forgejo /
+  # systemd verbs run only on kai-server itself now (the SSH transport was
+  # removed); this name is matched against the local hostname to confirm
+  # coily is running on that host. Embed the name here, not the IP.
   tailscale_host: kai-server
-  ssh_user: kai
-  # Optional path to a PEM private key. Leave empty to use ssh-agent.
-  # Windows (MSYS agent is not reachable from Windows-native Go):
-  #   ssh_key_path: ~/.ssh/id_ed25519
-  # ssh_key_path: ""
 
 audit:
   # log_path: ""   # blank picks the per-repo default under ~/.coily/audit/

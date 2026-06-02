@@ -24,8 +24,8 @@ name: coily-passthroughs
 description: |
   Use when a shell command is denied by Claude Code's permission system
   (e.g. "Permission to use Bash with command X has been denied"), when
-  reaching for aws, gh, kubectl, docker, tailscale, ssh, or scp against
-  Kai's homelab, AWS account, or coilysiren resources, or when checking
+  reaching for aws, gh, kubectl, docker, or tailscale against Kai's
+  homelab, AWS account, or coilysiren resources, or when checking
   whether a privileged op has a coily wrapper. The body is a flat lookup
   table of every coily command.
 ---
@@ -119,7 +119,6 @@ var wrapperAllows = map[string]string{
 	"Bash(gh:*)":        "Bash(coily ops gh:*)",
 	"Bash(flyctl:*)":    "Bash(coily ops flyctl:*)",
 	"Bash(gcloud:*)":    "Bash(coily ops gcloud:*)",
-	"Bash(ssh:*)":       "Bash(coily ssh:*)",
 	"Bash(brew:*)":      "Bash(coily pkg brew:*)",
 	"Bash(npm:*)":       "Bash(coily pkg npm:*)",
 	"Bash(pnpm:*)":      "Bash(coily pkg pnpm:*)",

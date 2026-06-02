@@ -42,12 +42,6 @@ var wrapperRecovery = map[string]string{
 	"docker":    "coily docker",
 	"tailscale": "coily tailscale",
 
-	// ssh family. Free-form remote exec was removed; named verbs live
-	// under `coily ssh` (copy, systemctl, journalctl, kubectl, git,
-	// deploy, fs).
-	"ssh": "coily ssh",
-	"scp": "coily ssh copy",
-
 	// Package managers. All wrapped under `coily pkg <pkgmgr>`.
 	"npm":    "coily pkg npm",
 	"pnpm":   "coily pkg pnpm",

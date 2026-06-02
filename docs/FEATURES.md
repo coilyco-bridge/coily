@@ -2,7 +2,7 @@
 
 Baseline of what coily ships. Update in the same commit as the change so this file mirrors the binary.
 
-Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh, kubectl, ssh, docker, tailscale, package managers, game-server systemd) in named verbs, validates argv, and writes a JSONL audit row per invocation. No escape hatch.
+Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh, kubectl, docker, tailscale, package managers, game-server systemd) in named verbs, validates argv, and writes a JSONL audit row per invocation. No escape hatch.
 
 ## Architecture
 
@@ -20,8 +20,6 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 **CLI passthroughs**: `coily ops aws|gh|kubectl`, `coily docker`, `coily tailscale`. kubectl has readonly/write gating via lockdown.
 
 **Package managers**: `coily pkg {pnpm,npm,yarn,bun,uv,pip,pipx,poetry,cargo,gem,bundle,brew,glama,skillsmp}`. `coily brew {install,uninstall,upgrade,reinstall}` is a separate top-level scoped to `coilysiren/tap/*`.
-
-**SSH**: `coily ssh <alias> -- coily <argv>`. Free-form passthrough; remote coily's lockdown is the security boundary. Audit rows chain across hosts via `--audit-parent`. See [coily#187](https://github.com/coilysiren/coily/issues/187).
 
 **Session**: `coily session {use,show,clear,end}`. Per-session lockdown-profile sentinel. `end` self-terminates a finished sidequest, SIGTERM to claude ([coily#309](https://github.com/coilysiren/coily/issues/309)).
 
@@ -57,7 +55,7 @@ No prebuilt binaries. Push to `main` triggers semver bump + tag + GH Release + `
 
 ## Cross-cutting infrastructure
 
-All cross-cutting infrastructure lives in the sibling `cli-guard` module: `cli-guard/shell` (subprocess), `cli-guard/gittree` (git state), `cli-guard/ttlcache` (cwd-to-toplevel memo), `cli-guard/ssh` (x/crypto/ssh + known_hosts + ssh-agent + SFTP). coily has no `pkg/`.
+All cross-cutting infrastructure lives in the sibling `cli-guard` module: `cli-guard/shell` (subprocess), `cli-guard/gittree` (git state), `cli-guard/ttlcache` (cwd-to-toplevel memo). coily has no `pkg/`.
 
 ## Testing + docs
 

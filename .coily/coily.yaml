@@ -43,22 +43,6 @@ commands:
     run: make build
     description: Build ./bin/coily (prod tags, for install).
 
-# Free-form ssh-passthrough target list. Schema: coilysiren/coily#187 phase 2.
-# `coily ssh <alias> -- <coily args>` resolves <alias> here, ssh's into the
-# target, and runs the supplied coily subcommand with --cwd set to
-# working_dir and --audit-parent set to the local audit-row id. Remote
-# coily's lockdown is the security boundary, not this client side.
-ssh:
-  targets:
-    kai-server:
-      user: kai
-      host: kai-server
-      # working_dir must be a git toplevel so coily systemctl's
-      # self-elevation invariant (coily#245) can bind the audit row
-      # symmetrically on the outer (kai) and the sudo'd inner (root).
-      # The coily checkout is the natural anchor on a coily-managed host.
-      working_dir: /home/kai/projects/coilysiren/coily
-
 # Catalog metadata for the cross-repo knowledge graph.
 # Schema: coilysiren/agentic-os-kai#420 (tracker).
 catalog:

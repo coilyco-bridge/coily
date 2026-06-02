@@ -58,7 +58,7 @@ commands:
 
 - **Single binary, single trust boundary.** One allowlist entry, `Bash(coily:*)`.
 - **Trust `$PATH` for sub-tool binaries.** Earlier sha256-pinned manifest dropped: the protection didn't justify the release pipeline.
-- **SDK-native for simple APIs.** ssh/scp + tailscale via Go SDKs. No subprocess means no argv to a shell.
+- **SDK-native for simple APIs.** tailscale via Go SDK. No subprocess means no argv to a shell.
 - **Mirror the sub-CLIs exactly.** `coily ops aws ssm get-parameter` takes the same args as `aws ssm get-parameter`.
 - **Config is embedded.** Changes require rebuild + sudo install.
 - **No self-update.** Binary cannot rewrite itself. v2 plan around adversarial-reviewed CI installs in SECURITY.md.

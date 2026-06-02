@@ -208,7 +208,7 @@ commands:
         - eco
         - mod
         - push
-      summary: scp a .zip to <server_dir> on kai-server and unzip -o it.
+      summary: copy a .zip into <server_dir> and unzip -o it (run on kai-server).
       flags:
         - --keep-remote
         - --server-dir
@@ -3079,6 +3079,11 @@ commands:
       flags:
         - --limit
         - --offset
+    - path:
+        - coily
+        - ops
+        - netlify
+      summary: Pass-through to netlify with argv validation + audit log.
     - path:
         - coily
         - ops
@@ -6067,10 +6072,6 @@ commands:
         - --skip-lockdown
         - --skip-skills
         - --skip-user-hook
-    - path:
-        - coily
-        - ssh
-      summary: Free-form passthrough to a configured host alias.
     - path:
         - coily
         - systemctl
