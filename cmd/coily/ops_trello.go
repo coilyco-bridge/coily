@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/coilysiren/coily/cmd/coily/trello"
+	"forgejo.coilysiren.me/coilyco-bridge/coily/cmd/coily/trello"
 	"github.com/urfave/cli/v3"
 )
 

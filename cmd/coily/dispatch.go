@@ -8,8 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/coilysiren/cli-guard/dispatch"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/dispatch"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 

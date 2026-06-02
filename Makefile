@@ -17,6 +17,12 @@ WINDOWS_ARCH        ?= amd64
 VERSION := $(shell git rev-parse --short HEAD 2>/dev/null || echo dev)
 LDFLAGS := -s -w -X main.Version=$(VERSION)
 
+# cli-guard is sourced direct from canonical Forgejo (not the github.com
+# mirror), so its module path is outside the public proxy + sum DB. GOPRIVATE
+# routes it through `direct` mode and skips sum.golang.org. Exported so every
+# go invocation under make (build/test/vet/lint/tidy) + CI inherits it.
+export GOPRIVATE := forgejo.coilysiren.me
+
 GO := go
 # gotest is a drop-in for `go test` that colorizes PASS/FAIL lines. Install
 # with `go install github.com/rakyll/gotest@latest`. Falls back to plain

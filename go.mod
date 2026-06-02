@@ -1,4 +1,4 @@
-module github.com/coilysiren/coily
+module forgejo.coilysiren.me/coilyco-bridge/coily
 
 go 1.25.0
 
@@ -8,7 +8,7 @@ require (
 )
 
 require (
-	github.com/coilysiren/cli-guard v0.1.1-0.20260528132809-aec940c2aef6
+	forgejo.coilysiren.me/coilyco-flight-deck/cli-guard v0.1.1-0.20260602072341-d9eb84266175
 	golang.org/x/net v0.53.0
 )
 

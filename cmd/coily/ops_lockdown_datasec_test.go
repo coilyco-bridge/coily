@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coilysiren/cli-guard/lockdown"
-	"github.com/coilysiren/cli-guard/profile"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/lockdown"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/profile"
 )
 
 func TestApplyDataSecurityDenies_LowNoChange(t *testing.T) {

@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 
-	"github.com/coilysiren/cli-guard/exitcode"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/exitcode"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )
@@ -99,79 +98,10 @@ func kindFor(err error, rc int) string {
 	}
 }
 
-// liftCommitScope pulls --commit-scope out of any position in argv and
-// reinserts it as a global flag (right after argv[0]). urfave/cli requires
-// global flags to precede the verb chain, but passthrough verbs use
-// SkipFlagParsing, so a flag placed after the verb (the natural spot) gets
-// consumed as part of the wrapped binary's argv. Pre-scanning here makes
-// --commit-scope positionally flexible (closes #101).
-//
-// Recognized forms:
-//
-//	--commit-scope=<value>   single token
-//	--commit-scope <value>   two tokens; the next token is treated as the
-//	                         value only when it does not itself look like a
-//	                         flag (a bare --commit-scope is dropped).
-//
-// Last occurrence wins, matching urfave/cli's default for repeated flags.
-// All instances are removed from their original positions.
-//
-// No coily-fronted binary (gh, aws, kubectl, docker, tailscale, the package
-// managers) defines a --commit-scope flag, so lifting cannot collide with a
-// legitimate wrapped-tool flag. A user-supplied argv value that happens to
-// contain the literal string "--commit-scope" inside a quoted body remains a
-// single argv element and does not match the token check.
-func liftCommitScope(argv []string) []string {
-	if len(argv) < 2 {
-		return argv
-	}
-	const flag = "--commit-scope"
-	var liftedValue string
-	var liftedFound bool
-	var anyConsumed bool
-	out := make([]string, 0, len(argv))
-	out = append(out, argv[0])
-	i := 1
-	for i < len(argv) {
-		tok := argv[i]
-		switch {
-		case tok == flag:
-			anyConsumed = true
-			if i+1 < len(argv) && !strings.HasPrefix(argv[i+1], "-") {
-				liftedValue = argv[i+1]
-				liftedFound = true
-				i += 2
-				continue
-			}
-			i++
-			continue
-		case strings.HasPrefix(tok, flag+"="):
-			anyConsumed = true
-			liftedValue = strings.TrimPrefix(tok, flag+"=")
-			liftedFound = true
-			i++
-			continue
-		}
-		out = append(out, tok)
-		i++
-	}
-	if !anyConsumed {
-		return argv
-	}
-	if !liftedFound {
-		return out
-	}
-	result := make([]string, 0, len(out)+1)
-	result = append(result, out[0], flag+"="+liftedValue)
-	result = append(result, out[1:]...)
-	return result
-}
-
 // run wires a Runner into the urfave/cli v3 root command and executes it
 // against argv. Split out from main() so tests can drive a Runner with fake
 // dependencies through a real cli.Command tree.
 func run(r *Runner, argv []string) error {
-	argv = liftCommitScope(argv)
 	builtIns := r.builtInCommands()
 	repoResult, execCmd := r.loadRepoExecCommand()
 
@@ -209,22 +139,12 @@ func run(r *Runner, argv []string) error {
 					"git history.",
 			},
 			&cli.StringFlag{
-				Name: verb.CommitScopeFlag,
-				Usage: "bind audit rows to a commit scope. " +
-					"`auto` (default) = git toplevel of cwd; " +
-					"`<path>` = explicit repo path. " +
-					"There is no opt-out: every invocation must bind to a real repo. " +
-					"Read from $COILY_COMMIT_SCOPE if unset.",
-				Value:   "auto",
-				Sources: cli.EnvVars("COILY_COMMIT_SCOPE"),
-			},
-			&cli.StringFlag{
 				Name: "cwd",
 				Usage: "chdir to this path before any other processing. " +
 					"Internal flag used by `coily systemctl` self-elevation " +
 					"(coily#245) so the sudo'd child lands in the same git " +
-					"toplevel the outer was running in, satisfying the " +
-					"audit-row-binds-to-git-toplevel invariant symmetrically. " +
+					"toplevel the outer was running in, so its audit row's " +
+					"RepoRoot matches the outer's. " +
 					"Operators rarely need this directly.",
 			},
 			&cli.StringFlag{
@@ -238,11 +158,11 @@ func run(r *Runner, argv []string) error {
 			},
 		},
 		Before: func(ctx context.Context, c *cli.Command) (context.Context, error) {
-			// --cwd chdirs before any subcommand action so scope.Resolve
+			// --cwd chdirs before any subcommand action so scope.RepoRoot
 			// (which reads os.Getwd) sees the post-chdir path. Powers
 			// the systemctl self-elevation invariant in coily#245: the
 			// sudo'd child lands in the outer's git toplevel before its
-			// audit row binds.
+			// audit row's RepoRoot is stamped.
 			if dir := c.String("cwd"); dir != "" {
 				if err := os.Chdir(dir); err != nil {
 					return ctx, fmt.Errorf("coily: --cwd=%q: %w", dir, err)

@@ -10,8 +10,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/coilysiren/cli-guard/exitcode"
-	"github.com/coilysiren/cli-guard/repocfg"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/exitcode"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/repocfg"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )

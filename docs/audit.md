@@ -18,7 +18,6 @@ This doc is the canonical reference for the row schema. It pairs with the `audit
   "repo_root": "/Users/kai/projects/coilyco-flight-deck/ward",
   "cwd_subprocess": "/Users/kai/projects/coilyco-flight-deck/ward",
   "cwd_at_invocation": "/Users/kai/projects/coilyco-flight-deck/ward",
-  "commit_scope": "/Users/kai/projects/coilyco-flight-deck/ward",
   "profile_decision": { ... },
   "egress": [ ... ]
 }
@@ -34,14 +33,13 @@ Field reference below.
 * `verb` - Canonical verb name (e.g. `ops.gh`, `dispatch.interactive`, `repo.<cmd>` for `coily exec` user verbs).
 * `argv` - Argv as coily received it. Validated against the verb's allowlist before any subprocess starts.
 * `exit_code` - Wrapped command's exit code, or coily's own exit code if the gate denied.
-* `repo_root` - Git toplevel resolved at invocation.
-* `commit_scope` - The scope the audit row is bound to (`--commit-scope` or `$COILY_COMMIT_SCOPE`). Determines which `<owner>-<repo>.jsonl` file the row lands in.
+* `repo_root` - Git toplevel of cwd at invocation, or empty when cwd is outside any git repo. Forensic only: records where the invocation ran. `coily git audit-show --scope <repo> --since <ts>` filters rows by this field.
 
 ## Sometimes present
 
 * `duration_ms` - Wall time the wrapped command ran. Absent for deny decisions (no subprocess) and for verbs that exit before timing starts.
 * `cwd_subprocess` - cwd handed to the wrapped command.
-* `cwd_at_invocation` - cwd of the coily process itself. Distinct from `cwd_subprocess` when coily rehomes for `--commit-scope`.
+* `cwd_at_invocation` - cwd of the coily process itself. Distinct from `cwd_subprocess` when coily rehomes the wrapped command into a different directory.
 * `profile_decision` - See below. Present when a session profile evaluation ran for this verb.
 * `egress` - See below. Present when the verb is one of coily's built-in network-aware wrappers (e.g. `ops.gh`, `ops.aws`) that records outbound HTTPS connections.
 
@@ -91,8 +89,8 @@ When reading an audit row to answer "what did this verb touch on the network", t
 
 ## File layout
 
-* `~/.coily/audit/<owner>-<repo>.jsonl` - Per-commit-scope log. One file per repo, one row per invocation, append-only.
-* `~/.coily/audit/_unrooted.jsonl` - Catch-all for invocations with no resolvable commit scope.
+* `~/.coily/audit/<owner>-<repo>.jsonl` - Per-repo log, slug derived from cwd's git origin remote. One file per repo, one row per invocation, append-only.
+* `~/.coily/audit/_unrooted.jsonl` - Catch-all for invocations made outside any git repo (or in one with no origin remote).
 * `~/.coily/audit/sessions/<session_id>/profile` - Session-profile sentinel file. Not a log row, named here so the layout is documented in one place.
 
 The path is owned by `pkg/config` (`SessionProfilePath`, audit dir defaults). Override via `$COILY_AUDIT_LOG` (full path) for tests and ephemeral hosts.

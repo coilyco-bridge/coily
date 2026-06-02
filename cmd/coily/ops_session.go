@@ -12,10 +12,10 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/coilysiren/cli-guard/config"
-	"github.com/coilysiren/cli-guard/exitcode"
-	"github.com/coilysiren/cli-guard/profiles"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/config"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/exitcode"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/profiles"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -61,8 +61,7 @@ func (r *Runner) sessionUseCommand() *cli.Command {
 		ArgsUsage: "<profile-name>",
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "session.use",
-				SkipScope: true,
+				Name: "session.use",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return nil, c.Args().Slice()
 				},
@@ -81,8 +80,7 @@ func (r *Runner) sessionShowCommand() *cli.Command {
 		Usage: "Print the active profile and (phase-2) the would-be strictest axis tiers.",
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "session.show",
-				SkipScope: true,
+				Name: "session.show",
 				Action: func(_ context.Context, _ *cli.Command) error {
 					return sessionShowAction(os.Stdout)
 				},
@@ -98,8 +96,7 @@ func (r *Runner) sessionClearCommand() *cli.Command {
 		Usage: "Remove the per-session sentinel. No-op if absent.",
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "session.clear",
-				SkipScope: true,
+				Name: "session.clear",
 				Action: func(_ context.Context, _ *cli.Command) error {
 					return sessionClearAction()
 				},
@@ -157,8 +154,7 @@ actually sending SIGTERM.`,
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "session.end",
-				SkipScope: true,
+				Name: "session.end",
 				Action: func(_ context.Context, c *cli.Command) error {
 					return sessionEndAction(c, os.Stdout)
 				},

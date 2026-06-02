@@ -432,7 +432,7 @@ func TestRunHostBootstrapStep_BrewBundleFailureIsWarning(t *testing.T) {
 // when the Brewfile exists, runHostBootstrapStep self-execs
 // `coily pkg brew bundle install --file <brewfile>` and
 // `coily pkg uv tool install pre-commit --with pre-commit-uv`, both with
-// cmd.Dir set to the agentic-os checkout so commit-scope resolves.
+// cmd.Dir set to the agentic-os checkout.
 func TestRunHostBootstrapStep_InvokesCoilyPkgInAgenticOSDir(t *testing.T) {
 	root := t.TempDir()
 	brewDir := filepath.Join(root, "agentic-os", "brew")

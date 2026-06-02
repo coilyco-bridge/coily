@@ -131,7 +131,7 @@ The Claude Code harness allowlist (`Bash(coily:*)`, `Bash(gh:*)`, etc.) matches 
 Rules:
 
 - Invoke binaries bare: `coily ops gh auth status`, never `cd somewhere && coily ops gh auth status`.
-- To bind an audit row to a specific repo, use `coily --commit-scope=<repo-path> ...` instead of `cd <repo-path> && coily ...`. There is no opt-out by design (every audit row must bind to a real repo).
+- coily no longer binds invocations to a repo: there is no `--commit-scope` flag. Each audit row records a best-effort `repo_root` (git toplevel of cwd, empty outside any repo) for forensics, and the per-repo log file is routed by cwd's git origin. Nothing fails for running outside a repo.
 - If you genuinely need to change dirs (rare, e.g. `coily exec` from the repo-parent), accept the prompt or ask Kai to widen the allowlist explicitly. Do not paper over by chaining.
 - The same rule applies to any other allowlisted leading token (`gh`, `aws`, `kubectl`, `docker`, etc.) - don't bury them behind `env` / `cd` / `PATH=`.
 
@@ -182,7 +182,7 @@ Per-host, per-repo JSONL at `~/.coily/audit/<owner>-<repo>.jsonl`. One row per c
 
 ### 4.4 Cross-cutting anti-signals
 
-- **"scope auto-detect is transparent to the operator."** False. The `--commit-scope auto` default fails closed when cwd is not inside a tracked tree. Many ops verbs (game-server restarts, SSM parameter rotations, k8s queries) have nothing to do with the cwd's repo identity but still get rejected. The `_unrooted.jsonl` audit file accumulated 485 rows in 35 days. The error names the fix but does not apply it.
+- **"scope auto-detect is transparent to the operator."** Was a live anti-signal, now resolved by removing the binding entirely. The old `--commit-scope auto` default failed closed when cwd was not inside a tracked tree, rejecting ops verbs (game-server restarts, SSM rotations, k8s queries) that have nothing to do with the cwd's repo identity - the `_unrooted.jsonl` file accumulated 485 rows in 35 days. The fix the error named is now applied: there is no `--commit-scope` flag, `repo_root` is a best-effort forensic stamp, and running outside a repo never refuses. Lesson retained: a forensic field should record what was true, never gate execution on it.
   **Pin:** [coily#229](https://github.com/coilysiren/coily/issues/229), forward [coily#59](https://github.com/coilysiren/coily/issues/59).
 
 ### 4.5 Coily design invariants

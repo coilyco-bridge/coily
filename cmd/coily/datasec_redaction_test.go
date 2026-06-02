@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/decision"
-	"github.com/coilysiren/cli-guard/profiles"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/decision"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/profiles"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -21,7 +21,6 @@ func runWithArgvAndReadRow(t *testing.T, r *Runner, argv []string) audit.Record 
 	t.Helper()
 	wrapped := r.WrapVerb(verb.Spec{
 		Name:       "test.datasec",
-		SkipScope:  true,
 		SkipPolicy: true,
 		ArgsFunc:   func(_ *cli.Command) (map[string]string, []string) { return nil, argv },
 		Action:     func(_ context.Context, _ *cli.Command) error { return nil },

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/coilysiren/coily/cmd/coily/modio"
+	"forgejo.coilysiren.me/coilyco-bridge/coily/cmd/coily/modio"
 	"github.com/urfave/cli/v3"
 )
 

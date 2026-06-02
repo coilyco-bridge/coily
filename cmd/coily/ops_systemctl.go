@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -111,11 +111,10 @@ sudo-prefixed. Intended for the remote side of
 // --cwd carries the outer's git toplevel through to the sudo'd child.
 // sudo does not reliably preserve cwd into root contexts (the child
 // often lands in /root via PAM session init), so coily's own --cwd
-// Before hook chdirs the inner explicitly before scope.Resolve fires.
-// The inner then resolves auto -> gitToplevel(<cwd>) -> the same
-// toplevel the outer was running in. Audit rows on both sides bind to
-// the same git toplevel: the symmetric invariant Kai's design intent
-// calls out in coily#245.
+// Before hook chdirs the inner explicitly before scope.RepoRoot fires.
+// The inner then resolves <cwd> -> the same toplevel the outer was
+// running in. Audit rows on both sides carry the same RepoRoot: the
+// symmetric invariant Kai's design intent calls out in coily#245.
 //
 // toplevel is required to be non-empty; the outer preflights this in
 // systemctlSelfElevate. Tests pass an explicit value.

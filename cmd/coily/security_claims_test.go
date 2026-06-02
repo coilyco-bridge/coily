@@ -23,13 +23,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/gittree"
-	"github.com/coilysiren/cli-guard/lockdown"
-	"github.com/coilysiren/cli-guard/policy"
-	"github.com/coilysiren/cli-guard/repocfg"
-	"github.com/coilysiren/cli-guard/scope"
-	"github.com/coilysiren/cli-guard/shell"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/gittree"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/lockdown"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/policy"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/repocfg"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
 	"github.com/urfave/cli/v3"
 )
 
@@ -125,26 +124,6 @@ func TestSecurityClaim_NoConfirmationTokenVerb(t *testing.T) {
 			for _, sub := range c.Commands {
 				t.Logf("  subcommand: %s", sub.Name)
 			}
-		}
-	}
-}
-
-// TestSecurityClaim_CommitScopeOptOutRejected covers SECURITY.md's "every
-// audit row binds to a real repo, no opt-out" guarantee. The rejected forms
-// are "-", "none", "off"; an empty string is the unset signal handled
-// elsewhere.
-func TestSecurityClaim_CommitScopeOptOutRejected(t *testing.T) {
-	// Resolve takes (flagValue, envFallback, cwd). Empty fallback + a real
-	// cwd suffice; the opt-out check fires before any cwd lookup.
-	cwd := t.TempDir()
-	for _, val := range []string{"-", "none", "off", "NONE", "Off"} {
-		_, err := scope.Resolve(val, "", cwd)
-		if err == nil {
-			t.Errorf("scope.Resolve(%q,...) returned nil err; SECURITY.md says no opt-out", val)
-			continue
-		}
-		if !errors.Is(err, scope.ErrOptOutRejected) {
-			t.Errorf("scope.Resolve(%q,...) err = %v; want errors.Is(_, ErrOptOutRejected)", val, err)
 		}
 	}
 }

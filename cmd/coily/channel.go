@@ -21,7 +21,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -72,8 +72,7 @@ func (r *Runner) channelListCommand() *cli.Command {
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "channel.list",
-				SkipScope: true,
+				Name: "channel.list",
 				Action: func(ctx context.Context, c *cli.Command) error {
 					if c.Args().Len() != 0 {
 						return fmt.Errorf("channel list: takes no positional args, got %d", c.Args().Len())
@@ -111,8 +110,7 @@ func (r *Runner) channelCreateCommand() *cli.Command {
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "channel.create",
-				SkipScope: true,
+				Name: "channel.create",
 				Action: func(ctx context.Context, c *cli.Command) error {
 					if c.Args().Len() != 0 {
 						return fmt.Errorf("channel create: takes no positional args, got %d", c.Args().Len())
@@ -185,8 +183,7 @@ func (r *Runner) channelReadCommand() *cli.Command {
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "channel.read",
-				SkipScope: true,
+				Name: "channel.read",
 				Action: func(ctx context.Context, c *cli.Command) error {
 					id, err := channelID(c.Name, c.Args().Slice())
 					if err != nil {
@@ -218,8 +215,7 @@ func (r *Runner) channelStateCommand() *cli.Command {
 		ArgsUsage: "<id>",
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "channel.state",
-				SkipScope: true,
+				Name: "channel.state",
 				Action: func(ctx context.Context, c *cli.Command) error {
 					id, err := channelID(c.Name, c.Args().Slice())
 					if err != nil {
@@ -240,8 +236,7 @@ func (r *Runner) channelSpecCommand() *cli.Command {
 		ArgsUsage: "<id>",
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "channel.spec",
-				SkipScope: true,
+				Name: "channel.spec",
 				Action: func(ctx context.Context, c *cli.Command) error {
 					id, err := channelID(c.Name, c.Args().Slice())
 					if err != nil {
@@ -266,8 +261,7 @@ func (r *Runner) channelEventsCommand() *cli.Command {
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "channel.events",
-				SkipScope: true,
+				Name: "channel.events",
 				Action: func(ctx context.Context, c *cli.Command) error {
 					id, err := channelID(c.Name, c.Args().Slice())
 					if err != nil {

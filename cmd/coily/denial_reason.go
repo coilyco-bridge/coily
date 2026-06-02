@@ -7,9 +7,8 @@ package main
 // returned reason is empty.
 //
 // Coily-side construction sites have all migrated to WithReason() at
-// the call point. The remaining entries cover cli-guard internals:
-// policy_denied (verb.go shell-meta gate) and scope_unresolved
-// (verb.go commit-scope binding). Drop entries here once the
+// the call point. The remaining entry covers a cli-guard internal:
+// policy_denied (verb.go shell-meta gate). Drop it here once the
 // corresponding cli-guard site adds WithReason() upstream
 // (tracked at coilysiren/cli-guard for the per-kind migration).
 var denialReasons = map[string]string{
@@ -20,7 +19,6 @@ var denialReasons = map[string]string{
 		"--jq '...' -> external pipe (coily ops gh api X | jq '...') or coily-side --jq-file /tmp/q.jq; " +
 		"mcporter --args '{...}' -> coily-side --args-file /tmp/args.json; " +
 		"for user-defined `coily exec <verb>` invocations, opt the verb into `allow_metacharacters: true` in the declaring .coily/coily.yaml (audit row stamps policy_skipped so forensics still see it)",
-	"scope_unresolved": "every audit row binds to a real commit scope; --commit-scope is the explicit hand-off when cwd cannot resolve one",
 }
 
 // reasonFor returns the registered fallback reason for a kind, or ""

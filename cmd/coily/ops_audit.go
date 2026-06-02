@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -48,8 +48,7 @@ func (r *Runner) auditPathCommand() *cli.Command {
 		Usage: "Print the resolved audit log path and exit.",
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "audit.path",
-				SkipScope: true,
+				Name: "audit.path",
 				Action: func(_ context.Context, _ *cli.Command) error {
 					fmt.Println(r.Cfg.Audit.LogPath)
 					return nil
@@ -81,8 +80,7 @@ with jq or any JSON library.`,
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "audit.tail",
-				SkipScope: true,
+				Name: "audit.tail",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--since": c.String("since")}, nil
 				},
@@ -114,8 +112,7 @@ func (r *Runner) auditOpenCommand() *cli.Command {
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "audit.open",
-				SkipScope: true,
+				Name: "audit.open",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--path": c.String("path")}, nil
 				},

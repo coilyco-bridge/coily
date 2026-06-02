@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coilysiren/coily/cmd/coily/eco"
+	"forgejo.coilysiren.me/coilyco-bridge/coily/cmd/coily/eco"
 )
 
 // sampleWorldGen returns a minimal WorldGenerator.eco shape that includes

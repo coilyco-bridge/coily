@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/repocfg"
-	"github.com/coilysiren/cli-guard/shell"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/repocfg"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
 	"github.com/urfave/cli/v3"
 )
 
@@ -100,8 +100,8 @@ func TestPromptChildChoice_RejectsOutOfRange(t *testing.T) {
 
 // TestBuildExecFromConfigs_PromptingSubcommandPicksRepo wires the
 // prompting subcommand through verb.Wrap and proves that after stdin
-// feeds "2\n", the audit row's commit-scope binds to the second repo
-// (the one the operator picked), not the first.
+// feeds "2\n" the picked repo's command runs and produces an accepted
+// audit row under the repo.<name> verb.
 func TestBuildExecFromConfigs_PromptingSubcommandPicksRepo(t *testing.T) {
 	if _, err := exec.LookPath("git"); err != nil {
 		t.Skip("git not on PATH")
@@ -155,10 +155,6 @@ func TestBuildExecFromConfigs_PromptingSubcommandPicksRepo(t *testing.T) {
 		t.Fatalf("prompting run: %v", err)
 	}
 	rec := lastAuditRecord(t, r.Audit.Path)
-	wantScope := filepath.Dir(filepath.Dir(configs[1].Path))
-	if rec.CommitScope != wantScope {
-		t.Errorf("commit_scope = %q, want %q (the picked repo)", rec.CommitScope, wantScope)
-	}
 	if rec.Verb != "repo.noop" {
 		t.Errorf("verb = %q, want repo.noop", rec.Verb)
 	}
@@ -167,11 +163,11 @@ func TestBuildExecFromConfigs_PromptingSubcommandPicksRepo(t *testing.T) {
 	}
 }
 
-// TestBuildChildRepoCommand_BindsAuditScopeToChild is the headline-case
-// invariant: running `coily exec daily-social` from above agentic-os-kai
-// (the issue's example) must bind the audit row's commit-scope to the
-// matched repo, not cwd's git toplevel.
-func TestBuildChildRepoCommand_BindsAuditScopeToChild(t *testing.T) {
+// TestBuildChildRepoCommand_RunsAndAudits proves the single-declarant
+// child command (e.g. `coily exec daily-social` resolving one repo)
+// executes the declared command and produces an accepted audit row
+// under the repo.<name> verb.
+func TestBuildChildRepoCommand_RunsAndAudits(t *testing.T) {
 	if _, err := exec.LookPath("git"); err != nil {
 		t.Skip("git not on PATH")
 	}
@@ -205,10 +201,6 @@ func TestBuildChildRepoCommand_BindsAuditScopeToChild(t *testing.T) {
 	}
 
 	rec := lastAuditRecord(t, r.Audit.Path)
-	if rec.CommitScope != repoRoot {
-		t.Errorf("commit_scope = %q, want %q (the matched repo, not cwd's toplevel)",
-			rec.CommitScope, repoRoot)
-	}
 	if rec.Verb != "repo.noop" {
 		t.Errorf("verb = %q, want repo.noop", rec.Verb)
 	}
@@ -424,7 +416,6 @@ func wrapExecRoot(child *cli.Command) *cli.Command {
 		Name: "coily",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{Name: "audit-override-dirty"},
-			&cli.StringFlag{Name: "commit-scope", Value: "auto"},
 		},
 		Commands: []*cli.Command{child},
 	}

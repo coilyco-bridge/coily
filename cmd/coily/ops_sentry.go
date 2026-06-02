@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/coilysiren/coily/cmd/coily/sentry"
+	"forgejo.coilysiren.me/coilyco-bridge/coily/cmd/coily/sentry"
 	"github.com/urfave/cli/v3"
 )
 

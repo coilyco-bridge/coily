@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/coilysiren/coily/cmd/coily/glama"
+	"forgejo.coilysiren.me/coilyco-bridge/coily/cmd/coily/glama"
 	"github.com/urfave/cli/v3"
 )
 

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coilysiren/cli-guard/config"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/config"
 )
 
 func TestLoadConfig_ParsesEmbeddedConfig(t *testing.T) {

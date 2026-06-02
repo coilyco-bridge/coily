@@ -11,7 +11,6 @@ import "testing"
 func TestReasonFor_FallbackKinds(t *testing.T) {
 	required := []string{
 		"policy_denied",
-		"scope_unresolved",
 	}
 	for _, k := range required {
 		if got := reasonFor(k); got == "" {

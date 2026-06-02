@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/coilysiren/cli-guard/passthrough"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/passthrough"
 	"github.com/urfave/cli/v3"
 )
 

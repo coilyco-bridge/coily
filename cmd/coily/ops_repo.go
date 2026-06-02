@@ -12,13 +12,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/egress"
-	"github.com/coilysiren/cli-guard/exitcode"
-	"github.com/coilysiren/cli-guard/gittree"
-	"github.com/coilysiren/cli-guard/repocfg"
-	"github.com/coilysiren/cli-guard/shell"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/egress"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/exitcode"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/gittree"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/repocfg"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -51,10 +51,9 @@ type childMatch struct {
 //
 //   - 0 declarants for a name: name does not exist as a subcommand.
 //   - 1 declarant: subcommand auto-runs against that repo, cwd set to the
-//     repo root, audit row's commit-scope bound to it.
+//     repo root.
 //   - 2+ declarants: subcommand prompts on stderr for a numeric pick,
-//     reads stdin, then runs the picked repo's command. The audit row's
-//     commit-scope binds to the repo that was picked.
+//     reads stdin, then runs the picked repo's command.
 //
 // This replaces the older "ancestor wins, else fall back to direct
 // children" branching, which produced "where did my config come from"
@@ -128,7 +127,7 @@ func (r *Runner) buildExecFromConfigs(configs []*repocfg.Config) *cli.Command {
 				"every coily.yaml in a direct child of cwd. %d configs in scope. "+
 				"Subcommand names are the union of declared commands across the "+
 				"pool: declared by exactly one repo means auto-execute against "+
-				"that repo (cwd-set, audit row bound to its commit-scope); "+
+				"that repo (cwd-set); "+
 				"declared by multiple repos means prompt on stderr for a numeric "+
 				"pick before exec.\n\nConfigs in scope:\n  %s",
 			len(configs), strings.Join(paths, "\n  "),
@@ -139,8 +138,7 @@ func (r *Runner) buildExecFromConfigs(configs []*repocfg.Config) *cli.Command {
 
 // buildChildRepoCommand wraps a single (cfg, command) pair into a
 // cli.Command whose Action runs the declared argv inside the matched
-// repo (cmd.Dir = repoRoot) and binds the audit row to that repo's
-// commit-scope. Used for command names with exactly one declarant in the
+// repo (cmd.Dir = repoRoot). Used for command names with exactly one declarant in the
 // unified discovery pool. Repo verbs require a synced upstream branch and
 // that the coily.yaml that declares them be committed, so the audit row's
 // argv can be reconstructed from git history; --audit-override-dirty
@@ -166,8 +164,7 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 		Description: fmt.Sprintf(
 			"Per-repo command discovered in %s.\nExpands to: %s\n\n"+
 				"Exactly one repo in the discovery pool declares %q, so coily runs "+
-				"it without prompting. Working directory is set to %s and the audit "+
-				"row binds to that repo's commit-scope.\n\nExtra positional args "+
+				"it without prompting. Working directory is set to %s.\n\nExtra positional args "+
 				"are appended and validated against the same shell-metacharacter "+
 				"rules as privileged verbs unless the declaring command opts in "+
 				"with allow_metacharacters: true (audit row stamps policy_skipped "+
@@ -179,9 +176,8 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 		),
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:                verbName,
-				CommitScopeOverride: repoRoot,
-				SkipPolicy:          rc.AllowMetacharacters,
+				Name:       verbName,
+				SkipPolicy: rc.AllowMetacharacters,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					positional := append([]string{}, rc.Argv...)
 					positional = append(positional, c.Args().Slice()...)
@@ -227,11 +223,9 @@ func (r *Runner) buildChildRepoCommand(cfg *repocfg.Config, rc repocfg.Command) 
 // buildPromptingChildCommand returns a cli.Command for a name declared
 // by more than one repo in the unified discovery pool. On invocation it
 // prints the matches on stderr, reads a numeric pick from stdin, then
-// runs the chosen repo's command with cwd set to that repo and the audit
-// row's commit-scope bound to it. The pick happens inside the wrapped
-// Action so verb.Wrap's argv validation and audit logging cover the
-// whole flow. CommitScope is left blank by verb.Wrap (SkipScope) and
-// filled in by OnComplete once the pick is known.
+// runs the chosen repo's command with cwd set to that repo. The pick
+// happens inside the wrapped Action so verb.Wrap's argv validation and
+// audit logging cover the whole flow.
 func (r *Runner) buildPromptingChildCommand(name string, matches []childMatch) *cli.Command {
 	verbName := "repo." + name
 	repoPaths := make([]string, 0, len(matches))
@@ -256,20 +250,17 @@ func (r *Runner) buildPromptingChildCommand(name string, matches []childMatch) *
 			"%d repos in the discovery pool declare %q. Invoking this "+
 				"subcommand prints the matches on stderr and reads a numeric "+
 				"choice from stdin. The chosen repo's command runs with cwd "+
-				"set to that repo and the audit row's commit-scope bound to "+
-				"it.\n\nMatches:\n  %s",
+				"set to that repo.\n\nMatches:\n  %s",
 			len(matches), name, strings.Join(repoPaths, "\n  ")),
 		Action: r.WrapVerb(
 			verb.Spec{
 				Name:       verbName,
-				SkipScope:  true,
 				SkipPolicy: allAllowMetacharacters,
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return nil, c.Args().Slice()
 				},
 				OnComplete: func(rec *audit.Record) {
 					if chosen != nil {
-						rec.CommitScope = filepath.Dir(filepath.Dir(chosen.cfg.Path))
 						if chosen.cmd.AllowMetacharacters {
 							rec.PolicySkipped = true
 						}

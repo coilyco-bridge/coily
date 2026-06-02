@@ -9,10 +9,10 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/coilysiren/cli-guard/ghidcache"
-	"github.com/coilysiren/cli-guard/shell"
-	"github.com/coilysiren/cli-guard/stscache"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/ghidcache"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/stscache"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )
@@ -37,9 +37,8 @@ Non-fatal. If any tool is not configured or returns an error, its block
 reports the error but the other tools still run.`,
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "whoami",
-				SkipScope: true,
-				Action:    r.whoamiAction,
+				Name:   "whoami",
+				Action: r.whoamiAction,
 			},
 			r.Audit,
 		),

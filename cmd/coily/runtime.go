@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/decision"
-	"github.com/coilysiren/cli-guard/shell"
-	coilyssh "github.com/coilysiren/cli-guard/ssh"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/decision"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
+	coilyssh "forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/ssh"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 

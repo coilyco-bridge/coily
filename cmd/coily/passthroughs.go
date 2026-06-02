@@ -2,13 +2,10 @@ package main
 
 import (
 	"context"
-	"os"
-	"path/filepath"
-	"strings"
 
-	"github.com/coilysiren/cli-guard/egress"
-	"github.com/coilysiren/cli-guard/mcporter"
-	"github.com/coilysiren/cli-guard/passthrough"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/egress"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/mcporter"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/passthrough"
 	"github.com/urfave/cli/v3"
 )
 
@@ -36,11 +33,6 @@ import (
 // the proxy runs in ModeEnforce; otherwise it runs in ModeObserve (capture
 // only). Enforce-mode allowlists for individual binaries are Phase 2 of #35.
 //
-// ScopeArgvHint, when non-nil, installs a fallback --commit-scope resolver
-// that fires when the operator did not set the flag (or env var) and the
-// verb's argv carries enough information to pick a sensible default. Today
-// only `ops gh` uses this, to derive the scope from --repo coilysiren/<name>.
-//
 // PreflightGate, when non-nil, runs against the raw argv before the
 // passthrough executes. A non-nil return aborts the invocation with that
 // error and the wrapped binary never runs. Today only `ops gh` uses this,
@@ -50,7 +42,6 @@ type ptEntry struct {
 	SkipPolicy     bool
 	VerbName       string
 	Egress         bool
-	ScopeArgvHint  func(argv []string) string
 	ArgvRewriter   func(argv []string) []string
 	ReadCache      passthrough.ReadCacheClassifier
 	SecretResolver mcporter.SecretResolver
@@ -63,7 +54,7 @@ type ptEntry struct {
 // user-visible path.
 var ptOps = []ptEntry{
 	{Bin: "aws", VerbName: "ops.aws", Egress: true},
-	{Bin: "gh", VerbName: "ops.gh", Egress: true, ScopeArgvHint: ghRepoScopeHint, ArgvRewriter: rewriteGHForRESTAndJQFile, ReadCache: ghReadCacheClassifier, PreflightGate: ghPreflightGate},
+	{Bin: "gh", VerbName: "ops.gh", Egress: true, ArgvRewriter: rewriteGHForRESTAndJQFile, ReadCache: ghReadCacheClassifier, PreflightGate: ghPreflightGate},
 	{Bin: "kubectl", VerbName: "ops.kubectl", Egress: true},
 	{Bin: "flyctl", VerbName: "ops.flyctl", Egress: true},
 	{Bin: "gcloud", VerbName: "ops.gcloud", Egress: true},
@@ -138,9 +129,6 @@ func (r *Runner) passthroughCommand(e ptEntry) *cli.Command {
 			opts = append(opts, passthrough.WithEgress(nil, egress.ModeObserve))
 		}
 	}
-	if e.ScopeArgvHint != nil {
-		opts = append(opts, passthrough.WithScopeArgvHint(e.ScopeArgvHint))
-	}
 	if e.ArgvRewriter != nil {
 		opts = append(opts, passthrough.WithArgvRewriter(e.ArgvRewriter))
 	}
@@ -169,57 +157,6 @@ func withPreflightGate(inner cli.ActionFunc, gate func(argv []string) error) cli
 		}
 		return inner(ctx, c)
 	}
-}
-
-// ghRepoScopeHint reads --repo coilysiren/<name> out of `coily ops gh` argv
-// and returns ~/projects/coilysiren/<name> when that local clone exists and
-// is a real git repo. Returns "" otherwise (including when --repo names a
-// non-coilysiren owner: those clones may live elsewhere or not at all, and
-// silently binding the audit row to a same-name coilysiren clone would be a
-// surprise). Recognized argv shapes: `--repo X/Y`, `--repo=X/Y`, `-R X/Y`,
-// `-R=X/Y`. The function ignores positional argv beyond gh subcommands
-// (gh's --repo is a top-level flag inherited by every subcommand, so the
-// scan order does not matter).
-func ghRepoScopeHint(argv []string) string {
-	owner, name := parseGhRepoFlag(argv)
-	if owner != "coilysiren" || name == "" {
-		return ""
-	}
-	home, err := os.UserHomeDir()
-	if err != nil || home == "" {
-		return ""
-	}
-	candidate := filepath.Join(home, "projects", "coilysiren", name)
-	if fi, err := os.Stat(filepath.Join(candidate, ".git")); err != nil || fi == nil {
-		return ""
-	}
-	return candidate
-}
-
-func parseGhRepoFlag(argv []string) (owner, name string) {
-	for i := 0; i < len(argv); i++ {
-		tok := argv[i]
-		var raw string
-		switch {
-		case tok == "--repo" || tok == "-R":
-			if i+1 >= len(argv) {
-				return "", ""
-			}
-			raw = argv[i+1]
-		case strings.HasPrefix(tok, "--repo="):
-			raw = strings.TrimPrefix(tok, "--repo=")
-		case strings.HasPrefix(tok, "-R="):
-			raw = strings.TrimPrefix(tok, "-R=")
-		default:
-			continue
-		}
-		o, n, ok := strings.Cut(raw, "/")
-		if !ok {
-			return "", ""
-		}
-		return o, n
-	}
-	return "", ""
 }
 
 // passthroughCommands is the slice form: build one cli.Command per entry,

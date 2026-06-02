@@ -8,8 +8,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/coilysiren/cli-guard/hook"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/hook"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -40,7 +40,6 @@ func (r *Runner) hookPreToolUseCommand() *cli.Command {
 		Usage: "PreToolUse hook for the Bash tool. Routes bare-binary invocations through coily wrappers with a recovery hint; rejects coily-binary invocations resolving outside the canonical install paths.",
 		Action: r.WrapVerb(verb.Spec{
 			Name:       "hook.pre-tool-use",
-			SkipScope:  true,
 			SkipPolicy: true,
 			Action: func(_ context.Context, _ *cli.Command) error {
 				return runCoilyPreToolUse(os.Stdin, os.Stderr, exec.LookPath)

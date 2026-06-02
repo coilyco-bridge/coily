@@ -22,7 +22,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -80,8 +80,7 @@ point - it buys a budget the REST API cannot.`,
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "ops.ci",
-				SkipScope: true,
+				Name: "ops.ci",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--branch": c.String("branch")}, c.Args().Slice()
 				},

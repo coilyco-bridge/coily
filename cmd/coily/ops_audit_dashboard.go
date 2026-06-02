@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/decision"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/decision"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -47,8 +47,7 @@ browser.`,
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "audit.dashboard",
-				SkipScope: true,
+				Name: "audit.dashboard",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
 						"--since": c.String("since"),
@@ -182,8 +181,8 @@ func newVerbAcc(verb string) *verbAcc {
 func (a *verbAcc) add(r audit.Record) {
 	a.bucket.Total++
 	a.countDecision(r)
-	if r.CommitScope != "" {
-		a.repoSet[filepath.Base(r.CommitScope)] = struct{}{}
+	if r.RepoRoot != "" {
+		a.repoSet[filepath.Base(r.RepoRoot)] = struct{}{}
 	}
 	for _, e := range r.Egress {
 		if e.Host == "" {

@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/profiles"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/profiles"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -21,9 +21,8 @@ import (
 func runWrapVerbAndReadAudit(t *testing.T, r *Runner) audit.Record {
 	t.Helper()
 	wrapped := r.WrapVerb(verb.Spec{
-		Name:      "test.wrapverb",
-		SkipScope: true,
-		Action:    func(_ context.Context, _ *cli.Command) error { return nil },
+		Name:   "test.wrapverb",
+		Action: func(_ context.Context, _ *cli.Command) error { return nil },
 	}, r.Audit)
 	cmd := &cli.Command{Name: "test", Action: wrapped}
 	if err := cmd.Run(context.Background(), []string{"test"}); err != nil {

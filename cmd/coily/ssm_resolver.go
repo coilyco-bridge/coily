@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coilysiren/cli-guard/mcporter"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/mcporter"
 )
 
 // ssmResolver returns the SecretResolver wired into `coily ops mcporter`.

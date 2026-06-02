@@ -45,7 +45,7 @@ commands:
 
 # Free-form ssh-passthrough target list. Schema: coilysiren/coily#187 phase 2.
 # `coily ssh <alias> -- <coily args>` resolves <alias> here, ssh's into the
-# target, and runs the supplied coily subcommand with --commit-scope set to
+# target, and runs the supplied coily subcommand with --cwd set to
 # working_dir and --audit-parent set to the local audit-row id. Remote
 # coily's lockdown is the security boundary, not this client side.
 ssh:

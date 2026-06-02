@@ -1,11 +1,11 @@
+forgejo.coilysiren.me/coilyco-flight-deck/cli-guard v0.1.1-0.20260602072341-d9eb84266175 h1:/SAZYF3L3A5q5hJ5bdI1hdFfa08BpvS+XSJrMhs3Wao=
+forgejo.coilysiren.me/coilyco-flight-deck/cli-guard v0.1.1-0.20260602072341-d9eb84266175/go.mod h1:BUGQczthG3GcRny/hQVNQUqyQMBCvkehEgX2VYAphyU=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/clipperhouse/displaywidth v0.10.0 h1:GhBG8WuerxjFQQYeuZAeVTuyxuX+UraiZGD4HJQ3Y8g=
 github.com/clipperhouse/displaywidth v0.10.0/go.mod h1:XqJajYsaiEwkxOj4bowCTMcT1SgvHo9flfF3jQasdbs=
 github.com/clipperhouse/uax29/v2 v2.6.0 h1:z0cDbUV+aPASdFb2/ndFnS9ts/WNXgTNNGFoKXuhpos=
 github.com/clipperhouse/uax29/v2 v2.6.0/go.mod h1:Wn1g7MK6OoeDT0vL+Q0SQLDz/KpfsVRgg6W7ihQeh4g=
-github.com/coilysiren/cli-guard v0.1.1-0.20260528132809-aec940c2aef6 h1:SqHYWPDqAI8305LZTCoP6JUottmBwmJzNYlPrZLOoJ0=
-github.com/coilysiren/cli-guard v0.1.1-0.20260528132809-aec940c2aef6/go.mod h1:b4Fa4oPXUBiQWAwnktbiaVHK2wi9V8B4JNma6+UFHUk=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

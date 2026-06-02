@@ -4,9 +4,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/coilysiren/cli-guard/config"
-	"github.com/coilysiren/cli-guard/decision"
-	"github.com/coilysiren/cli-guard/lockdown"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/config"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/decision"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/lockdown"
 )
 
 // coilyAllowedPaths is the closed set of filesystem paths a `coily`

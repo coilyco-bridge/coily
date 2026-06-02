@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/coilysiren/cli-guard/lockdown"
-	"github.com/coilysiren/cli-guard/profiles"
-	"github.com/coilysiren/cli-guard/skillgen"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/lockdown"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/profiles"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/skillgen"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -53,8 +53,7 @@ func (r *Runner) lockdownSkillCommand() *cli.Command {
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "lockdown.skill",
-				SkipScope: true,
+				Name: "lockdown.skill",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--format": c.String("format"), "--out": c.String("out")}, nil
 				},
@@ -276,8 +275,7 @@ to clobber, parallel to ` + "`coily lockdown --apply --replace`" + `.`,
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "lockdown.init-config",
-				SkipScope: true,
+				Name: "lockdown.init-config",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--replace": fmt.Sprintf("%t", c.Bool("replace"))}, nil
 				},
@@ -372,8 +370,7 @@ the recursion root cannot shadow per-repo deny rules with a broader allow.`,
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "lockdown",
-				SkipScope: true,
+				Name: "lockdown",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
 						"--path":      c.String("path"),

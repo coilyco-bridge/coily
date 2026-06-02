@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -36,8 +36,7 @@ Pure local lookup: no aws/kubectl/gh calls, unlike coily whoami.`,
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "agent-name",
-				SkipScope: true,
+				Name: "agent-name",
 				Action: func(_ context.Context, c *cli.Command) error {
 					sid := c.String("session-id")
 					if sid == "" {

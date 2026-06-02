@@ -9,15 +9,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coilysiren/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
 )
 
 func TestBuildDashboardView_GroupsByVerb(t *testing.T) {
 	now := time.Now().Unix()
 	records := []audit.Record{
-		{Verb: "ops.gh", Timestamp: now - 10, Decision: audit.DecisionAccept, Argv: []string{"coily", "ops", "gh", "issue", "view"}, CommitScope: "/repos/coily"},
-		{Verb: "ops.gh", Timestamp: now - 5, Decision: audit.DecisionAccept, Argv: []string{"coily", "ops", "gh", "issue", "list"}, CommitScope: "/repos/agentic-os-kai", Egress: []audit.EgressRow{{Host: "api.github.com", Decision: "allow", BytesDown: 100}}},
-		{Verb: "ops.gh", Timestamp: now - 1, Decision: audit.DecisionAccept, Argv: []string{"coily", "ops", "gh", "issue", "view"}, CommitScope: "/repos/coily"},
+		{Verb: "ops.gh", Timestamp: now - 10, Decision: audit.DecisionAccept, Argv: []string{"coily", "ops", "gh", "issue", "view"}, RepoRoot: "/repos/coily"},
+		{Verb: "ops.gh", Timestamp: now - 5, Decision: audit.DecisionAccept, Argv: []string{"coily", "ops", "gh", "issue", "list"}, RepoRoot: "/repos/agentic-os-kai", Egress: []audit.EgressRow{{Host: "api.github.com", Decision: "allow", BytesDown: 100}}},
+		{Verb: "ops.gh", Timestamp: now - 1, Decision: audit.DecisionAccept, Argv: []string{"coily", "ops", "gh", "issue", "view"}, RepoRoot: "/repos/coily"},
 		{Verb: "dispatch", Timestamp: now - 20, Decision: audit.DecisionAccept, Argv: []string{"coily", "dispatch", "coilysiren/coily#1"}, ExitCode: 1},
 	}
 	view := buildDashboardView(records, now-60)

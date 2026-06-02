@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/coilysiren/coily/cmd/coily/skillsmp"
+	"forgejo.coilysiren.me/coilyco-bridge/coily/cmd/coily/skillsmp"
 	"github.com/urfave/cli/v3"
 )
 

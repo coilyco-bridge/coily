@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coilysiren/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
 )
 
 // seedAuditLog writes the given records to a tempfile and returns its path.
@@ -61,10 +61,10 @@ func TestLoadAuditRecords_FiltersByScopeAndSince(t *testing.T) {
 	scope := "/repo/a"
 	other := "/repo/b"
 	path := seedAuditLog(t, []audit.Record{
-		{Verb: "old", Timestamp: 100, CommitScope: scope, Decision: audit.DecisionAccept},
-		{Verb: "match", Timestamp: 200, CommitScope: scope, Decision: audit.DecisionAccept},
-		{Verb: "wrong-scope", Timestamp: 300, CommitScope: other, Decision: audit.DecisionAccept},
-		{Verb: "rejected", Timestamp: 250, CommitScope: scope, Decision: audit.DecisionReject},
+		{Verb: "old", Timestamp: 100, RepoRoot: scope, Decision: audit.DecisionAccept},
+		{Verb: "match", Timestamp: 200, RepoRoot: scope, Decision: audit.DecisionAccept},
+		{Verb: "wrong-scope", Timestamp: 300, RepoRoot: other, Decision: audit.DecisionAccept},
+		{Verb: "rejected", Timestamp: 250, RepoRoot: scope, Decision: audit.DecisionReject},
 	})
 	got, err := loadAuditRecords(path, scope, 150)
 	if err != nil {
@@ -81,11 +81,11 @@ func TestLoadAuditRecords_FiltersByScopeAndSince(t *testing.T) {
 func TestLoadAuditRecords_ScopeMatchesDescendants(t *testing.T) {
 	parent := "/repo"
 	path := seedAuditLog(t, []audit.Record{
-		{Verb: "self", Timestamp: 100, CommitScope: "/repo", Decision: audit.DecisionAccept},
-		{Verb: "child", Timestamp: 101, CommitScope: "/repo/a", Decision: audit.DecisionAccept},
-		{Verb: "grandchild", Timestamp: 102, CommitScope: "/repo/a/b", Decision: audit.DecisionAccept},
-		{Verb: "sibling-prefix", Timestamp: 103, CommitScope: "/repobar", Decision: audit.DecisionAccept},
-		{Verb: "unrelated", Timestamp: 104, CommitScope: "/other", Decision: audit.DecisionAccept},
+		{Verb: "self", Timestamp: 100, RepoRoot: "/repo", Decision: audit.DecisionAccept},
+		{Verb: "child", Timestamp: 101, RepoRoot: "/repo/a", Decision: audit.DecisionAccept},
+		{Verb: "grandchild", Timestamp: 102, RepoRoot: "/repo/a/b", Decision: audit.DecisionAccept},
+		{Verb: "sibling-prefix", Timestamp: 103, RepoRoot: "/repobar", Decision: audit.DecisionAccept},
+		{Verb: "unrelated", Timestamp: 104, RepoRoot: "/other", Decision: audit.DecisionAccept},
 	})
 	got, err := loadAuditRecords(path, parent, 0)
 	if err != nil {

@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -78,8 +78,7 @@ tree (friends' machines, alternate layouts) silent.`,
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "setup",
-				SkipScope: true,
+				Name: "setup",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--lockdown-root": c.String("lockdown-root")}, nil
 				},
@@ -431,8 +430,8 @@ func filepathHasPrefix(s, prefix string) bool {
 //  1. coily pkg brew bundle install --file <agentic-os>/brew/Brewfile
 //  2. coily pkg uv tool install pre-commit --with pre-commit-uv
 //
-// Both inner commands run with cmd.Dir set to the agentic-os checkout so the
-// commit-scope resolver lands cleanly. If the Brewfile is missing the step
+// Both inner commands run with cmd.Dir set to the agentic-os checkout. If the
+// Brewfile is missing the step
 // prints a skip and returns nil, same pattern as runLockdownStep on missing
 // lockdown roots — keeps friends' machines and alternate layouts silent.
 //

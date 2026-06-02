@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -40,8 +40,7 @@ Pass --dry-run to print the script to stdout instead of writing.`,
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "install-completion",
-				SkipScope: true,
+				Name: "install-completion",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--shell": c.String("shell")}, nil
 				},

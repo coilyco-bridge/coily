@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/decision"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/decision"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )
@@ -22,8 +22,8 @@ import (
 // ('audit-show') plus thin passthroughs for the heavy-rotation git
 // commands (status, log, diff, pull, push, ...).
 //
-// audit-show is SkipScope: it's meta - operating on the audit log itself.
-// The passthrough subcommands bind scope like any other passthrough.
+// audit-show queries by the forensic RepoRoot stamped on each row (git
+// toplevel of cwd at invocation time), not a caller-supplied scope.
 func (r *Runner) gitCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "git",
@@ -38,9 +38,9 @@ for the rows bound to a repo over a time window.`,
 	}
 }
 
-// scopeMatches returns true when a recorded commit-scope is the filter
-// scope itself or any descendant directory. The boundary check prevents
-// "/foo" from matching "/foobar".
+// scopeMatches returns true when a recorded RepoRoot is the filter scope
+// itself or any descendant directory. The boundary check prevents "/foo"
+// from matching "/foobar".
 func scopeMatches(recScope, filterScope string) bool {
 	if recScope == filterScope {
 		return true
@@ -69,7 +69,7 @@ func loadAuditRecords(path, scopePath string, since int64) ([]audit.Record, erro
 		if rec.Timestamp < since {
 			continue
 		}
-		if !scopeMatches(filepath.Clean(rec.CommitScope), scopePath) {
+		if rec.RepoRoot == "" || !scopeMatches(filepath.Clean(rec.RepoRoot), scopePath) {
 			continue
 		}
 		if rec.Decision != audit.DecisionAccept {
@@ -100,7 +100,7 @@ func (r *Runner) gitAuditShowCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "audit-show",
 		Usage: "Print the audit rows bound to a repo over a time window.",
-		Description: `audit-show prints every audit row whose commit_scope matches --scope
+		Description: `audit-show prints every audit row whose repo_root matches --scope
 and whose timestamp is at or after --since, as yaml. Use it to inspect
 what privileged commands coily ran in a repo over a window.`,
 		Flags: []cli.Flag{
@@ -117,8 +117,7 @@ what privileged commands coily ran in a repo over a window.`,
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "git.audit-show",
-				SkipScope: true,
+				Name: "git.audit-show",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{
 						"--scope": c.String("scope"),
@@ -163,20 +162,19 @@ func writeRecordsYAML(w io.Writer, records []audit.Record) error {
 		safeRemoteArgv := audit.RedactArgv(rec.RemoteArgv, audit.DataSecurityHigh, policy)
 		view := map[string]any{
 			"record": map[string]any{
-				"id":           rec.ID,
-				"ts":           rec.Timestamp,
-				"ts_iso":       time.Unix(rec.Timestamp, 0).UTC().Format(time.RFC3339),
-				"verb":         rec.Verb,
-				"argv":         safeArgv,
-				"remote_argv":  safeRemoteArgv,
-				"decision":     rec.Decision,
-				"exit_code":    rec.ExitCode,
-				"duration_ms":  rec.DurationMS,
-				"repo_root":    rec.RepoRoot,
-				"commit_scope": rec.CommitScope,
-				"version":      rec.Version,
-				"error":        rec.Error,
-				"stderr_tail":  rec.StderrTail,
+				"id":          rec.ID,
+				"ts":          rec.Timestamp,
+				"ts_iso":      time.Unix(rec.Timestamp, 0).UTC().Format(time.RFC3339),
+				"verb":        rec.Verb,
+				"argv":        safeArgv,
+				"remote_argv": safeRemoteArgv,
+				"decision":    rec.Decision,
+				"exit_code":   rec.ExitCode,
+				"duration_ms": rec.DurationMS,
+				"repo_root":   rec.RepoRoot,
+				"version":     rec.Version,
+				"error":       rec.Error,
+				"stderr_tail": rec.StderrTail,
 			},
 		}
 		out, err := yaml.Marshal(view)

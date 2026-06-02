@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/coilysiren/cli-guard/config"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/config"
 )
 
 // auditLogEnvVar is the orchestrator-friendly path override for the

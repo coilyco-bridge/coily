@@ -10,7 +10,7 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 - Trust inversion: narrow allowlist of named verbs, not broad denylist.
 - Escape-hatch resistant: no `shell`, `run`, free-form `exec`.
 - Argv validation: every string arg checked for shell metacharacters at load + invocation.
-- Scope binding: every audit row bound to a git toplevel (`--commit-scope` or `$COILY_COMMIT_SCOPE`). No opt-out.
+- RepoRoot stamping: every audit row records cwd's git toplevel (empty outside any repo), best-effort and forensic. `coily git audit-show --scope <repo>` filters by it.
 - `Verb.Spec` abstraction: uniform validation/action/audit pipeline per command.
 
 ## Verb surface
@@ -49,7 +49,7 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 
 ## Configuration + secrets
 
-Three-layer precedence: Go defaults < `~/.coily/config.yaml` < `./.coily/config.yaml`. Sections: `kai_server`, `audit`, `aws`, `eco`, `factorio`, `channel`. Env: `$COILY_AUDIT_LOG`, `$COILY_COMMIT_SCOPE`, `$COILY_REPO_CONFIG`, `$COILY_CACHE_DIR`. AWS / kubectl / gh creds from canonical files, the REST APIs from SSM.
+Three-layer precedence: Go defaults < `~/.coily/config.yaml` < `./.coily/config.yaml`. Sections: `kai_server`, `audit`, `aws`, `eco`, `factorio`, `channel`. Env: `$COILY_AUDIT_LOG`, `$COILY_REPO_CONFIG`, `$COILY_CACHE_DIR`. AWS / kubectl / gh creds from canonical files, the REST APIs from SSM.
 
 ## Distribution
 

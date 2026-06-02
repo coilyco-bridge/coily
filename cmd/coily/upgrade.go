@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -50,8 +50,7 @@ any tap formula. ` + "`coily upgrade`" + ` is the coily-specific shortcut.`,
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
-				Name:      "upgrade",
-				SkipScope: true,
+				Name: "upgrade",
 				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
 					return map[string]string{"--dry": fmt.Sprintf("%t", c.Bool("dry"))}, nil
 				},

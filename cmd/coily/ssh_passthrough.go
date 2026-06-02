@@ -7,9 +7,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/coilysiren/cli-guard/audit"
-	"github.com/coilysiren/cli-guard/repocfg"
-	"github.com/coilysiren/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/repocfg"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 	"github.com/urfave/cli/v3"
 )
 
@@ -31,9 +31,10 @@ import (
 //  4. Pre-allocate the local audit-row id with audit.NewUUIDv7 so the same
 //     id can be both the local Spec.IDOverride AND the remote
 //     --audit-parent. Forensic walks (forward and backward) line up.
-//  5. Build the remote command: `coily --commit-scope=<wd>
+//  5. Build the remote command: `coily --cwd=<wd>
 //     --audit-parent=<id> <rest...>`, POSIX-quote each token, ssh -T -stream
-//     stdout/stderr back to the local terminal.
+//     stdout/stderr back to the local terminal. --cwd lands the remote in
+//     the target working dir so its audit row's RepoRoot resolves there.
 //
 // SkipPolicy is set because the remote argv may carry legitimate shell
 // metacharacters (markdown bodies in `gh issue create --body`, etc.). The
@@ -63,7 +64,6 @@ func (r *Runner) sshPassthroughAction(ctx context.Context, c *cli.Command) error
 	remoteArgv := append([]string{
 		"coily",
 		"--cwd=" + target.WorkingDir,
-		"--commit-scope=" + target.WorkingDir,
 		"--audit-parent=" + localID,
 	}, rest...)
 	remoteCmd := joinPOSIX(remoteArgv)

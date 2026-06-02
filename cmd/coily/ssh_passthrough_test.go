@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coilysiren/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
 )
 
 func TestPosixQuote(t *testing.T) {
@@ -91,8 +91,8 @@ func TestNormalizePassthroughRest(t *testing.T) {
 }
 
 func TestJoinPOSIX(t *testing.T) {
-	got := joinPOSIX([]string{"coily", "--commit-scope=/home/kai", "gh", "issue", "create", "--body", "body with space; and semicolon"})
-	want := `coily --commit-scope=/home/kai gh issue create --body 'body with space; and semicolon'`
+	got := joinPOSIX([]string{"coily", "--cwd=/home/kai", "gh", "issue", "create", "--body", "body with space; and semicolon"})
+	want := `coily --cwd=/home/kai gh issue create --body 'body with space; and semicolon'`
 	if got != want {
 		t.Errorf("joinPOSIX = %q, want %q", got, want)
 	}
