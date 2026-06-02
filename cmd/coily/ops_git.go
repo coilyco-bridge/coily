@@ -34,6 +34,7 @@ passthroughs, and carries 'audit-show', which queries the audit log
 for the rows bound to a repo over a time window.`,
 		Commands: append([]*cli.Command{
 			r.gitAuditShowCommand(),
+			r.gitCommitCommand(),
 		}, r.gitPassthroughCommands()...),
 	}
 }

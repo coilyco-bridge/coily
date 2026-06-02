@@ -18,7 +18,10 @@ var gitPassthroughVerbs = []struct{ name, usage string }{
 	{"diff", "git diff - show changes."},
 	{"show", "git show - show a commit or object."},
 	{"add", "git add - stage changes."},
-	{"commit", "git commit - record staged changes."},
+	// `commit` is intentionally absent here: it gets a dedicated,
+	// concurrency-safe implementation in git_commit.go (coily#7) rather
+	// than a thin passthrough, so two sessions sharing a working tree
+	// cannot cross commit messages or content via the shared index.
 	{"fetch", "git fetch - download objects and refs from a remote."},
 	{"pull", "git pull - fetch and integrate."},
 	{"push", "git push - update remote refs."},

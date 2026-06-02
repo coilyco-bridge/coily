@@ -307,7 +307,7 @@ git checkout - switch branches or restore files.
 
 ## `coily git commit`
 
-git commit - record staged changes.
+git commit - record named paths atomically (concurrency-safe, coily#7).
 
 ## `coily git diff`
 
