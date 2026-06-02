@@ -237,8 +237,7 @@ func agentShortHostname() string {
 }
 
 // Dictatable alphabet, lowercased to fit the all-lowercase agent name. Mirrors
-// the otel-a2a-relay channels generator (otel_a2a_relay_channels/ids.py) and
-// agentic-os docs/dictatable-id-alphabet.md, which drop the visually and
+// agentic-os docs/dictatable-id-alphabet.md, which drops the visually and
 // phonetically ambiguous characters from base32/base58.
 const (
 	tagLetters = "abcdefghjkmpqrstuvwxyz"
@@ -246,8 +245,8 @@ const (
 )
 
 // agentSessionTag derives the stable per-session suffix of the agent name: a
-// dictatable id shaped as two letters then two digits (e.g. "ab45"), the same
-// shape o2r and backend channel ids use. Deterministic in the session id, so a
+// dictatable id shaped as two letters then two digits (e.g. "ab45").
+// Deterministic in the session id, so a
 // session always self-names the same way; the SHA-256 digest spreads adjacent
 // session ids apart instead of slicing raw UUID hex. Empty id yields an empty
 // tag, and the suffix is then dropped.

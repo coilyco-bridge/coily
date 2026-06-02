@@ -29,8 +29,6 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 
 **REST API wrappers**: `coily ops {modio,discord,sentry,trello,forgejo}`.
 
-**Agent Channel**: `coily channel {create,post,read,state,spec,events,close}` wraps the v2 protocol from coilysiren/backend ([coily#330](https://github.com/coilysiren/coily/issues/330)).
-
 **Repo-defined**: `coily exec <cmd> [-- extra-args]`. Loaded from `.coily/coily.yaml`. Gated on clean+synced tree; `--audit-override-dirty` bypasses with audit tag. Verb prefix `repo.<cmd>`.
 
 ## Audit and logging
@@ -49,7 +47,7 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 
 ## Configuration + secrets
 
-Three-layer precedence: Go defaults < `~/.coily/config.yaml` < `./.coily/config.yaml`. Sections: `kai_server`, `audit`, `aws`, `eco`, `factorio`, `channel`. Env: `$COILY_AUDIT_LOG`, `$COILY_REPO_CONFIG`, `$COILY_CACHE_DIR`. AWS / kubectl / gh creds from canonical files, the REST APIs from SSM.
+Three-layer precedence: Go defaults < `~/.coily/config.yaml` < `./.coily/config.yaml`. Sections: `kai_server`, `audit`, `aws`, `eco`, `factorio`, `forgejo`. Env: `$COILY_AUDIT_LOG`, `$COILY_REPO_CONFIG`, `$COILY_CACHE_DIR`. AWS / kubectl / gh creds from canonical files, the REST APIs from SSM.
 
 ## Distribution
 

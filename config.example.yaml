@@ -39,11 +39,3 @@ eco:
   # by `coily eco mod install` as the root for Mods/<Name>/. Steam installs
   # land here on kai-server.
   server_dir: "/home/kai/Steam/steamapps/common/EcoServer"
-
-channel:
-  # Agent Channel deployment base URL. The reference deployment in
-  # coilysiren/backend exposes the API on its tailnet sidecar as `http://api`.
-  # Override per host if you run a different deployment.
-  base_url: "http://api"
-  # AWS SSM path holding the bearer token. Resolved on every channel call.
-  ssm_token_path: "/coilysiren/backend/datastore-token"

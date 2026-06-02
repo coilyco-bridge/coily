@@ -2,8 +2,6 @@ package main
 
 import (
 	"bytes"
-	"io"
-	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -26,35 +24,6 @@ func seedAuditLog(t *testing.T, records []audit.Record) string {
 		}
 	}
 	return path
-}
-
-// captureStdout runs fn with a temporary stdout pipe and returns whatever
-// fn printed. Restores stdout in a t.Cleanup.
-func captureStdout(t *testing.T, fn func() error) string {
-	t.Helper()
-	orig := os.Stdout
-	r, w, err := os.Pipe()
-	if err != nil {
-		t.Fatalf("pipe: %v", err)
-	}
-	os.Stdout = w
-	t.Cleanup(func() { os.Stdout = orig })
-
-	done := make(chan struct{})
-	var buf bytes.Buffer
-	go func() {
-		_, _ = io.Copy(&buf, r)
-		close(done)
-	}()
-
-	fnErr := fn()
-	_ = w.Close()
-	<-done
-	os.Stdout = orig
-	if fnErr != nil {
-		t.Fatalf("fn: %v", fnErr)
-	}
-	return buf.String()
 }
 
 func TestLoadAuditRecords_FiltersByScopeAndSince(t *testing.T) {
