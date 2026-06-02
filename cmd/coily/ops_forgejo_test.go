@@ -5,83 +5,11 @@ import (
 	"testing"
 )
 
-// TestRenderForgejoCmd_PinnedTarget pins the namespace and pod selector in
-// the rendered remote command. The wrapper deliberately doesn't expose flag
-// overrides for these; the issue (#91) calls them out as code-pinned.
-func TestRenderForgejoCmd_PinnedTarget(t *testing.T) {
-	got := renderForgejoCmd([]string{"admin", "user", "list"})
-	for _, want := range []string{
-		"k3s kubectl ",
-		" -n forgejo ",
-		" exec deploy/forgejo ",
-		" -- forgejo ",
-		"'admin'",
-		"'user'",
-		"'list'",
-	} {
-		if !strings.Contains(got, want) {
-			t.Errorf("rendered cmd missing %q; got %q", want, got)
-		}
-	}
-}
-
-// TestRenderForgejoCmd_NoSudo mirrors the issue #56 invariant for the
-// forgejo wrapper: no sudo prefix on the remote command. /etc/rancher/k3s/
-// k3s.yaml is mode 644 on kai-server.
-func TestRenderForgejoCmd_NoSudo(t *testing.T) {
-	got := renderForgejoCmd([]string{"admin", "user", "list"})
-	if strings.HasPrefix(got, "sudo ") || strings.HasPrefix(got, "sudo\t") {
-		t.Errorf("rendered cmd has sudo prefix: %q", got)
-	}
-}
-
-// TestRenderForgejoCmd_QuotesArgs pins POSIX-quoting of forgejo args so the
-// remote login shell does not re-interpret shell metacharacters. Doctor
-// check names are constrained, but the helper is general.
-func TestRenderForgejoCmd_QuotesArgs(t *testing.T) {
-	got := renderForgejoCmd([]string{"doctor", "check", "--run", "db-version"})
-	for _, want := range []string{"'doctor'", "'check'", "'--run'", "'db-version'"} {
-		if !strings.Contains(got, want) {
-			t.Errorf("rendered cmd missing quoted token %q; got %q", want, got)
-		}
-	}
-}
-
-// TestRenderForgejoCmd_AdminUserCreatePinsRandomAndMustChange asserts the
-// onboarding-slice invariant: the admin user create verb always carries
-// --random-password and --must-change-password, and never a --password flag.
-// Same renderer is shared with every other verb, so this test exercises the
-// argv shape that the create command's Action builds.
-func TestRenderForgejoCmd_AdminUserCreatePinsRandomAndMustChange(t *testing.T) {
-	argv := []string{
-		"admin", "user", "create",
-		"--username", "peer",
-		"--email", "peer@example.org",
-		"--random-password",
-		"--must-change-password",
-		"--admin",
-	}
-	got := renderForgejoCmd(argv)
-	for _, want := range []string{
-		"'--random-password'",
-		"'--must-change-password'",
-		"'--admin'",
-		"'peer'",
-		"'peer@example.org'",
-	} {
-		if !strings.Contains(got, want) {
-			t.Errorf("rendered cmd missing %q; got %q", want, got)
-		}
-	}
-	if strings.Contains(got, "'--password'") {
-		t.Errorf("rendered cmd must not carry --password; got %q", got)
-	}
-}
-
-// TestForgejoLocalArgv_PinnedTarget asserts the local-exec argv shape
-// matches the rendered remote command's pinned namespace and pod selector,
-// and that no shell quoting leaks into argv (execve sees the raw bytes).
-// Closes coilysiren/coily#260.
+// TestForgejoLocalArgv_PinnedTarget pins the local-exec argv shape: the
+// namespace and pod selector are code-pinned (issue #91), no sudo prefix
+// (issue #56; /etc/rancher/k3s/k3s.yaml is mode 644 on kai-server), and no
+// shell quoting leaks into argv (execve sees the raw bytes). Closes
+// coilysiren/coily#260.
 func TestForgejoLocalArgv_PinnedTarget(t *testing.T) {
 	got := forgejoLocalArgv([]string{"admin", "user", "list"})
 	want := []string{"k3s", "kubectl", "-n", "forgejo", "exec", "deploy/forgejo", "--", "forgejo", "admin", "user", "list"}
@@ -93,9 +21,12 @@ func TestForgejoLocalArgv_PinnedTarget(t *testing.T) {
 			t.Errorf("argv[%d] = %q, want %q", i, got[i], want[i])
 		}
 	}
+	if got[0] == "sudo" {
+		t.Errorf("local argv must not be sudo-prefixed; got %v", got)
+	}
 	for _, a := range got {
 		if strings.HasPrefix(a, "'") && strings.HasSuffix(a, "'") {
-			t.Errorf("local argv element %q is POSIX-quoted; quoting is for the ssh path only", a)
+			t.Errorf("local argv element %q is POSIX-quoted; argv goes straight to execve", a)
 		}
 	}
 }

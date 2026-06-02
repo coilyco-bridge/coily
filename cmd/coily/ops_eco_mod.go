@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -15,10 +15,10 @@ import (
 
 // ecoModCommand wraps mod-file operations against the Eco dedicated
 // server's tree on kai-server. Today only `push` exists. It mirrors the
-// `invoke push-asset` tasks in eco-mods / eco-mods-public: scp a zip to
-// <server_dir>, unzip -o on the server. The zip's internal layout
-// determines the extract destination - callers build the zip with the
-// paths they want on the server.
+// `invoke push-asset` tasks in eco-mods / eco-mods-public: copy a zip into
+// <server_dir>, unzip -o it. The SSH upload path was removed, so this runs
+// on kai-server itself. The zip's internal layout determines the extract
+// destination - callers build the zip with the paths they want.
 func (r *Runner) ecoModCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "mod",
@@ -38,12 +38,12 @@ when you want the new mod(s) to take effect.`,
 func (r *Runner) ecoModPushCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "push",
-		Usage: "scp a .zip to <server_dir> on kai-server and unzip -o it.",
+		Usage: "copy a .zip into <server_dir> and unzip -o it (run on kai-server).",
 		Description: `push mirrors the 'invoke push-asset' tasks in eco-mods and
-eco-mods-public: scp --src to <server_dir> on kai-server, then run
-'unzip -o' on the server so the archive's internal paths extract in
-place. The zip's top-level layout IS the install layout - callers decide
-where files land by how they build the zip.
+eco-mods-public: copy --src into <server_dir>, then run 'unzip -o' so the
+archive's internal paths extract in place. The zip's top-level layout IS
+the install layout - callers decide where files land by how they build
+the zip. Runs on kai-server itself; the SSH upload path was removed.
 
 Typical archive shapes (same convention as eco-mods/tasks.py):
 
@@ -80,10 +80,13 @@ for Eco's ModKitPlugin to pick them up.`,
 	}
 }
 
-// ecoModPushAction is the real work behind `coily eco mod push`. It is a
-// method on Runner so tests can swap r.SSH for a fake client.
+// ecoModPushAction is the real work behind `coily eco mod push`. The SSH
+// transport that used to scp the archive to kai-server was removed, so this
+// runs only on kai-server itself (hostIsLocal): it copies the local .zip
+// into <server_dir> and unzips it in place. A non-local configured host
+// returns errRemoteRemoved.
 //
-//nolint:gocyclo,cyclop // sequential flag validation, dry-run branches, and SSH+SFTP steps are linear and more readable inline than split across helpers.
+//nolint:gocyclo,cyclop // sequential flag validation, host gate, and copy+unzip+cleanup steps are linear and more readable inline than split across helpers.
 func (r *Runner) ecoModPushAction(ctx context.Context, c *cli.Command) error {
 	src := expandTilde(c.String("src"))
 	if !strings.HasSuffix(strings.ToLower(src), ".zip") {
@@ -109,43 +112,64 @@ func (r *Runner) ecoModPushAction(ctx context.Context, c *cli.Command) error {
 	}
 
 	host := r.Cfg.KaiServer.TailscaleHost
-	user := r.Cfg.KaiServer.SSHUser
-	if host == "" || user == "" {
-		return fmt.Errorf("eco mod push: kai_server.tailscale_host or ssh_user not configured")
+	if host == "" {
+		return fmt.Errorf("eco mod push: kai_server.tailscale_host not configured")
+	}
+	if !hostIsLocal(host) {
+		return errRemoteRemoved("eco mod push", host)
 	}
 
-	// The archive basename is local input; validate it before interpolating
-	// into the remote shell command. The shell-meta check is enough: the
-	// zip sits under server_dir, not in a location where a traversal is
-	// interesting, and the filename round-trips through scp's own parser.
+	// The archive basename is operator input; validate it before joining it
+	// into the destination path under server_dir.
 	base := filepath.Base(src)
 	if err := policy.ValidateArg("--src basename", base); err != nil {
 		return fmt.Errorf("eco mod push: %w", err)
 	}
 
-	// Forward slashes - remote is Linux.
-	remotePath := path.Join(serverDir, base)
-
-	if err := r.SSH.CopyTo(ctx, host, user, src, remotePath); err != nil {
-		return fmt.Errorf("eco mod push: upload: %w", err)
+	destPath := filepath.Join(serverDir, base)
+	if err := copyFile(src, destPath); err != nil {
+		return fmt.Errorf("eco mod push: copy into server dir: %w", err)
 	}
-	fmt.Fprintf(os.Stderr, "uploaded %s -> %s:%s\n", base, host, remotePath)
+	fmt.Fprintf(os.Stderr, "copied %s -> %s\n", base, destPath)
 
-	extract := fmt.Sprintf("cd %s && unzip -o %s", serverDir, base)
-	if _, stderr, err := r.SSH.Run(ctx, host, user, extract); err != nil {
-		return fmt.Errorf("eco mod push: remote unzip: %w (stderr: %s)", err, strings.TrimSpace(stderr))
+	// -d extracts into server_dir; the archive's internal paths land in place.
+	if err := r.Runner.Exec(ctx, "unzip", "-o", destPath, "-d", serverDir); err != nil {
+		return fmt.Errorf("eco mod push: unzip: %w", err)
 	}
-	fmt.Fprintf(os.Stderr, "unzipped %s at %s:%s\n", base, host, serverDir)
+	fmt.Fprintf(os.Stderr, "unzipped %s into %s\n", base, serverDir)
 
 	if !c.Bool("keep-remote") {
-		// rm the uploaded archive so Eco's server root doesn't accumulate
+		// Drop the copied archive so Eco's server root doesn't accumulate
 		// one .zip per push. Extracted files stay in place.
-		rm := fmt.Sprintf("rm -f %s", remotePath)
-		if _, stderr, err := r.SSH.Run(ctx, host, user, rm); err != nil {
-			return fmt.Errorf("eco mod push: remote cleanup: %w (stderr: %s)", err, strings.TrimSpace(stderr))
+		if err := os.Remove(destPath); err != nil {
+			return fmt.Errorf("eco mod push: cleanup %s: %w", destPath, err)
 		}
 	}
 
 	fmt.Fprintf(os.Stderr, "eco mod push: done. Run 'coily gaming eco restart' to load.\n")
 	return nil
+}
+
+// copyFile copies src to dst, creating or truncating dst with 0o644. Used by
+// eco mod push to place a local archive into the eco server dir. The named
+// return surfaces a close error on the write side without masking a copy error.
+func copyFile(src, dst string) (err error) {
+	// #nosec G304 -- src is an operator-supplied .zip path, already stat'd as a
+	// regular file; dst is server_dir/base with both segments policy-validated.
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close() //nolint:errcheck,gosec // read side; copy error dominates.
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if cerr := out.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
+	_, err = io.Copy(out, in)
+	return err
 }

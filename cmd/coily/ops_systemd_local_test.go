@@ -10,8 +10,8 @@ import (
 // detection rule: the comparison is on the first dotted segment of
 // hostname, so a target named "kai-server" matches a local
 // "kai-server", "kai-server.local", "kai-server.tail-scale.ts.net"
-// equally. Empty target and Hostname errors fall through to false so
-// the safe default is "ssh as today."
+// equally. Empty target and Hostname errors fall through to false, so a
+// non-local host is rejected (errRemoteRemoved) rather than run locally.
 func TestHostIsLocal_MatchesLeadingSegment(t *testing.T) {
 	h, err := os.Hostname()
 	if err != nil {

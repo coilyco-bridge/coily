@@ -37,8 +37,8 @@ func (r *Runner) systemdUnitCommand(u systemdUnit) *cli.Command {
 		Name:  u.VerbName,
 		Usage: fmt.Sprintf("Operate the %s systemd unit on kai-server.", u.UnitName),
 		Description: fmt.Sprintf(`%s wraps systemctl/journalctl calls against the %s unit
-that runs on kai-server. Every call goes through cli-guard/ssh; no ssh
-subprocess is spawned.`, u.VerbName, u.UnitName),
+that runs on kai-server. The SSH transport was removed, so run this on
+kai-server itself.`, u.VerbName, u.UnitName),
 		Commands: []*cli.Command{
 			r.systemdStatus(u),
 			r.systemdTail(u),
@@ -144,11 +144,12 @@ func (r *Runner) systemdStart(u systemdUnit) *cli.Command {
 	}
 }
 
-// systemdRemote runs one or more argv lines on kai-server in sequence.
-// When invoked on kai-server itself (detected via hostNameMatches), the
-// argvs are exec'd locally to skip an ssh-to-self that doesn't carry
-// authentication in non-interactive environments like the
-// claude-remote-control daemon. Per coilysiren/coily#135.
+// systemdRemote runs one or more argv lines against kai-server's systemd
+// in sequence. The SSH transport that used to reach kai-server from
+// another host was removed, so these verbs now run only on kai-server
+// itself (detected via hostIsLocal); a non-local configured host returns
+// errRemoteRemoved. Run the verb on kai-server directly (e.g. via a
+// dispatch/headless coily on the box) instead of across the network.
 //
 // Local mode still needs sudo for mutating verbs; the operator must
 // have a sudoers entry for each systemctl verb (tracked in the
@@ -163,29 +164,17 @@ func (r *Runner) systemdRemote(argvs [][]string) cli.ActionFunc {
 		if host == "" {
 			return fmt.Errorf("systemd: kai_server.tailscale_host not configured")
 		}
-		if hostIsLocal(host) {
-			return r.systemdRemoteLocal(ctx, argvs)
+		if !hostIsLocal(host) {
+			return errRemoteRemoved("systemd", host)
 		}
-		user := r.Cfg.KaiServer.SSHUser
-		if user == "" {
-			return fmt.Errorf("systemd: kai_server.ssh_user not configured")
-		}
-		parts := make([]string, 0, len(argvs))
-		for _, a := range argvs {
-			parts = append(parts, strings.Join(a, " "))
-		}
-		cmd := strings.Join(parts, " && ")
-		if err := r.SSH.Stream(ctx, host, user, cmd, os.Stdout, os.Stderr); err != nil {
-			return fmt.Errorf("systemd: remote exec: %w", err)
-		}
-		return nil
+		return r.systemdRemoteLocal(ctx, argvs)
 	}
 }
 
 // systemdRemoteLocal exec's each argv directly on the local host using
 // the runner's shell.Runner. Stdout/stderr forward to the operator's
-// terminal. Stops at the first failure to mirror the `&&` chaining the
-// ssh path uses.
+// terminal. Stops at the first failure, mirroring the sequential `&&`
+// chaining these verbs expect.
 func (r *Runner) systemdRemoteLocal(ctx context.Context, argvs [][]string) error {
 	for _, a := range argvs {
 		if len(a) == 0 {
@@ -198,11 +187,24 @@ func (r *Runner) systemdRemoteLocal(ctx context.Context, argvs [][]string) error
 	return nil
 }
 
+// errRemoteRemoved is returned by the kai-server ops verbs (systemd, eco,
+// factorio, forgejo) when the configured kai_server.tailscale_host is not
+// the machine coily is running on. The SSH transport these verbs used to
+// reach kai-server over was removed, so they now run only on kai-server
+// itself. Run the command there directly instead of from another host.
+func errRemoteRemoved(verb, host string) error {
+	return fmt.Errorf(
+		"%s: remote execution over SSH was removed; run this on kai-server directly "+
+			"(configured kai_server.tailscale_host %q is not this machine)",
+		verb, host,
+	)
+}
+
 // hostIsLocal reports whether target names the host this binary is
 // running on. Matches on the leading hostname segment so target=
 // "kai-server" matches local "kai-server", "kai-server.local",
 // "kai-server.tail-scale.ts.net", etc. False on os.Hostname errors so
-// the safe default is to ssh (the original behavior).
+// the safe default is to treat the host as remote.
 func hostIsLocal(target string) bool {
 	if target == "" {
 		return false

@@ -436,9 +436,8 @@ func filepathHasPrefix(s, prefix string) bool {
 // lockdown roots — keeps friends' machines and alternate layouts silent.
 //
 // Per coilysiren/coily#264 and as step 4 of coilysiren/agentic-os-kai#615.
-// Originally framed as a `coily ssh bootstrap` verb in agentic-os-kai#493,
-// but coilysiren/coily#187 step 8 deleted per-verb ssh wrappers; the
-// replacement is `coily ssh kai-server -- coily setup`.
+// Run `coily setup` on kai-server itself; the SSH transport that once let
+// a laptop drive a remote `coily setup` was removed.
 func runHostBootstrapStep(ctx context.Context, self, lockdownRoot string) error {
 	if lockdownRoot == "" {
 		home, err := os.UserHomeDir()

@@ -14,9 +14,9 @@ import (
 
 // ecoCommand wraps the eco game server which runs as a systemd unit on
 // kai-server. All verbs run a `sudo <systemctl|journalctl> ... eco-server`
-// command on kai-server through cli-guard/ssh, which wraps
-// golang.org/x/crypto/ssh. No ssh subprocess is spawned. The ssh target is
-// taken from embedded config (kai_server.tailscale_host and ssh_user).
+// command on the local host. The SSH transport was removed, so these run
+// only on kai-server itself (kai_server.tailscale_host must match the
+// local hostname).
 //
 // `coily eco world` is a sub-tree of local-side helpers ported from
 // eco-cycle-prep/worldgen.py. Those verbs operate on a local checkout of
@@ -328,42 +328,30 @@ func (r *Runner) ecoWorldSnapshotCommand() *cli.Command {
 	}
 }
 
-// ecoRemote returns a cli.ActionFunc that runs the given argv on
-// kai-server, either through cli-guard/ssh (off-host caller) or
-// directly via r.Runner.Exec (on-host caller, detected via hostIsLocal).
-// The local branch skips an ssh-to-self that doesn't carry auth in
-// non-interactive environments. Closes coilysiren/coily#261.
+// ecoRemote returns a cli.ActionFunc that runs the given argv against the
+// eco-server unit via r.Runner.Exec on the local host. The SSH transport
+// was removed, so a non-local configured host (hostIsLocal is false)
+// returns errRemoteRemoved; run the verb on kai-server itself. Closes
+// coilysiren/coily#261.
 //
 // Every element of remoteArgv is hardcoded at compile time in this
-// file. No user input reaches here, so no runtime metacharacter risk
-// from either path. If we ever take user input, add
-// policy.ValidateArgSlice at the entry point.
+// file. No user input reaches here, so no runtime metacharacter risk.
+// If we ever take user input, add policy.ValidateArgSlice at the entry
+// point.
 func (r *Runner) ecoRemote(remoteArgv []string) cli.ActionFunc {
 	return func(ctx context.Context, _ *cli.Command) error {
 		host := r.Cfg.KaiServer.TailscaleHost
 		if host == "" {
 			return fmt.Errorf("eco: kai_server.tailscale_host not configured")
 		}
-		if hostIsLocal(host) {
-			if len(remoteArgv) == 0 {
-				return fmt.Errorf("eco: empty argv")
-			}
-			if err := r.Runner.Exec(ctx, remoteArgv[0], remoteArgv[1:]...); err != nil {
-				return fmt.Errorf("eco: local %s: %w", remoteArgv[0], err)
-			}
-			return nil
+		if !hostIsLocal(host) {
+			return errRemoteRemoved("eco", host)
 		}
-		user := r.Cfg.KaiServer.SSHUser
-		if user == "" {
-			return fmt.Errorf("eco: kai_server.ssh_user not configured")
+		if len(remoteArgv) == 0 {
+			return fmt.Errorf("eco: empty argv")
 		}
-		// crypto/ssh's session API takes one string (which the remote
-		// shell parses), the same shape ssh(1) uses.
-		cmd := strings.Join(remoteArgv, " ")
-		// Stream stdout/stderr live. Some eco verbs (`tail --follow`) run
-		// indefinitely, so buffering the whole output is wrong.
-		if err := r.SSH.Stream(ctx, host, user, cmd, os.Stdout, os.Stderr); err != nil {
-			return fmt.Errorf("eco: remote %s: %w", remoteArgv[0], err)
+		if err := r.Runner.Exec(ctx, remoteArgv[0], remoteArgv[1:]...); err != nil {
+			return fmt.Errorf("eco: local %s: %w", remoteArgv[0], err)
 		}
 		return nil
 	}

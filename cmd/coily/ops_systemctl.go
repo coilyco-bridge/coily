@@ -69,11 +69,10 @@ func validateUnitName(unit string) error {
 	return nil
 }
 
-// systemctlCommand is the local-execution systemctl verb tree. The
-// intended call-site is the remote coily that local
-// `coily ssh <alias> -- coily systemctl <verb> <unit>` dispatches to.
-// Direct `coily systemctl ...` use from a Mac is a no-op without local
-// systemd.
+// systemctlCommand is the local-execution systemctl verb tree. It runs
+// against the local host's systemd, so the intended call-site is coily
+// running on kai-server itself. Direct `coily systemctl ...` use from a
+// Mac is a no-op without local systemd.
 //
 // Sudo discipline (coilysiren/coily#203): mutating verbs self-elevate by
 // re-execing the coily binary under outer sudo, then run `systemctl ...`
@@ -93,8 +92,8 @@ func (r *Runner) systemctlCommand() *cli.Command {
 		Description: `Closed verb set (status/start/stop/restart/reload/
 enable/disable/daemon-reload). Status runs unprivileged (sudo trips a tty
 prompt on non-tty sessions, coilysiren/coily#144); mutating verbs are
-sudo-prefixed. Intended for the remote side of
-` + "`coily ssh <alias> -- coily systemctl <verb> <unit>`" + `.`,
+sudo-prefixed. Runs against the local host's systemd, so use it on
+kai-server itself.`,
 		Commands: cmds,
 	}
 }

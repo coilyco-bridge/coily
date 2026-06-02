@@ -31,8 +31,8 @@ var gitPassthroughVerbs = []struct{ name, usage string }{
 // gitVerbRewriter prepends the git subcommand to the passthrough argv, and
 // hoists a leading `-C <path>` ahead of the verb so `coily git <verb> -C
 // <path>` resolves to `git -C <path> <verb> ...` (git requires -C before
-// the subcommand). The -C form lets a `coily ssh` session operate on a repo
-// other than the ssh target's fixed working directory.
+// the subcommand). The -C form lets a session operate on a repo other than
+// the current working directory.
 func gitVerbRewriter(verb string) func([]string) []string {
 	return func(argv []string) []string {
 		if len(argv) >= 2 && argv[0] == "-C" {

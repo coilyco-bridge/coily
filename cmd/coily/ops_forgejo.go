@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
@@ -24,10 +23,10 @@ import (
 func stampPolicySkipped(rec *audit.Record) { rec.PolicySkipped = true }
 
 // forgejoCommand wraps the in-pod `forgejo` CLI on the kai-server k3s deploy.
-// Each leaf renders a fixed-shape `k3s kubectl -n forgejo exec deploy/forgejo
-// -- forgejo <verb...>` and runs it through the same audit + ssh path as
-// `coily ssh kubectl`. Namespace and pod selector are pinned in code: no
-// free-form passthrough, no flag overrides for the target.
+// Each leaf runs a fixed-shape `k3s kubectl -n forgejo exec deploy/forgejo
+// -- forgejo <verb...>` locally on kai-server (the SSH transport was
+// removed). Namespace and pod selector are pinned in code: no free-form
+// passthrough, no flag overrides for the target.
 //
 // Slices landed so far (parent #57):
 //   - #91 readonly: admin user list, admin auth list, doctor check
@@ -42,8 +41,8 @@ func (r *Runner) forgejoCommand() *cli.Command {
 		Aliases: []string{"fj"},
 		Usage:   "Run forgejo CLI verbs against the kai-server forgejo pod.",
 		Description: `forgejo wraps the in-pod forgejo CLI. Each leaf is a fixed-shape
-k3s kubectl -n forgejo exec deploy/forgejo -- forgejo <verb...>, run via
-ssh to kai-server. Namespace and pod selector are pinned in code.
+k3s kubectl -n forgejo exec deploy/forgejo -- forgejo <verb...>, run
+locally on kai-server. Namespace and pod selector are pinned in code.
 
 Verbs:
   coily ops forgejo admin user list
@@ -232,65 +231,33 @@ func (r *Runner) forgejoDoctorCheckCommand() *cli.Command {
 }
 
 // runForgejo dispatches every forgejo leaf to either a local exec or an
-// ssh stream to kai-server. Pinned to namespace=forgejo,
+// kubectl exec into the forgejo pod. Pinned to namespace=forgejo,
 // pod-selector=deploy/forgejo. The verb argv is the forgejo subcommand
 // (e.g. ["admin", "user", "list"]).
 //
-// When invoked on kai-server itself (detected via hostIsLocal), the
-// kubectl command runs directly through r.Runner.Exec to skip an
-// ssh-to-self that doesn't carry authentication in non-interactive
-// environments. Same pattern as systemdRemote (coilysiren/coily#135),
-// closing coilysiren/coily#260.
+// The SSH transport that used to reach kai-server from another host was
+// removed, so this verb now runs only on kai-server itself (detected via
+// hostIsLocal), executing k3s kubectl directly through r.Runner.Exec. A
+// non-local configured host returns errRemoteRemoved. Closes
+// coilysiren/coily#260 (local path), per coilysiren/coily#135.
 func (r *Runner) runForgejo(ctx context.Context, forgejoArgs []string) error {
 	host := r.Cfg.KaiServer.TailscaleHost
 	if host == "" {
 		return fmt.Errorf("ops forgejo: kai_server.tailscale_host must be set in config")
 	}
-	if hostIsLocal(host) {
-		argv := forgejoLocalArgv(forgejoArgs)
-		return r.Runner.Exec(ctx, argv[0], argv[1:]...)
+	if !hostIsLocal(host) {
+		return errRemoteRemoved("ops forgejo", host)
 	}
-	user := r.Cfg.KaiServer.SSHUser
-	if user == "" {
-		return fmt.Errorf("ops forgejo: kai_server.ssh_user must be set in config")
-	}
-	return r.SSH.Stream(ctx, host, user, renderForgejoCmd(forgejoArgs), os.Stdout, os.Stderr)
+	argv := forgejoLocalArgv(forgejoArgs)
+	return r.Runner.Exec(ctx, argv[0], argv[1:]...)
 }
 
-// forgejoLocalArgv returns the argv used when forgejo runs on kai-server
-// itself. No shell layer involved, so no POSIX quoting; the args go
-// straight into execve. Shape mirrors renderForgejoCmd's pinned target.
+// forgejoLocalArgv returns the argv used to run forgejo on kai-server.
+// No shell layer involved, so no POSIX quoting; the args go straight into
+// execve. Shape is the pinned k3s kubectl exec into the forgejo pod.
 func forgejoLocalArgv(forgejoArgs []string) []string {
 	argv := []string{"k3s", "kubectl", "-n", "forgejo", "exec", "deploy/forgejo", "--", "forgejo"}
 	return append(argv, forgejoArgs...)
-}
-
-// renderForgejoCmd assembles the remote command string sent to kai-server.
-// Pulled out as a helper so the pinned-target + quoted-argv property is
-// unit-testable without spinning up an ssh fake. The shape is:
-//
-//	k3s kubectl -n forgejo exec deploy/forgejo -- forgejo <quoted args...>
-//
-// Each forgejo arg is POSIX single-quoted before joining, same rationale as
-// renderSSHKubectlCmd: the remote login shell would otherwise re-interpret
-// shell metacharacters.
-func renderForgejoCmd(forgejoArgs []string) string {
-	parts := []string{"k3s", "kubectl", "-n", "forgejo", "exec", "deploy/forgejo", "--", "forgejo"}
-	for _, a := range forgejoArgs {
-		parts = append(parts, posixShellQuote(a))
-	}
-	return strings.Join(parts, " ")
-}
-
-// posixShellQuote wraps s in POSIX single quotes. Embedded single quotes
-// are encoded as '\” (close-quote, escaped quote, reopen-quote). The
-// result is safe to splice into a shell command line. Distinct from
-// ssh_passthrough.go's posixQuote, which fast-paths safe strings and is
-// tested against that behavior; this one always quotes, matching the
-// kubectl-exec-shell discipline that the forgejo verb inherited from
-// the old `coily ssh kubectl` path.
-func posixShellQuote(s string) string {
-	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
 }
 
 // validateForgejoUsername enforces forgejo's username character set
