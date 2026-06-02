@@ -2,16 +2,11 @@ package main
 
 import (
 	"bytes"
-	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/coilysiren/cli-guard/audit"
 )
@@ -60,15 +55,6 @@ func captureStdout(t *testing.T, fn func() error) string {
 		t.Fatalf("fn: %v", fnErr)
 	}
 	return buf.String()
-}
-
-func runnerWithAuditPath(path string) *Runner {
-	r := &Runner{
-		Cfg: &Config{},
-	}
-	r.Cfg.Audit.LogPath = path
-	r.Audit = audit.NewWriter(path)
-	return r
 }
 
 func TestLoadAuditRecords_FiltersByScopeAndSince(t *testing.T) {
@@ -131,149 +117,6 @@ func TestLoadAuditRecords_MissingFileIsEmpty(t *testing.T) {
 	}
 	if got != nil {
 		t.Errorf("got %+v, want nil", got)
-	}
-}
-
-func TestRunTrailer_NoMatchingRowsEmitsNone(t *testing.T) {
-	scope := "/repo/x"
-	path := seedAuditLog(t, []audit.Record{
-		{Verb: "v", Timestamp: 100, CommitScope: "/repo/y", Decision: audit.DecisionAccept},
-	})
-	r := runnerWithAuditPath(path)
-	cmd := r.gitTrailerCommand()
-	out := captureStdout(t, func() error {
-		return cmd.Run(context.Background(), []string{"trailer", "--scope", scope, "--since", "1"})
-	})
-	if !strings.Contains(out, "Audit-log: none") {
-		t.Errorf("output %q should contain Audit-log: none", out)
-	}
-}
-
-func TestRunTrailer_EmitsOnePerRow(t *testing.T) {
-	scope := "/repo/x"
-	path := seedAuditLog(t, []audit.Record{
-		{Verb: "v1", Timestamp: 100, CommitScope: scope, Decision: audit.DecisionAccept},
-		{Verb: "v2", Timestamp: 200, CommitScope: scope, Decision: audit.DecisionAccept},
-	})
-	r := runnerWithAuditPath(path)
-	cmd := r.gitTrailerCommand()
-	out := captureStdout(t, func() error {
-		return cmd.Run(context.Background(), []string{"trailer", "--scope", scope, "--since", "1"})
-	})
-	count := strings.Count(out, "Audit-log: coily://")
-	if count != 2 {
-		t.Errorf("got %d Audit-log lines, want 2:\n%s", count, out)
-	}
-}
-
-func TestRunTrailer_TruncatesAtMax(t *testing.T) {
-	scope := "/repo/x"
-	var seed []audit.Record
-	for i := int64(1); i <= 25; i++ {
-		seed = append(seed, audit.Record{Verb: fmt.Sprintf("v%d", i), Timestamp: i, CommitScope: scope, Decision: audit.DecisionAccept})
-	}
-	path := seedAuditLog(t, seed)
-	r := runnerWithAuditPath(path)
-	cmd := r.gitTrailerCommand()
-	out := captureStdout(t, func() error {
-		return cmd.Run(context.Background(), []string{"trailer", "--scope", scope, "--since", "0", "--max", "20"})
-	})
-	count := strings.Count(out, "Audit-log: coily://")
-	if count != 20 {
-		t.Errorf("got %d coily:// lines, want 20\n%s", count, out)
-	}
-	if !strings.Contains(out, "5 earlier rows truncated") {
-		t.Errorf("output should mention truncation:\n%s", out)
-	}
-}
-
-func TestMergeTrailerBlock_AppendsAfterBody(t *testing.T) {
-	body := []byte("subject\n\nlong body\n")
-	got := mergeTrailerBlock(body, "Audit-log: coily://1/AAAAAAAA\n")
-	want := "subject\n\nlong body\n\nAudit-log: coily://1/AAAAAAAA\n"
-	if got != want {
-		t.Errorf("got:\n%q\nwant:\n%q", got, want)
-	}
-}
-
-func TestMergeTrailerBlock_JoinsExistingTrailers(t *testing.T) {
-	body := []byte("subject\n\nbody\n\nCo-Authored-By: x <x@x>\n")
-	got := mergeTrailerBlock(body, "Audit-log: coily://1/AAAAAAAA\n")
-	want := "subject\n\nbody\n\nCo-Authored-By: x <x@x>\nAudit-log: coily://1/AAAAAAAA\n"
-	if got != want {
-		t.Errorf("got:\n%q\nwant:\n%q", got, want)
-	}
-}
-
-func TestIsTrailerLine(t *testing.T) {
-	yes := []string{
-		"Co-Authored-By: x",
-		"Signed-off-by: x",
-		"Audit-log: coily://1/AAAAAAAA",
-	}
-	no := []string{
-		"",
-		"plain prose",
-		": lacks-key",
-		"key with spaces: yes",
-		"sentence with: colon in middle",
-	}
-	for _, s := range yes {
-		if !isTrailerLine(s) {
-			t.Errorf("isTrailerLine(%q) = false, want true", s)
-		}
-	}
-	for _, s := range no {
-		if isTrailerLine(s) {
-			t.Errorf("isTrailerLine(%q) = true, want false", s)
-		}
-	}
-}
-
-func TestRunTrailerHook_SkipsMergeSource(t *testing.T) {
-	dir := t.TempDir()
-	msgFile := filepath.Join(dir, "MSG")
-	if err := os.WriteFile(msgFile, []byte("merge stuff\n"), 0o644); err != nil {
-		t.Fatal(err)
-	}
-	r := runnerWithAuditPath(filepath.Join(t.TempDir(), "audit.jsonl"))
-	cmd := r.gitTrailerHookCommand()
-	if err := cmd.Run(context.Background(), []string{"trailer-hook", msgFile, "merge"}); err != nil {
-		t.Fatalf("Run: %v", err)
-	}
-	got, _ := os.ReadFile(msgFile)
-	if string(got) != "merge stuff\n" {
-		t.Errorf("merge source should have left file untouched, got %q", got)
-	}
-}
-
-func TestFindRecordByShortID_RoundTrip(t *testing.T) {
-	scope := "/repo/x"
-	path := seedAuditLog(t, []audit.Record{
-		{Verb: "target", Timestamp: time.Now().Unix(), CommitScope: scope, Decision: audit.DecisionAccept, Argv: []string{"a", "b"}},
-	})
-	// Read back the seeded ID/short.
-	f, err := os.Open(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() { _ = f.Close() }()
-	dec := json.NewDecoder(f)
-	var rec audit.Record
-	if err := dec.Decode(&rec); err != nil {
-		t.Fatal(err)
-	}
-	got, err := findRecordByShortID(path, rec.Timestamp, rec.ShortID())
-	if err != nil {
-		t.Fatalf("findRecordByShortID: %v", err)
-	}
-	if got == nil || got.Verb != "target" {
-		t.Fatalf("got %+v, want verb=target", got)
-	}
-
-	// Negative case: missing file should return errNotFound.
-	if _, err := findRecordByShortID(filepath.Join(t.TempDir(), "nope.jsonl"), 0, ""); !errors.Is(err, errNotFound) {
-		t.Errorf("missing file: got %v, want errNotFound", err)
 	}
 }
 

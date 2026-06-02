@@ -17,7 +17,7 @@ Format: full path, one-line summary, comma-separated flag names. No flag descrip
 
 ## `coily agent-name`
 
-Print this agent's self-name: claude-<os>-<hostname>-<tag>.
+Print this agent's self-name: claude-<os>-<hostname>-<tag>-<pronouns>.
 
 Flags: --session-id
 
@@ -293,7 +293,7 @@ git add - stage changes.
 
 ## `coily git audit-show`
 
-Resolve an Audit-log trailer back to its full audit record.
+Print the audit rows bound to a repo over a time window.
 
 Flags: --scope, --since
 
@@ -344,16 +344,6 @@ git stash - shelve working-tree changes.
 ## `coily git status`
 
 git status - show the working tree state.
-
-## `coily git trailer`
-
-Emit Audit-log: trailers for the current repo.
-
-Flags: --max, --scope, --since
-
-## `coily git trailer-hook`
-
-prepare-commit-msg hook: append Audit-log: trailers in place.
 
 ## `coily hook pre-tool-use`
 

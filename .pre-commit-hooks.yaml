@@ -11,15 +11,3 @@
   language: system
   files: '^(\.coily/coily\.yaml|Makefile)$'
   pass_filenames: false
-
-- id: coily-trailer
-  name: coily audit-log trailer
-  description: |
-    Append `Audit-log:` trailers to the commit message. Pulls audit rows
-    bound to this repo (commit_scope == git toplevel) since the last commit
-    and writes one trailer line per row, capped at 20.
-  entry: coily git trailer-hook
-  language: system
-  stages: [prepare-commit-msg]
-  always_run: true
-  require_serial: true

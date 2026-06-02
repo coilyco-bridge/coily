@@ -101,7 +101,7 @@ The path is owned by `pkg/config` (`SessionProfilePath`, audit dir defaults). Ov
 
 * One row per line, NDJSON. `jq -c` over the relevant `<owner>-<repo>.jsonl` is the canonical reader.
 * `coily audit path` prints the file path for the current commit scope.
-* `coily git audit-show` resolves an audit row id stored in a git commit trailer back to the original row.
+* `coily git audit-show --scope <repo> --since <unix-seconds>` prints the rows bound to a repo over a time window as yaml.
 
 ## See also
 

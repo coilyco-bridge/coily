@@ -1,14 +1,25 @@
 commands:
     - path:
         - coily
-        - audit
-        - finding
-      summary: Walk an agent through writing a finding about a flagged audit event.
+        - agent-name
+      summary: 'Print this agent''s self-name: claude-<os>-<hostname>-<tag>-<pronouns>.'
       flags:
-        - --id
-        - --slug
-        - --ts
-        - --verb
+        - --session-id
+    - path:
+        - coily
+        - audit
+        - dashboard
+      summary: Render a static HTML aggregation of the audit log.
+      flags:
+        - --out
+        - --since
+    - path:
+        - coily
+        - audit
+        - open
+      summary: Open the rendered audit dashboard in the default browser.
+      flags:
+        - --path
     - path:
         - coily
         - audit
@@ -22,6 +33,138 @@ commands:
       flags:
         - --follow
         - --since
+    - path:
+        - coily
+        - channel
+        - close
+      summary: Mark a channel closed. Events stay readable.
+    - path:
+        - coily
+        - channel
+        - create
+      summary: Create a channel. Returns the fresh 4-char id and URL.
+      flags:
+        - --created-by
+        - --title
+    - path:
+        - coily
+        - channel
+        - events
+      summary: List a channel's events (newest first), optionally filtered by kind.
+      flags:
+        - --kind
+        - --limit
+    - path:
+        - coily
+        - channel
+        - list
+      summary: List agent channels. Default shows only OPEN channels.
+      flags:
+        - --all
+        - --format
+    - path:
+        - coily
+        - channel
+        - post
+      summary: Append an event to a channel. Payload from --payload (literal | @file | -).
+      flags:
+        - --author
+        - --kind
+        - --payload
+    - path:
+        - coily
+        - channel
+        - read
+      summary: Read the whole channel (self-describing onboarding view).
+      flags:
+        - --format
+    - path:
+        - coily
+        - channel
+        - spec
+      summary: Read the newest spec event's payload (the channel charter).
+    - path:
+        - coily
+        - channel
+        - state
+      summary: Read the newest state event's payload.
+    - path:
+        - coily
+        - dispatch
+        - cascade
+      summary: Spawn a detached worker allowed to recursively dispatch sub-workers (bounded fan-out).
+      flags:
+        - --allowed-tools
+        - --claims
+        - --claude-bin
+        - --depth
+        - --dry-run
+        - --permission-mode
+    - path:
+        - coily
+        - dispatch
+        - consult
+      summary: Like interactive, but encouraged to pause and surface real judgment calls.
+      flags:
+        - --channel
+        - --dry-run
+        - --launch-name
+        - --queue-dir
+        - --surface
+    - path:
+        - coily
+        - dispatch
+        - headless
+      summary: Spawn a detached `claude -p` against a real open issue.
+      flags:
+        - --allowed-tools
+        - --claims
+        - --claude-bin
+        - --dry-run
+        - --permission-mode
+    - path:
+        - coily
+        - dispatch
+        - interactive
+      summary: Open a new Warp tab with `claude "Work on issue <ref>"` pre-submitted.
+      flags:
+        - --channel
+        - --dry-run
+        - --launch-name
+        - --queue-dir
+        - --surface
+    - path:
+        - coily
+        - dispatch
+        - reap
+      summary: Remove dispatch worktrees whose branch is already merged into main.
+    - path:
+        - coily
+        - dispatch
+        - registry
+        - check
+      summary: Check whether a path is claimed by an active sidequest.
+      flags:
+        - --json
+    - path:
+        - coily
+        - dispatch
+        - registry
+        - list
+      summary: Print every active sidequest, oldest first.
+      flags:
+        - --json
+    - path:
+        - coily
+        - dispatch
+        - status
+      summary: Show pid + log tail for a headless dispatch.
+      flags:
+        - --all
+        - --follow
+        - --pid
+        - --since
+        - --tail
     - path:
         - coily
         - docker
@@ -268,25 +411,81 @@ commands:
     - path:
         - coily
         - git
+        - add
+      summary: git add - stage changes.
+    - path:
+        - coily
+        - git
         - audit-show
-      summary: Resolve an Audit-log trailer back to its full audit record.
+      summary: Print the audit rows bound to a repo over a time window.
       flags:
         - --scope
         - --since
     - path:
         - coily
         - git
-        - trailer
-      summary: 'Emit Audit-log: trailers for the current repo.'
-      flags:
-        - --max
-        - --scope
-        - --since
+        - branch
+      summary: git branch - list or manage branches.
     - path:
         - coily
         - git
-        - trailer-hook
-      summary: 'prepare-commit-msg hook: append Audit-log: trailers in place.'
+        - checkout
+      summary: git checkout - switch branches or restore files.
+    - path:
+        - coily
+        - git
+        - commit
+      summary: git commit - record staged changes.
+    - path:
+        - coily
+        - git
+        - diff
+      summary: git diff - show changes.
+    - path:
+        - coily
+        - git
+        - fetch
+      summary: git fetch - download objects and refs from a remote.
+    - path:
+        - coily
+        - git
+        - log
+      summary: git log - show commit history.
+    - path:
+        - coily
+        - git
+        - pull
+      summary: git pull - fetch and integrate.
+    - path:
+        - coily
+        - git
+        - push
+      summary: git push - update remote refs.
+    - path:
+        - coily
+        - git
+        - restore
+      summary: git restore - restore working-tree files.
+    - path:
+        - coily
+        - git
+        - show
+      summary: git show - show a commit or object.
+    - path:
+        - coily
+        - git
+        - stash
+      summary: git stash - shelve working-tree changes.
+    - path:
+        - coily
+        - git
+        - status
+      summary: git status - show the working tree state.
+    - path:
+        - coily
+        - hook
+        - pre-tool-use
+      summary: PreToolUse hook for the Bash tool. Routes bare-binary invocations through coily wrappers with a recovery hint; rejects coily-binary invocations resolving outside the canonical install paths.
     - path:
         - coily
         - install-completion
@@ -294,6 +493,17 @@ commands:
       flags:
         - --dry-run
         - --shell
+    - path:
+        - coily
+        - lint
+      summary: Lint .coily/coily.yaml against the repo Makefile.
+    - path:
+        - coily
+        - lockdown
+        - init-config
+      summary: Write the embedded default profiles registry to ~/.coily/coily.yaml.
+      flags:
+        - --replace
     - path:
         - coily
         - lockdown
@@ -307,6 +517,50 @@ commands:
         - ops
         - aws
       summary: Pass-through to aws with argv validation + audit log.
+    - path:
+        - coily
+        - ops
+        - ci
+      summary: Watch GitHub Actions run status, read off the github.com web budget.
+      flags:
+        - --branch
+        - --interval
+        - --json
+        - --limit
+        - --watch
+    - path:
+        - coily
+        - ops
+        - claude-remote-control
+        - restart
+      summary: Restart the claude-remote-control unit.
+    - path:
+        - coily
+        - ops
+        - claude-remote-control
+        - start
+      summary: Start the claude-remote-control unit.
+    - path:
+        - coily
+        - ops
+        - claude-remote-control
+        - status
+      summary: Print systemctl status claude-remote-control.
+    - path:
+        - coily
+        - ops
+        - claude-remote-control
+        - stop
+      summary: Stop the claude-remote-control unit.
+    - path:
+        - coily
+        - ops
+        - claude-remote-control
+        - tail
+      summary: Tail claude-remote-control journal logs (journalctl -u claude-remote-control -f).
+      flags:
+        - --follow
+        - --lines
     - path:
         - coily
         - ops
@@ -2263,6 +2517,525 @@ commands:
     - path:
         - coily
         - ops
+        - flyctl
+      summary: Pass-through to flyctl with argv validation + audit log.
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - actions
+        - task
+        - list
+      summary: List recent Forgejo Actions tasks for a repo.
+      flags:
+        - --limit
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - actions
+        - task
+        - logs
+      summary: Print the decoded log for a Forgejo Actions task.
+      flags:
+        - --id
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - admin
+        - auth
+        - list
+      summary: List forgejo auth sources.
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - admin
+        - user
+        - create
+      summary: Create a forgejo user with a random password and forced first-login rotation.
+      flags:
+        - --admin
+        - --email
+        - --username
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - admin
+        - user
+        - list
+      summary: List forgejo users.
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - doctor
+        - check
+      summary: Run a forgejo doctor check (readonly; --fix not exposed).
+      flags:
+        - --run
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - issue
+        - close
+      summary: Set a forgejo issue's state to closed.
+      flags:
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - issue
+        - comment
+      summary: Add a comment to a forgejo issue.
+      flags:
+        - --body-file
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - issue
+        - create
+      summary: Create a forgejo issue via the API.
+      flags:
+        - --body-file
+        - --repo
+        - --title
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - issue
+        - delete
+      summary: Delete a forgejo issue (forgejo requires site-admin).
+      flags:
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - issue
+        - edit
+      summary: Edit an existing forgejo issue's title and/or body.
+      flags:
+        - --body-file
+        - --number
+        - --repo
+        - --title
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - issue
+        - list
+      summary: List forgejo issues in a repo.
+      flags:
+        - --limit
+        - --repo
+        - --state
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - issue
+        - reopen
+      summary: Set a forgejo issue's state to open.
+      flags:
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - issue
+        - view
+      summary: View a single forgejo issue.
+      flags:
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - label
+        - create
+      summary: Create a forgejo label.
+      flags:
+        - --color
+        - --description-file
+        - --name
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - label
+        - delete
+      summary: Delete a forgejo label by id.
+      flags:
+        - --id
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - label
+        - edit
+      summary: Edit a forgejo label by id.
+      flags:
+        - --color
+        - --description-file
+        - --id
+        - --name
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - label
+        - list
+      summary: List forgejo labels in a repo.
+      flags:
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - milestone
+        - close
+      summary: Set a forgejo milestone's state to closed.
+      flags:
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - milestone
+        - create
+      summary: Create a forgejo milestone.
+      flags:
+        - --description-file
+        - --due-on
+        - --repo
+        - --title
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - milestone
+        - delete
+      summary: Delete a forgejo milestone by id.
+      flags:
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - milestone
+        - edit
+      summary: Edit an existing forgejo milestone.
+      flags:
+        - --description-file
+        - --due-on
+        - --number
+        - --repo
+        - --state
+        - --title
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - milestone
+        - list
+      summary: List forgejo milestones in a repo.
+      flags:
+        - --repo
+        - --state
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - milestone
+        - reopen
+      summary: Set a forgejo milestone's state to open.
+      flags:
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - milestone
+        - view
+      summary: View a single forgejo milestone.
+      flags:
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - pr
+        - close
+      summary: Set a forgejo PR's state to closed.
+      flags:
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - pr
+        - comment
+      summary: Add a conversation comment to a forgejo PR (uses the issue comments endpoint).
+      flags:
+        - --body-file
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - pr
+        - create
+      summary: Create a forgejo pull request.
+      flags:
+        - --base
+        - --body-file
+        - --head
+        - --repo
+        - --title
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - pr
+        - list
+      summary: List forgejo pull requests in a repo.
+      flags:
+        - --limit
+        - --repo
+        - --state
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - pr
+        - merge
+      summary: Merge a forgejo pull request.
+      flags:
+        - --message-file
+        - --method
+        - --number
+        - --repo
+        - --title
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - pr
+        - reopen
+      summary: Set a forgejo PR's state to open.
+      flags:
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - pr
+        - review
+      summary: Submit a review (APPROVE, REQUEST_CHANGES, COMMENT) on a forgejo PR.
+      flags:
+        - --body-file
+        - --comments-file
+        - --event
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - pr
+        - view
+      summary: View a single forgejo pull request.
+      flags:
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - release
+        - create
+      summary: Create a forgejo release.
+      flags:
+        - --body-file
+        - --draft
+        - --name
+        - --prerelease
+        - --repo
+        - --tag
+        - --target
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - release
+        - delete
+      summary: Delete a forgejo release by id.
+      flags:
+        - --id
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - release
+        - edit
+      summary: Edit an existing forgejo release.
+      flags:
+        - --body-file
+        - --draft
+        - --id
+        - --name
+        - --prerelease
+        - --repo
+        - --tag
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - release
+        - list
+      summary: List forgejo releases in a repo.
+      flags:
+        - --limit
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - release
+        - upload-asset
+      summary: Upload an attachment file to a forgejo release.
+      flags:
+        - --file
+        - --id
+        - --name
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - release
+        - view
+      summary: View a single forgejo release.
+      flags:
+        - --id
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - repo
+        - archive
+      summary: Archive a forgejo repo (sets archived=true).
+      flags:
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - repo
+        - delete
+      summary: Delete a forgejo repo (admin-gated server-side).
+      flags:
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - repo
+        - edit
+      summary: Edit a forgejo repo's metadata.
+      flags:
+        - --description-file
+        - --has-issues
+        - --has-wiki
+        - --private
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - repo
+        - fork
+      summary: Fork a forgejo repo to the authenticated user or a named org.
+      flags:
+        - --organization
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - repo
+        - list
+      summary: Search forgejo repos by name.
+      flags:
+        - --limit
+        - --query
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - repo
+        - topics
+        - list
+      summary: List a forgejo repo's topics (one per line).
+      flags:
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - repo
+        - topics
+        - set
+      summary: Replace a forgejo repo's full topic set with --topic values.
+      flags:
+        - --repo
+        - --topic
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - repo
+        - view
+      summary: View a single forgejo repo.
+      flags:
+        - --json
+        - --repo
+    - path:
+        - coily
+        - ops
+        - gcloud
+      summary: Pass-through to gcloud with argv validation + audit log.
+    - path:
+        - coily
+        - ops
         - gh
       summary: Pass-through to gh with argv validation + audit log.
     - path:
@@ -2270,6 +3043,11 @@ commands:
         - ops
         - kubectl
       summary: Pass-through to kubectl with argv validation + audit log.
+    - path:
+        - coily
+        - ops
+        - mcporter
+      summary: Pass-through to mcporter with argv validation + audit log.
     - path:
         - coily
         - ops
@@ -2301,6 +3079,39 @@ commands:
       flags:
         - --limit
         - --offset
+    - path:
+        - coily
+        - ops
+        - personal-dashboard
+        - restart
+      summary: Restart the personal-dashboard unit.
+    - path:
+        - coily
+        - ops
+        - personal-dashboard
+        - start
+      summary: Start the personal-dashboard unit.
+    - path:
+        - coily
+        - ops
+        - personal-dashboard
+        - status
+      summary: Print systemctl status personal-dashboard.
+    - path:
+        - coily
+        - ops
+        - personal-dashboard
+        - stop
+      summary: Stop the personal-dashboard unit.
+    - path:
+        - coily
+        - ops
+        - personal-dashboard
+        - tail
+      summary: Tail personal-dashboard journal logs (journalctl -u personal-dashboard -f).
+      flags:
+        - --follow
+        - --lines
     - path:
         - coily
         - ops
@@ -5097,7 +5908,7 @@ commands:
         - coily
         - pkg
         - brew
-      summary: Pass-through to brew with argv validation + audit log.
+      summary: Scoped wrapper around brew. Mirrors brew's argv shape.
     - path:
         - coily
         - pkg
@@ -5160,6 +5971,11 @@ commands:
     - path:
         - coily
         - pkg
+        - nix
+      summary: Pass-through to nix with argv validation + audit log.
+    - path:
+        - coily
+        - pkg
         - npm
       summary: Pass-through to npm with argv validation + audit log.
     - path:
@@ -5185,9 +6001,17 @@ commands:
     - path:
         - coily
         - pkg
+        - scoop
+      summary: Scoped wrapper around scoop. Mirrors scoop's argv shape.
+    - path:
+        - coily
+        - pkg
         - skillsmp
         - ai-search
       summary: GET /ai-search - semantic search across skills.
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - pkg
@@ -5196,7 +6020,9 @@ commands:
       summary: GET /search - keyword search across skills.
       flags:
         - --limit
+        - --output
         - --page
+        - --query
         - --sort-by
     - path:
         - coily
@@ -5210,273 +6036,91 @@ commands:
       summary: Pass-through to yarn with argv validation + audit log.
     - path:
         - coily
+        - session
+        - clear
+      summary: Remove the per-session sentinel. No-op if absent.
+    - path:
+        - coily
+        - session
+        - end
+      summary: Terminate the current Claude Code session (SIGTERM to the claude process).
+      flags:
+        - --dry-run
+    - path:
+        - coily
+        - session
+        - show
+      summary: Print the active profile and (phase-2) the would-be strictest axis tiers.
+    - path:
+        - coily
+        - session
+        - use
+      summary: Record the active lockdown profile for this Claude Code session.
+    - path:
+        - coily
         - setup
       summary: 'Run the post-upgrade rituals: completion, lockdown re-baseline, and user hook.'
       flags:
+        - --lockdown-root
         - --skip-completion
+        - --skip-host-bootstrap
         - --skip-lockdown
+        - --skip-skills
         - --skip-user-hook
-        - --workspace
     - path:
         - coily
         - ssh
-        - cat
-      summary: Run cat <path>.
-      flags:
-        - --host
-        - --user
+      summary: Free-form passthrough to a configured host alias.
     - path:
         - coily
-        - ssh
-        - copy
-      summary: Upload a local file to the remote via sftp.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - deploy
-        - eco-mod
-      summary: Fetch the latest release zip(s) of <name> and unzip into the EcoServer tree.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - deploy
-        - eco-mod-source
-      summary: Rsync the source-tree Eco mod <name> from eco-mods / eco-mods-public into the EcoServer tree.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - deploy
-        - repo-recall
-      summary: Fast-forward /home/kai/projects/coilysiren/repo-recall and run /home/kai/projects/coilysiren/infrastructure/scripts/install-repo-recall.sh as root.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - file
-      summary: Run file <path>.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - git
-        - branch
-      summary: Run git branch --show-current in <repo-path>.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - git
-        - diff
-      summary: Run git diff in <repo-path> (read-only, unstaged changes).
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - git
-        - fetch
-      summary: Run git fetch --all --prune in <repo-path>.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - git
-        - log
-      summary: Run git log --oneline -n 20 in <repo-path>.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - git
-        - pull
-      summary: Run git pull --ff-only in <repo-path>.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - git
-        - rev-parse
-      summary: Run git rev-parse HEAD in <repo-path>.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - git
-        - status
-      summary: Run git status --short --branch in <repo-path>.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - git
-        - update-index
-      summary: Run git update-index --really-refresh in <repo-path> (re-hashes file contents to clear stat-stale phantom-dirty entries; mutates only the index's cached-stat column).
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - grep
-      summary: Run grep -F -- '<pattern>' <path> (fixed-string match).
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - head
-      summary: Run head <path> (first 10 lines).
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - journalctl
-      summary: Run journalctl -u <unit> -n <lines> --no-pager on the remote.
-      flags:
-        - --host
-        - --lines
-        - --user
-    - path:
-        - coily
-        - ssh
-        - kubectl
-      summary: Run `sudo k3s kubectl <args>` on kai-server.
-    - path:
-        - coily
-        - ssh
-        - ls
-      summary: Run ls -la <path>.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - rm-unit
-      summary: Remove /etc/systemd/system/<unit>.service and reload systemd.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
         - systemctl
         - daemon-reload
       summary: Run systemctl daemon-reload.
-      flags:
-        - --host
-        - --user
     - path:
         - coily
-        - ssh
         - systemctl
         - disable
       summary: Disable <unit>.
-      flags:
-        - --host
-        - --user
     - path:
         - coily
-        - ssh
         - systemctl
         - enable
       summary: Enable <unit>.
-      flags:
-        - --host
-        - --user
     - path:
         - coily
-        - ssh
+        - systemctl
+        - reload
+      summary: Reload <unit> config in place, graceful, no restart.
+    - path:
+        - coily
         - systemctl
         - restart
       summary: Restart <unit>.
-      flags:
-        - --host
-        - --user
     - path:
         - coily
-        - ssh
         - systemctl
         - start
       summary: Start <unit>.
-      flags:
-        - --host
-        - --user
     - path:
         - coily
-        - ssh
         - systemctl
         - status
       summary: Print systemctl status of <unit>.
-      flags:
-        - --host
-        - --user
     - path:
         - coily
-        - ssh
         - systemctl
         - stop
       summary: Stop <unit>.
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - tail
-      summary: Run tail <path> (last 10 lines).
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - tree
-      summary: Run tree -L 2 <path> (depth-limited).
-      flags:
-        - --host
-        - --user
-    - path:
-        - coily
-        - ssh
-        - wc
-      summary: Run wc <path>.
-      flags:
-        - --host
-        - --user
     - path:
         - coily
         - tailscale
       summary: Pass-through to tailscale with argv validation + audit log.
+    - path:
+        - coily
+        - upgrade
+      summary: Self-update via brew (coilysiren tap, per-repo or umbrella).
+      flags:
+        - --dry
     - path:
         - coily
         - version
@@ -5484,4 +6128,4 @@ commands:
     - path:
         - coily
         - whoami
-      summary: Print the authenticated identity coily sees across aws, kubectl, and gh.
+      summary: Print the authenticated identity coily sees across aws, kubectl, gh, plus the agent self-name.

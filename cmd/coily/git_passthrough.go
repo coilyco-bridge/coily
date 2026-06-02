@@ -7,10 +7,10 @@ import (
 
 // gitPassthroughVerbs is the heavy-rotation git command set fronted by
 // `coily git <verb>`. Each becomes a thin passthrough to `git <verb> ...`
-// with an audit row, mounted alongside the audit-trailer subcommands.
+// with an audit row, mounted alongside the audit-show subcommand.
 //
 // `coily git` cannot be a single whole-binary passthrough (the way
-// `coily docker` is) because the name is already the audit-trailer group.
+// `coily docker` is) because the name already groups audit-show.
 // Per-verb subcommands sidestep that and keep the audit verb granular.
 var gitPassthroughVerbs = []struct{ name, usage string }{
 	{"status", "git status - show the working tree state."},
