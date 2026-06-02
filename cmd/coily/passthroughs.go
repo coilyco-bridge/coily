@@ -35,8 +35,10 @@ import (
 //
 // PreflightGate, when non-nil, runs against the raw argv before the
 // passthrough executes. A non-nil return aborts the invocation with that
-// error and the wrapped binary never runs. Today only `ops gh` uses this,
-// to keep GitHub Actions / CI status playwright-only (coilysiren/coily#305).
+// error and the wrapped binary never runs. `ops gh` uses this to keep
+// GitHub Actions / CI status playwright-only (coilysiren/coily#305); `pkg
+// uv` uses it to reject `uv run` against scratch-tier / repo-escaping
+// script paths (coily#10).
 type ptEntry struct {
 	Bin            string
 	SkipPolicy     bool
@@ -92,7 +94,7 @@ var ptPkg = []ptEntry{
 	{Bin: "npm", Egress: true},
 	{Bin: "yarn", Egress: true},
 	{Bin: "bun", Egress: true},
-	{Bin: "uv", Egress: true},
+	{Bin: "uv", Egress: true, PreflightGate: uvPreflightGate},
 	{Bin: "pip", Egress: true},
 	{Bin: "pipx", Egress: true},
 	{Bin: "poetry", Egress: true},
