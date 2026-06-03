@@ -9,6 +9,7 @@ require (
 
 require (
 	forgejo.coilysiren.me/coilyco-flight-deck/cli-guard v0.1.1-0.20260602083033-86cf9d106ebf
+	github.com/jmespath/go-jmespath v0.4.0
 	golang.org/x/net v0.53.0
 )
 
@@ -17,7 +18,6 @@ require (
 	github.com/clipperhouse/displaywidth v0.10.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.6.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
-	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
