@@ -22,12 +22,12 @@ import (
 // See coilysiren/coily#270 for the headless/interactive split design and
 // coilysiren/coily#310 for the switch to the package.
 
-// allowedOwner is the org coily's dispatch trust check accepts, and the
-// stable anchor for the dispatch infra dirs (.dispatch-worktrees/-logs) and
-// the localRepoPath fallback. The checkout-path scan (coily#173) already spans
-// every primary org; widening the trust check itself to the primary-org set
-// needs cli-guard's dispatch.Config to accept a set (AllowedOwners), tracked
-// in coilyco-bridge/coily#173.
+// allowedOwner is the primary org named in dispatch help/status text, the
+// stable anchor for the dispatch infra dirs (.dispatch-worktrees/-logs), and
+// the localRepoPath fallback. The trust check accepts the full primary-org set
+// (passed as AllowedOwners below), and the checkout-path scan spans every
+// primary org, so a canonical-owner ref dispatches and resolves on disk
+// (coilyco-bridge/coily#173).
 const allowedOwner = "coilysiren"
 
 // localRepoPath resolves a repo name to its on-disk checkout. Post org-split
@@ -83,6 +83,7 @@ func (r *Runner) dispatchCommand() *cli.Command {
 			return r.WrapVerb(s, r.Audit)
 		},
 		AllowedOwner:      allowedOwner,
+		AllowedOwners:     r.primaryOrgs(),
 		BinaryName:        "coily",
 		RepoPath:          r.localRepoPath,
 		WorktreeRoot:      dispatchWorktreeRoot,

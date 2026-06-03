@@ -8,7 +8,7 @@ require (
 )
 
 require (
-	forgejo.coilysiren.me/coilyco-flight-deck/cli-guard v0.1.1-0.20260602083033-86cf9d106ebf
+	forgejo.coilysiren.me/coilyco-flight-deck/cli-guard v0.1.1-0.20260603095634-f9c9909aa981
 	github.com/jmespath/go-jmespath v0.4.0
 	golang.org/x/net v0.53.0
 )
