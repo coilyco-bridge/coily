@@ -101,6 +101,11 @@ func kindFor(err error, rc int) string {
 // against argv. Split out from main() so tests can drive a Runner with fake
 // dependencies through a real cli.Command tree.
 func run(r *Runner, argv []string) error {
+	// Drop the redundant `coily ops <tool> --` separator that urfave would
+	// otherwise reorder args across, mangling the forwarded argv
+	// (coilyco-bridge/coily#37). No-op when no such separator is present.
+	argv = stripPassthroughSeparator(argv)
+
 	// Spill an inline `ops gh ... --jq <expr>` onto the gate-safe --jq-file
 	// rail before the metachar gate sees it (coilyco-bridge/coily#30). No-op
 	// for every other invocation.
