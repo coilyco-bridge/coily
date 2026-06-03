@@ -437,7 +437,10 @@ func (r *Runner) forgejoAPIDo(ctx context.Context, prefix, method, path string, 
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	client := &http.Client{Timeout: forgejoAPIHTTPTimeout}
+	client := &http.Client{
+		Timeout:       forgejoAPIHTTPTimeout,
+		CheckRedirect: forgejoCheckRedirect,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s %s: %w", prefix, method, target, err)
@@ -449,6 +452,66 @@ func (r *Runner) forgejoAPIDo(ctx context.Context, prefix, method, path string, 
 		return nil, fmt.Errorf("%s: %s %s returned HTTP %d: %s", prefix, method, target, resp.StatusCode, strings.TrimSpace(string(respBody)))
 	}
 	return respBody, nil
+}
+
+// forgejoCheckRedirect is the redirect policy for every forgejo API call.
+// Safe reads (GET/HEAD) follow redirects as usual, so a verb aimed at an
+// org-alias owner that 301s to its canonical owner still resolves. Mutating
+// methods must NOT follow: Go's http client downgrades POST/PATCH/PUT to GET
+// on a 301/302/303, dropping the request body. A create/edit against an alias
+// owner would then hit the wrong (list) endpoint, come back HTTP 200, and
+// fail the wantStatus check with a misleading "returned HTTP 200: [...]" dump
+// that reads like success. Refuse the redirect and name the canonical target
+// so the caller can retry. coilyco-bridge/coily#178, #160.
+func forgejoCheckRedirect(req *http.Request, via []*http.Request) error {
+	if len(via) >= 10 {
+		return fmt.Errorf("stopped after 10 redirects")
+	}
+	return forgejoRedirectError(via[0].Method, via[0].URL.String(), req.URL.String())
+}
+
+// forgejoRedirectError returns nil when a redirect from origMethod is safe to
+// follow, or a descriptive error when it must be refused (any mutating
+// method). Split out from forgejoCheckRedirect so the policy is unit-testable
+// without a live HTTP round trip.
+func forgejoRedirectError(origMethod, origURL, destURL string) error {
+	switch origMethod {
+	case http.MethodGet, http.MethodHead:
+		return nil
+	}
+	suggestion := ""
+	if slug, ok := forgejoRepoFromAPIPath(destURL); ok {
+		suggestion = fmt.Sprintf(" Retry with --repo %s.", slug)
+	}
+	return fmt.Errorf("%s %s redirects to %s: the owner is likely an org alias, and forgejo does not preserve %s across redirects, so this would otherwise silently no-op.%s",
+		origMethod, origURL, destURL, origMethod, suggestion)
+}
+
+// forgejoRepoFromAPIPath pulls "owner/repo" out of a forgejo API URL of the
+// shape .../api/v1/repos/<owner>/<repo>/... so the redirect error can suggest
+// the exact --repo value to retry with. Returns false when the path is not
+// that shape.
+func forgejoRepoFromAPIPath(rawURL string) (string, bool) {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return "", false
+	}
+	parts := strings.Split(strings.Trim(u.Path, "/"), "/")
+	idx := -1
+	for i, p := range parts {
+		if p == "repos" {
+			idx = i
+			break
+		}
+	}
+	if idx < 0 || idx+2 >= len(parts) {
+		return "", false
+	}
+	owner, repo := parts[idx+1], parts[idx+2]
+	if owner == "" || repo == "" {
+		return "", false
+	}
+	return owner + "/" + repo, true
 }
 
 // forgejoAPIToken resolves the bearer token from AWS SSM. Mirrors
