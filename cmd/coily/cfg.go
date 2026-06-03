@@ -27,7 +27,12 @@ type Config struct {
 	Eco       Eco          `yaml:"eco"`
 	Factorio  Factorio     `yaml:"factorio"`
 	Forgejo   Forgejo      `yaml:"forgejo"`
-	Loaded    time.Time    `yaml:"-"`
+	// PrimaryOrgs is the set of first-party Forgejo orgs the fleet spans
+	// post org-split (coilyco-bridge/coily#162). Drives dispatch trust,
+	// brew/scoop tap scope, and any other "is this one of ours" check, so
+	// the assumption lives in one place instead of a hardcoded "coilysiren".
+	PrimaryOrgs []string  `yaml:"primary_orgs"`
+	Loaded      time.Time `yaml:"-"`
 }
 
 // Forgejo is the config for `coily ops forgejo issue ...` API verbs that
@@ -104,7 +109,8 @@ func defaultConfig() Config {
 		Factorio: Factorio{
 			ServerDir: "/home/kai/Steam/steamapps/common/FactorioServer",
 		},
-		Forgejo: defaultForgejo(),
+		Forgejo:     defaultForgejo(),
+		PrimaryOrgs: defaultPrimaryOrgs(),
 	}
 }
 

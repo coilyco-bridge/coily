@@ -204,11 +204,11 @@ func (r *Runner) brewFormulaScopedAction(prefix, rest []string) (cli.ActionFunc,
 				// Fall through: brew will surface its own usage error.
 			}
 			for _, f := range formulae {
-				if !brewInTapScope(f) {
+				if !brewInTapScope(f, r.primaryOrgs()) {
 					return exitcode.New(exitcode.PolicyDenied, "policy_denied",
-						fmt.Errorf("brew %s %q is outside the known coilysiren taps; pass --allow-untapped to confirm", verbLabel, f),
-						"qualify the formula with a coilysiren/<tap>/ prefix (e.g. coilysiren/tap/, coilysiren/coily/), or add --allow-untapped to confirm an off-tap formula").
-						WithReason("brew state should live under a coilysiren-owned tap by default so the install graph is reviewable from coilysiren repos; --allow-untapped is the explicit opt-out for one-offs")
+						fmt.Errorf("brew %s %q is outside the primary-org taps (%s); pass --allow-untapped to confirm", verbLabel, f, strings.Join(r.primaryOrgs(), ", ")),
+						"qualify the formula with a <primary-org>/<tap>/ prefix (e.g. coilysiren/tap/, coilyco-flight-deck/o2r/), or add --allow-untapped to confirm an off-tap formula").
+						WithReason("brew state should live under a primary-org tap by default so the install graph is reviewable from first-party repos; --allow-untapped is the explicit opt-out for one-offs")
 				}
 			}
 		}
@@ -232,11 +232,11 @@ func (r *Runner) brewTapScopedAction(prefix, rest []string) (cli.ActionFunc, fun
 		verbLabel := strings.Join(prefix, " ")
 		if !allow && len(positionals) > 0 {
 			for _, t := range positionals {
-				if !brewTapPositionalAllowed(t) {
+				if !brewTapPositionalAllowed(t, r.primaryOrgs()) {
 					return exitcode.New(exitcode.PolicyDenied, "policy_denied",
-						fmt.Errorf("brew %s %q is outside coilysiren/*; pass --allow-untapped to confirm", verbLabel, t),
-						"name a coilysiren/<repo> tap or a forgejo.coilysiren.me/coilysiren/<repo> URL, or add --allow-untapped to confirm an off-org tap").
-						WithReason("brew-tap state should be coilysiren/* by default so the registered-tap graph is reviewable from one org; --allow-untapped is the explicit opt-out")
+						fmt.Errorf("brew %s %q is outside the primary orgs (%s); pass --allow-untapped to confirm", verbLabel, t, strings.Join(r.primaryOrgs(), ", ")),
+						"name a <primary-org>/<repo> tap or a forgejo.coilysiren.me/<primary-org>/<repo> URL, or add --allow-untapped to confirm an off-org tap").
+						WithReason("brew-tap state should be a primary-org tap by default so the registered-tap graph is reviewable from the fleet; --allow-untapped is the explicit opt-out")
 				}
 			}
 		}
@@ -346,11 +346,16 @@ func splitBrewArgs(raw []string) (allow bool, forward, positionals []string) {
 // source of truth for the brew taps (per-repo Formula clone URLs point
 // at forgejo); the tap-name prefix still covers the bare `brew untap
 // coilysiren/<repo>` form.
-func brewTapPositionalAllowed(t string) bool {
-	if strings.HasPrefix(t, "coilysiren/") {
-		return true
+func brewTapPositionalAllowed(t string, orgs []string) bool {
+	for _, o := range orgs {
+		if strings.HasPrefix(t, o+"/") {
+			return true
+		}
+		if strings.HasPrefix(t, "https://forgejo.coilysiren.me/"+o+"/") {
+			return true
+		}
 	}
-	return strings.HasPrefix(t, "https://forgejo.coilysiren.me/coilysiren/")
+	return false
 }
 
 // brewInTapScope is true when f is either a coilysiren/<tap>/<formula>
@@ -359,11 +364,13 @@ func brewTapPositionalAllowed(t string) bool {
 // umbrella tap publishes. Widened from coilysiren/tap/* to all
 // coilysiren/* taps in coilysiren/coily#271 to cover the per-repo tap
 // release flow; the policy intent is "any coilysiren-owned tap".
-func brewInTapScope(f string) bool {
-	if strings.HasPrefix(f, "coilysiren/") {
-		parts := strings.Split(f, "/")
-		if len(parts) == 3 && parts[1] != "" && parts[2] != "" {
-			return true
+func brewInTapScope(f string, orgs []string) bool {
+	for _, o := range orgs {
+		if strings.HasPrefix(f, o+"/") {
+			parts := strings.Split(f, "/")
+			if len(parts) == 3 && parts[1] != "" && parts[2] != "" {
+				return true
+			}
 		}
 	}
 	return scopedTapFormulae[f]

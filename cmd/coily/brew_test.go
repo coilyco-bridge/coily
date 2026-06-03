@@ -143,25 +143,49 @@ func TestPkgBrewCommand_TopLevelShape(t *testing.T) {
 }
 
 func TestBrewInTapScope(t *testing.T) {
+	orgs := defaultPrimaryOrgs()
 	cases := map[string]bool{
 		"coilysiren/tap/coily":               true,
 		"coilysiren/tap/repo-recall":         true,
 		"coilysiren/tap/anything":            true,
 		"coilysiren/coily/coily":             true,
 		"coilysiren/repo-recall/repo-recall": true,
-		"coily":                              true,
-		"repo-recall":                        true,
-		"arize-phoenix":                      true,
-		"ripgrep":                            false,
-		"":                                   false,
-		"homebrew/core/wget":                 false,
-		"someuser/tap/coily":                 false,
-		"coilysiren/coily":                   false,
+		// post org-split primary orgs (coily#175)
+		"coilyco-flight-deck/o2r/o2r": true,
+		"coilyco-bridge/coily/coily":  true,
+		"coily":                       true,
+		"repo-recall":                 true,
+		"arize-phoenix":               true,
+		"ripgrep":                     false,
+		"":                            false,
+		"homebrew/core/wget":          false,
+		"someuser/tap/coily":          false,
+		"coilysiren/coily":            false,
 	}
 	for f, want := range cases {
 		t.Run(f, func(t *testing.T) {
-			if got := brewInTapScope(f); got != want {
+			if got := brewInTapScope(f, orgs); got != want {
 				t.Errorf("brewInTapScope(%q) = %v, want %v", f, got, want)
+			}
+		})
+	}
+}
+
+func TestBrewTapPositionalAllowed(t *testing.T) {
+	orgs := defaultPrimaryOrgs()
+	cases := map[string]bool{
+		"coilysiren/tap":                                     true,
+		"coilyco-flight-deck/o2r":                            true,
+		"coilyco-bridge/coily":                               true,
+		"https://forgejo.coilysiren.me/coilyco-flight-deck/otel-a2a-relay-cli.git": true,
+		"https://forgejo.coilysiren.me/coilysiren/tap":                             true,
+		"someuser/tap":                                                             false,
+		"https://github.com/someuser/tap":                                          false,
+	}
+	for tap, want := range cases {
+		t.Run(tap, func(t *testing.T) {
+			if got := brewTapPositionalAllowed(tap, orgs); got != want {
+				t.Errorf("brewTapPositionalAllowed(%q) = %v, want %v", tap, got, want)
 			}
 		})
 	}

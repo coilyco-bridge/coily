@@ -22,16 +22,30 @@ import (
 // See coilysiren/coily#270 for the headless/interactive split design and
 // coilysiren/coily#310 for the switch to the package.
 
-// allowedOwner is the org coily will dispatch against. Hard-coded rather
-// than configurable: this is the security claim, not a knob.
+// allowedOwner is the org coily's dispatch trust check accepts, and the
+// stable anchor for the dispatch infra dirs (.dispatch-worktrees/-logs) and
+// the localRepoPath fallback. The checkout-path scan (coily#173) already spans
+// every primary org; widening the trust check itself to the primary-org set
+// needs cli-guard's dispatch.Config to accept a set (AllowedOwners), tracked
+// in coilyco-bridge/coily#173.
 const allowedOwner = "coilysiren"
 
-// localRepoPath returns the expected local checkout for a coilysiren repo.
-// Mirrors the workspace shape from AGENTS.md: ~/projects/coilysiren/<repo>.
-func localRepoPath(repo string) (string, error) {
+// localRepoPath resolves a repo name to its on-disk checkout. Post org-split
+// the same repo may live under any primary org (~/projects/<org>/<repo>), so
+// scan the set and return the first checkout that exists rather than assuming
+// a single org (coilyco-bridge/coily#173). Falls back to the historical
+// ~/projects/coilysiren/<repo> when none is present, preserving the prior
+// "local checkout missing at ..." error shape.
+func (r *Runner) localRepoPath(repo string) (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
+	}
+	for _, org := range r.primaryOrgs() {
+		p := filepath.Join(home, "projects", org, repo)
+		if st, statErr := os.Stat(p); statErr == nil && st.IsDir() {
+			return p, nil
+		}
 	}
 	return filepath.Join(home, "projects", allowedOwner, repo), nil
 }
@@ -70,7 +84,7 @@ func (r *Runner) dispatchCommand() *cli.Command {
 		},
 		AllowedOwner:      allowedOwner,
 		BinaryName:        "coily",
-		RepoPath:          localRepoPath,
+		RepoPath:          r.localRepoPath,
 		WorktreeRoot:      dispatchWorktreeRoot,
 		LogRoot:           dispatchLogRoot,
 		ForgejoBaseURL:    r.Cfg.Forgejo.BaseURL,
