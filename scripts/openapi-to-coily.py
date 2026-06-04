@@ -208,6 +208,12 @@ HEADER = '''// Package {pkg} wraps the {title} REST API ({base_url}).
 // string flags; request bodies arrive via --body (literal | @file | -).
 // Responses stream to stdout pretty-printed (JSON) or verbatim (other).
 //
+// Two persistent root flags, --query (JMESPath projection) and --output
+// (json|yaml|text), fold coily's REST projection rail (coilyco-bridge/coily#46)
+// into every leaf via restfmt. When neither is set the response is emitted
+// byte-for-byte as before. An op that already owns an API --query parameter
+// exposes the projection as --jq instead, mirroring the gh-rest --jq rail.
+//
 // {auth_doc}
 package {pkg}
 
@@ -223,9 +229,10 @@ import (
 \t"strings"
 \t"time"
 
-\t"github.com/coilysiren/cli-guard/audit"
-\t"github.com/coilysiren/cli-guard/shell"
-\t"github.com/coilysiren/cli-guard/verb"
+\t"forgejo.coilysiren.me/coilyco-bridge/coily/cmd/coily/restfmt"
+\t"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
+\t"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
+\t"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
 \t"github.com/urfave/cli/v3"
 )
 
@@ -240,6 +247,13 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {{
 \treturn &cli.Command{{
 \t\tName:  "{pkg}",
 \t\tUsage: "{usage}",
+\t\tFlags: []cli.Flag{{
+\t\t\t// urfave/cli v3 flags propagate to every subcommand by default
+\t\t\t// (Local defaults false), so these reach every generated leaf. A
+\t\t\t// leaf that declares a same-named local flag shadows them.
+\t\t\t&cli.StringFlag{{Name: "query", Usage: "JMESPath projection applied to the JSON response (coily#46)"}},
+\t\t\t&cli.StringFlag{{Name: "output", Usage: "output format: json (default), yaml, text (coily#46)"}},
+\t\t}},
 \t\tCommands: []*cli.Command{{
 {root_subs}
 \t\t}},
@@ -303,7 +317,7 @@ func readBody(spec string) ([]byte, error) {
 	}
 }
 
-func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path string, q url.Values, body []byte, authNeeded bool) error {
+func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path string, q url.Values, body []byte, authNeeded bool, projection, output string) error {
 	target := apiBase + path
 	if len(q) > 0 {
 		target += "?" + q.Encode()
@@ -337,6 +351,24 @@ func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path strin
 	}
 	if len(bytes.TrimSpace(raw)) == 0 {
 		return nil
+	}
+	outFmt, outSet, err := restfmt.ParseOutput(output)
+	if err != nil {
+		return err
+	}
+	if restfmt.NeedsRender(projection, outSet) {
+		// --query alone defaults to JSON, preserving the surface's existing
+		// output format; --output flips it to yaml/text. Either routes through
+		// restfmt instead of the byte-identical pretty-print path below.
+		if !outSet {
+			outFmt = restfmt.OutputJSON
+		}
+		rendered, rErr := restfmt.Render(projection, outFmt, raw)
+		if rErr != nil {
+			return rErr
+		}
+		_, err = os.Stdout.Write(rendered)
+		return err
 	}
 	var pretty json.RawMessage
 	if err := json.Unmarshal(raw, &pretty); err != nil {
@@ -432,6 +464,17 @@ def emit_leaf(
 
     path_p, query_p = split_params(params)
 
+    # Collision handling for the persistent --query/--output projection rail
+    # (coily#46). An op that already owns an API query parameter of the same
+    # name shadows the persistent flag, so the coily projection moves to --jq
+    # (mirroring the gh-rest --jq rail) and the output formatter is suppressed
+    # rather than mis-reading the API value as a format name.
+    query_names = {qp["name"] for qp in query_p}
+    proj_collides = "query" in query_names
+    out_collides = "output" in query_names
+    proj_expr = 'c.String("jq")' if proj_collides else 'c.String("query")'
+    out_expr = '""' if out_collides else 'c.String("output")'
+
     has_body = method in ("post", "put", "patch", "delete") and (
         op.get("requestBody") is not None
     )
@@ -453,6 +496,12 @@ def emit_leaf(
         )
         args_kv.append(
             '\t\t\t\t\tif c.IsSet("body") { m["--body"] = c.String("body") }'
+        )
+    if proj_collides:
+        # This op owns an API --query; expose the coily JMESPath projection as
+        # --jq so the persistent root --query stays usable (coily#46).
+        flag_lines.append(
+            '\t\t\t&cli.StringFlag{Name: "jq", Usage: "JMESPath projection applied to the JSON response; --jq here because this op owns an API --query (coily#46)"},'
         )
 
     flags_block = ""
@@ -518,7 +567,7 @@ def emit_leaf(
     )
 
     action_lines.append(
-        f'\t\t\t\t\treturn doRequestAndStream(ctx, r, "{method.upper()}", path, q, body, {auth_needed})'
+        f'\t\t\t\t\treturn doRequestAndStream(ctx, r, "{method.upper()}", path, q, body, {auth_needed}, {proj_expr}, {out_expr})'
     )
 
     action_body = "\n".join(action_lines) + "\n"

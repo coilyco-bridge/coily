@@ -7,6 +7,12 @@
 // string flags; request bodies arrive via --body (literal | @file | -).
 // Responses stream to stdout pretty-printed (JSON) or verbatim (other).
 //
+// Two persistent root flags, --query (JMESPath projection) and --output
+// (json|yaml|text), fold coily's REST projection rail (coilyco-bridge/coily#46)
+// into every leaf via restfmt. When neither is set the response is emitted
+// byte-for-byte as before. An op that already owns an API --query parameter
+// exposes the projection as --jq instead, mirroring the gh-rest --jq rail.
+//
 // Trello key+token auth from AWS SSM at /trello/api-key (key) and /trello/token (token), appended as query parameters.
 package trello
 
@@ -22,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"forgejo.coilysiren.me/coilyco-bridge/coily/cmd/coily/restfmt"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
@@ -40,6 +47,13 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  "trello",
 		Usage: "Trello REST API (key+token auth).",
+		Flags: []cli.Flag{
+			// urfave/cli v3 flags propagate to every subcommand by default
+			// (Local defaults false), so these reach every generated leaf. A
+			// leaf that declares a same-named local flag shadows them.
+			&cli.StringFlag{Name: "query", Usage: "JMESPath projection applied to the JSON response (coily#46)"},
+			&cli.StringFlag{Name: "output", Usage: "output format: json (default), yaml, text (coily#46)"},
+		},
 		Commands: []*cli.Command{
 			groupActions(r, w),
 			groupApplications(r, w),
@@ -551,7 +565,7 @@ func opActionsGetActionsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("memberCreator_fields", c.String("memberCreator_fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -589,7 +603,7 @@ func opActionsPutActionsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("text", c.String("text"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -618,7 +632,7 @@ func opActionsDeleteActionsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/actions/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -648,7 +662,7 @@ func opActionsGetActionsIdField(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/actions/" + p0 + "/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -686,7 +700,7 @@ func opActionsGetActionsIdBoard(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -724,7 +738,7 @@ func opActionsGetActionsIdCard(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -762,7 +776,7 @@ func opActionsGetActionsIdList(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -800,7 +814,7 @@ func opActionsGetActionsIdMember(r *shell.Runner, w *audit.Writer) *cli.Command 
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -838,7 +852,7 @@ func opActionsGetActionsIdMembercreator(r *shell.Runner, w *audit.Writer) *cli.C
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -876,7 +890,7 @@ func opActionsGetActionsIdOrganization(r *shell.Runner, w *audit.Writer) *cli.Co
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -914,7 +928,7 @@ func opActionsPutActionsIdText(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -959,7 +973,7 @@ func opActionsGetActionsIdactionReactions(r *shell.Runner, w *audit.Writer) *cli
 						q.Set("emoji", c.String("emoji"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -997,7 +1011,7 @@ func opActionsPostActionsIdactionReactions(r *shell.Runner, w *audit.Writer) *cl
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1043,7 +1057,7 @@ func opActionsGetActionsIdactionReactionsId(r *shell.Runner, w *audit.Writer) *c
 						q.Set("emoji", c.String("emoji"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1073,7 +1087,7 @@ func opActionsDeleteActionsIdactionReactionsId(r *shell.Runner, w *audit.Writer)
 					path := "/actions/" + p0 + "/reactions/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1102,7 +1116,7 @@ func opActionsGetActionsIdactionReactionsummary(r *shell.Runner, w *audit.Writer
 					path := "/actions/" + p0 + "/reactionsSummary"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1131,7 +1145,7 @@ func opApplicationsApplicationsKeyCompliance(r *shell.Runner, w *audit.Writer) *
 					path := "/applications/" + p0 + "/compliance"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1163,7 +1177,7 @@ func opBatchGetBatch(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("urls", c.String("urls"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1229,7 +1243,7 @@ func opBoardsGetBoardsIdMemberships(r *shell.Runner, w *audit.Writer) *cli.Comma
 						q.Set("member_fields", c.String("member_fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1372,7 +1386,7 @@ func opBoardsGetBoardsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("tags", c.String("tags"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1508,7 +1522,7 @@ func opBoardsPutBoardsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("prefs/calendarFeedEnabled", c.String("prefs/calendarFeedEnabled"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1537,7 +1551,7 @@ func opBoardsDeleteBoardsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/boards/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1567,7 +1581,7 @@ func opBoardsGetBoardsIdField(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/boards/" + p0 + "/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1689,7 +1703,7 @@ func opBoardsGetBoardsIdActions(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("since", c.String("since"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1727,7 +1741,7 @@ func opBoardsGetBoardsIdBoardstars(r *shell.Runner, w *audit.Writer) *cli.Comman
 						q.Set("filter", c.String("filter"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1756,7 +1770,7 @@ func opBoardsBoardsIdChecklists(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/boards/" + p0 + "/checklists"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1785,7 +1799,7 @@ func opBoardsGetBoardsIdCards(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/boards/" + p0 + "/cards"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1815,7 +1829,7 @@ func opBoardsGetBoardsIdCardsFilter(r *shell.Runner, w *audit.Writer) *cli.Comma
 					path := "/boards/" + p0 + "/cards/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1844,7 +1858,7 @@ func opBoardsGetBoardsIdCustomfields(r *shell.Runner, w *audit.Writer) *cli.Comm
 					path := "/boards/" + p0 + "/customFields"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1889,7 +1903,7 @@ func opBoardsGetBoardsIdLabels(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("limit", c.String("limit"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1934,7 +1948,7 @@ func opBoardsPostBoardsIdLabels(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("color", c.String("color"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1993,7 +2007,7 @@ func opBoardsGetBoardsIdLists(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2038,7 +2052,7 @@ func opBoardsPostBoardsIdLists(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("pos", c.String("pos"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2068,7 +2082,7 @@ func opBoardsGetBoardsIdListsFilter(r *shell.Runner, w *audit.Writer) *cli.Comma
 					path := "/boards/" + p0 + "/lists/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2097,7 +2111,7 @@ func opBoardsGetBoardsIdMembers(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/boards/" + p0 + "/members"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2149,7 +2163,7 @@ func opBoardsPutBoardsIdMembers(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2195,7 +2209,7 @@ func opBoardsPutBoardsIdMembersIdmember(r *shell.Runner, w *audit.Writer) *cli.C
 						q.Set("allowBillableGuest", c.String("allowBillableGuest"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2225,7 +2239,7 @@ func opBoardsBoardsidmembersidmember(r *shell.Runner, w *audit.Writer) *cli.Comm
 					path := "/boards/" + p0 + "/members/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2271,7 +2285,7 @@ func opBoardsPutBoardsIdMembershipsIdmembership(r *shell.Runner, w *audit.Writer
 						q.Set("member_fields", c.String("member_fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2309,7 +2323,7 @@ func opBoardsPutBoardsIdMyprefsEmailposition(r *shell.Runner, w *audit.Writer) *
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2347,7 +2361,7 @@ func opBoardsPutBoardsIdMyprefsIdemaillist(r *shell.Runner, w *audit.Writer) *cl
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2385,7 +2399,7 @@ func opBoardsPutBoardsIdMyPrefsShowsidebar(r *shell.Runner, w *audit.Writer) *cl
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2423,7 +2437,7 @@ func opBoardsPutBoardsIdMyPrefsShowsidebaractivity(r *shell.Runner, w *audit.Wri
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2461,7 +2475,7 @@ func opBoardsPutBoardsIdMyPrefsShowsidebarboardactions(r *shell.Runner, w *audit
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2499,7 +2513,7 @@ func opBoardsPutBoardsIdMyPrefsShowsidebarmembers(r *shell.Runner, w *audit.Writ
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2636,7 +2650,7 @@ func opBoardsPostBoards(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("prefs_cardAging", c.String("prefs_cardAging"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2665,7 +2679,7 @@ func opBoardsPostBoardsIdCalendarkeyGenerate(r *shell.Runner, w *audit.Writer) *
 					path := "/boards/" + p0 + "/calendarKey/generate"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2694,7 +2708,7 @@ func opBoardsPostBoardsIdEmailkeyGenerate(r *shell.Runner, w *audit.Writer) *cli
 					path := "/boards/" + p0 + "/emailKey/generate"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2732,7 +2746,7 @@ func opBoardsPostBoardsIdIdtags(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2761,7 +2775,7 @@ func opBoardsPostBoardsIdMarkedasviewed(r *shell.Runner, w *audit.Writer) *cli.C
 					path := "/boards/" + p0 + "/markedAsViewed"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2790,7 +2804,7 @@ func opBoardsGetBoardsIdBoardplugins(r *shell.Runner, w *audit.Writer) *cli.Comm
 					path := "/boards/" + p0 + "/boardPlugins"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2828,7 +2842,7 @@ func opBoardsGetBoardIdPlugins(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("filter", c.String("filter"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2979,7 +2993,7 @@ func opCardsPostCards(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("cardRole", c.String("cardRole"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3136,7 +3150,7 @@ func opCardsGetCardsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("customFieldItems", c.String("customFieldItems"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3286,7 +3300,7 @@ func opCardsPutCardsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("cover", c.String("cover"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3315,7 +3329,7 @@ func opCardsDeleteCardsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/cards/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3345,7 +3359,7 @@ func opCardsGetCardsIdField(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/cards/" + p0 + "/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3390,7 +3404,7 @@ func opCardsGetCardsIdActions(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("page", c.String("page"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3435,7 +3449,7 @@ func opCardsGetCardsIdAttachments(r *shell.Runner, w *audit.Writer) *cli.Command
 						q.Set("filter", c.String("filter"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3501,7 +3515,7 @@ func opCardsPostCardsIdAttachments(r *shell.Runner, w *audit.Writer) *cli.Comman
 						q.Set("setCover", c.String("setCover"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3540,7 +3554,7 @@ func opCardsGetCardsIdAttachmentsIdattachment(r *shell.Runner, w *audit.Writer) 
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3570,7 +3584,7 @@ func opCardsDeletedCardsIdAttachmentsIdattachment(r *shell.Runner, w *audit.Writ
 					path := "/cards/" + p0 + "/attachments/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3608,7 +3622,7 @@ func opCardsGetCardsIdBoard(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3646,7 +3660,7 @@ func opCardsGetCardsIdCheckitemstates(r *shell.Runner, w *audit.Writer) *cli.Com
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3705,7 +3719,7 @@ func opCardsGetCardsIdChecklists(r *shell.Runner, w *audit.Writer) *cli.Command 
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3757,7 +3771,7 @@ func opCardsPostCardsIdChecklists(r *shell.Runner, w *audit.Writer) *cli.Command
 						q.Set("pos", c.String("pos"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3796,7 +3810,7 @@ func opCardsGetCardsIdCheckitemIdcheckitem(r *shell.Runner, w *audit.Writer) *cl
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3877,7 +3891,7 @@ func opCardsPutCardsIdCheckitemIdcheckitem(r *shell.Runner, w *audit.Writer) *cl
 						q.Set("idMember", c.String("idMember"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3907,7 +3921,7 @@ func opCardsDeleteCardsIdCheckitemIdcheckitem(r *shell.Runner, w *audit.Writer) 
 					path := "/cards/" + p0 + "/checkItem/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3945,7 +3959,7 @@ func opCardsGetCardsIdList(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3983,7 +3997,7 @@ func opCardsGetCardsIdMembers(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4021,7 +4035,7 @@ func opCardsGetCardsIdMembersvoted(r *shell.Runner, w *audit.Writer) *cli.Comman
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4059,7 +4073,7 @@ func opCardsCardsidmembersvoted1(r *shell.Runner, w *audit.Writer) *cli.Command 
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4088,7 +4102,7 @@ func opCardsGetCardsIdPlugindata(r *shell.Runner, w *audit.Writer) *cli.Command 
 					path := "/cards/" + p0 + "/pluginData"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4126,7 +4140,7 @@ func opCardsGetCardsIdStickers(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4192,7 +4206,7 @@ func opCardsPostCardsIdStickers(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("rotate", c.String("rotate"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4231,7 +4245,7 @@ func opCardsGetCardsIdStickersIdsticker(r *shell.Runner, w *audit.Writer) *cli.C
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4291,7 +4305,7 @@ func opCardsPutCardsIdStickersIdsticker(r *shell.Runner, w *audit.Writer) *cli.C
 						q.Set("rotate", c.String("rotate"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4321,7 +4335,7 @@ func opCardsDeleteCardsIdStickersIdsticker(r *shell.Runner, w *audit.Writer) *cl
 					path := "/cards/" + p0 + "/stickers/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4360,7 +4374,7 @@ func opCardsPutCardsIdActionsIdactionComments(r *shell.Runner, w *audit.Writer) 
 						q.Set("text", c.String("text"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4390,7 +4404,7 @@ func opCardsDeleteCardsIdActionsIdComments(r *shell.Runner, w *audit.Writer) *cl
 					path := "/cards/" + p0 + "/actions/" + p1 + "/comments"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4429,7 +4443,7 @@ func opCardsPutCardsIdcardCustomfieldIdcustomfieldItem(r *shell.Runner, w *audit
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4461,7 +4475,7 @@ func opCardsPutCardsIdcardCustomfields(r *shell.Runner, w *audit.Writer) *cli.Co
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4490,7 +4504,7 @@ func opCardsGetCardsIdCustomfielditems(r *shell.Runner, w *audit.Writer) *cli.Co
 					path := "/cards/" + p0 + "/customFieldItems"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4528,7 +4542,7 @@ func opCardsPostCardsIdActionsComments(r *shell.Runner, w *audit.Writer) *cli.Co
 						q.Set("text", c.String("text"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4566,7 +4580,7 @@ func opCardsPostCardsIdIdlabels(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4604,7 +4618,7 @@ func opCardsPostCardsIdIdmembers(r *shell.Runner, w *audit.Writer) *cli.Command 
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4649,7 +4663,7 @@ func opCardsPostCardsIdLabels(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("name", c.String("name"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4678,7 +4692,7 @@ func opCardsPostCardsIdMarkassociatednotificationsread(r *shell.Runner, w *audit
 					path := "/cards/" + p0 + "/markAssociatedNotificationsRead"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4708,7 +4722,7 @@ func opCardsDeleteCardsIdIdlabelsIdlabel(r *shell.Runner, w *audit.Writer) *cli.
 					path := "/cards/" + p0 + "/idLabels/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4738,7 +4752,7 @@ func opCardsDeleteIdIdmembersIdmember(r *shell.Runner, w *audit.Writer) *cli.Com
 					path := "/cards/" + p0 + "/idMembers/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4768,7 +4782,7 @@ func opCardsDeleteCardsIdMembersvotedIdmember(r *shell.Runner, w *audit.Writer) 
 					path := "/cards/" + p0 + "/membersVoted/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4808,7 +4822,7 @@ func opCardsPutCardsIdcardChecklistIdchecklistCheckitemIdcheckitem(r *shell.Runn
 						q.Set("pos", c.String("pos"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4838,7 +4852,7 @@ func opCardsDeleteCardsIdChecklistsIdchecklist(r *shell.Runner, w *audit.Writer)
 					path := "/cards/" + p0 + "/checklists/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4891,7 +4905,7 @@ func opChecklistsPostChecklists(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("idChecklistSource", c.String("idChecklistSource"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4950,7 +4964,7 @@ func opChecklistsGetChecklistsId(r *shell.Runner, w *audit.Writer) *cli.Command 
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4995,7 +5009,7 @@ func opChecklistsPutCheclistsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("pos", c.String("pos"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5024,7 +5038,7 @@ func opChecklistsDeleteChecklistsId(r *shell.Runner, w *audit.Writer) *cli.Comma
 					path := "/checklists/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5054,7 +5068,7 @@ func opChecklistsGetChecklistsIdField(r *shell.Runner, w *audit.Writer) *cli.Com
 					path := "/checklists/" + p0 + "/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5093,7 +5107,7 @@ func opChecklistsPutChecklistsIdField(r *shell.Runner, w *audit.Writer) *cli.Com
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5131,7 +5145,7 @@ func opChecklistsGetChecklistsIdBoard(r *shell.Runner, w *audit.Writer) *cli.Com
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5160,7 +5174,7 @@ func opChecklistsGetChecklistsIdCards(r *shell.Runner, w *audit.Writer) *cli.Com
 					path := "/checklists/" + p0 + "/cards"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5205,7 +5219,7 @@ func opChecklistsGetChecklistsIdCheckitems(r *shell.Runner, w *audit.Writer) *cl
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5278,7 +5292,7 @@ func opChecklistsPostChecklistsIdCheckitems(r *shell.Runner, w *audit.Writer) *c
 						q.Set("idMember", c.String("idMember"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5317,7 +5331,7 @@ func opChecklistsGetChecklistsIdCheckitemsIdcheckitem(r *shell.Runner, w *audit.
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5347,7 +5361,7 @@ func opChecklistsDeleteChecklistsIdCheckitemsIdcheckitem(r *shell.Runner, w *aud
 					path := "/checklists/" + p0 + "/checkItems/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5379,7 +5393,7 @@ func opCustomFieldsPostCustomfields(r *shell.Runner, w *audit.Writer) *cli.Comma
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5408,7 +5422,7 @@ func opCustomFieldsGetCustomfieldsId(r *shell.Runner, w *audit.Writer) *cli.Comm
 					path := "/customFields/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5446,7 +5460,7 @@ func opCustomFieldsPutCustomfieldsId(r *shell.Runner, w *audit.Writer) *cli.Comm
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5475,7 +5489,7 @@ func opCustomFieldsDeleteCustomfieldsId(r *shell.Runner, w *audit.Writer) *cli.C
 					path := "/customFields/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5504,7 +5518,7 @@ func opCustomFieldsPostCustomfieldsIdOptions(r *shell.Runner, w *audit.Writer) *
 					path := "/customFields/" + p0 + "/options"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5533,7 +5547,7 @@ func opCustomFieldsGetCustomfieldsIdOptions(r *shell.Runner, w *audit.Writer) *c
 					path := "/customFields/" + p0 + "/options"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5563,7 +5577,7 @@ func opCustomFieldsGetCustomfieldsOptionsIdcustomfieldoption(r *shell.Runner, w 
 					path := "/customFields/" + p0 + "/options/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5593,7 +5607,7 @@ func opCustomFieldsDeleteCustomfieldsOptionsIdcustomfieldoption(r *shell.Runner,
 					path := "/customFields/" + p0 + "/options/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5632,7 +5646,7 @@ func opEmojiEmoji(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("spritesheets", c.String("spritesheets"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5754,7 +5768,7 @@ func opEnterprisesGetEnterprisesId(r *shell.Runner, w *audit.Writer) *cli.Comman
 						q.Set("organization_memberships", c.String("organization_memberships"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5783,7 +5797,7 @@ func opEnterprisesGetEnterprisesIdAuditlog(r *shell.Runner, w *audit.Writer) *cl
 					path := "/enterprises/" + p0 + "/auditlog"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5821,7 +5835,7 @@ func opEnterprisesGetEnterprisesIdAdmins(r *shell.Runner, w *audit.Writer) *cli.
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5880,7 +5894,7 @@ func opEnterprisesGetEnterprisesIdSignupurl(r *shell.Runner, w *audit.Writer) *c
 						q.Set("tosAccepted", c.String("tosAccepted"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5974,7 +5988,7 @@ func opEnterprisesGetUsersId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("cursor", c.String("cursor"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6068,7 +6082,7 @@ func opEnterprisesGetEnterprisesIdMembers(r *shell.Runner, w *audit.Writer) *cli
 						q.Set("board_fields", c.String("board_fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6121,7 +6135,7 @@ func opEnterprisesGetEnterprisesIdMembersIdmember(r *shell.Runner, w *audit.Writ
 						q.Set("board_fields", c.String("board_fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6151,7 +6165,7 @@ func opEnterprisesGetEnterprisesIdTransferrableOrganizationIdOrganization(r *she
 					path := "/enterprises/" + p0 + "/transferrable/organization/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6181,7 +6195,7 @@ func opEnterprisesGetEnterprisesIdTransferrableBulkIdOrganizations(r *shell.Runn
 					path := "/enterprises/" + p0 + "/transferrable/bulk/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6219,7 +6233,7 @@ func opEnterprisesPutEnterprisesIdEnterpriseJoinRequestBulk(r *shell.Runner, w *
 						q.Set("idOrganizations", c.String("idOrganizations"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6285,7 +6299,7 @@ func opEnterprisesGetEnterprisesIdClaimableOrganizations(r *shell.Runner, w *aud
 						q.Set("inactiveSince", c.String("inactiveSince"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6330,7 +6344,7 @@ func opEnterprisesGetEnterprisesIdPendingOrganizations(r *shell.Runner, w *audit
 						q.Set("inactiveSince", c.String("inactiveSince"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6368,7 +6382,7 @@ func opEnterprisesPostEnterprisesIdTokens(r *shell.Runner, w *audit.Writer) *cli
 						q.Set("expiration", c.String("expiration"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6427,7 +6441,7 @@ func opEnterprisesGetEnterprisesIdOrganizations(r *shell.Runner, w *audit.Writer
 						q.Set("count", c.String("count"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6465,7 +6479,7 @@ func opEnterprisesPutEnterprisesIdOrganizations(r *shell.Runner, w *audit.Writer
 						q.Set("idOrganization", c.String("idOrganization"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6504,7 +6518,7 @@ func opEnterprisesPutEnterprisesIdMembersIdmemberLicensed(r *shell.Runner, w *au
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6564,7 +6578,7 @@ func opEnterprisesEnterprisesIdMembersIdMemberDeactivated(r *shell.Runner, w *au
 						q.Set("board_fields", c.String("board_fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6594,7 +6608,7 @@ func opEnterprisesPutEnterprisesIdAdminsIdmember(r *shell.Runner, w *audit.Write
 					path := "/enterprises/" + p0 + "/admins/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6624,7 +6638,7 @@ func opEnterprisesEnterprisesIdOrganizationsIdmember(r *shell.Runner, w *audit.W
 					path := "/enterprises/" + p0 + "/admins/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6654,7 +6668,7 @@ func opEnterprisesDeleteEnterprisesIdOrganizationsIdorg(r *shell.Runner, w *audi
 					path := "/enterprises/" + p0 + "/organizations/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6684,7 +6698,7 @@ func opEnterprisesGetEnterprisesIdOrganizationsBulkIdOrganizations(r *shell.Runn
 					path := "/enterprises/" + p0 + "/organizations/bulk/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6722,7 +6736,7 @@ func opLabelsGetLabelsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6767,7 +6781,7 @@ func opLabelsPutLabelsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("color", c.String("color"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6796,7 +6810,7 @@ func opLabelsDeleteLabelsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/labels/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6835,7 +6849,7 @@ func opLabelsPutLabelsIdField(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6881,7 +6895,7 @@ func opLabelsPostLabels(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("idBoard", c.String("idBoard"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6919,7 +6933,7 @@ func opListsGetListsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6985,7 +6999,7 @@ func opListsPutListsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("subscribed", c.String("subscribed"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7038,7 +7052,7 @@ func opListsPostLists(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("pos", c.String("pos"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7067,7 +7081,7 @@ func opListsPostListsIdArchiveallcards(r *shell.Runner, w *audit.Writer) *cli.Co
 					path := "/lists/" + p0 + "/archiveAllCards"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7112,7 +7126,7 @@ func opListsPostListsIdMoveallcards(r *shell.Runner, w *audit.Writer) *cli.Comma
 						q.Set("idList", c.String("idList"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7150,7 +7164,7 @@ func opListsPutListsIdClosed(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7188,7 +7202,7 @@ func opListsPutIdIdboard(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7227,7 +7241,7 @@ func opListsPutListsIdField(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7265,7 +7279,7 @@ func opListsGetListsIdActions(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("filter", c.String("filter"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7303,7 +7317,7 @@ func opListsGetListsIdBoard(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7332,7 +7346,7 @@ func opListsGetListsIdCards(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/lists/" + p0 + "/cards"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7503,7 +7517,7 @@ func opMembersGetMembersId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("tokens", c.String("tokens"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7590,7 +7604,7 @@ func opMembersPutMembersId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("prefs/minutesBetweenSummaries", c.String("prefs/minutesBetweenSummaries"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7620,7 +7634,7 @@ func opMembersGetMembersIdField(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/members/" + p0 + "/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7658,7 +7672,7 @@ func opMembersGetMembersIdActions(r *shell.Runner, w *audit.Writer) *cli.Command
 						q.Set("filter", c.String("filter"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7696,7 +7710,7 @@ func opMembersGetMembersIdBoardbackgrounds(r *shell.Runner, w *audit.Writer) *cl
 						q.Set("filter", c.String("filter"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7734,7 +7748,7 @@ func opMembersPostMembersIdBoardbackgrounds1(r *shell.Runner, w *audit.Writer) *
 						q.Set("file", c.String("file"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7773,7 +7787,7 @@ func opMembersGetMembersIdBoardbackgroundsIdbackground(r *shell.Runner, w *audit
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7819,7 +7833,7 @@ func opMembersPutMembersIdBoardbackgroundsIdbackground(r *shell.Runner, w *audit
 						q.Set("tile", c.String("tile"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7849,7 +7863,7 @@ func opMembersDeleteMembersIdBoardbackgroundsIdbackground(r *shell.Runner, w *au
 					path := "/members/" + p0 + "/boardBackgrounds/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7878,7 +7892,7 @@ func opMembersGetMembersIdBoardstars(r *shell.Runner, w *audit.Writer) *cli.Comm
 					path := "/members/" + p0 + "/boardStars"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7923,7 +7937,7 @@ func opMembersPostMembersIdBoardstars(r *shell.Runner, w *audit.Writer) *cli.Com
 						q.Set("pos", c.String("pos"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7953,7 +7967,7 @@ func opMembersGetMembersIdBoardstarsIdstar(r *shell.Runner, w *audit.Writer) *cl
 					path := "/members/" + p0 + "/boardStars/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7992,7 +8006,7 @@ func opMembersPutMembersIdBoardstarsIdstar(r *shell.Runner, w *audit.Writer) *cl
 						q.Set("pos", c.String("pos"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8022,7 +8036,7 @@ func opMembersDeleteMembersIdBoardstarsIdstar(r *shell.Runner, w *audit.Writer) 
 					path := "/members/" + p0 + "/boardStars/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8088,7 +8102,7 @@ func opMembersGetMembersIdBoards(r *shell.Runner, w *audit.Writer) *cli.Command 
 						q.Set("organization_fields", c.String("organization_fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8126,7 +8140,7 @@ func opMembersGetMembersIdBoardsinvited(r *shell.Runner, w *audit.Writer) *cli.C
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8164,7 +8178,7 @@ func opMembersGetMembersIdCards(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("filter", c.String("filter"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8193,7 +8207,7 @@ func opMembersGetMembersIdCustomboardbackgrounds(r *shell.Runner, w *audit.Write
 					path := "/members/" + p0 + "/customBoardBackgrounds"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8231,7 +8245,7 @@ func opMembersMembersidcustomboardbackgrounds1(r *shell.Runner, w *audit.Writer)
 						q.Set("file", c.String("file"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8261,7 +8275,7 @@ func opMembersGetMembersIdCustomboardbackgroundsIdbackground(r *shell.Runner, w 
 					path := "/members/" + p0 + "/customBoardBackgrounds/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8307,7 +8321,7 @@ func opMembersPutMembersIdCustomboardbackgroundsIdbackground(r *shell.Runner, w 
 						q.Set("tile", c.String("tile"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8337,7 +8351,7 @@ func opMembersDeleteMembersIdCustomboardbackgroundsIdbackground(r *shell.Runner,
 					path := "/members/" + p0 + "/customBoardBackgrounds/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8366,7 +8380,7 @@ func opMembersGetMembersIdCustomemoji(r *shell.Runner, w *audit.Writer) *cli.Com
 					path := "/members/" + p0 + "/customEmoji"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8411,7 +8425,7 @@ func opMembersPostMembersIdCustomemoji(r *shell.Runner, w *audit.Writer) *cli.Co
 						q.Set("name", c.String("name"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8450,7 +8464,7 @@ func opMembersMembersidcustomemojiidemoji(r *shell.Runner, w *audit.Writer) *cli
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8479,7 +8493,7 @@ func opMembersGetMembersIdCustomstickers(r *shell.Runner, w *audit.Writer) *cli.
 					path := "/members/" + p0 + "/customStickers"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8517,7 +8531,7 @@ func opMembersPostMembersIdCustomstickers(r *shell.Runner, w *audit.Writer) *cli
 						q.Set("file", c.String("file"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8556,7 +8570,7 @@ func opMembersGetMembersIdCustomstickersIdsticker(r *shell.Runner, w *audit.Writ
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8586,7 +8600,7 @@ func opMembersDeleteMembersIdCustomstickersIdsticker(r *shell.Runner, w *audit.W
 					path := "/members/" + p0 + "/customStickers/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8694,7 +8708,7 @@ func opMembersGetMembersIdNotifications(r *shell.Runner, w *audit.Writer) *cli.C
 						q.Set("memberCreator_fields", c.String("memberCreator_fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8746,7 +8760,7 @@ func opMembersGetMembersIdOrganizations(r *shell.Runner, w *audit.Writer) *cli.C
 						q.Set("paid_account", c.String("paid_account"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8784,7 +8798,7 @@ func opMembersGetMembersIdOrganizationsinvited(r *shell.Runner, w *audit.Writer)
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8813,7 +8827,7 @@ func opMembersGetMembersIdSavedsearches(r *shell.Runner, w *audit.Writer) *cli.C
 					path := "/members/" + p0 + "/savedSearches"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8830,6 +8844,7 @@ func opMembersPostMembersIdSavedsearches(r *shell.Runner, w *audit.Writer) *cli.
 			&cli.StringFlag{Name: "name", Usage: "query: The name for the saved search"},
 			&cli.StringFlag{Name: "query", Usage: "query: The search query"},
 			&cli.StringFlag{Name: "pos", Usage: "query: The position of the saved search. `top`, `bottom`, or a positive float."},
+			&cli.StringFlag{Name: "jq", Usage: "JMESPath projection applied to the JSON response; --jq here because this op owns an API --query (coily#46)"},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
@@ -8865,7 +8880,7 @@ func opMembersPostMembersIdSavedsearches(r *shell.Runner, w *audit.Writer) *cli.
 						q.Set("pos", c.String("pos"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("jq"), c.String("output"))
 				},
 			},
 			w,
@@ -8895,7 +8910,7 @@ func opMembersGetMembersIdSavedsearchesIdsearch(r *shell.Runner, w *audit.Writer
 					path := "/members/" + p0 + "/savedSearches/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8912,6 +8927,7 @@ func opMembersPutMembersIdSavedsearchesIdsearch(r *shell.Runner, w *audit.Writer
 			&cli.StringFlag{Name: "name", Usage: "query: The new name for the saved search"},
 			&cli.StringFlag{Name: "query", Usage: "query: The new search query"},
 			&cli.StringFlag{Name: "pos", Usage: "query: New position for saves search. `top`, `bottom`, or a positive float."},
+			&cli.StringFlag{Name: "jq", Usage: "JMESPath projection applied to the JSON response; --jq here because this op owns an API --query (coily#46)"},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
@@ -8948,7 +8964,7 @@ func opMembersPutMembersIdSavedsearchesIdsearch(r *shell.Runner, w *audit.Writer
 						q.Set("pos", c.String("pos"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("jq"), c.String("output"))
 				},
 			},
 			w,
@@ -8978,7 +8994,7 @@ func opMembersDeleteMembersIdSavedsearchesIdsearch(r *shell.Runner, w *audit.Wri
 					path := "/members/" + p0 + "/savedSearches/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9016,7 +9032,7 @@ func opMembersGetMembersIdTokens(r *shell.Runner, w *audit.Writer) *cli.Command 
 						q.Set("webhooks", c.String("webhooks"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9054,7 +9070,7 @@ func opMembersMembersidavatar(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("file", c.String("file"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9092,7 +9108,7 @@ func opMembersPostMembersIdOnetimemessagesdismissed(r *shell.Runner, w *audit.Wr
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9121,7 +9137,7 @@ func opMembersGetMembersIdNotificationChannelSettings(r *shell.Runner, w *audit.
 					path := "/members/" + p0 + "/notificationsChannelSettings"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9159,7 +9175,7 @@ func opMembersPutMembersIdNotificationChannelSettingsChannelBlockedKeys(r *shell
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9189,7 +9205,7 @@ func opMembersGetMembersIdNotificationChannelSettingsChannel(r *shell.Runner, w 
 					path := "/members/" + p0 + "/notificationsChannelSettings/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9228,7 +9244,7 @@ func opMembersPutMembersIdNotificationChannelSettingsChannelBlockedKeys2(r *shel
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9259,7 +9275,7 @@ func opMembersPutMembersIdNotificationChannelSettingsChannelBlockedKeys3(r *shel
 					path := "/members/" + p0 + "/notificationsChannelSettings/" + p1 + "/" + p2
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9388,7 +9404,7 @@ func opNotificationsGetNotificationsId(r *shell.Runner, w *audit.Writer) *cli.Co
 						q.Set("organization_fields", c.String("organization_fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9426,7 +9442,7 @@ func opNotificationsPutNotificationsId(r *shell.Runner, w *audit.Writer) *cli.Co
 						q.Set("unread", c.String("unread"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9456,7 +9472,7 @@ func opNotificationsGetNotificationsIdField(r *shell.Runner, w *audit.Writer) *c
 					path := "/notifications/" + p0 + "/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9495,7 +9511,7 @@ func opNotificationsPostNotificationsAllRead(r *shell.Runner, w *audit.Writer) *
 						q.Set("ids", c.String("ids"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9533,7 +9549,7 @@ func opNotificationsPutNotificationsIdUnread(r *shell.Runner, w *audit.Writer) *
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9571,7 +9587,7 @@ func opNotificationsGetNotificationsIdBoard(r *shell.Runner, w *audit.Writer) *c
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9609,7 +9625,7 @@ func opNotificationsGetNotificationsIdCard(r *shell.Runner, w *audit.Writer) *cl
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9647,7 +9663,7 @@ func opNotificationsGetNotificationsIdList(r *shell.Runner, w *audit.Writer) *cl
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9685,7 +9701,7 @@ func opNotificationsNotificationsidmember(r *shell.Runner, w *audit.Writer) *cli
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9723,7 +9739,7 @@ func opNotificationsGetNotificationsIdMembercreator(r *shell.Runner, w *audit.Wr
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9761,7 +9777,7 @@ func opNotificationsGetNotificationsIdOrganization(r *shell.Runner, w *audit.Wri
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9814,7 +9830,7 @@ func opOrganizationsPostOrganizations(r *shell.Runner, w *audit.Writer) *cli.Com
 						q.Set("website", c.String("website"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9843,7 +9859,7 @@ func opOrganizationsGetOrganizationsId(r *shell.Runner, w *audit.Writer) *cli.Co
 					path := "/organizations/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9958,7 +9974,7 @@ func opOrganizationsPutOrganizationsId(r *shell.Runner, w *audit.Writer) *cli.Co
 						q.Set("prefs/permissionLevel", c.String("prefs/permissionLevel"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -9987,7 +10003,7 @@ func opOrganizationsDeleteOrganizationsId(r *shell.Runner, w *audit.Writer) *cli
 					path := "/organizations/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10017,7 +10033,7 @@ func opOrganizationsGetOrganizationsIdField(r *shell.Runner, w *audit.Writer) *c
 					path := "/organizations/" + p0 + "/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10046,7 +10062,7 @@ func opOrganizationsGetOrganizationsIdActions(r *shell.Runner, w *audit.Writer) 
 					path := "/organizations/" + p0 + "/actions"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10091,7 +10107,7 @@ func opOrganizationsGetOrganizationsIdBoards(r *shell.Runner, w *audit.Writer) *
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10120,7 +10136,7 @@ func opOrganizationsGetOrganizationsIdExports(r *shell.Runner, w *audit.Writer) 
 					path := "/organizations/" + p0 + "/exports"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10158,7 +10174,7 @@ func opOrganizationsPostOrganizationsIdExports(r *shell.Runner, w *audit.Writer)
 						q.Set("attachments", c.String("attachments"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10187,7 +10203,7 @@ func opOrganizationsGetOrganizationsIdMembers(r *shell.Runner, w *audit.Writer) 
 					path := "/organizations/" + p0 + "/members"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10239,7 +10255,7 @@ func opOrganizationsPutOrganizationsIdMembers(r *shell.Runner, w *audit.Writer) 
 						q.Set("type", c.String("type"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10284,7 +10300,7 @@ func opOrganizationsGetOrganizationsIdMemberships(r *shell.Runner, w *audit.Writ
 						q.Set("member", c.String("member"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10323,7 +10339,7 @@ func opOrganizationsGetOrganizationsIdMembershipsIdmembership(r *shell.Runner, w
 						q.Set("member", c.String("member"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10352,7 +10368,7 @@ func opOrganizationsGetOrganizationsIdPlugindata(r *shell.Runner, w *audit.Write
 					path := "/organizations/" + p0 + "/pluginData"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10381,7 +10397,7 @@ func opOrganizationsGetOrganizationsIdTags(r *shell.Runner, w *audit.Writer) *cl
 					path := "/organizations/" + p0 + "/tags"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10410,7 +10426,7 @@ func opOrganizationsPostOrganizationsIdTags(r *shell.Runner, w *audit.Writer) *c
 					path := "/organizations/" + p0 + "/tags"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10449,7 +10465,7 @@ func opOrganizationsPutOrganizationsIdMembersIdmember(r *shell.Runner, w *audit.
 						q.Set("type", c.String("type"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10479,7 +10495,7 @@ func opOrganizationsDeleteOrganizationsIdMembers(r *shell.Runner, w *audit.Write
 					path := "/organizations/" + p0 + "/members/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10518,7 +10534,7 @@ func opOrganizationsPutOrganizationsIdMembersIdmemberDeactivated(r *shell.Runner
 						q.Set("value", c.String("value"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10556,7 +10572,7 @@ func opOrganizationsPostOrganizationsIdLogo(r *shell.Runner, w *audit.Writer) *c
 						q.Set("file", c.String("file"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10585,7 +10601,7 @@ func opOrganizationsDeleteOrganizationsIdLogo(r *shell.Runner, w *audit.Writer) 
 					path := "/organizations/" + p0 + "/logo"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10615,7 +10631,7 @@ func opOrganizationsOrganizationsIdMembersIdmemberAll(r *shell.Runner, w *audit.
 					path := "/organizations/" + p0 + "/members/" + p1 + "/all"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10644,7 +10660,7 @@ func opOrganizationsDeleteOrganizationsIdPrefsAssociateddomain(r *shell.Runner, 
 					path := "/organizations/" + p0 + "/prefs/associatedDomain"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10673,7 +10689,7 @@ func opOrganizationsDeleteOrganizationsIdPrefsOrginviterestrict(r *shell.Runner,
 					path := "/organizations/" + p0 + "/prefs/orgInviteRestrict"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10703,7 +10719,7 @@ func opOrganizationsDeleteOrganizationsIdTagsIdtag(r *shell.Runner, w *audit.Wri
 					path := "/organizations/" + p0 + "/tags/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10733,7 +10749,7 @@ func opOrganizationsGetOrganizationsIdNewbillableguestsIdboard(r *shell.Runner, 
 					path := "/organizations/" + p0 + "/newBillableGuests/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10762,7 +10778,7 @@ func opPluginsGetPluginsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/plugins/" + p0 + "/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10791,7 +10807,7 @@ func opPluginsPutPluginsId(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/plugins/" + p0 + "/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10829,7 +10845,7 @@ func opPluginsPostPluginsIdpluginListing(r *shell.Runner, w *audit.Writer) *cli.
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10858,7 +10874,7 @@ func opPluginsGetPluginsIdComplianceMemberprivacy(r *shell.Runner, w *audit.Writ
 					path := "/plugins/" + p0 + "/compliance/memberPrivacy"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10897,7 +10913,7 @@ func opPluginsPutPluginsIdpluginListingsIdlisting(r *shell.Runner, w *audit.Writ
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -10931,6 +10947,7 @@ func opSearchGetSearch(r *shell.Runner, w *audit.Writer) *cli.Command {
 			&cli.StringFlag{Name: "member_fields", Usage: "query: all or a comma-separated list of: avatarHash, bio, bioData, confirmed, fullName…"},
 			&cli.StringFlag{Name: "members_limit", Usage: "query: The maximum number of members to return. Maximum 1000"},
 			&cli.StringFlag{Name: "partial", Usage: "query: By default, Trello searches for each word in your query against exactly matchin…"},
+			&cli.StringFlag{Name: "jq", Usage: "JMESPath projection applied to the JSON response; --jq here because this op owns an API --query (coily#46)"},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
@@ -11069,7 +11086,7 @@ func opSearchGetSearch(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("partial", c.String("partial"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("jq"), c.String("output"))
 				},
 			},
 			w,
@@ -11087,6 +11104,7 @@ func opSearchGetSearchMembers(r *shell.Runner, w *audit.Writer) *cli.Command {
 			&cli.StringFlag{Name: "idBoard", Usage: "query: "},
 			&cli.StringFlag{Name: "idOrganization", Usage: "query: "},
 			&cli.StringFlag{Name: "onlyOrgMembers", Usage: "query: "},
+			&cli.StringFlag{Name: "jq", Usage: "JMESPath projection applied to the JSON response; --jq here because this op owns an API --query (coily#46)"},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
@@ -11129,7 +11147,7 @@ func opSearchGetSearchMembers(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("onlyOrgMembers", c.String("onlyOrgMembers"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("jq"), c.String("output"))
 				},
 			},
 			w,
@@ -11174,7 +11192,7 @@ func opTokensGetTokensToken(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("webhooks", c.String("webhooks"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -11212,7 +11230,7 @@ func opTokensGetTokensTokenMember(r *shell.Runner, w *audit.Writer) *cli.Command
 						q.Set("fields", c.String("fields"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -11241,7 +11259,7 @@ func opTokensGetTokensTokenWebhooks(r *shell.Runner, w *audit.Writer) *cli.Comma
 					path := "/tokens/" + p0 + "/webhooks"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -11293,7 +11311,7 @@ func opTokensPostTokensTokenWebhooks(r *shell.Runner, w *audit.Writer) *cli.Comm
 						q.Set("idModel", c.String("idModel"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -11323,7 +11341,7 @@ func opTokensGetTokensTokenWebhooksIdwebhook(r *shell.Runner, w *audit.Writer) *
 					path := "/tokens/" + p0 + "/webhooks/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -11376,7 +11394,7 @@ func opTokensTokenstokenwebhooks1(r *shell.Runner, w *audit.Writer) *cli.Command
 						q.Set("idModel", c.String("idModel"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -11406,7 +11424,7 @@ func opTokensDeleteTokensTokenWebhooksIdwebhook(r *shell.Runner, w *audit.Writer
 					path := "/tokens/" + p0 + "/webhooks/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -11435,7 +11453,7 @@ func opTokensDeleteToken(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/tokens/" + p0 + "/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -11488,7 +11506,7 @@ func opWebhooksPostWebhooks(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("active", c.String("active"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -11517,7 +11535,7 @@ func opWebhooksGetWebhooksId(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/webhooks/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -11576,7 +11594,7 @@ func opWebhooksPutWebhooksId(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("active", c.String("active"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -11605,7 +11623,7 @@ func opWebhooksDeleteWebhooksId(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/webhooks/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -11635,7 +11653,7 @@ func opWebhooksWebhooksidfield(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/webhooks/" + p0 + "/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -11666,7 +11684,7 @@ func readBody(spec string) ([]byte, error) {
 	}
 }
 
-func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path string, q url.Values, body []byte, authNeeded bool) error {
+func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path string, q url.Values, body []byte, authNeeded bool, projection, output string) error {
 	target := apiBase + path
 	if len(q) > 0 {
 		target += "?" + q.Encode()
@@ -11715,6 +11733,24 @@ func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path strin
 	}
 	if len(bytes.TrimSpace(raw)) == 0 {
 		return nil
+	}
+	outFmt, outSet, err := restfmt.ParseOutput(output)
+	if err != nil {
+		return err
+	}
+	if restfmt.NeedsRender(projection, outSet) {
+		// --query alone defaults to JSON, preserving the surface's existing
+		// output format; --output flips it to yaml/text. Either routes through
+		// restfmt instead of the byte-identical pretty-print path below.
+		if !outSet {
+			outFmt = restfmt.OutputJSON
+		}
+		rendered, rErr := restfmt.Render(projection, outFmt, raw)
+		if rErr != nil {
+			return rErr
+		}
+		_, err = os.Stdout.Write(rendered)
+		return err
 	}
 	var pretty json.RawMessage
 	if err := json.Unmarshal(raw, &pretty); err != nil {
