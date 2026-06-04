@@ -2943,6 +2943,20 @@ commands:
         - ops
         - forgejo
         - repo
+        - create
+      summary: Create a forgejo repo under an org or the authenticated user (private by default).
+      flags:
+        - --auto-init
+        - --default-branch
+        - --description
+        - --name
+        - --owner
+        - --public
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - repo
         - delete
       summary: Delete a forgejo repo (admin-gated server-side).
       flags:

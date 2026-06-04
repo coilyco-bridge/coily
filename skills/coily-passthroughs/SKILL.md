@@ -1787,6 +1787,12 @@ Archive a forgejo repo (sets archived=true).
 
 Flags: --repo
 
+## `coily ops forgejo repo create`
+
+Create a forgejo repo under an org or the authenticated user (private by default).
+
+Flags: --auto-init, --default-branch, --description, --name, --owner, --public
+
 ## `coily ops forgejo repo delete`
 
 Delete a forgejo repo (admin-gated server-side).
