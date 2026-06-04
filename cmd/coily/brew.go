@@ -24,8 +24,9 @@ import (
 //
 // Categories:
 //
-//   - formula-scoped (default-allow coilysiren/tap/* + bare names in the
-//     tap; --allow-untapped otherwise): install, uninstall, upgrade,
+//   - formula-scoped (default-allow any coilysiren/<repo>/<formula>
+//     per-repo tap + known bare names; --allow-untapped otherwise):
+//     install, uninstall, upgrade,
 //     reinstall, link, unlink, pin, unpin.
 //   - tap-scoped (default-allow coilysiren/* taps; --allow-untapped
 //     otherwise): tap, untap.
@@ -45,8 +46,8 @@ func (r *Runner) pkgBrewCommand() *cli.Command {
 		Name:  "brew",
 		Usage: "Scoped wrapper around brew. Mirrors brew's argv shape.",
 		Description: `brew is the single entry point for every brew verb. Mutating verbs
-that operate on a named formula default to coilysiren/tap/* scope and
-require --allow-untapped otherwise. Tap mutations default to
+that operate on a named formula default to coilysiren/<repo>/<formula>
+per-repo tap scope and require --allow-untapped otherwise. Tap mutations default to
 coilysiren/* taps. Touch-everything verbs (cleanup, autoremove,
 services cleanup) require --allow-untapped. Read-only verbs and
 brew update pass through verbatim.
@@ -85,7 +86,7 @@ func (r *Runner) pkgBrewDispatch(ctx context.Context, c *cli.Command) error {
 }
 
 // brewFormulaScopedVerbs are the mutating brew verbs whose positionals
-// are formula names and which should default-allow coilysiren/tap/*.
+// are formula names and which should default-allow coilysiren/*/* taps.
 var brewFormulaScopedVerbs = map[string]bool{
 	"install":   true,
 	"uninstall": true,
@@ -180,7 +181,7 @@ func (r *Runner) classifyBrewServices(rest []string) (string, cli.ActionFunc, fu
 }
 
 // brewFormulaScopedAction builds an action that scope-checks formula
-// positionals against coilysiren/tap/*. prefix is the verb chain
+// positionals against the coilysiren/*/* per-repo taps. prefix is the verb chain
 // already consumed (e.g. ["install"] or ["services", "restart"]); rest
 // is what came after.
 func (r *Runner) brewFormulaScopedAction(prefix, rest []string) (cli.ActionFunc, func(*audit.Record)) {
@@ -207,7 +208,7 @@ func (r *Runner) brewFormulaScopedAction(prefix, rest []string) (cli.ActionFunc,
 				if !brewInTapScope(f, r.primaryOrgs()) {
 					return exitcode.New(exitcode.PolicyDenied, "policy_denied",
 						fmt.Errorf("brew %s %q is outside the primary-org taps (%s); pass --allow-untapped to confirm", verbLabel, f, strings.Join(r.primaryOrgs(), ", ")),
-						"qualify the formula with a <primary-org>/<tap>/ prefix (e.g. coilysiren/tap/, coilyco-flight-deck/o2r/), or add --allow-untapped to confirm an off-tap formula").
+						"qualify the formula with a <primary-org>/<repo>/ prefix (e.g. coilysiren/coily/, coilyco-flight-deck/o2r/), or add --allow-untapped to confirm an off-tap formula").
 						WithReason("brew state should live under a primary-org tap by default so the install graph is reviewable from first-party repos; --allow-untapped is the explicit opt-out for one-offs")
 				}
 			}
@@ -306,13 +307,15 @@ func makeBrewHook(rows *[]audit.EgressRow, tail *brewTail) func(*audit.Record) {
 	}
 }
 
-// scopedTapFormulae mirrors the bare formula names in
-// coilysiren/homebrew-tap/Formula/. They are default-allowed without
-// --allow-untapped because brew installs them under the user-controlled
-// tap regardless of whether the operator typed the qualified name.
+// scopedTapFormulae lists the bare (unqualified) coilysiren-owned
+// formula names that are default-allowed without --allow-untapped. They
+// resolve against whichever per-repo tap (coilysiren/<repo>) publishes
+// them once it is tapped, so the operator can type the short name
+// without the qualified coilysiren/<repo>/ prefix.
 //
-// Update this map in lockstep with the Formula directory in
-// coilysiren/homebrew-tap.
+// The umbrella tap coilysiren/homebrew-tap was decommissioned in favor
+// of per-repo taps (coilyco-bridge/coily#22); keep this map in lockstep
+// with the formula names the per-repo taps publish.
 var scopedTapFormulae = map[string]bool{
 	"coily":         true,
 	"repo-recall":   true,
@@ -358,12 +361,13 @@ func brewTapPositionalAllowed(t string, orgs []string) bool {
 	return false
 }
 
-// brewInTapScope is true when f is either a coilysiren/<tap>/<formula>
-// qualified name (umbrella `coilysiren/tap/*` or any per-repo tap like
-// `coilysiren/coily/coily`) or one of the bare formula names the
-// umbrella tap publishes. Widened from coilysiren/tap/* to all
-// coilysiren/* taps in coilysiren/coily#271 to cover the per-repo tap
-// release flow; the policy intent is "any coilysiren-owned tap".
+// brewInTapScope is true when f is either a coilysiren/<repo>/<formula>
+// qualified per-repo tap name (e.g. `coilysiren/coily/coily`) or one of
+// the bare formula names a per-repo tap publishes. Widened from the
+// hardcoded coilysiren/tap/* umbrella shape to all coilysiren/* taps in
+// coilysiren/coily#271; coilyco-bridge/coily#22 removed the last umbrella
+// references after the umbrella tap was decommissioned. The policy
+// intent is "any coilysiren-owned tap".
 func brewInTapScope(f string, orgs []string) bool {
 	for _, o := range orgs {
 		if strings.HasPrefix(f, o+"/") {

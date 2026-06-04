@@ -21,7 +21,7 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 
 **git**: `coily git {status,log,diff,show,add,fetch,pull,push,branch,checkout,stash,restore}` are audited passthroughs. `coily git commit` is not - it is a dedicated, concurrency-safe verb ([coily#7](https://forgejo.coilysiren.me/coilyco-bridge/coily/issues/7)): it requires `coily git commit -m "msg" -- <path>...`, commits the named paths from the worktree against a private `GIT_INDEX_FILE` seeded from HEAD, and forbids the editor - so two sessions sharing one working tree cannot cross commit content or messages through the shared index / `COMMIT_EDITMSG`.
 
-**Package managers**: `coily pkg {pnpm,npm,yarn,bun,uv,pip,pipx,poetry,cargo,gem,bundle,brew,glama,skillsmp}`. `coily brew {install,uninstall,upgrade,reinstall}` is a separate top-level scoped to `coilysiren/tap/*`.
+**Package managers**: `coily pkg {pnpm,npm,yarn,bun,uv,pip,pipx,poetry,cargo,gem,bundle,brew,glama,skillsmp}`. `coily brew {install,uninstall,upgrade,reinstall}` is a separate top-level scoped to the `coilysiren/<repo>/<formula>` per-repo taps.
 
 **Session**: `coily session {use,show,clear,end}`. Per-session lockdown-profile sentinel. `end` self-terminates a finished sidequest, SIGTERM to claude ([coily#309](https://github.com/coilysiren/coily/issues/309)).
 

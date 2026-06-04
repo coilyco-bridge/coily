@@ -15,10 +15,10 @@ func TestSplitBrewArgs(t *testing.T) {
 	}{
 		{
 			name:        "single tap formula",
-			raw:         []string{"coilysiren/tap/coily"},
+			raw:         []string{"coilysiren/coily/coily"},
 			wantAllow:   false,
-			wantForward: []string{"coilysiren/tap/coily"},
-			wantForms:   []string{"coilysiren/tap/coily"},
+			wantForward: []string{"coilysiren/coily/coily"},
+			wantForms:   []string{"coilysiren/coily/coily"},
 		},
 		{
 			name:        "allow flag is consumed",
@@ -85,8 +85,8 @@ func TestClassifyBrewInvocation(t *testing.T) {
 		{"pin", []string{"pin", "coily"}, "pkg.brew.pin"},
 		{"unpin", []string{"unpin", "coily"}, "pkg.brew.unpin"},
 		// Tap-scoped.
-		{"tap", []string{"tap", "coilysiren/homebrew-tap"}, "pkg.brew.tap"},
-		{"untap", []string{"untap", "coilysiren/homebrew-tap"}, "pkg.brew.untap"},
+		{"tap", []string{"tap", "coilysiren/coily"}, "pkg.brew.tap"},
+		{"untap", []string{"untap", "coilysiren/coily"}, "pkg.brew.untap"},
 		// Touch-everything.
 		{"cleanup", []string{"cleanup"}, "pkg.brew.cleanup"},
 		{"autoremove", []string{"autoremove"}, "pkg.brew.autoremove"},
@@ -145,11 +145,10 @@ func TestPkgBrewCommand_TopLevelShape(t *testing.T) {
 func TestBrewInTapScope(t *testing.T) {
 	orgs := defaultPrimaryOrgs()
 	cases := map[string]bool{
-		"coilysiren/tap/coily":               true,
-		"coilysiren/tap/repo-recall":         true,
-		"coilysiren/tap/anything":            true,
+		// per-repo tap shape coilysiren/<repo>/<formula> (coilyco-bridge/coily#22)
 		"coilysiren/coily/coily":             true,
 		"coilysiren/repo-recall/repo-recall": true,
+		"coilysiren/anything/anything":       true,
 		// post org-split primary orgs (coily#175)
 		"coilyco-flight-deck/o2r/o2r": true,
 		"coilyco-bridge/coily/coily":  true,
@@ -174,11 +173,11 @@ func TestBrewInTapScope(t *testing.T) {
 func TestBrewTapPositionalAllowed(t *testing.T) {
 	orgs := defaultPrimaryOrgs()
 	cases := map[string]bool{
-		"coilysiren/tap":          true,
+		"coilysiren/coily":        true,
 		"coilyco-flight-deck/o2r": true,
 		"coilyco-bridge/coily":    true,
 		"https://forgejo.coilysiren.me/coilyco-flight-deck/otel-a2a-relay-cli.git": true,
-		"https://forgejo.coilysiren.me/coilysiren/tap":                             true,
+		"https://forgejo.coilysiren.me/coilysiren/repo-recall":                     true,
 		"someuser/tap":                    false,
 		"https://github.com/someuser/tap": false,
 	}

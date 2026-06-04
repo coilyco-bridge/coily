@@ -5,30 +5,23 @@ import (
 	"testing"
 )
 
-// TestUpgradeFormulaCandidates_LockedToCoilysiren pins coilysiren/coily#19
-// + coilysiren/coily#271: the upgrade verb is bound to coily-the-formula
-// specifically, and the only knob is which coilysiren tap is providing
-// it. Widening either candidate to a non-coilysiren tap would defeat
-// the "audited self-update" claim by letting an agent upgrade arbitrary
-// formulae through the audited path; that's what `coily brew upgrade`
-// is for.
-func TestUpgradeFormulaCandidates_LockedToCoilysiren(t *testing.T) {
-	candidates := []struct {
-		name    string
-		formula string
-	}{
-		{"per-repo tap", upgradeFormulaPerRepo},
-		{"umbrella tap", upgradeFormulaUmbrella},
+// TestUpgradeFormula_LockedToCoilysirenPerRepo pins coilysiren/coily#19
+// + coilyco-bridge/coily#22: the upgrade verb is bound to coily-the-
+// formula specifically, and the formula is the per-repo tap shape
+// coilysiren/coily/coily. Widening it to a non-coilysiren tap would
+// defeat the "audited self-update" claim by letting an agent upgrade
+// arbitrary formulae through the audited path; that's what `coily brew
+// upgrade` is for. The umbrella shape (coilysiren/tap/coily) is no
+// longer accepted here because that tap was decommissioned.
+func TestUpgradeFormula_LockedToCoilysirenPerRepo(t *testing.T) {
+	if upgradeFormula != "coilysiren/coily/coily" {
+		t.Errorf("upgradeFormula = %q, want %q", upgradeFormula, "coilysiren/coily/coily")
 	}
-	for _, c := range candidates {
-		t.Run(c.name, func(t *testing.T) {
-			if !strings.HasPrefix(c.formula, "coilysiren/") {
-				t.Errorf("%s = %q must live under coilysiren/", c.name, c.formula)
-			}
-			if !strings.HasSuffix(c.formula, "/coily") {
-				t.Errorf("%s = %q must name the coily formula", c.name, c.formula)
-			}
-		})
+	if !strings.HasPrefix(upgradeFormula, "coilysiren/") {
+		t.Errorf("upgradeFormula = %q must live under coilysiren/", upgradeFormula)
+	}
+	if !strings.HasSuffix(upgradeFormula, "/coily") {
+		t.Errorf("upgradeFormula = %q must name the coily formula", upgradeFormula)
 	}
 }
 

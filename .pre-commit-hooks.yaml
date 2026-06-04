@@ -1,6 +1,6 @@
 # Hook definitions for repos that want to consume coily via pre-commit.
 # `language: system` expects `coily` to be on PATH (typically via the
-# coilysiren/homebrew-tap formula).
+# coilysiren/coily/coily per-repo tap formula).
 - id: coily-lint
   name: coily lint .coily/coily.yaml
   description: |
