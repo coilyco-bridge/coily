@@ -40,6 +40,7 @@ func (r *Runner) forgejoIssueCommand() *cli.Command {
 			r.forgejoIssueViewCommand(),
 			r.forgejoIssueEditCommand(),
 			r.forgejoIssueCommentCommand(),
+			r.forgejoIssueLabelCommand(),
 			r.forgejoIssueCloseCommand(),
 			r.forgejoIssueReopenCommand(),
 			r.forgejoIssueDeleteCommand(),
