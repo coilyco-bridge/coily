@@ -28,7 +28,9 @@ func normalizeGHJQInline(argv []string) ([]string, func()) {
 	var tmps []string
 	cleanup := func() {
 		for _, p := range tmps {
-			_ = os.Remove(p)
+			// p is a temp path this function created via os.CreateTemp, not
+			// user-controlled, so the path-traversal flag is a false positive.
+			_ = os.Remove(p) //nolint:gosec // self-created temp path
 		}
 	}
 	out := make([]string, 0, len(argv))

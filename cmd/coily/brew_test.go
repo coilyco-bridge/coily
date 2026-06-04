@@ -174,13 +174,13 @@ func TestBrewInTapScope(t *testing.T) {
 func TestBrewTapPositionalAllowed(t *testing.T) {
 	orgs := defaultPrimaryOrgs()
 	cases := map[string]bool{
-		"coilysiren/tap":                                     true,
-		"coilyco-flight-deck/o2r":                            true,
-		"coilyco-bridge/coily":                               true,
+		"coilysiren/tap":          true,
+		"coilyco-flight-deck/o2r": true,
+		"coilyco-bridge/coily":    true,
 		"https://forgejo.coilysiren.me/coilyco-flight-deck/otel-a2a-relay-cli.git": true,
 		"https://forgejo.coilysiren.me/coilysiren/tap":                             true,
-		"someuser/tap":                                                             false,
-		"https://github.com/someuser/tap":                                          false,
+		"someuser/tap":                    false,
+		"https://github.com/someuser/tap": false,
 	}
 	for tap, want := range cases {
 		t.Run(tap, func(t *testing.T) {

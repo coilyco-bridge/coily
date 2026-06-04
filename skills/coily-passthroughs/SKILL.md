@@ -1595,6 +1595,24 @@ Edit an existing forgejo issue's title and/or body.
 
 Flags: --body-file, --number, --repo, --title
 
+## `coily ops forgejo issue label add`
+
+Add one or more labels to a forgejo issue (repeat --label).
+
+Flags: --label, --number, --repo
+
+## `coily ops forgejo issue label remove`
+
+Remove one or more labels from a forgejo issue (repeat --label).
+
+Flags: --label, --number, --repo
+
+## `coily ops forgejo issue label set`
+
+Replace the full label set on a forgejo issue (no --label clears all).
+
+Flags: --label, --number, --repo
+
 ## `coily ops forgejo issue list`
 
 List forgejo issues in a repo.
@@ -1693,7 +1711,7 @@ Flags: --body-file, --number, --repo
 
 ## `coily ops forgejo pr create`
 
-Create a forgejo pull request.
+Disabled. Merge/commit straight to main instead.
 
 Flags: --base, --body-file, --head, --repo, --title
 
@@ -2095,1335 +2113,1525 @@ Flags: --body
 
 Delete an Action
 
+Flags: --output, --query
+
 ## `coily ops trello actions delete-actions-idaction-reactions-id`
 
 Delete Action's Reaction
+
+Flags: --output, --query
 
 ## `coily ops trello actions get-actions-id`
 
 Get an Action
 
-Flags: --display, --entities, --fields, --member, --memberCreator, --memberCreator_fields, --member_fields
+Flags: --display, --entities, --fields, --member, --memberCreator, --memberCreator_fields, --member_fields, --output, --query
 
 ## `coily ops trello actions get-actions-id-board`
 
 Get the Board for an Action
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello actions get-actions-id-card`
 
 Get the Card for an Action
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello actions get-actions-id-field`
 
 Get a specific field on an Action
 
+Flags: --output, --query
+
 ## `coily ops trello actions get-actions-id-list`
 
 Get the List for an Action
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello actions get-actions-id-member`
 
 Get the Member of an Action
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello actions get-actions-id-membercreator`
 
 Get the Member Creator of an Action
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello actions get-actions-id-organization`
 
 Get the Organization of an Action
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello actions get-actions-idaction-reactions`
 
 Get Action's Reactions
 
-Flags: --emoji, --member
+Flags: --emoji, --member, --output, --query
 
 ## `coily ops trello actions get-actions-idaction-reactions-id`
 
 Get Action's Reaction
 
-Flags: --emoji, --member
+Flags: --emoji, --member, --output, --query
 
 ## `coily ops trello actions get-actions-idaction-reactionsummary`
 
 List Action's summary of Reactions
 
+Flags: --output, --query
+
 ## `coily ops trello actions post-actions-idaction-reactions`
 
 Create Reaction for Action
 
-Flags: --body
+Flags: --body, --output, --query
 
 ## `coily ops trello actions put-actions-id`
 
 Update an Action
 
-Flags: --text
+Flags: --output, --query, --text
 
 ## `coily ops trello actions put-actions-id-text`
 
 Update a Comment Action
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello applications applications-key-compliance`
 
 Get Application's compliance data
 
+Flags: --output, --query
+
 ## `coily ops trello batch get-batch`
 
 Batch Requests
 
-Flags: --urls
+Flags: --output, --query, --urls
 
 ## `coily ops trello boards boards-id-checklists`
 
 Get Checklists on a Board
 
+Flags: --output, --query
+
 ## `coily ops trello boards boardsidmembersidmember`
 
 Remove Member from Board
+
+Flags: --output, --query
 
 ## `coily ops trello boards delete-boards-id`
 
 Delete a Board
 
+Flags: --output, --query
+
 ## `coily ops trello boards get-board-id-plugins`
 
 Get Power-Ups on a Board
 
-Flags: --filter
+Flags: --filter, --output, --query
 
 ## `coily ops trello boards get-boards-id`
 
 Get a Board
 
-Flags: --actions, --boardStars, --card_pluginData, --cards, --checklists, --customFields, --fields, --labels, --lists, --members, --memberships, --myPrefs, --organization, --organization_pluginData, --pluginData, --tags
+Flags: --actions, --boardStars, --card_pluginData, --cards, --checklists, --customFields, --fields, --labels, --lists, --members, --memberships, --myPrefs, --organization, --organization_pluginData, --output, --pluginData, --query, --tags
 
 ## `coily ops trello boards get-boards-id-actions`
 
 Get Actions of a Board
 
-Flags: --before, --fields, --filter, --format, --idModels, --limit, --member, --memberCreator, --memberCreator_fields, --member_fields, --page, --reactions, --since
+Flags: --before, --fields, --filter, --format, --idModels, --limit, --member, --memberCreator, --memberCreator_fields, --member_fields, --output, --page, --query, --reactions, --since
 
 ## `coily ops trello boards get-boards-id-boardplugins`
 
 Get Enabled Power-Ups on Board
 
+Flags: --output, --query
+
 ## `coily ops trello boards get-boards-id-boardstars`
 
 Get boardStars on a Board
 
-Flags: --filter
+Flags: --filter, --output, --query
 
 ## `coily ops trello boards get-boards-id-cards`
 
 Get Cards on a Board
 
+Flags: --output, --query
+
 ## `coily ops trello boards get-boards-id-cards-filter`
 
 Get filtered Cards on a Board
+
+Flags: --output, --query
 
 ## `coily ops trello boards get-boards-id-customfields`
 
 Get Custom Fields for Board
 
+Flags: --output, --query
+
 ## `coily ops trello boards get-boards-id-field`
 
 Get a field on a Board
+
+Flags: --output, --query
 
 ## `coily ops trello boards get-boards-id-labels`
 
 Get Labels on a Board
 
-Flags: --fields, --limit
+Flags: --fields, --limit, --output, --query
 
 ## `coily ops trello boards get-boards-id-lists`
 
 Get Lists on a Board
 
-Flags: --card_fields, --cards, --fields, --filter
+Flags: --card_fields, --cards, --fields, --filter, --output, --query
 
 ## `coily ops trello boards get-boards-id-lists-filter`
 
 Get filtered Lists on a Board
 
+Flags: --output, --query
+
 ## `coily ops trello boards get-boards-id-members`
 
 Get the Members of a Board
+
+Flags: --output, --query
 
 ## `coily ops trello boards get-boards-id-memberships`
 
 Get Memberships of a Board
 
-Flags: --activity, --filter, --member, --member_fields, --orgMemberType
+Flags: --activity, --filter, --member, --member_fields, --orgMemberType, --output, --query
 
 ## `coily ops trello boards post-boards`
 
 Create a Board
 
-Flags: --defaultLabels, --defaultLists, --desc, --idBoardSource, --idOrganization, --keepFromSource, --name, --powerUps, --prefs_background, --prefs_cardAging, --prefs_cardCovers, --prefs_comments, --prefs_invitations, --prefs_permissionLevel, --prefs_selfJoin, --prefs_voting
+Flags: --defaultLabels, --defaultLists, --desc, --idBoardSource, --idOrganization, --keepFromSource, --name, --output, --powerUps, --prefs_background, --prefs_cardAging, --prefs_cardCovers, --prefs_comments, --prefs_invitations, --prefs_permissionLevel, --prefs_selfJoin, --prefs_voting, --query
 
 ## `coily ops trello boards post-boards-id-calendarkey-generate`
 
 Create a calendarKey for a Board
 
+Flags: --output, --query
+
 ## `coily ops trello boards post-boards-id-emailkey-generate`
 
 Create a emailKey for a Board
+
+Flags: --output, --query
 
 ## `coily ops trello boards post-boards-id-idtags`
 
 Create a Tag for a Board
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello boards post-boards-id-labels`
 
 Create a Label on a Board
 
-Flags: --color, --name
+Flags: --color, --name, --output, --query
 
 ## `coily ops trello boards post-boards-id-lists`
 
 Create a List on a Board
 
-Flags: --name, --pos
+Flags: --name, --output, --pos, --query
 
 ## `coily ops trello boards post-boards-id-markedasviewed`
 
 Mark Board as viewed
 
+Flags: --output, --query
+
 ## `coily ops trello boards put-boards-id`
 
 Update a Board
 
-Flags: --closed, --desc, --idOrganization, --name, --prefs/background, --prefs/calendarFeedEnabled, --prefs/cardAging, --prefs/cardCovers, --prefs/comments, --prefs/hideVotes, --prefs/invitations, --prefs/permissionLevel, --prefs/selfJoin, --prefs/voting, --subscribed
+Flags: --closed, --desc, --idOrganization, --name, --output, --prefs/background, --prefs/calendarFeedEnabled, --prefs/cardAging, --prefs/cardCovers, --prefs/comments, --prefs/hideVotes, --prefs/invitations, --prefs/permissionLevel, --prefs/selfJoin, --prefs/voting, --query, --subscribed
 
 ## `coily ops trello boards put-boards-id-members`
 
 Invite Member to Board via email
 
-Flags: --body, --email, --type
+Flags: --body, --email, --output, --query, --type
 
 ## `coily ops trello boards put-boards-id-members-idmember`
 
 Add a Member to a Board
 
-Flags: --allowBillableGuest, --type
+Flags: --allowBillableGuest, --output, --query, --type
 
 ## `coily ops trello boards put-boards-id-memberships-idmembership`
 
 Update Membership of Member on a Board
 
-Flags: --member_fields, --type
+Flags: --member_fields, --output, --query, --type
 
 ## `coily ops trello boards put-boards-id-my-prefs-showsidebar`
 
 Update showSidebar Pref on a Board
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello boards put-boards-id-my-prefs-showsidebaractivity`
 
 Update showSidebarActivity Pref on a Board
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello boards put-boards-id-my-prefs-showsidebarboardactions`
 
 Update showSidebarBoardActions Pref on a Board
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello boards put-boards-id-my-prefs-showsidebarmembers`
 
 Update showSidebarMembers Pref on a Board
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello boards put-boards-id-myprefs-emailposition`
 
 Update emailPosition Pref on a Board
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello boards put-boards-id-myprefs-idemaillist`
 
 Update idEmailList Pref on a Board
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello cards cardsidmembersvoted-1`
 
 Add Member vote to Card
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello cards delete-cards-id`
 
 Delete a Card
 
+Flags: --output, --query
+
 ## `coily ops trello cards delete-cards-id-actions-id-comments`
 
 Delete a comment on a Card
+
+Flags: --output, --query
 
 ## `coily ops trello cards delete-cards-id-checkitem-idcheckitem`
 
 Delete checkItem on a Card
 
+Flags: --output, --query
+
 ## `coily ops trello cards delete-cards-id-checklists-idchecklist`
 
 Delete a Checklist on a Card
+
+Flags: --output, --query
 
 ## `coily ops trello cards delete-cards-id-idlabels-idlabel`
 
 Remove a Label from a Card
 
+Flags: --output, --query
+
 ## `coily ops trello cards delete-cards-id-membersvoted-idmember`
 
 Remove a Member's Vote on a Card
+
+Flags: --output, --query
 
 ## `coily ops trello cards delete-cards-id-stickers-idsticker`
 
 Delete a Sticker on a Card
 
+Flags: --output, --query
+
 ## `coily ops trello cards delete-id-idmembers-idmember`
 
 Remove a Member from a Card
+
+Flags: --output, --query
 
 ## `coily ops trello cards deleted-cards-id-attachments-idattachment`
 
 Delete an Attachment on a Card
 
+Flags: --output, --query
+
 ## `coily ops trello cards get-cards-id`
 
 Get a Card
 
-Flags: --actions, --attachment_fields, --attachments, --board, --board_fields, --checkItemStates, --checklist_fields, --checklists, --customFieldItems, --fields, --list, --memberVoted_fields, --member_fields, --members, --membersVoted, --pluginData, --sticker_fields, --stickers
+Flags: --actions, --attachment_fields, --attachments, --board, --board_fields, --checkItemStates, --checklist_fields, --checklists, --customFieldItems, --fields, --list, --memberVoted_fields, --member_fields, --members, --membersVoted, --output, --pluginData, --query, --sticker_fields, --stickers
 
 ## `coily ops trello cards get-cards-id-actions`
 
 Get Actions on a Card
 
-Flags: --filter, --page
+Flags: --filter, --output, --page, --query
 
 ## `coily ops trello cards get-cards-id-attachments`
 
 Get Attachments on a Card
 
-Flags: --fields, --filter
+Flags: --fields, --filter, --output, --query
 
 ## `coily ops trello cards get-cards-id-attachments-idattachment`
 
 Get an Attachment on a Card
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello cards get-cards-id-board`
 
 Get the Board the Card is on
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello cards get-cards-id-checkitem-idcheckitem`
 
 Get checkItem on a Card
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello cards get-cards-id-checkitemstates`
 
 Get checkItems on a Card
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello cards get-cards-id-checklists`
 
 Get Checklists on a Card
 
-Flags: --checkItem_fields, --checkItems, --fields, --filter
+Flags: --checkItem_fields, --checkItems, --fields, --filter, --output, --query
 
 ## `coily ops trello cards get-cards-id-customfielditems`
 
 Get Custom Field Items for a Card
 
+Flags: --output, --query
+
 ## `coily ops trello cards get-cards-id-field`
 
 Get a field on a Card
+
+Flags: --output, --query
 
 ## `coily ops trello cards get-cards-id-list`
 
 Get the List of a Card
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello cards get-cards-id-members`
 
 Get the Members of a Card
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello cards get-cards-id-membersvoted`
 
 Get Members who have voted on a Card
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello cards get-cards-id-plugindata`
 
 Get pluginData on a Card
 
+Flags: --output, --query
+
 ## `coily ops trello cards get-cards-id-stickers`
 
 Get Stickers on a Card
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello cards get-cards-id-stickers-idsticker`
 
 Get a Sticker on a Card
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello cards post-cards`
 
 Create a new Card
 
-Flags: --address, --cardRole, --coordinates, --desc, --due, --dueComplete, --fileSource, --idCardSource, --idLabels, --idList, --idMembers, --keepFromSource, --locationName, --mimeType, --name, --pos, --start, --urlSource
+Flags: --address, --cardRole, --coordinates, --desc, --due, --dueComplete, --fileSource, --idCardSource, --idLabels, --idList, --idMembers, --keepFromSource, --locationName, --mimeType, --name, --output, --pos, --query, --start, --urlSource
 
 ## `coily ops trello cards post-cards-id-actions-comments`
 
 Add a new comment to a Card
 
-Flags: --text
+Flags: --output, --query, --text
 
 ## `coily ops trello cards post-cards-id-attachments`
 
 Create Attachment On Card
 
-Flags: --file, --mimeType, --name, --setCover, --url
+Flags: --file, --mimeType, --name, --output, --query, --setCover, --url
 
 ## `coily ops trello cards post-cards-id-checklists`
 
 Create Checklist on a Card
 
-Flags: --idChecklistSource, --name, --pos
+Flags: --idChecklistSource, --name, --output, --pos, --query
 
 ## `coily ops trello cards post-cards-id-idlabels`
 
 Add a Label to a Card
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello cards post-cards-id-idmembers`
 
 Add a Member to a Card
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello cards post-cards-id-labels`
 
 Create a new Label on a Card
 
-Flags: --color, --name
+Flags: --color, --name, --output, --query
 
 ## `coily ops trello cards post-cards-id-markassociatednotificationsread`
 
 Mark a Card's Notifications as read
 
+Flags: --output, --query
+
 ## `coily ops trello cards post-cards-id-stickers`
 
 Add a Sticker to a Card
 
-Flags: --image, --left, --rotate, --top, --zIndex
+Flags: --image, --left, --output, --query, --rotate, --top, --zIndex
 
 ## `coily ops trello cards put-cards-id`
 
 Update a Card
 
-Flags: --address, --closed, --coordinates, --cover, --desc, --due, --dueComplete, --idAttachmentCover, --idBoard, --idLabels, --idList, --idMembers, --locationName, --name, --pos, --start, --subscribed
+Flags: --address, --closed, --coordinates, --cover, --desc, --due, --dueComplete, --idAttachmentCover, --idBoard, --idLabels, --idList, --idMembers, --locationName, --name, --output, --pos, --query, --start, --subscribed
 
 ## `coily ops trello cards put-cards-id-actions-idaction-comments`
 
 Update Comment Action on a Card
 
-Flags: --text
+Flags: --output, --query, --text
 
 ## `coily ops trello cards put-cards-id-checkitem-idcheckitem`
 
 Update a checkItem on a Card
 
-Flags: --due, --dueReminder, --idChecklist, --idMember, --name, --pos, --state
+Flags: --due, --dueReminder, --idChecklist, --idMember, --name, --output, --pos, --query, --state
 
 ## `coily ops trello cards put-cards-id-stickers-idsticker`
 
 Update a Sticker on a Card
 
-Flags: --left, --rotate, --top, --zIndex
+Flags: --left, --output, --query, --rotate, --top, --zIndex
 
 ## `coily ops trello cards put-cards-idcard-checklist-idchecklist-checkitem-idcheckitem`
 
 Update Checkitem on Checklist on Card
 
-Flags: --pos
+Flags: --output, --pos, --query
 
 ## `coily ops trello cards put-cards-idcard-customfield-idcustomfield-item`
 
 Update Custom Field item on Card
 
-Flags: --body
+Flags: --body, --output, --query
 
 ## `coily ops trello cards put-cards-idcard-customfields`
 
 Update Multiple Custom Field items on Card
 
-Flags: --body
+Flags: --body, --output, --query
 
 ## `coily ops trello checklists delete-checklists-id`
 
 Delete a Checklist
 
+Flags: --output, --query
+
 ## `coily ops trello checklists delete-checklists-id-checkitems-idcheckitem`
 
 Delete Checkitem from Checklist
+
+Flags: --output, --query
 
 ## `coily ops trello checklists get-checklists-id`
 
 Get a Checklist
 
-Flags: --cards, --checkItem_fields, --checkItems, --fields
+Flags: --cards, --checkItem_fields, --checkItems, --fields, --output, --query
 
 ## `coily ops trello checklists get-checklists-id-board`
 
 Get the Board the Checklist is on
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello checklists get-checklists-id-cards`
 
 Get the Card a Checklist is on
 
+Flags: --output, --query
+
 ## `coily ops trello checklists get-checklists-id-checkitems`
 
 Get Checkitems on a Checklist
 
-Flags: --fields, --filter
+Flags: --fields, --filter, --output, --query
 
 ## `coily ops trello checklists get-checklists-id-checkitems-idcheckitem`
 
 Get a Checkitem on a Checklist
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello checklists get-checklists-id-field`
 
 Get field on a Checklist
 
+Flags: --output, --query
+
 ## `coily ops trello checklists post-checklists`
 
 Create a Checklist
 
-Flags: --idCard, --idChecklistSource, --name, --pos
+Flags: --idCard, --idChecklistSource, --name, --output, --pos, --query
 
 ## `coily ops trello checklists post-checklists-id-checkitems`
 
 Create Checkitem on Checklist
 
-Flags: --checked, --due, --dueReminder, --idMember, --name, --pos
+Flags: --checked, --due, --dueReminder, --idMember, --name, --output, --pos, --query
 
 ## `coily ops trello checklists put-checklists-id-field`
 
 Update field on a Checklist
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello checklists put-checlists-id`
 
 Update a Checklist
 
-Flags: --name, --pos
+Flags: --name, --output, --pos, --query
 
 ## `coily ops trello custom-fields delete-customfields-id`
 
 Delete a Custom Field definition
 
+Flags: --output, --query
+
 ## `coily ops trello custom-fields delete-customfields-options-idcustomfieldoption`
 
 Delete Option of Custom Field dropdown
+
+Flags: --output, --query
 
 ## `coily ops trello custom-fields get-customfields-id`
 
 Get a Custom Field
 
+Flags: --output, --query
+
 ## `coily ops trello custom-fields get-customfields-id-options`
 
 Add Option to Custom Field dropdown
+
+Flags: --output, --query
 
 ## `coily ops trello custom-fields get-customfields-options-idcustomfieldoption`
 
 Get Option of Custom Field dropdown
 
+Flags: --output, --query
+
 ## `coily ops trello custom-fields post-customfields`
 
 Create a new Custom Field on a Board
 
-Flags: --body
+Flags: --body, --output, --query
 
 ## `coily ops trello custom-fields post-customfields-id-options`
 
 Get Options of Custom Field drop down
 
+Flags: --output, --query
+
 ## `coily ops trello custom-fields put-customfields-id`
 
 Update a Custom Field definition
 
-Flags: --body
+Flags: --body, --output, --query
 
 ## `coily ops trello emoji emoji`
 
 List available Emoji
 
-Flags: --locale, --spritesheets
+Flags: --locale, --output, --query, --spritesheets
 
 ## `coily ops trello enterprises delete-enterprises-id-organizations-idorg`
 
 Delete an Organization from an Enterprise.
 
+Flags: --output, --query
+
 ## `coily ops trello enterprises enterprises-id-members-id-member-deactivated`
 
 Deactivate a Member of an Enterprise.
 
-Flags: --board_fields, --fields, --organization_fields, --value
+Flags: --board_fields, --fields, --organization_fields, --output, --query, --value
 
 ## `coily ops trello enterprises enterprises-id-organizations-idmember`
 
 Remove a Member as admin from Enterprise.
 
+Flags: --output, --query
+
 ## `coily ops trello enterprises get-enterprises-id`
 
 Get an Enterprise
 
-Flags: --fields, --member_count, --member_fields, --member_filter, --member_sort, --member_sortBy, --member_sortOrder, --member_startIndex, --members, --organization_fields, --organization_memberships, --organization_paid_accounts, --organizations
+Flags: --fields, --member_count, --member_fields, --member_filter, --member_sort, --member_sortBy, --member_sortOrder, --member_startIndex, --members, --organization_fields, --organization_memberships, --organization_paid_accounts, --organizations, --output, --query
 
 ## `coily ops trello enterprises get-enterprises-id-admins`
 
 Get Enterprise admin Members
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello enterprises get-enterprises-id-auditlog`
 
 Get auditlog data for an Enterprise
 
+Flags: --output, --query
+
 ## `coily ops trello enterprises get-enterprises-id-claimable-organizations`
 
 Get ClaimableOrganizations of an Enterprise
 
-Flags: --activeSince, --cursor, --inactiveSince, --limit, --name
+Flags: --activeSince, --cursor, --inactiveSince, --limit, --name, --output, --query
 
 ## `coily ops trello enterprises get-enterprises-id-members`
 
 Get Members of Enterprise
 
-Flags: --board_fields, --count, --fields, --filter, --organization_fields, --sort, --sortBy, --sortOrder, --startIndex
+Flags: --board_fields, --count, --fields, --filter, --organization_fields, --output, --query, --sort, --sortBy, --sortOrder, --startIndex
 
 ## `coily ops trello enterprises get-enterprises-id-members-idmember`
 
 Get a Member of Enterprise
 
-Flags: --board_fields, --fields, --organization_fields
+Flags: --board_fields, --fields, --organization_fields, --output, --query
 
 ## `coily ops trello enterprises get-enterprises-id-organizations`
 
 Get Organizations of an Enterprise
 
-Flags: --count, --fields, --filter, --startIndex
+Flags: --count, --fields, --filter, --output, --query, --startIndex
 
 ## `coily ops trello enterprises get-enterprises-id-organizations-bulk-id-organizations`
 
 Bulk accept a set of organizations to an Enterprise.
 
+Flags: --output, --query
+
 ## `coily ops trello enterprises get-enterprises-id-pending-organizations`
 
 Get PendingOrganizations of an Enterprise
 
-Flags: --activeSince, --inactiveSince
+Flags: --activeSince, --inactiveSince, --output, --query
 
 ## `coily ops trello enterprises get-enterprises-id-signupurl`
 
 Get signupUrl for Enterprise
 
-Flags: --authenticate, --confirmationAccepted, --returnUrl, --tosAccepted
+Flags: --authenticate, --confirmationAccepted, --output, --query, --returnUrl, --tosAccepted
 
 ## `coily ops trello enterprises get-enterprises-id-transferrable-bulk-id-organizations`
 
 Get a bulk list of organizations that can be transferred to an enterprise.
 
+Flags: --output, --query
+
 ## `coily ops trello enterprises get-enterprises-id-transferrable-organization-id-organization`
 
 Get whether an organization can be transferred to an enterprise.
+
+Flags: --output, --query
 
 ## `coily ops trello enterprises get-users-id`
 
 Get Users of an Enterprise
 
-Flags: --activeSince, --admin, --collaborator, --cursor, --deactivated, --inactiveSince, --licensed, --managed, --search
+Flags: --activeSince, --admin, --collaborator, --cursor, --deactivated, --inactiveSince, --licensed, --managed, --output, --query, --search
 
 ## `coily ops trello enterprises post-enterprises-id-tokens`
 
 Create an auth Token for an Enterprise.
 
-Flags: --expiration
+Flags: --expiration, --output, --query
 
 ## `coily ops trello enterprises put-enterprises-id-admins-idmember`
 
 Update Member to be admin of Enterprise
 
+Flags: --output, --query
+
 ## `coily ops trello enterprises put-enterprises-id-enterprise-join-request-bulk`
 
 Decline enterpriseJoinRequests from one organization or a bulk list of organizations.
 
-Flags: --idOrganizations
+Flags: --idOrganizations, --output, --query
 
 ## `coily ops trello enterprises put-enterprises-id-members-idmember-licensed`
 
 Update a Member's licensed status
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello enterprises put-enterprises-id-organizations`
 
 Transfer an Organization to an Enterprise.
 
-Flags: --idOrganization
+Flags: --idOrganization, --output, --query
 
 ## `coily ops trello labels delete-labels-id`
 
 Delete a Label
 
+Flags: --output, --query
+
 ## `coily ops trello labels get-labels-id`
 
 Get a Label
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello labels post-labels`
 
 Create a Label
 
-Flags: --color, --idBoard, --name
+Flags: --color, --idBoard, --name, --output, --query
 
 ## `coily ops trello labels put-labels-id`
 
 Update a Label
 
-Flags: --color, --name
+Flags: --color, --name, --output, --query
 
 ## `coily ops trello labels put-labels-id-field`
 
 Update a field on a label
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello lists get-lists-id`
 
 Get a List
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello lists get-lists-id-actions`
 
 Get Actions for a List
 
-Flags: --filter
+Flags: --filter, --output, --query
 
 ## `coily ops trello lists get-lists-id-board`
 
 Get the Board a List is on
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello lists get-lists-id-cards`
 
 Get Cards in a List
 
+Flags: --output, --query
+
 ## `coily ops trello lists post-lists`
 
 Create a new List
 
-Flags: --idBoard, --idListSource, --name, --pos
+Flags: --idBoard, --idListSource, --name, --output, --pos, --query
 
 ## `coily ops trello lists post-lists-id-archiveallcards`
 
 Archive all Cards in List
 
+Flags: --output, --query
+
 ## `coily ops trello lists post-lists-id-moveallcards`
 
 Move all Cards in List
 
-Flags: --idBoard, --idList
+Flags: --idBoard, --idList, --output, --query
 
 ## `coily ops trello lists put-id-idboard`
 
 Move List to Board
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello lists put-lists-id`
 
 Update a List
 
-Flags: --closed, --idBoard, --name, --pos, --subscribed
+Flags: --closed, --idBoard, --name, --output, --pos, --query, --subscribed
 
 ## `coily ops trello lists put-lists-id-closed`
 
 Archive or unarchive a list
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello lists put-lists-id-field`
 
 Update a field on a List
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello members delete-members-id-boardbackgrounds-idbackground`
 
 Delete a Member's custom Board background
 
+Flags: --output, --query
+
 ## `coily ops trello members delete-members-id-boardstars-idstar`
 
 Delete Star for Board
+
+Flags: --output, --query
 
 ## `coily ops trello members delete-members-id-customboardbackgrounds-idbackground`
 
 Delete custom Board Background of Member
 
+Flags: --output, --query
+
 ## `coily ops trello members delete-members-id-customstickers-idsticker`
 
 Delete a Member's custom Sticker
+
+Flags: --output, --query
 
 ## `coily ops trello members delete-members-id-savedsearches-idsearch`
 
 Delete a saved search
 
+Flags: --output, --query
+
 ## `coily ops trello members get-members-id`
 
 Get a Member
 
-Flags: --actions, --boardBackgrounds, --boardStars, --boards, --boardsInvited, --boardsInvited_fields, --cards, --customBoardBackgrounds, --customEmoji, --customStickers, --fields, --notifications, --organization_fields, --organization_paid_account, --organizations, --organizationsInvited, --organizationsInvited_fields, --paid_account, --savedSearches, --tokens
+Flags: --actions, --boardBackgrounds, --boardStars, --boards, --boardsInvited, --boardsInvited_fields, --cards, --customBoardBackgrounds, --customEmoji, --customStickers, --fields, --notifications, --organization_fields, --organization_paid_account, --organizations, --organizationsInvited, --organizationsInvited_fields, --output, --paid_account, --query, --savedSearches, --tokens
 
 ## `coily ops trello members get-members-id-actions`
 
 Get a Member's Actions
 
-Flags: --filter
+Flags: --filter, --output, --query
 
 ## `coily ops trello members get-members-id-boardbackgrounds`
 
 Get Member's custom Board backgrounds
 
-Flags: --filter
+Flags: --filter, --output, --query
 
 ## `coily ops trello members get-members-id-boardbackgrounds-idbackground`
 
 Get a boardBackground of a Member
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello members get-members-id-boards`
 
 Get Boards that Member belongs to
 
-Flags: --fields, --filter, --lists, --organization, --organization_fields
+Flags: --fields, --filter, --lists, --organization, --organization_fields, --output, --query
 
 ## `coily ops trello members get-members-id-boardsinvited`
 
 Get Boards the Member has been invited to
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello members get-members-id-boardstars`
 
 Get a Member's boardStars
 
+Flags: --output, --query
+
 ## `coily ops trello members get-members-id-boardstars-idstar`
 
 Get a boardStar of Member
+
+Flags: --output, --query
 
 ## `coily ops trello members get-members-id-cards`
 
 Get Cards the Member is on
 
-Flags: --filter
+Flags: --filter, --output, --query
 
 ## `coily ops trello members get-members-id-customboardbackgrounds`
 
 Get a Member's custom Board Backgrounds
 
+Flags: --output, --query
+
 ## `coily ops trello members get-members-id-customboardbackgrounds-idbackground`
 
 Get custom Board Background of Member
+
+Flags: --output, --query
 
 ## `coily ops trello members get-members-id-customemoji`
 
 Get a Member's customEmojis
 
+Flags: --output, --query
+
 ## `coily ops trello members get-members-id-customstickers`
 
 Get Member's custom Stickers
+
+Flags: --output, --query
 
 ## `coily ops trello members get-members-id-customstickers-idsticker`
 
 Get a Member's custom Sticker
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello members get-members-id-field`
 
 Get a field on a Member
 
+Flags: --output, --query
+
 ## `coily ops trello members get-members-id-notification-channel-settings`
 
 Get a Member's notification channel settings
+
+Flags: --output, --query
 
 ## `coily ops trello members get-members-id-notification-channel-settings-channel`
 
 Get blocked notification keys of Member on this channel
 
+Flags: --output, --query
+
 ## `coily ops trello members get-members-id-notifications`
 
 Get Member's Notifications
 
-Flags: --before, --display, --entities, --fields, --filter, --limit, --memberCreator, --memberCreator_fields, --page, --read_filter, --since
+Flags: --before, --display, --entities, --fields, --filter, --limit, --memberCreator, --memberCreator_fields, --output, --page, --query, --read_filter, --since
 
 ## `coily ops trello members get-members-id-organizations`
 
 Get Member's Organizations
 
-Flags: --fields, --filter, --paid_account
+Flags: --fields, --filter, --output, --paid_account, --query
 
 ## `coily ops trello members get-members-id-organizationsinvited`
 
 Get Organizations a Member has been invited to
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello members get-members-id-savedsearches`
 
 Get Member's saved searched
 
+Flags: --output, --query
+
 ## `coily ops trello members get-members-id-savedsearches-idsearch`
 
 Get a saved search
+
+Flags: --output, --query
 
 ## `coily ops trello members get-members-id-tokens`
 
 Get Member's Tokens
 
-Flags: --webhooks
+Flags: --output, --query, --webhooks
 
 ## `coily ops trello members membersidavatar`
 
 Create Avatar for Member
 
-Flags: --file
+Flags: --file, --output, --query
 
 ## `coily ops trello members membersidcustomboardbackgrounds-1`
 
 Create a new custom Board Background
 
-Flags: --file
+Flags: --file, --output, --query
 
 ## `coily ops trello members membersidcustomemojiidemoji`
 
 Get a Member's custom Emoji
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello members post-members-id-boardbackgrounds-1`
 
 Upload new boardBackground for Member
 
-Flags: --file
+Flags: --file, --output, --query
 
 ## `coily ops trello members post-members-id-boardstars`
 
 Create Star for Board
 
-Flags: --idBoard, --pos
+Flags: --idBoard, --output, --pos, --query
 
 ## `coily ops trello members post-members-id-customemoji`
 
 Create custom Emoji for Member
 
-Flags: --file, --name
+Flags: --file, --name, --output, --query
 
 ## `coily ops trello members post-members-id-customstickers`
 
 Create custom Sticker for Member
 
-Flags: --file
+Flags: --file, --output, --query
 
 ## `coily ops trello members post-members-id-onetimemessagesdismissed`
 
 Dismiss a message for Member
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello members post-members-id-savedsearches`
 
 Create saved Search for Member
 
-Flags: --name, --pos, --query
+Flags: --name, --output, --pos, --query
 
 ## `coily ops trello members put-members-id`
 
 Update a Member
 
-Flags: --avatarSource, --bio, --fullName, --initials, --prefs/colorBlind, --prefs/locale, --prefs/minutesBetweenSummaries, --username
+Flags: --avatarSource, --bio, --fullName, --initials, --output, --prefs/colorBlind, --prefs/locale, --prefs/minutesBetweenSummaries, --query, --username
 
 ## `coily ops trello members put-members-id-boardbackgrounds-idbackground`
 
 Update a Member's custom Board background
 
-Flags: --brightness, --tile
+Flags: --brightness, --output, --query, --tile
 
 ## `coily ops trello members put-members-id-boardstars-idstar`
 
 Update the position of a boardStar of Member
 
-Flags: --pos
+Flags: --output, --pos, --query
 
 ## `coily ops trello members put-members-id-customboardbackgrounds-idbackground`
 
 Update custom Board Background of Member
 
-Flags: --brightness, --tile
+Flags: --brightness, --output, --query, --tile
 
 ## `coily ops trello members put-members-id-notification-channel-settings-channel-blocked-keys`
 
 Update blocked notification keys of Member on a channel
 
-Flags: --body
+Flags: --body, --output, --query
 
 ## `coily ops trello members put-members-id-notification-channel-settings-channel-blocked-keys-put`
 
 Update blocked notification keys of Member on a channel
 
-Flags: --body
+Flags: --body, --output, --query
 
 ## `coily ops trello members put-members-id-notification-channel-settings-channel-blocked-keys-put3`
 
 Update blocked notification keys of Member on a channel
 
+Flags: --output, --query
+
 ## `coily ops trello members put-members-id-savedsearches-idsearch`
 
 Update a saved search
 
-Flags: --name, --pos, --query
+Flags: --name, --output, --pos, --query
 
 ## `coily ops trello notifications get-notifications-id`
 
 Get a Notification
 
-Flags: --board, --board_fields, --card, --card_fields, --display, --entities, --fields, --list, --member, --memberCreator, --memberCreator_fields, --member_fields, --organization, --organization_fields
+Flags: --board, --board_fields, --card, --card_fields, --display, --entities, --fields, --list, --member, --memberCreator, --memberCreator_fields, --member_fields, --organization, --organization_fields, --output, --query
 
 ## `coily ops trello notifications get-notifications-id-board`
 
 Get the Board a Notification is on
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello notifications get-notifications-id-card`
 
 Get the Card a Notification is on
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello notifications get-notifications-id-field`
 
 Get a field of a Notification
 
+Flags: --output, --query
+
 ## `coily ops trello notifications get-notifications-id-list`
 
 Get the List a Notification is on
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello notifications get-notifications-id-membercreator`
 
 Get the Member who created the Notification
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello notifications get-notifications-id-organization`
 
 Get a Notification's associated Organization
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello notifications notificationsidmember`
 
 Get the Member a Notification is about (not the creator)
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello notifications post-notifications-all-read`
 
 Mark all Notifications as read
 
-Flags: --ids, --read
+Flags: --ids, --output, --query, --read
 
 ## `coily ops trello notifications put-notifications-id`
 
 Update a Notification's read status
 
-Flags: --unread
+Flags: --output, --query, --unread
 
 ## `coily ops trello notifications put-notifications-id-unread`
 
 Update Notification's read status
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello organizations delete-organizations-id`
 
 Delete an Organization
 
+Flags: --output, --query
+
 ## `coily ops trello organizations delete-organizations-id-logo`
 
 Delete Logo for Organization
+
+Flags: --output, --query
 
 ## `coily ops trello organizations delete-organizations-id-members`
 
 Remove a Member from an Organization
 
+Flags: --output, --query
+
 ## `coily ops trello organizations delete-organizations-id-prefs-associateddomain`
 
 Remove the associated Google Apps domain from a Workspace
+
+Flags: --output, --query
 
 ## `coily ops trello organizations delete-organizations-id-prefs-orginviterestrict`
 
 Delete the email domain restriction on who can be invited to the Workspace
 
+Flags: --output, --query
+
 ## `coily ops trello organizations delete-organizations-id-tags-idtag`
 
 Delete an Organization's Tag
+
+Flags: --output, --query
 
 ## `coily ops trello organizations get-organizations-id`
 
 Get an Organization
 
+Flags: --output, --query
+
 ## `coily ops trello organizations get-organizations-id-actions`
 
 Get Actions for Organization
+
+Flags: --output, --query
 
 ## `coily ops trello organizations get-organizations-id-boards`
 
 Get Boards in an Organization
 
-Flags: --fields, --filter
+Flags: --fields, --filter, --output, --query
 
 ## `coily ops trello organizations get-organizations-id-exports`
 
 Retrieve Organization's Exports
 
+Flags: --output, --query
+
 ## `coily ops trello organizations get-organizations-id-field`
 
 Get field on Organization
+
+Flags: --output, --query
 
 ## `coily ops trello organizations get-organizations-id-members`
 
 Get the Members of an Organization
 
+Flags: --output, --query
+
 ## `coily ops trello organizations get-organizations-id-memberships`
 
 Get Memberships of an Organization
 
-Flags: --filter, --member
+Flags: --filter, --member, --output, --query
 
 ## `coily ops trello organizations get-organizations-id-memberships-idmembership`
 
 Get a Membership of an Organization
 
-Flags: --member
+Flags: --member, --output, --query
 
 ## `coily ops trello organizations get-organizations-id-newbillableguests-idboard`
 
 Get Organizations new billable guests
 
+Flags: --output, --query
+
 ## `coily ops trello organizations get-organizations-id-plugindata`
 
 Get the pluginData Scoped to Organization
+
+Flags: --output, --query
 
 ## `coily ops trello organizations get-organizations-id-tags`
 
 Get Tags of an Organization
 
+Flags: --output, --query
+
 ## `coily ops trello organizations organizations-id-members-idmember-all`
 
 Remove a Member from an Organization and all Organization Boards
+
+Flags: --output, --query
 
 ## `coily ops trello organizations post-organizations`
 
 Create a new Organization
 
-Flags: --desc, --displayName, --name, --website
+Flags: --desc, --displayName, --name, --output, --query, --website
 
 ## `coily ops trello organizations post-organizations-id-exports`
 
 Create Export for Organizations
 
-Flags: --attachments
+Flags: --attachments, --output, --query
 
 ## `coily ops trello organizations post-organizations-id-logo`
 
 Update logo for an Organization
 
-Flags: --file
+Flags: --file, --output, --query
 
 ## `coily ops trello organizations post-organizations-id-tags`
 
 Create a Tag in Organization
 
+Flags: --output, --query
+
 ## `coily ops trello organizations put-organizations-id`
 
 Update an Organization
 
-Flags: --desc, --displayName, --name, --prefs/associatedDomain, --prefs/boardVisibilityRestrict/org, --prefs/boardVisibilityRestrict/private, --prefs/boardVisibilityRestrict/public, --prefs/externalMembersDisabled, --prefs/googleAppsVersion, --prefs/orgInviteRestrict, --prefs/permissionLevel, --website
+Flags: --desc, --displayName, --name, --output, --prefs/associatedDomain, --prefs/boardVisibilityRestrict/org, --prefs/boardVisibilityRestrict/private, --prefs/boardVisibilityRestrict/public, --prefs/externalMembersDisabled, --prefs/googleAppsVersion, --prefs/orgInviteRestrict, --prefs/permissionLevel, --query, --website
 
 ## `coily ops trello organizations put-organizations-id-members`
 
 Update an Organization's Members
 
-Flags: --email, --fullName, --type
+Flags: --email, --fullName, --output, --query, --type
 
 ## `coily ops trello organizations put-organizations-id-members-idmember`
 
 Update a Member of an Organization
 
-Flags: --type
+Flags: --output, --query, --type
 
 ## `coily ops trello organizations put-organizations-id-members-idmember-deactivated`
 
 Deactivate or reactivate a member of an Organization
 
-Flags: --value
+Flags: --output, --query, --value
 
 ## `coily ops trello plugins get-plugins-id`
 
 Get a Plugin
 
+Flags: --output, --query
+
 ## `coily ops trello plugins get-plugins-id-compliance-memberprivacy`
 
 Get Plugin's Member privacy compliance
+
+Flags: --output, --query
 
 ## `coily ops trello plugins post-plugins-idplugin-listing`
 
 Create a Listing for Plugin
 
-Flags: --body
+Flags: --body, --output, --query
 
 ## `coily ops trello plugins put-plugins-id`
 
 Update a Plugin
 
+Flags: --output, --query
+
 ## `coily ops trello plugins put-plugins-idplugin-listings-idlisting`
 
 Updating Plugin's Listing
 
-Flags: --body
+Flags: --body, --output, --query
 
 ## `coily ops trello search get-search`
 
 Search Trello
 
-Flags: --board_fields, --board_organization, --boards_limit, --card_attachments, --card_board, --card_fields, --card_list, --card_members, --card_stickers, --cards_limit, --cards_page, --idBoards, --idCards, --idOrganizations, --member_fields, --members_limit, --modelTypes, --organization_fields, --organizations_limit, --partial, --query
+Flags: --board_fields, --board_organization, --boards_limit, --card_attachments, --card_board, --card_fields, --card_list, --card_members, --card_stickers, --cards_limit, --cards_page, --idBoards, --idCards, --idOrganizations, --member_fields, --members_limit, --modelTypes, --organization_fields, --organizations_limit, --output, --partial, --query
 
 ## `coily ops trello search get-search-members`
 
 Search for Members
 
-Flags: --idBoard, --idOrganization, --limit, --onlyOrgMembers, --query
+Flags: --idBoard, --idOrganization, --limit, --onlyOrgMembers, --output, --query
 
 ## `coily ops trello tokens delete-token`
 
 Delete a Token
 
+Flags: --output, --query
+
 ## `coily ops trello tokens delete-tokens-token-webhooks-idwebhook`
 
 Delete a Webhook created by Token
+
+Flags: --output, --query
 
 ## `coily ops trello tokens get-tokens-token`
 
 Get a Token
 
-Flags: --fields, --webhooks
+Flags: --fields, --output, --query, --webhooks
 
 ## `coily ops trello tokens get-tokens-token-member`
 
 Get Token's Member
 
-Flags: --fields
+Flags: --fields, --output, --query
 
 ## `coily ops trello tokens get-tokens-token-webhooks`
 
 Get Webhooks for Token
 
+Flags: --output, --query
+
 ## `coily ops trello tokens get-tokens-token-webhooks-idwebhook`
 
 Get a Webhook belonging to a Token
+
+Flags: --output, --query
 
 ## `coily ops trello tokens post-tokens-token-webhooks`
 
 Create Webhooks for Token
 
-Flags: --callbackURL, --description, --idModel
+Flags: --callbackURL, --description, --idModel, --output, --query
 
 ## `coily ops trello tokens tokenstokenwebhooks-1`
 
 Update a Webhook created by Token
 
-Flags: --callbackURL, --description, --idModel
+Flags: --callbackURL, --description, --idModel, --output, --query
 
 ## `coily ops trello webhooks delete-webhooks-id`
 
 Delete a Webhook
 
+Flags: --output, --query
+
 ## `coily ops trello webhooks get-webhooks-id`
 
 Get a Webhook
+
+Flags: --output, --query
 
 ## `coily ops trello webhooks post-webhooks`
 
 Create a Webhook
 
-Flags: --active, --callbackURL, --description, --idModel
+Flags: --active, --callbackURL, --description, --idModel, --output, --query
 
 ## `coily ops trello webhooks put-webhooks-id`
 
 Update a Webhook
 
-Flags: --active, --callbackURL, --description, --idModel
+Flags: --active, --callbackURL, --description, --idModel, --output, --query
 
 ## `coily ops trello webhooks webhooksidfield`
 
 Get a field on a Webhook
+
+Flags: --output, --query
 
 ## `coily pkg brew`
 

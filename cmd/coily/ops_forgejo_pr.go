@@ -35,70 +35,42 @@ func (r *Runner) forgejoPRCommand() *cli.Command {
 	}
 }
 
+// forgejoPRCreateCommand is intentionally a hard block. Kai's release flow
+// pushes the merged branch straight to canonical Forgejo `main`, so coily
+// never opens a PR on her behalf. The command stays registered so the
+// kickback message explains the workflow instead of "unknown command".
 func (r *Runner) forgejoPRCreateCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "create",
-		Usage: "Create a forgejo pull request.",
+		Usage: "Disabled. Merge/commit straight to main instead.",
+		// Flags are kept (and ignored) so existing `pr create` invocations
+		// reach the Action and get the kickback, not a "flag not defined" error.
 		Flags: []cli.Flag{
-			&cli.StringFlag{Name: "repo", Usage: "target repo as owner/name", Required: true},
-			&cli.StringFlag{Name: "head", Usage: "source branch (the branch with changes)", Required: true},
-			&cli.StringFlag{Name: "base", Usage: "destination branch", Required: true},
-			&cli.StringFlag{Name: "title", Usage: "PR title", Required: true},
-			&cli.StringFlag{Name: "body-file", Usage: "path to PR description markdown"},
+			&cli.StringFlag{Name: "repo"},
+			&cli.StringFlag{Name: "head"},
+			&cli.StringFlag{Name: "base"},
+			&cli.StringFlag{Name: "title"},
+			&cli.StringFlag{Name: "body-file"},
 		},
-		Action: r.WrapVerb(
-			verb.Spec{
-				Name:       "ops.forgejo.pr.create",
-				SkipPolicy: true,
-				OnComplete: stampPolicySkipped,
-				Action: func(ctx context.Context, c *cli.Command) error {
-					return r.runForgejoPRCreate(ctx, c)
-				},
-			},
-			r.Audit,
-		),
+		Action: func(_ context.Context, _ *cli.Command) error {
+			return cli.Exit(forgejoPRCreateBlockMessage, 1)
+		},
 	}
 }
 
-func (r *Runner) runForgejoPRCreate(ctx context.Context, c *cli.Command) error {
-	if c.Args().Len() != 0 {
-		return fmt.Errorf("ops forgejo pr create: takes no positional args, got %d", c.Args().Len())
-	}
-	owner, repo, err := parseForgejoRepoSlug(c.String("repo"))
-	if err != nil {
-		return err
-	}
-	head, err := validateForgejoBranchName(c.String("head"), "ops forgejo pr create", "--head")
-	if err != nil {
-		return err
-	}
-	base, err := validateForgejoBranchName(c.String("base"), "ops forgejo pr create", "--base")
-	if err != nil {
-		return err
-	}
-	title := strings.TrimSpace(c.String("title"))
-	if title == "" {
-		return fmt.Errorf("ops forgejo pr create: --title is empty")
-	}
-	body := forgejoPRCreateBody{Head: head, Base: base, Title: title}
-	if bp := c.String("body-file"); bp != "" {
-		b, rerr := readForgejoBodyFile(bp, "ops forgejo pr create")
-		if rerr != nil {
-			return rerr
-		}
-		body.Body = b
-	}
-	payload, err := json.Marshal(body)
-	if err != nil {
-		return fmt.Errorf("ops forgejo pr create: marshal payload: %w", err)
-	}
-	path := fmt.Sprintf("/api/v1/repos/%s/%s/pulls", owner, repo)
-	respBody, err := r.forgejoAPIDo(ctx, "ops forgejo pr create", http.MethodPost, path, payload, http.StatusCreated)
-	if err != nil {
-		return err
-	}
-	return printForgejoPR(respBody)
-}
+const forgejoPRCreateBlockMessage = `coily: Forgejo PR creation is disabled. Merge/commit straight to main instead.
+
+Kai's release flow lands work by merging the branch locally and pushing it
+directly to canonical Forgejo ` + "`main`" + `, never through a pull request. coily
+will not open a PR on your behalf.
+
+Merge/commit, then push to main:
+  git push $(git config --get-all remote.origin.pushurl | grep forgejo) HEAD:main
+
+Commits must close a same-repo Forgejo issue by URL. Reads, edits, merges,
+comments, and reviews still pass through ` + "`coily ops forgejo pr`" + `.
+
+See agentic-os-kai AGENTS.md "Release".`
 
 func (r *Runner) forgejoPRListCommand() *cli.Command {
 	return &cli.Command{
@@ -518,40 +490,6 @@ func validateForgejoPRReviewComment(com forgejoPRReviewCommentBody, idx int) err
 		return fmt.Errorf("ops forgejo pr review: --comments-file[%d]: exactly one of old_position / new_position must be > 0", idx)
 	}
 	return nil
-}
-
-// validateForgejoBranchName applies the same defensive shape as the tag
-// validator. Forgejo's git refs allow more, but argv-as-flag and
-// shell-injection shapes must be rejected at this layer.
-func validateForgejoBranchName(name, prefix, flag string) (string, error) {
-	name = strings.TrimSpace(name)
-	if name == "" {
-		return "", fmt.Errorf("%s: %s is empty", prefix, flag)
-	}
-	if len(name) > 250 {
-		return "", fmt.Errorf("%s: %s too long", prefix, flag)
-	}
-	if strings.HasPrefix(name, "-") {
-		return "", fmt.Errorf("%s: %s must not start with '-'", prefix, flag)
-	}
-	for _, r := range name {
-		switch {
-		case r >= 'a' && r <= 'z',
-			r >= 'A' && r <= 'Z',
-			r >= '0' && r <= '9',
-			r == '-', r == '_', r == '.', r == '/', r == '+':
-		default:
-			return "", fmt.Errorf("%s: %s contains invalid character %q", prefix, flag, r)
-		}
-	}
-	return name, nil
-}
-
-type forgejoPRCreateBody struct {
-	Head  string `json:"head"`
-	Base  string `json:"base"`
-	Title string `json:"title"`
-	Body  string `json:"body,omitempty"`
 }
 
 type forgejoPRMergeBody struct {
