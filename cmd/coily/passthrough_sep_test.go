@@ -18,8 +18,8 @@ func TestStripPassthroughSeparator(t *testing.T) {
 		},
 		{
 			name: "ops aws with leading global flag",
-			in:   []string{"coily", "--commit-scope=/x", "ops", "aws", "--", "ssm", "get-parameter", "--name", "/p", "--query", "Parameter.Value"},
-			want: []string{"coily", "--commit-scope=/x", "ops", "aws", "ssm", "get-parameter", "--name", "/p", "--query", "Parameter.Value"},
+			in:   []string{"coily", "--cwd=/x", "ops", "aws", "--", "ssm", "get-parameter", "--name", "/p", "--query", "Parameter.Value"},
+			want: []string{"coily", "--cwd=/x", "ops", "aws", "ssm", "get-parameter", "--name", "/p", "--query", "Parameter.Value"},
 		},
 		{
 			name: "ops gh separator",
