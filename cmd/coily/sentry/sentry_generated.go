@@ -7,6 +7,12 @@
 // string flags; request bodies arrive via --body (literal | @file | -).
 // Responses stream to stdout pretty-printed (JSON) or verbatim (other).
 //
+// Two persistent root flags, --query (JMESPath projection) and --output
+// (json|yaml|text), fold coily's REST projection rail (coilyco-bridge/coily#46)
+// into every leaf via restfmt. When neither is set the response is emitted
+// byte-for-byte as before. An op that already owns an API --query parameter
+// exposes the projection as --jq instead, mirroring the gh-rest --jq rail.
+//
 // Bearer auth from AWS SSM at /sentry/api-key on every call.
 package sentry
 
@@ -22,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"forgejo.coilysiren.me/coilyco-bridge/coily/cmd/coily/restfmt"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
@@ -39,6 +46,13 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  "sentry",
 		Usage: "Sentry Public API (bearer auth).",
+		Flags: []cli.Flag{
+			// urfave/cli v3 flags propagate to every subcommand by default
+			// (Local defaults false), so these reach every generated leaf. A
+			// leaf that declares a same-named local flag shadows them.
+			&cli.StringFlag{Name: "query", Usage: "JMESPath projection applied to the JSON response (coily#46)"},
+			&cli.StringFlag{Name: "output", Usage: "output format: json (default), yaml, text (coily#46)"},
+		},
 		Commands: []*cli.Command{
 			groupEvents(r, w),
 			groupIntegration(r, w),
@@ -54,15 +68,10 @@ func groupEvents(r *shell.Runner, w *audit.Writer) *cli.Command {
 		Name:  "events",
 		Usage: "API Reference endpoints tagged events.",
 		Commands: []*cli.Command{
-			opEventsRetrieveAnEventForAProject(r, w),
 			opEventsListAProjectSIssues(r, w),
 			opEventsBulkMutateAListOfIssues(r, w),
 			opEventsBulkRemoveAListOfIssues(r, w),
 			opEventsListATagSValuesRelatedToAnIssue(r, w),
-			opEventsListAnIssueSHashes(r, w),
-			opEventsRetrieveAnIssue(r, w),
-			opEventsUpdateAnIssue(r, w),
-			opEventsRemoveAnIssue(r, w),
 		},
 	}
 }
@@ -94,9 +103,6 @@ func groupProjects(r *shell.Runner, w *audit.Writer) *cli.Command {
 		Name:  "projects",
 		Usage: "API Reference endpoints tagged projects.",
 		Commands: []*cli.Command{
-			opProjectsListAProjectSDebugInformationFiles(r, w),
-			opProjectsUploadANewFile(r, w),
-			opProjectsDeleteASpecificProjectSDebugInformationFile(r, w),
 			opProjectsListAProjectSUsers(r, w),
 			opProjectsListATagSValues(r, w),
 			opProjectsRetrieveEventCountsForAProject(r, w),
@@ -137,37 +143,6 @@ func groupReleases(r *shell.Runner, w *audit.Writer) *cli.Command {
 	}
 }
 
-func opEventsRetrieveAnEventForAProject(r *shell.Runner, w *audit.Writer) *cli.Command {
-	return &cli.Command{
-		Name:      "retrieve-an-event-for-a-project",
-		Usage:     "Return details on an individual event.",
-		ArgsUsage: "<organization_id_or_slug> <project_id_or_slug> <event_id>",
-		Action: verb.Wrap(
-			verb.Spec{
-				Name: "ops.sentry.events.retrieve-an-event-for-a-project",
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					m := map[string]string{}
-					return m, c.Args().Slice()
-				},
-				Action: func(ctx context.Context, c *cli.Command) error {
-					args := c.Args().Slice()
-					if len(args) != 3 {
-						return fmt.Errorf("sentry: need 3 positional args (organization_id_or_slug project_id_or_slug event_id), got %d", len(args))
-					}
-					p0 := url.PathEscape(args[0])
-					p1 := url.PathEscape(args[1])
-					p2 := url.PathEscape(args[2])
-					path := "/api/0/projects/" + p0 + "/" + p1 + "/events/" + p2 + "/"
-					q := url.Values{}
-					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
-				},
-			},
-			w,
-		),
-	}
-}
-
 func opEventsListAProjectSIssues(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
 		Name:      "list-a-project-s-issues",
@@ -178,6 +153,7 @@ func opEventsListAProjectSIssues(r *shell.Runner, w *audit.Writer) *cli.Command 
 			&cli.StringFlag{Name: "shortIdLookup", Usage: "query: If this is set to true then short IDs are looked up by this function as well. T…"},
 			&cli.StringFlag{Name: "query", Usage: "query: An optional Sentry structured search query. If not provided an implied `'is:unr…"},
 			&cli.StringFlag{Name: "hashes", Usage: "query: A list of hashes of groups to return. Is not compatible with 'query' parameter.…"},
+			&cli.StringFlag{Name: "jq", Usage: "JMESPath projection applied to the JSON response; --jq here because this op owns an API --query (coily#46)"},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
@@ -220,7 +196,7 @@ func opEventsListAProjectSIssues(r *shell.Runner, w *audit.Writer) *cli.Command 
 						q.Set("hashes", c.String("hashes"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("jq"), c.String("output"))
 				},
 			},
 			w,
@@ -273,7 +249,7 @@ func opEventsBulkMutateAListOfIssues(r *shell.Runner, w *audit.Writer) *cli.Comm
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -312,7 +288,7 @@ func opEventsBulkRemoveAListOfIssues(r *shell.Runner, w *audit.Writer) *cli.Comm
 						q.Set("id", c.String("id"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -343,154 +319,7 @@ func opEventsListATagSValuesRelatedToAnIssue(r *shell.Runner, w *audit.Writer) *
 					path := "/api/0/organizations/" + p0 + "/issues/" + p1 + "/tags/" + p2 + "/values/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
-				},
-			},
-			w,
-		),
-	}
-}
-
-func opEventsListAnIssueSHashes(r *shell.Runner, w *audit.Writer) *cli.Command {
-	return &cli.Command{
-		Name:      "list-an-issue-s-hashes",
-		Usage:     "This endpoint lists an issue's hashes, which are the generated checksums used to aggregate individual events.",
-		ArgsUsage: "<organization_id_or_slug> <issue_id>",
-		Flags: []cli.Flag{
-			&cli.StringFlag{Name: "full", Usage: "query: If this is set to true, the event payload will include the full event body, inc…"},
-		},
-		Action: verb.Wrap(
-			verb.Spec{
-				Name: "ops.sentry.events.list-an-issue-s-hashes",
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					m := map[string]string{}
-					if c.IsSet("full") {
-						m["--full"] = c.String("full")
-					}
-					return m, c.Args().Slice()
-				},
-				Action: func(ctx context.Context, c *cli.Command) error {
-					args := c.Args().Slice()
-					if len(args) != 2 {
-						return fmt.Errorf("sentry: need 2 positional args (organization_id_or_slug issue_id), got %d", len(args))
-					}
-					p0 := url.PathEscape(args[0])
-					p1 := url.PathEscape(args[1])
-					path := "/api/0/organizations/" + p0 + "/issues/" + p1 + "/hashes/"
-					q := url.Values{}
-					if c.IsSet("full") {
-						q.Set("full", c.String("full"))
-					}
-					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
-				},
-			},
-			w,
-		),
-	}
-}
-
-func opEventsRetrieveAnIssue(r *shell.Runner, w *audit.Writer) *cli.Command {
-	return &cli.Command{
-		Name:      "retrieve-an-issue",
-		Usage:     "Return details on an individual issue. This returns the basic stats for the issue (title, last seen, first seen), some…",
-		ArgsUsage: "<organization_id_or_slug> <issue_id>",
-		Flags: []cli.Flag{
-			&cli.StringFlag{Name: "collapse", Usage: "query: Fields to remove from the response to improve query performance."},
-		},
-		Action: verb.Wrap(
-			verb.Spec{
-				Name: "ops.sentry.events.retrieve-an-issue",
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					m := map[string]string{}
-					if c.IsSet("collapse") {
-						m["--collapse"] = c.String("collapse")
-					}
-					return m, c.Args().Slice()
-				},
-				Action: func(ctx context.Context, c *cli.Command) error {
-					args := c.Args().Slice()
-					if len(args) != 2 {
-						return fmt.Errorf("sentry: need 2 positional args (organization_id_or_slug issue_id), got %d", len(args))
-					}
-					p0 := url.PathEscape(args[0])
-					p1 := url.PathEscape(args[1])
-					path := "/api/0/organizations/" + p0 + "/issues/" + p1 + "/"
-					q := url.Values{}
-					if c.IsSet("collapse") {
-						q.Set("collapse", c.String("collapse"))
-					}
-					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
-				},
-			},
-			w,
-		),
-	}
-}
-
-func opEventsUpdateAnIssue(r *shell.Runner, w *audit.Writer) *cli.Command {
-	return &cli.Command{
-		Name:      "update-an-issue",
-		Usage:     "Updates an individual issue's attributes. Only the attributes submitted are modified.",
-		ArgsUsage: "<organization_id_or_slug> <issue_id>",
-		Flags: []cli.Flag{
-			&cli.StringFlag{Name: "body", Usage: "JSON body, '@file', or '-' for stdin"},
-		},
-		Action: verb.Wrap(
-			verb.Spec{
-				Name: "ops.sentry.events.update-an-issue",
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					m := map[string]string{}
-					if c.IsSet("body") {
-						m["--body"] = c.String("body")
-					}
-					return m, c.Args().Slice()
-				},
-				Action: func(ctx context.Context, c *cli.Command) error {
-					args := c.Args().Slice()
-					if len(args) != 2 {
-						return fmt.Errorf("sentry: need 2 positional args (organization_id_or_slug issue_id), got %d", len(args))
-					}
-					p0 := url.PathEscape(args[0])
-					p1 := url.PathEscape(args[1])
-					path := "/api/0/organizations/" + p0 + "/issues/" + p1 + "/"
-					q := url.Values{}
-					body, err := readBody(c.String("body"))
-					if err != nil {
-						return err
-					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
-				},
-			},
-			w,
-		),
-	}
-}
-
-func opEventsRemoveAnIssue(r *shell.Runner, w *audit.Writer) *cli.Command {
-	return &cli.Command{
-		Name:      "remove-an-issue",
-		Usage:     "Removes an individual issue.",
-		ArgsUsage: "<organization_id_or_slug> <issue_id>",
-		Action: verb.Wrap(
-			verb.Spec{
-				Name: "ops.sentry.events.remove-an-issue",
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					m := map[string]string{}
-					return m, c.Args().Slice()
-				},
-				Action: func(ctx context.Context, c *cli.Command) error {
-					args := c.Args().Slice()
-					if len(args) != 2 {
-						return fmt.Errorf("sentry: need 2 positional args (organization_id_or_slug issue_id), got %d", len(args))
-					}
-					p0 := url.PathEscape(args[0])
-					p1 := url.PathEscape(args[1])
-					path := "/api/0/organizations/" + p0 + "/issues/" + p1 + "/"
-					q := url.Values{}
-					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -519,7 +348,7 @@ func opIntegrationListAnOrganizationSIntegrationPlatformInstallations(r *shell.R
 					path := "/api/0/organizations/" + p0 + "/sentry-app-installations/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -557,7 +386,7 @@ func opIntegrationCreateOrUpdateAnExternalIssue(r *shell.Runner, w *audit.Writer
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -587,7 +416,7 @@ func opIntegrationDeleteAnExternalIssue(r *shell.Runner, w *audit.Writer) *cli.C
 					path := "/api/0/sentry-app-installations/" + p0 + "/external-issues/" + p1 + "/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -616,115 +445,7 @@ func opOrganizationsListAnOrganizationSRepositories(r *shell.Runner, w *audit.Wr
 					path := "/api/0/organizations/" + p0 + "/repos/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
-				},
-			},
-			w,
-		),
-	}
-}
-
-func opProjectsListAProjectSDebugInformationFiles(r *shell.Runner, w *audit.Writer) *cli.Command {
-	return &cli.Command{
-		Name:      "list-a-project-s-debug-information-files",
-		Usage:     "Retrieve a list of debug information files for a given project.",
-		ArgsUsage: "<organization_id_or_slug> <project_id_or_slug>",
-		Action: verb.Wrap(
-			verb.Spec{
-				Name: "ops.sentry.projects.list-a-project-s-debug-information-files",
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					m := map[string]string{}
-					return m, c.Args().Slice()
-				},
-				Action: func(ctx context.Context, c *cli.Command) error {
-					args := c.Args().Slice()
-					if len(args) != 2 {
-						return fmt.Errorf("sentry: need 2 positional args (organization_id_or_slug project_id_or_slug), got %d", len(args))
-					}
-					p0 := url.PathEscape(args[0])
-					p1 := url.PathEscape(args[1])
-					path := "/api/0/projects/" + p0 + "/" + p1 + "/files/dsyms/"
-					q := url.Values{}
-					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
-				},
-			},
-			w,
-		),
-	}
-}
-
-func opProjectsUploadANewFile(r *shell.Runner, w *audit.Writer) *cli.Command {
-	return &cli.Command{
-		Name:      "upload-a-new-file",
-		Usage:     "Upload a new debug information file for the given release. Unlike other API requests, files must be uploaded using the…",
-		ArgsUsage: "<organization_id_or_slug> <project_id_or_slug>",
-		Flags: []cli.Flag{
-			&cli.StringFlag{Name: "body", Usage: "JSON body, '@file', or '-' for stdin"},
-		},
-		Action: verb.Wrap(
-			verb.Spec{
-				Name: "ops.sentry.projects.upload-a-new-file",
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					m := map[string]string{}
-					if c.IsSet("body") {
-						m["--body"] = c.String("body")
-					}
-					return m, c.Args().Slice()
-				},
-				Action: func(ctx context.Context, c *cli.Command) error {
-					args := c.Args().Slice()
-					if len(args) != 2 {
-						return fmt.Errorf("sentry: need 2 positional args (organization_id_or_slug project_id_or_slug), got %d", len(args))
-					}
-					p0 := url.PathEscape(args[0])
-					p1 := url.PathEscape(args[1])
-					path := "/api/0/projects/" + p0 + "/" + p1 + "/files/dsyms/"
-					q := url.Values{}
-					body, err := readBody(c.String("body"))
-					if err != nil {
-						return err
-					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
-				},
-			},
-			w,
-		),
-	}
-}
-
-func opProjectsDeleteASpecificProjectSDebugInformationFile(r *shell.Runner, w *audit.Writer) *cli.Command {
-	return &cli.Command{
-		Name:      "delete-a-specific-project-s-debug-information-file",
-		Usage:     "Delete a debug information file for a given project.",
-		ArgsUsage: "<organization_id_or_slug> <project_id_or_slug>",
-		Flags: []cli.Flag{
-			&cli.StringFlag{Name: "id", Usage: "query: The ID of the DIF to delete."},
-		},
-		Action: verb.Wrap(
-			verb.Spec{
-				Name: "ops.sentry.projects.delete-a-specific-project-s-debug-information-file",
-				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
-					m := map[string]string{}
-					if c.IsSet("id") {
-						m["--id"] = c.String("id")
-					}
-					return m, c.Args().Slice()
-				},
-				Action: func(ctx context.Context, c *cli.Command) error {
-					args := c.Args().Slice()
-					if len(args) != 2 {
-						return fmt.Errorf("sentry: need 2 positional args (organization_id_or_slug project_id_or_slug), got %d", len(args))
-					}
-					p0 := url.PathEscape(args[0])
-					p1 := url.PathEscape(args[1])
-					path := "/api/0/projects/" + p0 + "/" + p1 + "/files/dsyms/"
-					q := url.Values{}
-					if c.IsSet("id") {
-						q.Set("id", c.String("id"))
-					}
-					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -739,6 +460,7 @@ func opProjectsListAProjectSUsers(r *shell.Runner, w *audit.Writer) *cli.Command
 		ArgsUsage: "<organization_id_or_slug> <project_id_or_slug>",
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "query", Usage: "query: Limit results to users matching the given query. Prefixes should be used to sug…"},
+			&cli.StringFlag{Name: "jq", Usage: "JMESPath projection applied to the JSON response; --jq here because this op owns an API --query (coily#46)"},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
@@ -763,7 +485,7 @@ func opProjectsListAProjectSUsers(r *shell.Runner, w *audit.Writer) *cli.Command
 						q.Set("query", c.String("query"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("jq"), c.String("output"))
 				},
 			},
 			w,
@@ -794,7 +516,7 @@ func opProjectsListATagSValues(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/api/0/projects/" + p0 + "/" + p1 + "/tags/" + p2 + "/values/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -854,7 +576,7 @@ func opProjectsRetrieveEventCountsForAProject(r *shell.Runner, w *audit.Writer) 
 						q.Set("resolution", c.String("resolution"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -884,7 +606,7 @@ func opProjectsListAProjectSUserFeedback(r *shell.Runner, w *audit.Writer) *cli.
 					path := "/api/0/projects/" + p0 + "/" + p1 + "/user-feedback/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -923,7 +645,7 @@ func opProjectsSubmitUserFeedback(r *shell.Runner, w *audit.Writer) *cli.Command
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -953,7 +675,7 @@ func opProjectsListAProjectSServiceHooks(r *shell.Runner, w *audit.Writer) *cli.
 					path := "/api/0/projects/" + p0 + "/" + p1 + "/hooks/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -992,7 +714,7 @@ func opProjectsRegisterANewServiceHook(r *shell.Runner, w *audit.Writer) *cli.Co
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1023,7 +745,7 @@ func opProjectsRetrieveAServiceHook(r *shell.Runner, w *audit.Writer) *cli.Comma
 					path := "/api/0/projects/" + p0 + "/" + p1 + "/hooks/" + p2 + "/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1063,7 +785,7 @@ func opProjectsUpdateAServiceHook(r *shell.Runner, w *audit.Writer) *cli.Command
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1094,7 +816,7 @@ func opProjectsRemoveAServiceHook(r *shell.Runner, w *audit.Writer) *cli.Command
 					path := "/api/0/projects/" + p0 + "/" + p1 + "/hooks/" + p2 + "/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1132,7 +854,7 @@ func opProjectsEnableSpikeProtection(r *shell.Runner, w *audit.Writer) *cli.Comm
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1170,7 +892,7 @@ func opProjectsDisableSpikeProtection(r *shell.Runner, w *audit.Writer) *cli.Com
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1185,6 +907,7 @@ func opReleasesListAnOrganizationSReleases(r *shell.Runner, w *audit.Writer) *cl
 		ArgsUsage: "<organization_id_or_slug>",
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "query", Usage: "query: This parameter can be used to create a 'starts with' filter for the version."},
+			&cli.StringFlag{Name: "jq", Usage: "JMESPath projection applied to the JSON response; --jq here because this op owns an API --query (coily#46)"},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
@@ -1208,7 +931,7 @@ func opReleasesListAnOrganizationSReleases(r *shell.Runner, w *audit.Writer) *cl
 						q.Set("query", c.String("query"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("jq"), c.String("output"))
 				},
 			},
 			w,
@@ -1246,7 +969,7 @@ func opReleasesCreateANewReleaseForAnOrganization(r *shell.Runner, w *audit.Writ
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1276,7 +999,7 @@ func opReleasesListAnOrganizationSReleaseFiles(r *shell.Runner, w *audit.Writer)
 					path := "/api/0/organizations/" + p0 + "/releases/" + p1 + "/files/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1315,7 +1038,7 @@ func opReleasesUploadANewOrganizationReleaseFile(r *shell.Runner, w *audit.Write
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1346,7 +1069,7 @@ func opReleasesListAProjectSReleaseFiles(r *shell.Runner, w *audit.Writer) *cli.
 					path := "/api/0/projects/" + p0 + "/" + p1 + "/releases/" + p2 + "/files/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1386,7 +1109,7 @@ func opReleasesUploadANewProjectReleaseFile(r *shell.Runner, w *audit.Writer) *c
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1426,7 +1149,7 @@ func opReleasesRetrieveAnOrganizationReleaseSFile(r *shell.Runner, w *audit.Writ
 						q.Set("download", c.String("download"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1466,7 +1189,7 @@ func opReleasesUpdateAnOrganizationReleaseFile(r *shell.Runner, w *audit.Writer)
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1497,7 +1220,7 @@ func opReleasesDeleteAnOrganizationReleaseSFile(r *shell.Runner, w *audit.Writer
 					path := "/api/0/organizations/" + p0 + "/releases/" + p1 + "/files/" + p2 + "/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1538,7 +1261,7 @@ func opReleasesRetrieveAProjectReleaseSFile(r *shell.Runner, w *audit.Writer) *c
 						q.Set("download", c.String("download"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1579,7 +1302,7 @@ func opReleasesUpdateAProjectReleaseFile(r *shell.Runner, w *audit.Writer) *cli.
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1611,7 +1334,7 @@ func opReleasesDeleteAProjectReleaseSFile(r *shell.Runner, w *audit.Writer) *cli
 					path := "/api/0/projects/" + p0 + "/" + p1 + "/releases/" + p2 + "/files/" + p3 + "/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1641,7 +1364,7 @@ func opReleasesListAnOrganizationReleaseSCommits(r *shell.Runner, w *audit.Write
 					path := "/api/0/organizations/" + p0 + "/releases/" + p1 + "/commits/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1672,7 +1395,7 @@ func opReleasesListAProjectReleaseSCommits(r *shell.Runner, w *audit.Writer) *cl
 					path := "/api/0/projects/" + p0 + "/" + p1 + "/releases/" + p2 + "/commits/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1702,7 +1425,7 @@ func opReleasesRetrieveFilesChangedInAReleaseSCommits(r *shell.Runner, w *audit.
 					path := "/api/0/organizations/" + p0 + "/releases/" + p1 + "/commitfiles/"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1733,7 +1456,7 @@ func readBody(spec string) ([]byte, error) {
 	}
 }
 
-func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path string, q url.Values, body []byte, authNeeded bool) error {
+func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path string, q url.Values, body []byte, authNeeded bool, projection, output string) error {
 	target := apiBase + path
 	if len(q) > 0 {
 		target += "?" + q.Encode()
@@ -1774,6 +1497,24 @@ func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path strin
 	}
 	if len(bytes.TrimSpace(raw)) == 0 {
 		return nil
+	}
+	outFmt, outSet, err := restfmt.ParseOutput(output)
+	if err != nil {
+		return err
+	}
+	if restfmt.NeedsRender(projection, outSet) {
+		// --query alone defaults to JSON, preserving the surface's existing
+		// output format; --output flips it to yaml/text. Either routes through
+		// restfmt instead of the byte-identical pretty-print path below.
+		if !outSet {
+			outFmt = restfmt.OutputJSON
+		}
+		rendered, rErr := restfmt.Render(projection, outFmt, raw)
+		if rErr != nil {
+			return rErr
+		}
+		_, err = os.Stdout.Write(rendered)
+		return err
 	}
 	var pretty json.RawMessage
 	if err := json.Unmarshal(raw, &pretty); err != nil {

@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"forgejo.coilysiren.me/coilyco-bridge/coily/cmd/coily/restfmt"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
@@ -53,6 +54,13 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 				Usage: "mod.io game id to scope every call to",
 				Value: DefaultGameID,
 			},
+			// --query/--output mirror the generated REST surfaces
+			// (coilyco-bridge/coily#46). urfave/cli v3 flags propagate to
+			// subcommands by default, so every leaf inherits the restfmt
+			// projection rail. No collision here - modio's API params are
+			// limit/offset/game-id, so projection stays on --query.
+			&cli.StringFlag{Name: "query", Usage: "JMESPath projection applied to the JSON response (coily#46)"},
+			&cli.StringFlag{Name: "output", Usage: "output format: json (default), yaml, text (coily#46)"},
 		},
 		Commands: []*cli.Command{
 			modsCommand(r, w),
@@ -97,7 +105,7 @@ func modsList(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if c.IsSet("offset") {
 						q.Set("_offset", fmt.Sprint(c.Int("offset")))
 					}
-					return doGetAndStream(ctx, r,
+					return doGetAndStream(ctx, r, c,
 						fmt.Sprintf("/games/%d/mods", gameID(c)), q)
 				},
 			},
@@ -122,7 +130,7 @@ func modsGet(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doGetAndStream(ctx, r,
+					return doGetAndStream(ctx, r, c,
 						fmt.Sprintf("/games/%d/mods/%s", gameID(c), modID), nil)
 				},
 			},
@@ -147,7 +155,7 @@ func modsFiles(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doGetAndStream(ctx, r,
+					return doGetAndStream(ctx, r, c,
 						fmt.Sprintf("/games/%d/mods/%s/files", gameID(c), modID), nil)
 				},
 			},
@@ -172,7 +180,7 @@ func modsComments(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doGetAndStream(ctx, r,
+					return doGetAndStream(ctx, r, c,
 						fmt.Sprintf("/games/%d/mods/%s/comments", gameID(c), modID), nil)
 				},
 			},
@@ -206,8 +214,10 @@ func requireModID(c *cli.Command) (string, error) {
 // doGetAndStream fetches the mod.io endpoint with the SSM-resolved
 // api_key as a query parameter, then streams the response body to stdout.
 // 4xx/5xx surface as errors with the response body included so callers
-// see the structured mod.io error envelope.
-func doGetAndStream(ctx context.Context, r *shell.Runner, path string, q url.Values) error {
+// see the structured mod.io error envelope. When --query/--output are set
+// the response routes through restfmt (coilyco-bridge/coily#46); otherwise
+// the output is the byte-for-byte pretty-print as before.
+func doGetAndStream(ctx context.Context, r *shell.Runner, c *cli.Command, path string, q url.Values) error {
 	apiKey, err := fetchAPIKey(ctx, r)
 	if err != nil {
 		return err
@@ -236,9 +246,35 @@ func doGetAndStream(ctx context.Context, r *shell.Runner, path string, q url.Val
 		return fmt.Errorf("modio: HTTP %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
 	}
 
-	// Pretty-print so jq pipelines remain practical at the terminal.
+	raw, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("modio: read response: %w", err)
+	}
+	return streamResponse(c, raw)
+}
+
+// streamResponse writes the mod.io response to stdout. When --query/--output
+// are set it routes through restfmt (coilyco-bridge/coily#46); otherwise it
+// pretty-prints, byte-for-byte as before so jq pipelines stay practical.
+func streamResponse(c *cli.Command, raw []byte) error {
+	outFmt, outSet, err := restfmt.ParseOutput(c.String("output"))
+	if err != nil {
+		return err
+	}
+	if projection := c.String("query"); restfmt.NeedsRender(projection, outSet) {
+		if !outSet {
+			outFmt = restfmt.OutputJSON
+		}
+		rendered, rErr := restfmt.Render(projection, outFmt, raw)
+		if rErr != nil {
+			return rErr
+		}
+		_, err = os.Stdout.Write(rendered)
+		return err
+	}
+
 	var pretty json.RawMessage
-	if err := json.NewDecoder(resp.Body).Decode(&pretty); err != nil {
+	if err := json.Unmarshal(raw, &pretty); err != nil {
 		return fmt.Errorf("modio: decode response: %w", err)
 	}
 	out, err := json.MarshalIndent(pretty, "", "  ")

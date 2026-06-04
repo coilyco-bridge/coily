@@ -7,6 +7,12 @@
 // string flags; request bodies arrive via --body (literal | @file | -).
 // Responses stream to stdout pretty-printed (JSON) or verbatim (other).
 //
+// Two persistent root flags, --query (JMESPath projection) and --output
+// (json|yaml|text), fold coily's REST projection rail (coilyco-bridge/coily#46)
+// into every leaf via restfmt. When neither is set the response is emitted
+// byte-for-byte as before. An op that already owns an API --query parameter
+// exposes the projection as --jq instead, mirroring the gh-rest --jq rail.
+//
 // Discord Bot auth from AWS SSM at /discord/bot-token on every call.
 package discord
 
@@ -22,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"forgejo.coilysiren.me/coilyco-bridge/coily/cmd/coily/restfmt"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
@@ -39,6 +46,13 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  "discord",
 		Usage: "Discord HTTP API (bot auth).",
+		Flags: []cli.Flag{
+			// urfave/cli v3 flags propagate to every subcommand by default
+			// (Local defaults false), so these reach every generated leaf. A
+			// leaf that declares a same-named local flag shadows them.
+			&cli.StringFlag{Name: "query", Usage: "JMESPath projection applied to the JSON response (coily#46)"},
+			&cli.StringFlag{Name: "output", Usage: "output format: json (default), yaml, text (coily#46)"},
+		},
 		Commands: []*cli.Command{
 			groupApplications(r, w),
 			groupChannels(r, w),
@@ -452,7 +466,7 @@ func opApplicationsGetMyApplication(r *shell.Runner, w *audit.Writer) *cli.Comma
 					path := "/applications/@me"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -484,7 +498,7 @@ func opApplicationsUpdateMyApplication(r *shell.Runner, w *audit.Writer) *cli.Co
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -513,7 +527,7 @@ func opApplicationsGetApplication(r *shell.Runner, w *audit.Writer) *cli.Command
 					path := "/applications/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -551,7 +565,7 @@ func opApplicationsUpdateApplication(r *shell.Runner, w *audit.Writer) *cli.Comm
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -581,7 +595,7 @@ func opApplicationsApplicationsGetActivityInstance(r *shell.Runner, w *audit.Wri
 					path := "/applications/" + p0 + "/activity-instances/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -619,7 +633,7 @@ func opApplicationsUploadApplicationAttachment(r *shell.Runner, w *audit.Writer)
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -657,7 +671,7 @@ func opApplicationsListApplicationCommands(r *shell.Runner, w *audit.Writer) *cl
 						q.Set("with_localizations", c.String("with_localizations"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -695,7 +709,7 @@ func opApplicationsCreateApplicationCommand(r *shell.Runner, w *audit.Writer) *c
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -733,7 +747,7 @@ func opApplicationsBulkSetApplicationCommands(r *shell.Runner, w *audit.Writer) 
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -763,7 +777,7 @@ func opApplicationsGetApplicationCommand(r *shell.Runner, w *audit.Writer) *cli.
 					path := "/applications/" + p0 + "/commands/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -793,7 +807,7 @@ func opApplicationsDeleteApplicationCommand(r *shell.Runner, w *audit.Writer) *c
 					path := "/applications/" + p0 + "/commands/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -832,7 +846,7 @@ func opApplicationsUpdateApplicationCommand(r *shell.Runner, w *audit.Writer) *c
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -861,7 +875,7 @@ func opApplicationsListApplicationEmojis(r *shell.Runner, w *audit.Writer) *cli.
 					path := "/applications/" + p0 + "/emojis"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -899,7 +913,7 @@ func opApplicationsCreateApplicationEmoji(r *shell.Runner, w *audit.Writer) *cli
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -929,7 +943,7 @@ func opApplicationsGetApplicationEmoji(r *shell.Runner, w *audit.Writer) *cli.Co
 					path := "/applications/" + p0 + "/emojis/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -959,7 +973,7 @@ func opApplicationsDeleteApplicationEmoji(r *shell.Runner, w *audit.Writer) *cli
 					path := "/applications/" + p0 + "/emojis/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -998,7 +1012,7 @@ func opApplicationsUpdateApplicationEmoji(r *shell.Runner, w *audit.Writer) *cli
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1092,7 +1106,7 @@ func opApplicationsGetEntitlements(r *shell.Runner, w *audit.Writer) *cli.Comman
 						q.Set("only_active", c.String("only_active"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1130,7 +1144,7 @@ func opApplicationsCreateEntitlement(r *shell.Runner, w *audit.Writer) *cli.Comm
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1160,7 +1174,7 @@ func opApplicationsGetEntitlement(r *shell.Runner, w *audit.Writer) *cli.Command
 					path := "/applications/" + p0 + "/entitlements/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1190,7 +1204,7 @@ func opApplicationsDeleteEntitlement(r *shell.Runner, w *audit.Writer) *cli.Comm
 					path := "/applications/" + p0 + "/entitlements/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1220,7 +1234,7 @@ func opApplicationsConsumeEntitlement(r *shell.Runner, w *audit.Writer) *cli.Com
 					path := "/applications/" + p0 + "/entitlements/" + p1 + "/consume"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1259,7 +1273,7 @@ func opApplicationsListGuildApplicationCommands(r *shell.Runner, w *audit.Writer
 						q.Set("with_localizations", c.String("with_localizations"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1298,7 +1312,7 @@ func opApplicationsCreateGuildApplicationCommand(r *shell.Runner, w *audit.Write
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1337,7 +1351,7 @@ func opApplicationsBulkSetGuildApplicationCommands(r *shell.Runner, w *audit.Wri
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1367,7 +1381,7 @@ func opApplicationsListGuildApplicationCommandPermissions(r *shell.Runner, w *au
 					path := "/applications/" + p0 + "/guilds/" + p1 + "/commands/permissions"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1398,7 +1412,7 @@ func opApplicationsGetGuildApplicationCommand(r *shell.Runner, w *audit.Writer) 
 					path := "/applications/" + p0 + "/guilds/" + p1 + "/commands/" + p2
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1429,7 +1443,7 @@ func opApplicationsDeleteGuildApplicationCommand(r *shell.Runner, w *audit.Write
 					path := "/applications/" + p0 + "/guilds/" + p1 + "/commands/" + p2
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1469,7 +1483,7 @@ func opApplicationsUpdateGuildApplicationCommand(r *shell.Runner, w *audit.Write
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1500,7 +1514,7 @@ func opApplicationsGetGuildApplicationCommandPermissions(r *shell.Runner, w *aud
 					path := "/applications/" + p0 + "/guilds/" + p1 + "/commands/" + p2 + "/permissions"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1540,7 +1554,7 @@ func opApplicationsSetGuildApplicationCommandPermissions(r *shell.Runner, w *aud
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1569,7 +1583,7 @@ func opApplicationsGetApplicationRoleConnectionsMetadata(r *shell.Runner, w *aud
 					path := "/applications/" + p0 + "/role-connections/metadata"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1607,7 +1621,7 @@ func opApplicationsUpdateApplicationRoleConnectionsMetadata(r *shell.Runner, w *
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1636,7 +1650,7 @@ func opChannelsGetChannel(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/channels/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1665,7 +1679,7 @@ func opChannelsDeleteChannel(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/channels/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1703,7 +1717,7 @@ func opChannelsUpdateChannel(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1741,7 +1755,7 @@ func opChannelsFollowChannel(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1770,7 +1784,7 @@ func opChannelsListChannelInvites(r *shell.Runner, w *audit.Writer) *cli.Command
 					path := "/channels/" + p0 + "/invites"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1808,7 +1822,7 @@ func opChannelsCreateChannelInvite(r *shell.Runner, w *audit.Writer) *cli.Comman
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1867,7 +1881,7 @@ func opChannelsListMessages(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("limit", c.String("limit"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1905,7 +1919,7 @@ func opChannelsCreateMessage(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1943,7 +1957,7 @@ func opChannelsBulkDeleteMessages(r *shell.Runner, w *audit.Writer) *cli.Command
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -1988,7 +2002,7 @@ func opChannelsListPins(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("limit", c.String("limit"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2018,7 +2032,7 @@ func opChannelsCreatePin(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/channels/" + p0 + "/messages/pins/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2048,7 +2062,7 @@ func opChannelsDeletePin(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/channels/" + p0 + "/messages/pins/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2078,7 +2092,7 @@ func opChannelsGetMessage(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/channels/" + p0 + "/messages/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2108,7 +2122,7 @@ func opChannelsDeleteMessage(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/channels/" + p0 + "/messages/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2147,7 +2161,7 @@ func opChannelsUpdateMessage(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2177,7 +2191,7 @@ func opChannelsCrosspostMessage(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/channels/" + p0 + "/messages/" + p1 + "/crosspost"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2207,7 +2221,7 @@ func opChannelsDeleteAllMessageReactions(r *shell.Runner, w *audit.Writer) *cli.
 					path := "/channels/" + p0 + "/messages/" + p1 + "/reactions"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2261,7 +2275,7 @@ func opChannelsListMessageReactionsByEmoji(r *shell.Runner, w *audit.Writer) *cl
 						q.Set("type", c.String("type"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2292,7 +2306,7 @@ func opChannelsDeleteAllMessageReactionsByEmoji(r *shell.Runner, w *audit.Writer
 					path := "/channels/" + p0 + "/messages/" + p1 + "/reactions/" + p2
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2323,7 +2337,7 @@ func opChannelsAddMyMessageReaction(r *shell.Runner, w *audit.Writer) *cli.Comma
 					path := "/channels/" + p0 + "/messages/" + p1 + "/reactions/" + p2 + "/@me"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2354,7 +2368,7 @@ func opChannelsDeleteMyMessageReaction(r *shell.Runner, w *audit.Writer) *cli.Co
 					path := "/channels/" + p0 + "/messages/" + p1 + "/reactions/" + p2 + "/@me"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2386,7 +2400,7 @@ func opChannelsDeleteUserMessageReaction(r *shell.Runner, w *audit.Writer) *cli.
 					path := "/channels/" + p0 + "/messages/" + p1 + "/reactions/" + p2 + "/" + p3
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2425,7 +2439,7 @@ func opChannelsCreateThreadFromMessage(r *shell.Runner, w *audit.Writer) *cli.Co
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2464,7 +2478,7 @@ func opChannelsSetChannelPermissionOverwrite(r *shell.Runner, w *audit.Writer) *
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2494,7 +2508,7 @@ func opChannelsDeleteChannelPermissionOverwrite(r *shell.Runner, w *audit.Writer
 					path := "/channels/" + p0 + "/permissions/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2523,7 +2537,7 @@ func opChannelsDeprecatedListPins(r *shell.Runner, w *audit.Writer) *cli.Command
 					path := "/channels/" + p0 + "/pins"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2553,7 +2567,7 @@ func opChannelsDeprecatedCreatePin(r *shell.Runner, w *audit.Writer) *cli.Comman
 					path := "/channels/" + p0 + "/pins/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2583,7 +2597,7 @@ func opChannelsDeprecatedDeletePin(r *shell.Runner, w *audit.Writer) *cli.Comman
 					path := "/channels/" + p0 + "/pins/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2630,7 +2644,7 @@ func opChannelsGetAnswerVoters(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("limit", c.String("limit"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2660,7 +2674,7 @@ func opChannelsPollExpire(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/channels/" + p0 + "/polls/" + p1 + "/expire"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2699,7 +2713,7 @@ func opChannelsAddGroupDmUser(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2729,7 +2743,7 @@ func opChannelsDeleteGroupDmUser(r *shell.Runner, w *audit.Writer) *cli.Command 
 					path := "/channels/" + p0 + "/recipients/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2767,7 +2781,7 @@ func opChannelsSendSoundboardSound(r *shell.Runner, w *audit.Writer) *cli.Comman
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2819,7 +2833,7 @@ func opChannelsListThreadMembers(r *shell.Runner, w *audit.Writer) *cli.Command 
 						q.Set("after", c.String("after"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2848,7 +2862,7 @@ func opChannelsJoinThread(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/channels/" + p0 + "/thread-members/@me"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2877,7 +2891,7 @@ func opChannelsLeaveThread(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/channels/" + p0 + "/thread-members/@me"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2916,7 +2930,7 @@ func opChannelsGetThreadMember(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("with_member", c.String("with_member"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2946,7 +2960,7 @@ func opChannelsAddThreadMember(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/channels/" + p0 + "/thread-members/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -2976,7 +2990,7 @@ func opChannelsDeleteThreadMember(r *shell.Runner, w *audit.Writer) *cli.Command
 					path := "/channels/" + p0 + "/thread-members/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3014,7 +3028,7 @@ func opChannelsCreateThread(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3059,7 +3073,7 @@ func opChannelsListPrivateArchivedThreads(r *shell.Runner, w *audit.Writer) *cli
 						q.Set("limit", c.String("limit"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3104,7 +3118,7 @@ func opChannelsListPublicArchivedThreads(r *shell.Runner, w *audit.Writer) *cli.
 						q.Set("limit", c.String("limit"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3212,7 +3226,7 @@ func opChannelsThreadSearch(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("offset", c.String("offset"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3241,7 +3255,7 @@ func opChannelsTriggerTypingIndicator(r *shell.Runner, w *audit.Writer) *cli.Com
 					path := "/channels/" + p0 + "/typing"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3286,7 +3300,7 @@ func opChannelsListMyPrivateArchivedThreads(r *shell.Runner, w *audit.Writer) *c
 						q.Set("limit", c.String("limit"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3324,7 +3338,7 @@ func opChannelsUpdateVoiceChannelStatus(r *shell.Runner, w *audit.Writer) *cli.C
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3353,7 +3367,7 @@ func opChannelsListChannelWebhooks(r *shell.Runner, w *audit.Writer) *cli.Comman
 					path := "/channels/" + p0 + "/webhooks"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3391,7 +3405,7 @@ func opChannelsCreateWebhook(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3414,7 +3428,7 @@ func opGatewayGetGateway(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/gateway"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3437,7 +3451,7 @@ func opGatewayGetBotGateway(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/gateway/bot"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3466,7 +3480,7 @@ func opGuildsGetGuildTemplate(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/templates/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3504,7 +3518,7 @@ func opGuildsGetGuild(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("with_counts", c.String("with_counts"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3542,7 +3556,7 @@ func opGuildsUpdateGuild(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3615,7 +3629,7 @@ func opGuildsListGuildAuditLogEntries(r *shell.Runner, w *audit.Writer) *cli.Com
 						q.Set("limit", c.String("limit"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3644,7 +3658,7 @@ func opGuildsListAutoModerationRules(r *shell.Runner, w *audit.Writer) *cli.Comm
 					path := "/guilds/" + p0 + "/auto-moderation/rules"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3682,7 +3696,7 @@ func opGuildsCreateAutoModerationRule(r *shell.Runner, w *audit.Writer) *cli.Com
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3712,7 +3726,7 @@ func opGuildsGetAutoModerationRule(r *shell.Runner, w *audit.Writer) *cli.Comman
 					path := "/guilds/" + p0 + "/auto-moderation/rules/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3742,7 +3756,7 @@ func opGuildsDeleteAutoModerationRule(r *shell.Runner, w *audit.Writer) *cli.Com
 					path := "/guilds/" + p0 + "/auto-moderation/rules/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3781,7 +3795,7 @@ func opGuildsUpdateAutoModerationRule(r *shell.Runner, w *audit.Writer) *cli.Com
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3833,7 +3847,7 @@ func opGuildsListGuildBans(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("after", c.String("after"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3863,7 +3877,7 @@ func opGuildsGetGuildBan(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/bans/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3902,7 +3916,7 @@ func opGuildsBanUserFromGuild(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3941,7 +3955,7 @@ func opGuildsUnbanUserFromGuild(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -3979,7 +3993,7 @@ func opGuildsBulkBanUsersFromGuild(r *shell.Runner, w *audit.Writer) *cli.Comman
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4008,7 +4022,7 @@ func opGuildsListGuildChannels(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/channels"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4046,7 +4060,7 @@ func opGuildsCreateGuildChannel(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4084,7 +4098,7 @@ func opGuildsBulkUpdateGuildChannels(r *shell.Runner, w *audit.Writer) *cli.Comm
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4113,7 +4127,7 @@ func opGuildsListGuildEmojis(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/emojis"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4151,7 +4165,7 @@ func opGuildsCreateGuildEmoji(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4181,7 +4195,7 @@ func opGuildsGetGuildEmoji(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/emojis/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4211,7 +4225,7 @@ func opGuildsDeleteGuildEmoji(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/emojis/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4250,7 +4264,7 @@ func opGuildsUpdateGuildEmoji(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4279,7 +4293,7 @@ func opGuildsListGuildIntegrations(r *shell.Runner, w *audit.Writer) *cli.Comman
 					path := "/guilds/" + p0 + "/integrations"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4309,7 +4323,7 @@ func opGuildsDeleteGuildIntegration(r *shell.Runner, w *audit.Writer) *cli.Comma
 					path := "/guilds/" + p0 + "/integrations/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4338,7 +4352,7 @@ func opGuildsListGuildInvites(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/invites"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4383,7 +4397,7 @@ func opGuildsListGuildMembers(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("after", c.String("after"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4421,7 +4435,7 @@ func opGuildsUpdateMyGuildMember(r *shell.Runner, w *audit.Writer) *cli.Command 
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4437,6 +4451,7 @@ func opGuildsSearchGuildMembers(r *shell.Runner, w *audit.Writer) *cli.Command {
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "limit", Usage: "query: "},
 			&cli.StringFlag{Name: "query", Usage: "query: "},
+			&cli.StringFlag{Name: "jq", Usage: "JMESPath projection applied to the JSON response; --jq here because this op owns an API --query (coily#46)"},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
@@ -4466,7 +4481,7 @@ func opGuildsSearchGuildMembers(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("query", c.String("query"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("jq"), c.String("output"))
 				},
 			},
 			w,
@@ -4496,7 +4511,7 @@ func opGuildsGetGuildMember(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/members/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4535,7 +4550,7 @@ func opGuildsAddGuildMember(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4565,7 +4580,7 @@ func opGuildsDeleteGuildMember(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/members/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4604,7 +4619,7 @@ func opGuildsUpdateGuildMember(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4635,7 +4650,7 @@ func opGuildsAddGuildMemberRole(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/members/" + p1 + "/roles/" + p2
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4666,7 +4681,7 @@ func opGuildsDeleteGuildMemberRole(r *shell.Runner, w *audit.Writer) *cli.Comman
 					path := "/guilds/" + p0 + "/members/" + p1 + "/roles/" + p2
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4865,7 +4880,7 @@ func opGuildsGuildSearch(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("channel_id", c.String("channel_id"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4894,7 +4909,7 @@ func opGuildsGetGuildNewMemberWelcome(r *shell.Runner, w *audit.Writer) *cli.Com
 					path := "/guilds/" + p0 + "/new-member-welcome"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4923,7 +4938,7 @@ func opGuildsGetGuildsOnboarding(r *shell.Runner, w *audit.Writer) *cli.Command 
 					path := "/guilds/" + p0 + "/onboarding"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4961,7 +4976,7 @@ func opGuildsPutGuildsOnboarding(r *shell.Runner, w *audit.Writer) *cli.Command 
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -4990,7 +5005,7 @@ func opGuildsGetGuildPreview(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/preview"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5035,7 +5050,7 @@ func opGuildsPreviewPruneGuild(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("include_roles", c.String("include_roles"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5073,7 +5088,7 @@ func opGuildsPruneGuild(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5102,7 +5117,7 @@ func opGuildsListGuildVoiceRegions(r *shell.Runner, w *audit.Writer) *cli.Comman
 					path := "/guilds/" + p0 + "/regions"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5161,7 +5176,7 @@ func opGuildsGetGuildJoinRequests(r *shell.Runner, w *audit.Writer) *cli.Command
 						q.Set("after", c.String("after"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5200,7 +5215,7 @@ func opGuildsActionGuildJoinRequest(r *shell.Runner, w *audit.Writer) *cli.Comma
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5229,7 +5244,7 @@ func opGuildsListGuildRoles(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/roles"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5267,7 +5282,7 @@ func opGuildsCreateGuildRole(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5305,7 +5320,7 @@ func opGuildsBulkUpdateGuildRoles(r *shell.Runner, w *audit.Writer) *cli.Command
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5334,7 +5349,7 @@ func opGuildsGuildRoleMemberCounts(r *shell.Runner, w *audit.Writer) *cli.Comman
 					path := "/guilds/" + p0 + "/roles/member-counts"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5364,7 +5379,7 @@ func opGuildsGetGuildRole(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/roles/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5394,7 +5409,7 @@ func opGuildsDeleteGuildRole(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/roles/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5433,7 +5448,7 @@ func opGuildsUpdateGuildRole(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5471,7 +5486,7 @@ func opGuildsListGuildScheduledEvents(r *shell.Runner, w *audit.Writer) *cli.Com
 						q.Set("with_user_count", c.String("with_user_count"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5509,7 +5524,7 @@ func opGuildsCreateGuildScheduledEvent(r *shell.Runner, w *audit.Writer) *cli.Co
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5548,7 +5563,7 @@ func opGuildsGetGuildScheduledEvent(r *shell.Runner, w *audit.Writer) *cli.Comma
 						q.Set("with_user_count", c.String("with_user_count"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5578,7 +5593,7 @@ func opGuildsDeleteGuildScheduledEvent(r *shell.Runner, w *audit.Writer) *cli.Co
 					path := "/guilds/" + p0 + "/scheduled-events/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5617,7 +5632,7 @@ func opGuildsUpdateGuildScheduledEvent(r *shell.Runner, w *audit.Writer) *cli.Co
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5677,7 +5692,7 @@ func opGuildsListGuildScheduledEventUsers(r *shell.Runner, w *audit.Writer) *cli
 						q.Set("after", c.String("after"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5706,7 +5721,7 @@ func opGuildsListGuildSoundboardSounds(r *shell.Runner, w *audit.Writer) *cli.Co
 					path := "/guilds/" + p0 + "/soundboard-sounds"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5744,7 +5759,7 @@ func opGuildsCreateGuildSoundboardSound(r *shell.Runner, w *audit.Writer) *cli.C
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5774,7 +5789,7 @@ func opGuildsGetGuildSoundboardSound(r *shell.Runner, w *audit.Writer) *cli.Comm
 					path := "/guilds/" + p0 + "/soundboard-sounds/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5804,7 +5819,7 @@ func opGuildsDeleteGuildSoundboardSound(r *shell.Runner, w *audit.Writer) *cli.C
 					path := "/guilds/" + p0 + "/soundboard-sounds/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5843,7 +5858,7 @@ func opGuildsUpdateGuildSoundboardSound(r *shell.Runner, w *audit.Writer) *cli.C
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5872,7 +5887,7 @@ func opGuildsListGuildStickers(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/stickers"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5910,7 +5925,7 @@ func opGuildsCreateGuildSticker(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5940,7 +5955,7 @@ func opGuildsGetGuildSticker(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/stickers/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -5970,7 +5985,7 @@ func opGuildsDeleteGuildSticker(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/stickers/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6009,7 +6024,7 @@ func opGuildsUpdateGuildSticker(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6038,7 +6053,7 @@ func opGuildsListGuildTemplates(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/templates"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6076,7 +6091,7 @@ func opGuildsCreateGuildTemplate(r *shell.Runner, w *audit.Writer) *cli.Command 
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6106,7 +6121,7 @@ func opGuildsSyncGuildTemplate(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/templates/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6136,7 +6151,7 @@ func opGuildsDeleteGuildTemplate(r *shell.Runner, w *audit.Writer) *cli.Command 
 					path := "/guilds/" + p0 + "/templates/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6175,7 +6190,7 @@ func opGuildsUpdateGuildTemplate(r *shell.Runner, w *audit.Writer) *cli.Command 
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6204,7 +6219,7 @@ func opGuildsGetActiveGuildThreads(r *shell.Runner, w *audit.Writer) *cli.Comman
 					path := "/guilds/" + p0 + "/threads/active"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6233,7 +6248,7 @@ func opGuildsGetGuildVanityUrl(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/vanity-url"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6262,7 +6277,7 @@ func opGuildsGetSelfVoiceState(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/voice-states/@me"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6300,7 +6315,7 @@ func opGuildsUpdateSelfVoiceState(r *shell.Runner, w *audit.Writer) *cli.Command
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6330,7 +6345,7 @@ func opGuildsGetVoiceState(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/voice-states/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6369,7 +6384,7 @@ func opGuildsUpdateVoiceState(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6398,7 +6413,7 @@ func opGuildsGetGuildWebhooks(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/webhooks"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6427,7 +6442,7 @@ func opGuildsGetGuildWelcomeScreen(r *shell.Runner, w *audit.Writer) *cli.Comman
 					path := "/guilds/" + p0 + "/welcome-screen"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6465,7 +6480,7 @@ func opGuildsUpdateGuildWelcomeScreen(r *shell.Runner, w *audit.Writer) *cli.Com
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6494,7 +6509,7 @@ func opGuildsGetGuildWidgetSettings(r *shell.Runner, w *audit.Writer) *cli.Comma
 					path := "/guilds/" + p0 + "/widget"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6532,7 +6547,7 @@ func opGuildsUpdateGuildWidgetSettings(r *shell.Runner, w *audit.Writer) *cli.Co
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6561,7 +6576,7 @@ func opGuildsGetGuildWidget(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/guilds/" + p0 + "/widget.json"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6599,7 +6614,7 @@ func opGuildsGetGuildWidgetPng(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("style", c.String("style"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6645,7 +6660,7 @@ func opInteractionsCreateInteractionResponse(r *shell.Runner, w *audit.Writer) *
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6690,7 +6705,7 @@ func opInvitesInviteResolve(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("guild_scheduled_event_id", c.String("guild_scheduled_event_id"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6719,7 +6734,7 @@ func opInvitesInviteRevoke(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/invites/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6748,7 +6763,7 @@ func opInvitesGetInviteTargetUsers(r *shell.Runner, w *audit.Writer) *cli.Comman
 					path := "/invites/" + p0 + "/target-users"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6786,7 +6801,7 @@ func opInvitesUpdateInviteTargetUsers(r *shell.Runner, w *audit.Writer) *cli.Com
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6815,7 +6830,7 @@ func opInvitesGetInviteTargetUsersJobStatus(r *shell.Runner, w *audit.Writer) *c
 					path := "/invites/" + p0 + "/target-users/job-status"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6847,7 +6862,7 @@ func opLobbiesCreateLobby(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6879,7 +6894,7 @@ func opLobbiesCreateOrJoinLobby(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6908,7 +6923,7 @@ func opLobbiesGetLobby(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/lobbies/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6946,7 +6961,7 @@ func opLobbiesEditLobby(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -6984,7 +6999,7 @@ func opLobbiesEditLobbyChannelLink(r *shell.Runner, w *audit.Writer) *cli.Comman
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7013,7 +7028,7 @@ func opLobbiesLeaveLobby(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/lobbies/" + p0 + "/members/@me"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7042,7 +7057,7 @@ func opLobbiesCreateLinkedLobbyGuildInviteForSelf(r *shell.Runner, w *audit.Writ
 					path := "/lobbies/" + p0 + "/members/@me/invites"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7080,7 +7095,7 @@ func opLobbiesBulkUpdateLobbyMembers(r *shell.Runner, w *audit.Writer) *cli.Comm
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7119,7 +7134,7 @@ func opLobbiesAddLobbyMember(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7149,7 +7164,7 @@ func opLobbiesDeleteLobbyMember(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/lobbies/" + p0 + "/members/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7179,7 +7194,7 @@ func opLobbiesCreateLinkedLobbyGuildInviteForUser(r *shell.Runner, w *audit.Writ
 					path := "/lobbies/" + p0 + "/members/" + p1 + "/invites"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7217,7 +7232,7 @@ func opLobbiesGetLobbyMessages(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("limit", c.String("limit"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7255,7 +7270,7 @@ func opLobbiesCreateLobbyMessage(r *shell.Runner, w *audit.Writer) *cli.Command 
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7294,7 +7309,7 @@ func opLobbiesUpdateLobbyMessageExternalModerationMetadata(r *shell.Runner, w *a
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7317,7 +7332,7 @@ func opOauth2GetMyOauth2Authorization(r *shell.Runner, w *audit.Writer) *cli.Com
 					path := "/oauth2/@me"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7340,7 +7355,7 @@ func opOauth2GetMyOauth2Application(r *shell.Runner, w *audit.Writer) *cli.Comma
 					path := "/oauth2/applications/@me"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7363,7 +7378,7 @@ func opOauth2GetPublicKeys(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/oauth2/keys"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7386,7 +7401,7 @@ func opOauth2GetOpenidConnectUserinfo(r *shell.Runner, w *audit.Writer) *cli.Com
 					path := "/oauth2/userinfo"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7426,7 +7441,7 @@ func opPartnerSdkUpdateUserMessageExternalModerationMetadata(r *shell.Runner, w 
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7458,7 +7473,7 @@ func opPartnerSdkPartnerSdkUnmergeProvisionalAccount(r *shell.Runner, w *audit.W
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7490,7 +7505,7 @@ func opPartnerSdkBotPartnerSdkUnmergeProvisionalAccount(r *shell.Runner, w *audi
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7522,7 +7537,7 @@ func opPartnerSdkPartnerSdkToken(r *shell.Runner, w *audit.Writer) *cli.Command 
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7554,7 +7569,7 @@ func opPartnerSdkBotPartnerSdkToken(r *shell.Runner, w *audit.Writer) *cli.Comma
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7577,7 +7592,7 @@ func opSoundboardDefaultSoundsGetSoundboardDefaultSounds(r *shell.Runner, w *aud
 					path := "/soundboard-default-sounds"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7609,7 +7624,7 @@ func opStageInstancesCreateStageInstance(r *shell.Runner, w *audit.Writer) *cli.
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7638,7 +7653,7 @@ func opStageInstancesGetStageInstance(r *shell.Runner, w *audit.Writer) *cli.Com
 					path := "/stage-instances/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7667,7 +7682,7 @@ func opStageInstancesDeleteStageInstance(r *shell.Runner, w *audit.Writer) *cli.
 					path := "/stage-instances/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7705,7 +7720,7 @@ func opStageInstancesUpdateStageInstance(r *shell.Runner, w *audit.Writer) *cli.
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7728,7 +7743,7 @@ func opStickerPacksListStickerPacks(r *shell.Runner, w *audit.Writer) *cli.Comma
 					path := "/sticker-packs"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7757,7 +7772,7 @@ func opStickerPacksGetStickerPack(r *shell.Runner, w *audit.Writer) *cli.Command
 					path := "/sticker-packs/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7786,7 +7801,7 @@ func opStickersGetSticker(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/stickers/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7809,7 +7824,7 @@ func opUsersGetMyUser(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/users/@me"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7841,7 +7856,7 @@ func opUsersUpdateMyUser(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7886,7 +7901,7 @@ func opUsersGetCurrentUserApplicationEntitlements(r *shell.Runner, w *audit.Writ
 						q.Set("exclude_consumed", c.String("exclude_consumed"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7915,7 +7930,7 @@ func opUsersGetApplicationUserRoleConnection(r *shell.Runner, w *audit.Writer) *
 					path := "/users/@me/applications/" + p0 + "/role-connection"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7953,7 +7968,7 @@ func opUsersUpdateApplicationUserRoleConnection(r *shell.Runner, w *audit.Writer
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PUT", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PUT", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -7982,7 +7997,7 @@ func opUsersDeleteApplicationUserRoleConnection(r *shell.Runner, w *audit.Writer
 					path := "/users/@me/applications/" + p0 + "/role-connection"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8014,7 +8029,7 @@ func opUsersCreateDm(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8037,7 +8052,7 @@ func opUsersListMyConnections(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/users/@me/connections"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8090,7 +8105,7 @@ func opUsersListMyGuilds(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("with_counts", c.String("with_counts"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8119,7 +8134,7 @@ func opUsersLeaveGuild(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/users/@me/guilds/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8148,7 +8163,7 @@ func opUsersGetMyGuildMember(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/users/@me/guilds/" + p0 + "/member"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8177,7 +8192,7 @@ func opUsersGetUser(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/users/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8200,7 +8215,7 @@ func opVoiceListVoiceRegions(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/voice/regions"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8229,7 +8244,7 @@ func opWebhooksGetWebhook(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/webhooks/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8258,7 +8273,7 @@ func opWebhooksDeleteWebhook(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/webhooks/" + p0
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8296,7 +8311,7 @@ func opWebhooksUpdateWebhook(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8326,7 +8341,7 @@ func opWebhooksGetWebhookByToken(r *shell.Runner, w *audit.Writer) *cli.Command 
 					path := "/webhooks/" + p0 + "/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8386,7 +8401,7 @@ func opWebhooksExecuteWebhook(r *shell.Runner, w *audit.Writer) *cli.Command {
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8416,7 +8431,7 @@ func opWebhooksDeleteWebhookByToken(r *shell.Runner, w *audit.Writer) *cli.Comma
 					path := "/webhooks/" + p0 + "/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8455,7 +8470,7 @@ func opWebhooksUpdateWebhookByToken(r *shell.Runner, w *audit.Writer) *cli.Comma
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8508,7 +8523,7 @@ func opWebhooksExecuteGithubCompatibleWebhook(r *shell.Runner, w *audit.Writer) 
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8547,7 +8562,7 @@ func opWebhooksGetOriginalWebhookMessage(r *shell.Runner, w *audit.Writer) *cli.
 						q.Set("thread_id", c.String("thread_id"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8586,7 +8601,7 @@ func opWebhooksDeleteOriginalWebhookMessage(r *shell.Runner, w *audit.Writer) *c
 						q.Set("thread_id", c.String("thread_id"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8639,7 +8654,7 @@ func opWebhooksUpdateOriginalWebhookMessage(r *shell.Runner, w *audit.Writer) *c
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8679,7 +8694,7 @@ func opWebhooksGetWebhookMessage(r *shell.Runner, w *audit.Writer) *cli.Command 
 						q.Set("thread_id", c.String("thread_id"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8719,7 +8734,7 @@ func opWebhooksDeleteWebhookMessage(r *shell.Runner, w *audit.Writer) *cli.Comma
 						q.Set("thread_id", c.String("thread_id"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true)
+					return doRequestAndStream(ctx, r, "DELETE", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8773,7 +8788,7 @@ func opWebhooksUpdateWebhookMessage(r *shell.Runner, w *audit.Writer) *cli.Comma
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true)
+					return doRequestAndStream(ctx, r, "PATCH", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8826,7 +8841,7 @@ func opWebhooksExecuteSlackCompatibleWebhook(r *shell.Runner, w *audit.Writer) *
 					if err != nil {
 						return err
 					}
-					return doRequestAndStream(ctx, r, "POST", path, q, body, true)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -8857,7 +8872,7 @@ func readBody(spec string) ([]byte, error) {
 	}
 }
 
-func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path string, q url.Values, body []byte, authNeeded bool) error {
+func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path string, q url.Values, body []byte, authNeeded bool, projection, output string) error {
 	target := apiBase + path
 	if len(q) > 0 {
 		target += "?" + q.Encode()
@@ -8898,6 +8913,24 @@ func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path strin
 	}
 	if len(bytes.TrimSpace(raw)) == 0 {
 		return nil
+	}
+	outFmt, outSet, err := restfmt.ParseOutput(output)
+	if err != nil {
+		return err
+	}
+	if restfmt.NeedsRender(projection, outSet) {
+		// --query alone defaults to JSON, preserving the surface's existing
+		// output format; --output flips it to yaml/text. Either routes through
+		// restfmt instead of the byte-identical pretty-print path below.
+		if !outSet {
+			outFmt = restfmt.OutputJSON
+		}
+		rendered, rErr := restfmt.Render(projection, outFmt, raw)
+		if rErr != nil {
+			return rErr
+		}
+		_, err = os.Stdout.Write(rendered)
+		return err
 	}
 	var pretty json.RawMessage
 	if err := json.Unmarshal(raw, &pretty); err != nil {

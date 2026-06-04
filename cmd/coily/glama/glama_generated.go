@@ -7,6 +7,12 @@
 // string flags; request bodies arrive via --body (literal | @file | -).
 // Responses stream to stdout pretty-printed (JSON) or verbatim (other).
 //
+// Two persistent root flags, --query (JMESPath projection) and --output
+// (json|yaml|text), fold coily's REST projection rail (coilyco-bridge/coily#46)
+// into every leaf via restfmt. When neither is set the response is emitted
+// byte-for-byte as before. An op that already owns an API --query parameter
+// exposes the projection as --jq instead, mirroring the gh-rest --jq rail.
+//
 // Bearer auth from AWS SSM at /glama/api-key, fetched only for endpoints that declare it.
 package glama
 
@@ -22,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"forgejo.coilysiren.me/coilyco-bridge/coily/cmd/coily/restfmt"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
@@ -39,6 +46,13 @@ func Command(r *shell.Runner, w *audit.Writer) *cli.Command {
 	return &cli.Command{
 		Name:  "glama",
 		Usage: "Glama MCP API directory + telemetry.",
+		Flags: []cli.Flag{
+			// urfave/cli v3 flags propagate to every subcommand by default
+			// (Local defaults false), so these reach every generated leaf. A
+			// leaf that declares a same-named local flag shadows them.
+			&cli.StringFlag{Name: "query", Usage: "JMESPath projection applied to the JSON response (coily#46)"},
+			&cli.StringFlag{Name: "output", Usage: "output format: json (default), yaml, text (coily#46)"},
+		},
 		Commands: []*cli.Command{
 			groupInstances(r, w),
 			groupServers(r, w),
@@ -94,7 +108,7 @@ func opInstancesGetV1Instances(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/v1/instances"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, true)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, true, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -110,6 +124,7 @@ func opServersGetV1Servers(r *shell.Runner, w *audit.Writer) *cli.Command {
 			&cli.StringFlag{Name: "after", Usage: "query: "},
 			&cli.StringFlag{Name: "first", Usage: "query: "},
 			&cli.StringFlag{Name: "query", Usage: "query: Free text search query"},
+			&cli.StringFlag{Name: "jq", Usage: "JMESPath projection applied to the JSON response; --jq here because this op owns an API --query (coily#46)"},
 		},
 		Action: verb.Wrap(
 			verb.Spec{
@@ -140,7 +155,7 @@ func opServersGetV1Servers(r *shell.Runner, w *audit.Writer) *cli.Command {
 						q.Set("query", c.String("query"))
 					}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, false)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, false, c.String("jq"), c.String("output"))
 				},
 			},
 			w,
@@ -163,7 +178,7 @@ func opServersGetV1Attributes(r *shell.Runner, w *audit.Writer) *cli.Command {
 					path := "/v1/attributes"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, false)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, false, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -193,7 +208,7 @@ func opServersGetV1ServersByNamespaceBySlug(r *shell.Runner, w *audit.Writer) *c
 					path := "/v1/servers/" + p0 + "/" + p1
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "GET", path, q, body, false)
+					return doRequestAndStream(ctx, r, "GET", path, q, body, false, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -216,7 +231,7 @@ func opTelemetryPostV1TelemetryUsage(r *shell.Runner, w *audit.Writer) *cli.Comm
 					path := "/v1/telemetry/usage"
 					q := url.Values{}
 					var body []byte
-					return doRequestAndStream(ctx, r, "POST", path, q, body, false)
+					return doRequestAndStream(ctx, r, "POST", path, q, body, false, c.String("query"), c.String("output"))
 				},
 			},
 			w,
@@ -247,7 +262,7 @@ func readBody(spec string) ([]byte, error) {
 	}
 }
 
-func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path string, q url.Values, body []byte, authNeeded bool) error {
+func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path string, q url.Values, body []byte, authNeeded bool, projection, output string) error {
 	target := apiBase + path
 	if len(q) > 0 {
 		target += "?" + q.Encode()
@@ -288,6 +303,24 @@ func doRequestAndStream(ctx context.Context, r *shell.Runner, method, path strin
 	}
 	if len(bytes.TrimSpace(raw)) == 0 {
 		return nil
+	}
+	outFmt, outSet, err := restfmt.ParseOutput(output)
+	if err != nil {
+		return err
+	}
+	if restfmt.NeedsRender(projection, outSet) {
+		// --query alone defaults to JSON, preserving the surface's existing
+		// output format; --output flips it to yaml/text. Either routes through
+		// restfmt instead of the byte-identical pretty-print path below.
+		if !outSet {
+			outFmt = restfmt.OutputJSON
+		}
+		rendered, rErr := restfmt.Render(projection, outFmt, raw)
+		if rErr != nil {
+			return rErr
+		}
+		_, err = os.Stdout.Write(rendered)
+		return err
 	}
 	var pretty json.RawMessage
 	if err := json.Unmarshal(raw, &pretty); err != nil {
