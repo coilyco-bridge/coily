@@ -168,6 +168,45 @@ func TestLockdown_RecursiveAppliesToEachGitRepo(t *testing.T) {
 	}
 }
 
+// TestLockdown_RecursiveSkipsExistingAndContinues pins coily#124: in
+// recursive mode, --apply (without --replace) must skip a repo that already
+// has a settings.json and keep stamping the rest, rather than erroring on the
+// first existing file and aborting the whole recursion.
+func TestLockdown_RecursiveSkipsExistingAndContinues(t *testing.T) {
+	root := t.TempDir()
+	stamped := filepath.Join(root, "already")
+	fresh := filepath.Join(root, "fresh")
+	for _, r := range []string{stamped, fresh} {
+		if err := os.MkdirAll(filepath.Join(r, ".git"), 0o750); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// Pre-stamp one repo with a sentinel settings.json.
+	existing := filepath.Join(stamped, ".claude", "settings.json")
+	if err := os.MkdirAll(filepath.Dir(existing), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	sentinel := `{"permissions":{}}`
+	if err := os.WriteFile(existing, []byte(sentinel), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := runLockdownFlags(t, root, true, false, true); err != nil {
+		t.Fatalf("recursive apply over a pre-stamped repo errored instead of skipping: %v", err)
+	}
+
+	// The pre-stamped repo is left untouched (skip, not clobber).
+	got, _ := os.ReadFile(existing)
+	if string(got) != sentinel {
+		t.Errorf("pre-stamped repo was modified despite no --replace: %q", string(got))
+	}
+	// The fresh repo still got stamped: recursion continued past the skip.
+	freshTarget := filepath.Join(fresh, ".claude", "settings.json")
+	if _, err := os.Stat(freshTarget); err != nil {
+		t.Errorf("recursion did not continue to fresh repo %s: %v", freshTarget, err)
+	}
+}
+
 func TestLockdown_RecursiveNoReposErrors(t *testing.T) {
 	root := t.TempDir()
 	err := runLockdownFlags(t, root, false, false, true)

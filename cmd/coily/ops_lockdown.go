@@ -417,7 +417,7 @@ func lockdownAction(_ context.Context, c *cli.Command) error {
 	}
 
 	for _, dir := range dirs {
-		if err := lockdownOne(dir, local, apply, replace, stampDefaults, drv); err != nil {
+		if err := lockdownOne(dir, local, apply, replace, recursive, stampDefaults, drv); err != nil {
 			return err
 		}
 	}
@@ -516,7 +516,7 @@ func reassertAncestor(root string, apply bool, d *lockdown.Defaults) error {
 	return nil
 }
 
-func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults, drv *lockdown.Driver) error {
+func lockdownOne(dir string, local, apply, replace, recursive bool, d *lockdown.Defaults, drv *lockdown.Driver) error {
 	target := lockdown.TargetPath(dir, local)
 	plan, err := lockdown.BuildPlan(target, d, drv)
 	if err != nil {
@@ -532,6 +532,8 @@ func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults, d
 			verb = "would create"
 		case replace:
 			verb = "would replace"
+		case recursive:
+			verb = "would skip (exists; use --apply --replace to clobber)"
 		default:
 			verb = "would refuse (exists; use --apply --replace to clobber)"
 		}
@@ -540,6 +542,15 @@ func lockdownOne(dir string, local, apply, replace bool, d *lockdown.Defaults, d
 	}
 
 	if plan.Existed && !replace {
+		// Recursive mode is meant to sweep a tree where most repos are
+		// already stamped: "refuse on existing" is per-target (skip and
+		// continue), not fatal for the whole recursion. --replace is the
+		// explicit opt-in to clobber. Single-target mode stays fatal so a
+		// lone `--apply` at an existing repo gets a clear error. See coily#124.
+		if recursive {
+			fmt.Fprintf(os.Stderr, "%s: skipped (exists; use --apply --replace to clobber)\n", disp)
+			return nil
+		}
 		return fmt.Errorf("lockdown: %s already exists. Use `coily lockdown --apply --replace` to overwrite", disp)
 	}
 
