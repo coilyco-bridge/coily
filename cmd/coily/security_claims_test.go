@@ -538,3 +538,71 @@ func TestSecurityClaim_LockdownDeniesBareKubectlAndAwsAndGh(t *testing.T) {
 		}
 	}
 }
+
+// TestSecurityClaim_AWSReadOnlyGateDeniesSensitiveReads covers SECURITY.md's
+// claim that read-only `coily ops aws` invocations are denied pre-send when
+// they touch a sensitive resource pattern, and that the denial still lands
+// an audit row (the trail survives the boundary). This is the #54 fix: the
+// audit row used to be the only thing a read-only verb produced, documenting
+// the leak without stopping it; now the read is denied before the aws CLI
+// runs and the row records the denial.
+//
+// Two halves back the claim:
+//
+//  1. Wiring: the production `ops aws` passthrough registry entry carries the
+//     read-only gate builder. Without this, the gate is dead code and the
+//     boundary description overstates what runs.
+//  2. Behavior: the gate denies a sensitive read, allows a benign one, and
+//     ignores write verbs (the destructive layer is out of scope for #54).
+//     A denied read lands an `ops.aws.read.denied` reject row.
+func TestSecurityClaim_AWSReadOnlyGateDeniesSensitiveReads(t *testing.T) {
+	// (1) Wiring: find the aws entry in the production ops registry and
+	// confirm it carries the read-only gate builder.
+	var awsEntry *ptEntry
+	for i := range ptOps {
+		if ptOps[i].Bin == "aws" {
+			awsEntry = &ptOps[i]
+			break
+		}
+	}
+	if awsEntry == nil {
+		t.Fatal("no aws entry in ptOps; the ops aws passthrough is gone")
+	}
+	if awsEntry.PreflightGateBuilder == nil {
+		t.Fatal("ops aws entry has no PreflightGateBuilder; the read-only gate is not wired (coilyco-bridge/coily#54)")
+	}
+
+	// (2) Behavior: drive the gate built from a real Runner with a temp
+	// audit log.
+	r, logPath := newAWSGateRunner(t, AWS{})
+	gate := awsEntry.PreflightGateBuilder(r)
+
+	// Sensitive read -> hard deny.
+	if err := gate([]string{"s3", "ls", "s3://prod-secrets"}); err == nil {
+		t.Error("gate allowed `s3 ls` on a secrets bucket; want a pre-send deny")
+	}
+	// Benign read -> pass.
+	if err := gate([]string{"ec2", "describe-instances"}); err != nil {
+		t.Errorf("gate denied a benign read: %v", err)
+	}
+	// Write verb -> pass (out of scope; destructive layer is gated elsewhere).
+	if err := gate([]string{"s3", "rb", "s3://prod-secrets"}); err != nil {
+		t.Errorf("gate denied a write verb (out of scope for #54): %v", err)
+	}
+
+	// The denied read must have landed a reject row so the trail survives.
+	rows := readAuditRows(t, logPath)
+	var denied *audit.Record
+	for i := range rows {
+		if rows[i].Verb == "ops.aws.read.denied" {
+			denied = &rows[i]
+			break
+		}
+	}
+	if denied == nil {
+		t.Fatal("no ops.aws.read.denied audit row landed; the boundary silenced the trail")
+	}
+	if denied.Decision != audit.DecisionReject {
+		t.Errorf("denied row decision = %q, want %q", denied.Decision, audit.DecisionReject)
+	}
+}

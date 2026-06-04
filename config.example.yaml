@@ -26,6 +26,17 @@ audit:
 aws:
   # Profile to use for SDK calls. Credentials come from ~/.aws/, not from this file.
   profile: default
+  # Read-only argv gate (coily#54). Read-only `coily ops aws` verbs that touch a
+  # sensitive pattern are denied pre-send. sensitive_read_patterns, when set,
+  # replaces the baked-in defaults (secrets/state/backup bucket globs, admin
+  # role ARNs) wholesale. allow_sensitive_reads is the persistent explicit-allow;
+  # the per-invocation override is the COILY_AWS_ALLOW_SENSITIVE_READ env var.
+  # Patterns are case-insensitive globs where * matches any run of characters.
+  # sensitive_read_patterns:
+  #   - "*secret*"
+  #   - "arn:aws:iam::*:role/*admin*"
+  # allow_sensitive_reads:
+  #   - "*my-known-good-bucket*"
   # Route53 zone IDs are discovered at runtime via the SDK (list-hosted-zones).
   # Do not hardcode them.
 
