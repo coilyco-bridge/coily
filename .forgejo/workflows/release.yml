@@ -1,13 +1,20 @@
 name: release
 
 # Forgejo-canonical release pipeline. Triggers on push to main against
-# the forgejo repo (forgejo.coilysiren.me/coilysiren/coily). Cuts the
-# tag + release on forgejo, rewrites Formula/coily.rb to pin the new
+# the forgejo repo (forgejo.coilysiren.me/coilyco-bridge/coily). Cuts the
+# tag + release on forgejo, then two formula-bump jobs pin the new
 # tag+revision via forgejo Contents API.
 #
-# Brew install path is forgejo direct-repo:
-#   brew tap coilysiren/coily https://forgejo.coilysiren.me/coilysiren/coily
-#   brew install coilysiren/coily/coily
+# Brew now installs from the org-aligned centralized tap:
+#   brew tap coilyco-bridge/tap https://forgejo.coilysiren.me/coilyco-bridge/homebrew-tap
+#   brew install coilyco-bridge/tap/coily
+#
+# bump-tap-formula writes that central tap. The per-repo bump-formula
+# (Formula/coily.rb in this repo) is kept fresh for one migration cycle
+# as a fallback for the old direct-repo tap:
+#   brew tap coilyco-bridge/coily https://forgejo.coilysiren.me/coilyco-bridge/coily
+#   brew install coilyco-bridge/coily/coily
+# Drop bump-formula + Formula/coily.rb next release cycle.
 #
 # main.Version is set at build time via ldflags by the Formula, so the
 # git tag is the only version artifact.
@@ -69,6 +76,42 @@ jobs:
           formula_path: Formula/coily.rb
           tag: ${{ needs.release.outputs.tag }}
           revision: ${{ steps.rev.outputs.revision }}
+          forgejo_token: ${{ secrets.CI_RELEASE_TOKEN }}
+
+  bump-tap-formula:
+    # Centralized monorepo tap: rewrite Formula/coily.rb in the
+    # org-aligned coilyco-bridge/homebrew-tap to pin the just-cut tag +
+    # revision. Reuses the same composite action as bump-formula, but
+    # points `repo` at the tap and overrides `url_template` to a literal
+    # so the pinned url still targets this source repo (not the tap).
+    # Cross-repo write, so it uses CI_RELEASE_TOKEN (write:repository PAT
+    # set per-repo on coily). This is the primary install path; the
+    # per-repo bump-formula above stays one cycle as a fallback for the
+    # old direct-repo tap.
+    needs: release
+    if: ${{ needs.release.outputs.tag != '' }}
+    runs-on: docker
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+
+      - id: rev
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: coilysiren/agentic-os/actions/bump-formula@main
+        with:
+          repo: coilyco-bridge/homebrew-tap
+          formula_path: Formula/coily.rb
+          tag: ${{ needs.release.outputs.tag }}
+          revision: ${{ steps.rev.outputs.revision }}
+          url_template: "https://forgejo.coilysiren.me/coilyco-bridge/coily.git"
+          message: "chore(formula): bump coily to {TAG} [skip ci]"
           forgejo_token: ${{ secrets.CI_RELEASE_TOKEN }}
 
   windows-assets:

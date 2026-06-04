@@ -31,9 +31,9 @@ Every push to `main` on forgejo triggers `.forgejo/workflows/release.yml`, fully
 1. `coilysiren/agentic-os/actions/tag-bump` parses conventional commits and computes the next semver. `default_bump: patch`: every push releases at least a patch. `feat:` -> minor, `feat!:` / `BREAKING CHANGE:` -> major. Tag is created via forgejo Tags API.
 2. `main.Version` set at build time via ldflags (brew formula); no source-tree version bump.
 3. `coilysiren/agentic-os/actions/create-release` posts the release with auto-changelog to forgejo Releases.
-4. `coilysiren/agentic-os/actions/bump-formula` rewrites `Formula/coily.rb`'s `url`+`tag`+`revision` line via forgejo Contents API and commits as the auto-issued forgejo Actions token (unsigned bot commit, `[skip ci]` marker).
+4. `coilysiren/agentic-os/actions/bump-formula` runs twice: `bump-tap-formula` rewrites `Formula/coily.rb` in the org-aligned central tap `coilyco-bridge/homebrew-tap` (the primary install path, using `CI_RELEASE_TOKEN` for the cross-repo write), and `bump-formula` keeps the in-repo `Formula/coily.rb` fresh one migration cycle as a fallback. Both rewrite the `url`+`tag`+`revision` line via forgejo Contents API with a `[skip ci]` marker.
 
-Loop-safe: forgejo's auto-token-created commits don't re-trigger workflows when the message carries `[skip ci]`. Brew install is direct-tap from forgejo (`brew tap coilysiren/coily https://forgejo.coilysiren.me/coilysiren/coily`). Formula here is the source of truth.
+Loop-safe: forgejo's token-created commits don't re-trigger workflows when the message carries `[skip ci]`. Brew install is from the central tap (`brew tap coilyco-bridge/tap https://forgejo.coilysiren.me/coilyco-bridge/homebrew-tap && brew install coilyco-bridge/tap/coily`). The tap formula is the install source of truth; the in-repo `Formula/coily.rb` is the one-cycle fallback.
 
 **Not yet on forgejo (residual on github):** Windows `.exe` cross-build + `coilysiren/scoop-bucket` autoupdate. Scoop migration tracked separately; until that lands, Windows users on the brew flow get nothing from a forgejo-only release and need to fall back to `make install-windows`.
 
