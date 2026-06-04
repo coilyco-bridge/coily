@@ -17,7 +17,10 @@
 //     the shared index. Another session's staged files cannot leak in.
 //   - We point GIT_INDEX_FILE at a private throwaway index, so the commit
 //     never reads or writes the shared `.git/index` at all - no contention,
-//     no drift caused by us.
+//     no drift caused by us. We seed that private index from HEAD and stage
+//     just the named paths into it, so a brand-new file (no HEAD entry) can
+//     be committed too - the empty-index case used to refuse new files
+//     (coily#192).
 //   - The message must come from `-m`/`-F` (never the editor), so
 //     `.git/COMMIT_EDITMSG` is written-not-read and each commit's message is
 //     taken from its own argv. Messages cannot cross.
@@ -31,6 +34,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -112,6 +116,21 @@ func (r *Runner) runGitCommit(ctx context.Context, argv []string) error {
 		Env:     []string{"GIT_INDEX_FILE=" + idxPath},
 	}
 
+	// Seed the private index from HEAD, then stage the worktree state of
+	// exactly the named paths into it. The seed matters for NEW files: git's
+	// pathspec-commit (`commit -- <paths>`) re-stages each path with
+	// `update-index <path>`, which fails with "did not match any file(s)
+	// known to git" when the path is neither in HEAD nor in the index - the
+	// empty-index case (coily#192). Seeding from HEAD plus an explicit
+	// `git add` gives every named path an index entry to update, so new,
+	// modified, and deleted paths all commit uniformly. Other HEAD entries
+	// are carried through untouched, and no concurrently-staged path from the
+	// shared index can leak in, because this index only ever sees HEAD + the
+	// named paths.
+	if err := seedPrivateIndex(ctx, idxRunner, dir, paths); err != nil {
+		return err
+	}
+
 	commitArgv := gitArgv(dir, "commit", flags, paths)
 	if err := idxRunner.Exec(ctx, "git", commitArgv...); err != nil {
 		return fmt.Errorf("coily git commit: %w", err)
@@ -126,6 +145,33 @@ func (r *Runner) runGitCommit(ctx context.Context, argv []string) error {
 		fmt.Fprintf(os.Stderr, "coily git commit: committed, but resyncing the shared index for "+
 			"the committed paths failed (%v); `git status` may show them until the next index "+
 			"update\n", err)
+	}
+	return nil
+}
+
+// seedPrivateIndex primes the private index so a pathspec-commit of the named
+// paths succeeds for new files as well as modifications and deletions. It
+// reads HEAD into the index (best-effort: the very first commit has no HEAD,
+// where an empty index is already correct), then runs `git add -A -- <paths>`
+// to stage the worktree state of exactly those paths. Only the named paths are
+// staged, so nothing else from the working tree - or another session's shared
+// index - can ride along.
+func seedPrivateIndex(ctx context.Context, idxRunner *shell.Runner, dir string, paths []string) error {
+	// read-tree HEAD through a stderr-discarding copy of the runner: the very
+	// first commit has no HEAD, where read-tree fails and an empty index is
+	// already correct, so we swallow both the error and git's fatal line.
+	readTreeArgv := []string{}
+	if dir != "" {
+		readTreeArgv = append(readTreeArgv, "-C", dir)
+	}
+	readTreeArgv = append(readTreeArgv, "read-tree", "HEAD")
+	quiet := *idxRunner
+	quiet.Stderr = io.Discard
+	_ = quiet.Exec(ctx, "git", readTreeArgv...)
+
+	addArgv := gitArgv(dir, "add", []string{"-A"}, paths)
+	if err := idxRunner.Exec(ctx, "git", addArgv...); err != nil {
+		return fmt.Errorf("coily git commit: staging the named paths failed: %w", err)
 	}
 	return nil
 }
@@ -202,8 +248,9 @@ func gitArgv(dir, verbName string, flags, paths []string) []string {
 
 // newPrivateIndex reserves a unique path for a throwaway GIT_INDEX_FILE and
 // returns a cleanup that removes it. The placeholder file is deleted before
-// return so git creates the index fresh; pathspec-commit seeds the commit
-// tree from HEAD regardless, so an absent index is correct.
+// return so git creates the index fresh; seedPrivateIndex then primes it from
+// HEAD and stages the named paths (see coily#192 for why an absent index alone
+// was not enough - it refused new files).
 func newPrivateIndex() (path string, cleanup func(), err error) {
 	f, err := os.CreateTemp("", "coily-gitidx-*")
 	if err != nil {

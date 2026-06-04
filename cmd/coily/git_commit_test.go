@@ -198,6 +198,90 @@ func TestRunGitCommitIsolatesSharedIndex(t *testing.T) {
 	}
 }
 
+// TestRunGitCommitNewFile is the regression test for coily#192: a path that
+// exists in the working tree but not in HEAD (a brand-new file) must commit,
+// where the empty-private-index design used to refuse it with "did not match
+// any file(s) known to git".
+func TestRunGitCommitNewFile(t *testing.T) {
+	gitAvailable(t)
+	repo := t.TempDir()
+	runGit(t, repo, "init", "-q")
+	runGit(t, repo, "config", "user.email", "t@t.t")
+	runGit(t, repo, "config", "user.name", "t")
+	writeFile(t, filepath.Join(repo, "base.txt"), "base\n")
+	runGit(t, repo, "add", "-A")
+	runGit(t, repo, "commit", "-qm", "init")
+
+	// A new file, plus an unrelated worktree change that must NOT ride along.
+	writeFile(t, filepath.Join(repo, "new.txt"), "hi\n")
+	writeFile(t, filepath.Join(repo, "base.txt"), "drifted\n")
+
+	r := &Runner{Runner: &shell.Runner{Stdout: os.Stderr, Stderr: os.Stderr}}
+	if err := r.runGitCommit(context.Background(), []string{"-C", repo, "-m", "feat: new", "--", "new.txt"}); err != nil {
+		t.Fatalf("runGitCommit new file: %v", err)
+	}
+
+	if files := gitOut(t, repo, "show", "--name-only", "--format=", "HEAD"); files != "new.txt" {
+		t.Errorf("HEAD changed files = %q, want only new.txt", files)
+	}
+	if content := gitOut(t, repo, "show", "HEAD:new.txt"); content != "hi" {
+		t.Errorf("committed new.txt = %q, want hi", content)
+	}
+	// base.txt's worktree drift must not have been committed.
+	if content := gitOut(t, repo, "show", "HEAD:base.txt"); content != "base" {
+		t.Errorf("base.txt in HEAD = %q, want base (unchanged)", content)
+	}
+}
+
+// TestRunGitCommitFirstCommitNewFile covers the no-HEAD path: the very first
+// commit in a repo seeds nothing (read-tree HEAD fails, swallowed) yet still
+// commits the named new file.
+func TestRunGitCommitFirstCommitNewFile(t *testing.T) {
+	gitAvailable(t)
+	repo := t.TempDir()
+	runGit(t, repo, "init", "-q")
+	runGit(t, repo, "config", "user.email", "t@t.t")
+	runGit(t, repo, "config", "user.name", "t")
+	writeFile(t, filepath.Join(repo, "first.txt"), "first\n")
+
+	r := &Runner{Runner: &shell.Runner{Stdout: os.Stderr, Stderr: os.Stderr}}
+	if err := r.runGitCommit(context.Background(), []string{"-C", repo, "-m", "feat: first", "--", "first.txt"}); err != nil {
+		t.Fatalf("runGitCommit first commit: %v", err)
+	}
+	if content := gitOut(t, repo, "show", "HEAD:first.txt"); content != "first" {
+		t.Errorf("committed first.txt = %q, want first", content)
+	}
+}
+
+// TestRunGitCommitDeletion covers a path removed from the working tree: the
+// seed-from-HEAD step must give it an index entry so the deletion commits.
+func TestRunGitCommitDeletion(t *testing.T) {
+	gitAvailable(t)
+	repo := t.TempDir()
+	runGit(t, repo, "init", "-q")
+	runGit(t, repo, "config", "user.email", "t@t.t")
+	runGit(t, repo, "config", "user.name", "t")
+	writeFile(t, filepath.Join(repo, "gone.txt"), "x\n")
+	writeFile(t, filepath.Join(repo, "keep.txt"), "y\n")
+	runGit(t, repo, "add", "-A")
+	runGit(t, repo, "commit", "-qm", "init")
+
+	if err := os.Remove(filepath.Join(repo, "gone.txt")); err != nil {
+		t.Fatalf("rm gone.txt: %v", err)
+	}
+
+	r := &Runner{Runner: &shell.Runner{Stdout: os.Stderr, Stderr: os.Stderr}}
+	if err := r.runGitCommit(context.Background(), []string{"-C", repo, "-m", "chore: rm gone", "--", "gone.txt"}); err != nil {
+		t.Fatalf("runGitCommit deletion: %v", err)
+	}
+	if status := gitOut(t, repo, "show", "--name-status", "--format=", "HEAD"); status != "D\tgone.txt" {
+		t.Errorf("HEAD name-status = %q, want %q", status, "D\tgone.txt")
+	}
+	if files := gitOut(t, repo, "ls-tree", "-r", "--name-only", "HEAD"); files != "keep.txt" {
+		t.Errorf("HEAD tree = %q, want only keep.txt", files)
+	}
+}
+
 func TestRunGitCommitRejects(t *testing.T) {
 	r := &Runner{Runner: &shell.Runner{Stdout: os.Stderr, Stderr: os.Stderr}}
 	cases := []struct {
