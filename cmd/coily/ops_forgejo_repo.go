@@ -25,6 +25,7 @@ func (r *Runner) forgejoRepoCommand() *cli.Command {
 		Commands: []*cli.Command{
 			r.forgejoRepoListCommand(),
 			r.forgejoRepoViewCommand(),
+			r.forgejoRepoCreateCommand(),
 			r.forgejoRepoEditCommand(),
 			r.forgejoRepoTopicsCommand(),
 			r.forgejoRepoForkCommand(),
@@ -114,6 +115,148 @@ func (r *Runner) forgejoRepoViewCommand() *cli.Command {
 			r.Audit,
 		),
 	}
+}
+
+func (r *Runner) forgejoRepoCreateCommand() *cli.Command {
+	return &cli.Command{
+		Name:  "create",
+		Usage: "Create a forgejo repo under an org or the authenticated user (private by default).",
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: "owner", Usage: "destination org or user", Required: true},
+			&cli.StringFlag{Name: "name", Usage: "new repo name", Required: true},
+			&cli.BoolFlag{Name: "public", Usage: "create the repo public; default is private since public repos are indexed beyond recall, so public must be explicit"},
+			&cli.StringFlag{Name: "description", Usage: "repo description"},
+			&cli.StringFlag{Name: "default-branch", Usage: "default branch name (e.g. main)"},
+			&cli.BoolFlag{Name: "auto-init", Usage: "initialize the repo with a README so the default branch exists"},
+		},
+		Action: r.WrapVerb(
+			verb.Spec{
+				Name: "ops.forgejo.repo.create",
+				ArgsFunc: func(c *cli.Command) (map[string]string, []string) {
+					return map[string]string{
+						"--owner":          c.String("owner"),
+						"--name":           c.String("name"),
+						"--public":         strconv.FormatBool(c.Bool("public")),
+						"--description":    c.String("description"),
+						"--default-branch": c.String("default-branch"),
+						"--auto-init":      strconv.FormatBool(c.Bool("auto-init")),
+					}, c.Args().Slice()
+				},
+				Action: func(ctx context.Context, c *cli.Command) error {
+					return r.runForgejoRepoCreate(ctx, c)
+				},
+			},
+			r.Audit,
+		),
+	}
+}
+
+func (r *Runner) runForgejoRepoCreate(ctx context.Context, c *cli.Command) error {
+	const prefix = "ops forgejo repo create"
+	if c.Args().Len() != 0 {
+		return fmt.Errorf("%s: takes no positional args, got %d", prefix, c.Args().Len())
+	}
+	owner := strings.TrimSpace(c.String("owner"))
+	name := strings.TrimSpace(c.String("name"))
+	if err := validateForgejoCreateOwner(prefix, owner); err != nil {
+		return err
+	}
+	if err := validateForgejoCreateName(prefix, name); err != nil {
+		return err
+	}
+	body := forgejoRepoCreateBodyFrom(name, c.String("description"), c.String("default-branch"), c.Bool("public"), c.Bool("auto-init"))
+	payload, err := json.Marshal(body)
+	if err != nil {
+		return fmt.Errorf("%s: marshal payload: %w", prefix, err)
+	}
+	// Resolve the token owner so a create aimed at the user's own namespace
+	// routes to POST /api/v1/user/repos; any other owner is treated as an org.
+	login, err := r.forgejoAuthenticatedLogin(ctx, prefix)
+	if err != nil {
+		return err
+	}
+	path := forgejoRepoCreatePath(owner, login)
+	respBody, err := r.forgejoAPIDo(ctx, prefix, http.MethodPost, path, payload, http.StatusCreated)
+	if err != nil {
+		return err
+	}
+	return printForgejoRepo(respBody)
+}
+
+// validateForgejoCreateOwner rejects an empty, leading-hyphen, or
+// invalid-character owner. Mirrors parseForgejoRepoSlug's owner checks for the
+// create verb, which takes owner and name as separate flags rather than a slug.
+func validateForgejoCreateOwner(prefix, owner string) error {
+	if owner == "" {
+		return fmt.Errorf("%s: --owner is required", prefix)
+	}
+	if strings.HasPrefix(owner, "-") {
+		return fmt.Errorf("%s: --owner %q must not start with '-'", prefix, owner)
+	}
+	return validateForgejoSlugPart(owner)
+}
+
+// validateForgejoCreateName applies the same shape checks to the new repo name.
+func validateForgejoCreateName(prefix, name string) error {
+	if name == "" {
+		return fmt.Errorf("%s: --name is required", prefix)
+	}
+	if strings.HasPrefix(name, "-") {
+		return fmt.Errorf("%s: --name %q must not start with '-'", prefix, name)
+	}
+	return validateForgejoSlugPart(name)
+}
+
+// forgejoRepoCreateBodyFrom builds the create payload. Private defaults to true
+// and is always sent explicitly, so the safe default is recorded on the wire
+// rather than left to forgejo's server-side default.
+func forgejoRepoCreateBodyFrom(name, description, defaultBranch string, public, autoInit bool) forgejoRepoCreateBody {
+	body := forgejoRepoCreateBody{
+		Name:    name,
+		Private: !public,
+	}
+	if d := strings.TrimSpace(description); d != "" {
+		body.Description = &d
+	}
+	if b := strings.TrimSpace(defaultBranch); b != "" {
+		body.DefaultBranch = &b
+	}
+	if autoInit {
+		v := true
+		body.AutoInit = &v
+	}
+	return body
+}
+
+// forgejoRepoCreatePath picks the create endpoint: the authenticated user's own
+// namespace routes to POST /api/v1/user/repos, every other owner is treated as
+// an org (POST /api/v1/orgs/{org}/repos). Org-alias owners resolve to canonical
+// via forgejoAPIDo's redirect retry.
+func forgejoRepoCreatePath(owner, login string) string {
+	if login != "" && strings.EqualFold(owner, login) {
+		return "/api/v1/user/repos"
+	}
+	return fmt.Sprintf("/api/v1/orgs/%s/repos", owner)
+}
+
+// forgejoAuthenticatedLogin returns the login of the token owner via GET
+// /api/v1/user, used to decide whether a create targets the user's own
+// namespace or an org.
+func (r *Runner) forgejoAuthenticatedLogin(ctx context.Context, prefix string) (string, error) {
+	respBody, err := r.forgejoAPIDo(ctx, prefix, http.MethodGet, "/api/v1/user", nil, http.StatusOK)
+	if err != nil {
+		return "", err
+	}
+	var who struct {
+		Login string `json:"login"`
+	}
+	if err := json.Unmarshal(respBody, &who); err != nil {
+		return "", fmt.Errorf("%s: decode authenticated user: %w", prefix, err)
+	}
+	if who.Login == "" {
+		return "", fmt.Errorf("%s: authenticated user has empty login", prefix)
+	}
+	return who.Login, nil
 }
 
 func (r *Runner) forgejoRepoEditCommand() *cli.Command {
@@ -462,6 +605,14 @@ type forgejoRepoEditBody struct {
 
 type forgejoRepoForkBody struct {
 	Organization *string `json:"organization,omitempty"`
+}
+
+type forgejoRepoCreateBody struct {
+	Name          string  `json:"name"`
+	Private       bool    `json:"private"`
+	Description   *string `json:"description,omitempty"`
+	DefaultBranch *string `json:"default_branch,omitempty"`
+	AutoInit      *bool   `json:"auto_init,omitempty"`
 }
 
 type forgejoRepoSummary struct {
