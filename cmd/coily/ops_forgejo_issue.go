@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -406,12 +407,27 @@ func (r *Runner) forgejoIssueDeleteCommand() *cli.Command {
 	}
 }
 
+// forgejoAliasMaxHops bounds how many org-alias redirects forgejoAPIDo will
+// resolve for one mutating call before giving up. A moved repo is exactly one
+// 301 (alias owner -> canonical owner), so one hop is enough; the cap keeps a
+// misconfigured redirect chain from looping. coilyco-bridge/coily#162.
+const forgejoAliasMaxHops = 1
+
 // forgejoAPIDo is the shared HTTP path for all forgejo API verbs. Fetches
 // the bearer token from SSM, builds the request, enforces the expected
 // HTTP status, and returns the response body. payload may be nil for
 // GET/DELETE. wantStatus is the single status code the verb treats as
 // success (forgejo's API is consistent enough that this is fine; if a
 // future verb needs 200/201 either-or, widen the type).
+//
+// Post org-split a repo referenced under its historical `coilysiren` owner
+// 301s to its canonical owner (coilyco-bridge / coilyco-flight-deck). Safe
+// reads follow that transparently; mutating methods can't (Go downgrades the
+// method and drops the body), so forgejoCheckRedirect refuses them. Rather than
+// bounce that back to the operator, resolve the alias here: re-issue the same
+// method and body against the canonical URL the redirect named, so dispatch,
+// create, labels, etc. all accept either the alias or the canonical owner
+// uniformly (coilyco-bridge/coily#162).
 func (r *Runner) forgejoAPIDo(ctx context.Context, prefix, method, path string, payload []byte, wantStatus int) ([]byte, error) {
 	base := strings.TrimSuffix(r.Cfg.Forgejo.BaseURL, "/")
 	if base == "" {
@@ -425,8 +441,50 @@ func (r *Runner) forgejoAPIDo(ctx context.Context, prefix, method, path string, 
 	if err != nil {
 		return nil, err
 	}
-	target := base + path
+	client := &http.Client{
+		Timeout:       forgejoAPIHTTPTimeout,
+		CheckRedirect: forgejoCheckRedirect,
+	}
+	return forgejoDoWithAliasRetry(base+path,
+		func(canonical string) {
+			fmt.Fprintf(os.Stderr, "%s: owner alias resolved to canonical %s\n", prefix, canonical)
+		},
+		func(target string) ([]byte, error) {
+			return forgejoAPIRoundTrip(ctx, client, prefix, method, target, payload, token, wantStatus)
+		})
+}
 
+// forgejoDoWithAliasRetry issues roundTrip(target) and, when it fails with an
+// org-alias redirect refusal, re-issues against the canonical URL the redirect
+// named - up to maxHops times. roundTrip preserves method and body, so unlike
+// Go's transparent redirect (which downgrades POST->GET and drops the body)
+// this resolves the alias without silently no-opping. notify fires once per
+// resolved hop so the operator sees which canonical owner the alias mapped to.
+// Resolution is bounded by forgejoAliasMaxHops so a misconfigured redirect
+// chain can't loop. Split from forgejoAPIDo so the retry policy is
+// unit-testable without a live SSM token or HTTP round trip.
+// coilyco-bridge/coily#162.
+func forgejoDoWithAliasRetry(target string, notify func(canonical string), roundTrip func(target string) ([]byte, error)) ([]byte, error) {
+	for hop := 0; ; hop++ {
+		body, err := roundTrip(target)
+		if err == nil {
+			return body, nil
+		}
+		var redir *forgejoRedirectRefusal
+		if hop < forgejoAliasMaxHops && errors.As(err, &redir) && redir.destURL != "" {
+			notify(redir.canonLabel())
+			target = redir.destURL
+			continue
+		}
+		return nil, err
+	}
+}
+
+// forgejoAPIRoundTrip performs a single forgejo API request with the bearer
+// token attached and enforces wantStatus. A refused org-alias redirect surfaces
+// as a *forgejoRedirectRefusal (wrapped through net/http's *url.Error), which
+// forgejoDoWithAliasRetry unwraps to drive the canonical retry.
+func forgejoAPIRoundTrip(ctx context.Context, client *http.Client, prefix, method, target string, payload []byte, token string, wantStatus int) ([]byte, error) {
 	var bodyReader io.Reader
 	if payload != nil {
 		bodyReader = bytes.NewReader(payload)
@@ -441,10 +499,6 @@ func (r *Runner) forgejoAPIDo(ctx context.Context, prefix, method, path string, 
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	client := &http.Client{
-		Timeout:       forgejoAPIHTTPTimeout,
-		CheckRedirect: forgejoCheckRedirect,
-	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s %s: %w", prefix, method, target, err)
@@ -465,8 +519,11 @@ func (r *Runner) forgejoAPIDo(ctx context.Context, prefix, method, path string, 
 // on a 301/302/303, dropping the request body. A create/edit against an alias
 // owner would then hit the wrong (list) endpoint, come back HTTP 200, and
 // fail the wantStatus check with a misleading "returned HTTP 200: [...]" dump
-// that reads like success. Refuse the redirect and name the canonical target
-// so the caller can retry. coilyco-bridge/coily#178, #160.
+// that reads like success. Refuse the redirect and name the canonical target;
+// forgejoDoWithAliasRetry catches the refusal and re-issues against the
+// canonical URL so the alias resolves transparently, and the error's "Retry
+// with --repo" text remains the fallback when no canonical target is parseable.
+// coilyco-bridge/coily#162, #178, #160.
 func forgejoCheckRedirect(req *http.Request, via []*http.Request) error {
 	if len(via) >= 10 {
 		return fmt.Errorf("stopped after 10 redirects")
@@ -475,7 +532,7 @@ func forgejoCheckRedirect(req *http.Request, via []*http.Request) error {
 }
 
 // forgejoRedirectError returns nil when a redirect from origMethod is safe to
-// follow, or a descriptive error when it must be refused (any mutating
+// follow, or a *forgejoRedirectRefusal when it must be refused (any mutating
 // method). Split out from forgejoCheckRedirect so the policy is unit-testable
 // without a live HTTP round trip.
 func forgejoRedirectError(origMethod, origURL, destURL string) error {
@@ -483,12 +540,36 @@ func forgejoRedirectError(origMethod, origURL, destURL string) error {
 	case http.MethodGet, http.MethodHead:
 		return nil
 	}
+	return &forgejoRedirectRefusal{method: origMethod, origURL: origURL, destURL: destURL}
+}
+
+// forgejoRedirectRefusal is the typed error a refused mutating redirect carries
+// so forgejoDoWithAliasRetry can pull the canonical target off it (destURL) and
+// retry, while its Error() still renders the operator-facing "retry with
+// --repo" guidance for the fallback path.
+type forgejoRedirectRefusal struct {
+	method  string
+	origURL string
+	destURL string
+}
+
+// canonLabel is the canonical owner/repo slug parsed from destURL, falling back
+// to the raw redirect URL when the path isn't the .../repos/<owner>/<repo>/...
+// shape. Used in the alias-resolved notice and the retry-suggestion text.
+func (e *forgejoRedirectRefusal) canonLabel() string {
+	if slug, ok := forgejoRepoFromAPIPath(e.destURL); ok {
+		return slug
+	}
+	return e.destURL
+}
+
+func (e *forgejoRedirectRefusal) Error() string {
 	suggestion := ""
-	if slug, ok := forgejoRepoFromAPIPath(destURL); ok {
+	if slug, ok := forgejoRepoFromAPIPath(e.destURL); ok {
 		suggestion = fmt.Sprintf(" Retry with --repo %s.", slug)
 	}
-	return fmt.Errorf("%s %s redirects to %s: the owner is likely an org alias, and forgejo does not preserve %s across redirects, so this would otherwise silently no-op.%s",
-		origMethod, origURL, destURL, origMethod, suggestion)
+	return fmt.Sprintf("%s %s redirects to %s: the owner is likely an org alias, and forgejo does not preserve %s across redirects, so this would otherwise silently no-op.%s",
+		e.method, e.origURL, e.destURL, e.method, suggestion)
 }
 
 // forgejoRepoFromAPIPath pulls "owner/repo" out of a forgejo API URL of the

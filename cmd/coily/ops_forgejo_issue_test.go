@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -37,6 +40,99 @@ func TestForgejoRedirectError(t *testing.T) {
 			t.Errorf("%s error missing canonical --repo suggestion: %v", m, err)
 		}
 	}
+}
+
+// TestForgejoDoWithAliasRetry pins coilyco-bridge/coily#162: a mutating verb
+// against a `coilysiren` org-alias owner gets a refused redirect, and the retry
+// loop re-issues the same method/body against the canonical owner the redirect
+// named rather than bouncing the refusal back to the operator.
+func TestForgejoDoWithAliasRetry(t *testing.T) {
+	const aliasURL = "https://f.me/api/v1/repos/coilysiren/coily/issues"
+	const canonURL = "https://f.me/api/v1/repos/coilyco-bridge/coily/issues"
+
+	t.Run("resolves alias to canonical on a refused mutating redirect", func(t *testing.T) {
+		var seen []string
+		var notified string
+		body, err := forgejoDoWithAliasRetry(aliasURL,
+			func(c string) { notified = c },
+			func(target string) ([]byte, error) {
+				seen = append(seen, target)
+				if target == aliasURL {
+					return nil, forgejoRedirectError(http.MethodPost, aliasURL, canonURL)
+				}
+				return []byte("ok"), nil
+			})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if string(body) != "ok" {
+			t.Errorf("body = %q, want %q", body, "ok")
+		}
+		if len(seen) != 2 || seen[0] != aliasURL || seen[1] != canonURL {
+			t.Errorf("targets = %v, want [alias canon]", seen)
+		}
+		if notified != "coilyco-bridge/coily" {
+			t.Errorf("notified = %q, want canonical slug", notified)
+		}
+	})
+
+	t.Run("gives up after maxHops and returns the refusal", func(t *testing.T) {
+		calls := 0
+		_, err := forgejoDoWithAliasRetry(aliasURL,
+			func(string) {},
+			func(target string) ([]byte, error) {
+				calls++
+				return nil, forgejoRedirectError(http.MethodPost, target, canonURL)
+			})
+		if err == nil {
+			t.Fatal("want the redirect refusal after exhausting hops")
+		}
+		if !strings.Contains(err.Error(), "silently no-op") {
+			t.Errorf("error missing rationale: %v", err)
+		}
+		// One initial call + one retry = 2; the second refusal is returned.
+		if calls != forgejoAliasMaxHops+1 {
+			t.Errorf("roundTrip calls = %d, want %d", calls, forgejoAliasMaxHops+1)
+		}
+	})
+
+	t.Run("non-redirect errors are not retried", func(t *testing.T) {
+		calls := 0
+		_, err := forgejoDoWithAliasRetry(aliasURL,
+			func(string) { t.Error("notify should not fire for a plain error") },
+			func(string) ([]byte, error) {
+				calls++
+				return nil, errors.New("boom")
+			})
+		if err == nil || err.Error() != "boom" {
+			t.Errorf("err = %v, want boom passed through", err)
+		}
+		if calls != 1 {
+			t.Errorf("roundTrip calls = %d, want 1 (no retry)", calls)
+		}
+	})
+
+	t.Run("refusal wrapped through url.Error is still unwrapped", func(t *testing.T) {
+		// net/http returns the CheckRedirect error inside a *url.Error, and
+		// forgejoAPIRoundTrip wraps that again - errors.As must see through both.
+		calls := 0
+		body, err := forgejoDoWithAliasRetry(aliasURL,
+			func(string) {},
+			func(target string) ([]byte, error) {
+				calls++
+				if target == aliasURL {
+					inner := forgejoRedirectError(http.MethodPost, aliasURL, canonURL)
+					return nil, fmt.Errorf("ctx: %w", &url.Error{Op: "Post", URL: aliasURL, Err: inner})
+				}
+				return []byte("ok"), nil
+			})
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if string(body) != "ok" || calls != 2 {
+			t.Errorf("body=%q calls=%d, want ok/2", body, calls)
+		}
+	})
 }
 
 func TestForgejoRepoFromAPIPath(t *testing.T) {

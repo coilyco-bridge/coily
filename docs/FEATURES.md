@@ -29,6 +29,8 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 
 **REST API wrappers**: `coily ops {modio,discord,sentry,trello,forgejo}`.
 
+**Multi-org owner resolution**: post org-split the fleet spans `coilysiren`, `coilyco-bridge`, and `coilyco-flight-deck` (config `primary_orgs`, [coily#162](https://forgejo.coilysiren.me/coilyco-bridge/coily/issues/162)). Dispatch trusts any ref in that set, and forgejo verbs accept either the historical `coilysiren` alias or the canonical owner: a mutating call that 301s from an alias owner is transparently re-issued (method + body preserved) against the canonical URL the redirect names, instead of silently no-opping.
+
 **Repo-defined**: `coily exec <cmd> [-- extra-args]`. Loaded from `.coily/coily.yaml`. Gated on clean+synced tree; `--audit-override-dirty` bypasses with audit tag. Verb prefix `repo.<cmd>`.
 
 ## Audit and logging
