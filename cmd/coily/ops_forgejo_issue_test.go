@@ -1,10 +1,15 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/urfave/cli/v3"
 )
 
 // TestForgejoRedirectError pins the org-alias silent-no-op fix
@@ -85,6 +90,107 @@ func TestParseForgejoRepoSlug(t *testing.T) {
 			t.Errorf("parseForgejoRepoSlug(%q) = (%q,%q), want (%q,%q)", c.in, o, r, c.owner, c.repo)
 		}
 	}
+}
+
+// TestForgejoIssueNumberFlagIndexAlias pins coilyco-bridge/coily#177: every
+// issue subverb that takes --number must also accept --index, matching
+// forgejo's own API/UI spelling. The flag is built by one shared helper, so
+// parsing `--index N` and reading c.Int("number") proves the alias for all of
+// them at once.
+func TestForgejoIssueNumberFlagIndexAlias(t *testing.T) {
+	for _, name := range []string{"number", "index"} {
+		var got int
+		cmd := &cli.Command{
+			Name:  "view",
+			Flags: []cli.Flag{forgejoIssueNumberFlag()},
+			Action: func(_ context.Context, c *cli.Command) error {
+				got = c.Int("number")
+				return nil
+			},
+		}
+		if err := cmd.Run(context.Background(), []string{"view", "--" + name, "42"}); err != nil {
+			t.Fatalf("--%s parse: %v", name, err)
+		}
+		if got != 42 {
+			t.Errorf("--%s: c.Int(\"number\") = %d, want 42", name, got)
+		}
+	}
+}
+
+// TestResolveForgejoBody covers the inline --body / --body-file exactly-one-of
+// contract added in coilyco-bridge/coily#177.
+func TestResolveForgejoBody(t *testing.T) {
+	dir := t.TempDir()
+	filePath := filepath.Join(dir, "body.md")
+	if err := os.WriteFile(filePath, []byte("from file\n"), 0o600); err != nil {
+		t.Fatalf("write temp body: %v", err)
+	}
+	emptyPath := filepath.Join(dir, "empty.md")
+	if err := os.WriteFile(emptyPath, []byte("   \n"), 0o600); err != nil {
+		t.Fatalf("write empty body: %v", err)
+	}
+
+	cases := []struct {
+		name     string
+		body     string
+		bodyFile string
+		want     string
+		wantErr  string
+	}{
+		{name: "inline only", body: "inline text", want: "inline text"},
+		{name: "file only", bodyFile: filePath, want: "from file\n"},
+		{name: "both set", body: "x", bodyFile: filePath, wantErr: "mutually exclusive"},
+		{name: "neither set", wantErr: "one of --body or --body-file is required"},
+		{name: "inline whitespace", body: "   ", wantErr: "--body is empty"},
+		{name: "file empty", bodyFile: emptyPath, wantErr: "is empty"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := runResolveForgejoBody(t, tc.body, tc.bodyFile)
+			if tc.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
+					t.Fatalf("err = %v, want containing %q", err, tc.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tc.want {
+				t.Errorf("body = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+// runResolveForgejoBody drives resolveForgejoBody through a real cli.Command so
+// the flag-reading path (c.String) is exercised exactly as in production.
+func runResolveForgejoBody(t *testing.T, body, bodyFile string) (string, error) {
+	t.Helper()
+	var got string
+	var resErr error
+	cmd := &cli.Command{
+		Name: "comment",
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: "body"},
+			&cli.StringFlag{Name: "body-file"},
+		},
+		Action: func(_ context.Context, c *cli.Command) error {
+			got, resErr = resolveForgejoBody(c, "test")
+			return nil
+		},
+	}
+	argv := []string{"comment"}
+	if body != "" {
+		argv = append(argv, "--body", body)
+	}
+	if bodyFile != "" {
+		argv = append(argv, "--body-file", bodyFile)
+	}
+	if err := cmd.Run(context.Background(), argv); err != nil {
+		t.Fatalf("cmd.Run: %v", err)
+	}
+	return got, resErr
 }
 
 func TestForgejoIssueCreateBodyShape(t *testing.T) {

@@ -2541,6 +2541,7 @@ commands:
         - comment
       summary: Add a comment to a forgejo issue.
       flags:
+        - --body
         - --body-file
         - --number
         - --repo
@@ -2552,6 +2553,7 @@ commands:
         - create
       summary: Create a forgejo issue via the API.
       flags:
+        - --body
         - --body-file
         - --repo
         - --title
@@ -2577,6 +2579,42 @@ commands:
         - --number
         - --repo
         - --title
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - issue
+        - label
+        - add
+      summary: Add one or more labels to a forgejo issue (repeat --label).
+      flags:
+        - --label
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - issue
+        - label
+        - remove
+      summary: Remove one or more labels from a forgejo issue (repeat --label).
+      flags:
+        - --label
+        - --number
+        - --repo
+    - path:
+        - coily
+        - ops
+        - forgejo
+        - issue
+        - label
+        - set
+      summary: Replace the full label set on a forgejo issue (no --label clears all).
+      flags:
+        - --label
+        - --number
+        - --repo
     - path:
         - coily
         - ops
@@ -2755,7 +2793,7 @@ commands:
         - forgejo
         - pr
         - create
-      summary: Create a forgejo pull request.
+      summary: Disabled. Merge/commit straight to main instead.
       flags:
         - --base
         - --body-file
@@ -3426,6 +3464,9 @@ commands:
         - actions
         - delete-actions-id
       summary: Delete an Action
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3433,6 +3474,9 @@ commands:
         - actions
         - delete-actions-idaction-reactions-id
       summary: Delete Action's Reaction
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3448,6 +3492,8 @@ commands:
         - --memberCreator
         - --memberCreator_fields
         - --member_fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3457,6 +3503,8 @@ commands:
       summary: Get the Board for an Action
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3466,6 +3514,8 @@ commands:
       summary: Get the Card for an Action
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3473,6 +3523,9 @@ commands:
         - actions
         - get-actions-id-field
       summary: Get a specific field on an Action
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3482,6 +3535,8 @@ commands:
       summary: Get the List for an Action
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3491,6 +3546,8 @@ commands:
       summary: Get the Member of an Action
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3500,6 +3557,8 @@ commands:
       summary: Get the Member Creator of an Action
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3509,6 +3568,8 @@ commands:
       summary: Get the Organization of an Action
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3519,6 +3580,8 @@ commands:
       flags:
         - --emoji
         - --member
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3529,6 +3592,8 @@ commands:
       flags:
         - --emoji
         - --member
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3536,6 +3601,9 @@ commands:
         - actions
         - get-actions-idaction-reactionsummary
       summary: List Action's summary of Reactions
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3545,6 +3613,8 @@ commands:
       summary: Create Reaction for Action
       flags:
         - --body
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3553,6 +3623,8 @@ commands:
         - put-actions-id
       summary: Update an Action
       flags:
+        - --output
+        - --query
         - --text
     - path:
         - coily
@@ -3562,6 +3634,8 @@ commands:
         - put-actions-id-text
       summary: Update a Comment Action
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -3570,6 +3644,9 @@ commands:
         - applications
         - applications-key-compliance
       summary: Get Application's compliance data
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3578,6 +3655,8 @@ commands:
         - get-batch
       summary: Batch Requests
       flags:
+        - --output
+        - --query
         - --urls
     - path:
         - coily
@@ -3586,6 +3665,9 @@ commands:
         - boards
         - boards-id-checklists
       summary: Get Checklists on a Board
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3593,6 +3675,9 @@ commands:
         - boards
         - boardsidmembersidmember
       summary: Remove Member from Board
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3600,6 +3685,9 @@ commands:
         - boards
         - delete-boards-id
       summary: Delete a Board
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3609,6 +3697,8 @@ commands:
       summary: Get Power-Ups on a Board
       flags:
         - --filter
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3631,7 +3721,9 @@ commands:
         - --myPrefs
         - --organization
         - --organization_pluginData
+        - --output
         - --pluginData
+        - --query
         - --tags
     - path:
         - coily
@@ -3651,7 +3743,9 @@ commands:
         - --memberCreator
         - --memberCreator_fields
         - --member_fields
+        - --output
         - --page
+        - --query
         - --reactions
         - --since
     - path:
@@ -3661,6 +3755,9 @@ commands:
         - boards
         - get-boards-id-boardplugins
       summary: Get Enabled Power-Ups on Board
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3670,6 +3767,8 @@ commands:
       summary: Get boardStars on a Board
       flags:
         - --filter
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3677,6 +3776,9 @@ commands:
         - boards
         - get-boards-id-cards
       summary: Get Cards on a Board
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3684,6 +3786,9 @@ commands:
         - boards
         - get-boards-id-cards-filter
       summary: Get filtered Cards on a Board
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3691,6 +3796,9 @@ commands:
         - boards
         - get-boards-id-customfields
       summary: Get Custom Fields for Board
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3698,6 +3806,9 @@ commands:
         - boards
         - get-boards-id-field
       summary: Get a field on a Board
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3708,6 +3819,8 @@ commands:
       flags:
         - --fields
         - --limit
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3720,6 +3833,8 @@ commands:
         - --cards
         - --fields
         - --filter
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3727,6 +3842,9 @@ commands:
         - boards
         - get-boards-id-lists-filter
       summary: Get filtered Lists on a Board
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3734,6 +3852,9 @@ commands:
         - boards
         - get-boards-id-members
       summary: Get the Members of a Board
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3747,6 +3868,8 @@ commands:
         - --member
         - --member_fields
         - --orgMemberType
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3762,6 +3885,7 @@ commands:
         - --idOrganization
         - --keepFromSource
         - --name
+        - --output
         - --powerUps
         - --prefs_background
         - --prefs_cardAging
@@ -3771,6 +3895,7 @@ commands:
         - --prefs_permissionLevel
         - --prefs_selfJoin
         - --prefs_voting
+        - --query
     - path:
         - coily
         - ops
@@ -3778,6 +3903,9 @@ commands:
         - boards
         - post-boards-id-calendarkey-generate
       summary: Create a calendarKey for a Board
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3785,6 +3913,9 @@ commands:
         - boards
         - post-boards-id-emailkey-generate
       summary: Create a emailKey for a Board
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3793,6 +3924,8 @@ commands:
         - post-boards-id-idtags
       summary: Create a Tag for a Board
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -3804,6 +3937,8 @@ commands:
       flags:
         - --color
         - --name
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3813,7 +3948,9 @@ commands:
       summary: Create a List on a Board
       flags:
         - --name
+        - --output
         - --pos
+        - --query
     - path:
         - coily
         - ops
@@ -3821,6 +3958,9 @@ commands:
         - boards
         - post-boards-id-markedasviewed
       summary: Mark Board as viewed
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3833,6 +3973,7 @@ commands:
         - --desc
         - --idOrganization
         - --name
+        - --output
         - --prefs/background
         - --prefs/calendarFeedEnabled
         - --prefs/cardAging
@@ -3843,6 +3984,7 @@ commands:
         - --prefs/permissionLevel
         - --prefs/selfJoin
         - --prefs/voting
+        - --query
         - --subscribed
     - path:
         - coily
@@ -3854,6 +3996,8 @@ commands:
       flags:
         - --body
         - --email
+        - --output
+        - --query
         - --type
     - path:
         - coily
@@ -3864,6 +4008,8 @@ commands:
       summary: Add a Member to a Board
       flags:
         - --allowBillableGuest
+        - --output
+        - --query
         - --type
     - path:
         - coily
@@ -3874,6 +4020,8 @@ commands:
       summary: Update Membership of Member on a Board
       flags:
         - --member_fields
+        - --output
+        - --query
         - --type
     - path:
         - coily
@@ -3883,6 +4031,8 @@ commands:
         - put-boards-id-my-prefs-showsidebar
       summary: Update showSidebar Pref on a Board
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -3892,6 +4042,8 @@ commands:
         - put-boards-id-my-prefs-showsidebaractivity
       summary: Update showSidebarActivity Pref on a Board
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -3901,6 +4053,8 @@ commands:
         - put-boards-id-my-prefs-showsidebarboardactions
       summary: Update showSidebarBoardActions Pref on a Board
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -3910,6 +4064,8 @@ commands:
         - put-boards-id-my-prefs-showsidebarmembers
       summary: Update showSidebarMembers Pref on a Board
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -3919,6 +4075,8 @@ commands:
         - put-boards-id-myprefs-emailposition
       summary: Update emailPosition Pref on a Board
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -3928,6 +4086,8 @@ commands:
         - put-boards-id-myprefs-idemaillist
       summary: Update idEmailList Pref on a Board
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -3937,6 +4097,8 @@ commands:
         - cardsidmembersvoted-1
       summary: Add Member vote to Card
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -3945,6 +4107,9 @@ commands:
         - cards
         - delete-cards-id
       summary: Delete a Card
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3952,6 +4117,9 @@ commands:
         - cards
         - delete-cards-id-actions-id-comments
       summary: Delete a comment on a Card
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3959,6 +4127,9 @@ commands:
         - cards
         - delete-cards-id-checkitem-idcheckitem
       summary: Delete checkItem on a Card
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3966,6 +4137,9 @@ commands:
         - cards
         - delete-cards-id-checklists-idchecklist
       summary: Delete a Checklist on a Card
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3973,6 +4147,9 @@ commands:
         - cards
         - delete-cards-id-idlabels-idlabel
       summary: Remove a Label from a Card
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3980,6 +4157,9 @@ commands:
         - cards
         - delete-cards-id-membersvoted-idmember
       summary: Remove a Member's Vote on a Card
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3987,6 +4167,9 @@ commands:
         - cards
         - delete-cards-id-stickers-idsticker
       summary: Delete a Sticker on a Card
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -3994,6 +4177,9 @@ commands:
         - cards
         - delete-id-idmembers-idmember
       summary: Remove a Member from a Card
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4001,6 +4187,9 @@ commands:
         - cards
         - deleted-cards-id-attachments-idattachment
       summary: Delete an Attachment on a Card
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4024,7 +4213,9 @@ commands:
         - --member_fields
         - --members
         - --membersVoted
+        - --output
         - --pluginData
+        - --query
         - --sticker_fields
         - --stickers
     - path:
@@ -4036,7 +4227,9 @@ commands:
       summary: Get Actions on a Card
       flags:
         - --filter
+        - --output
         - --page
+        - --query
     - path:
         - coily
         - ops
@@ -4047,6 +4240,8 @@ commands:
       flags:
         - --fields
         - --filter
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4056,6 +4251,8 @@ commands:
       summary: Get an Attachment on a Card
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4065,6 +4262,8 @@ commands:
       summary: Get the Board the Card is on
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4074,6 +4273,8 @@ commands:
       summary: Get checkItem on a Card
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4083,6 +4284,8 @@ commands:
       summary: Get checkItems on a Card
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4095,6 +4298,8 @@ commands:
         - --checkItems
         - --fields
         - --filter
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4102,6 +4307,9 @@ commands:
         - cards
         - get-cards-id-customfielditems
       summary: Get Custom Field Items for a Card
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4109,6 +4317,9 @@ commands:
         - cards
         - get-cards-id-field
       summary: Get a field on a Card
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4118,6 +4329,8 @@ commands:
       summary: Get the List of a Card
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4127,6 +4340,8 @@ commands:
       summary: Get the Members of a Card
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4136,6 +4351,8 @@ commands:
       summary: Get Members who have voted on a Card
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4143,6 +4360,9 @@ commands:
         - cards
         - get-cards-id-plugindata
       summary: Get pluginData on a Card
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4152,6 +4372,8 @@ commands:
       summary: Get Stickers on a Card
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4161,6 +4383,8 @@ commands:
       summary: Get a Sticker on a Card
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4184,7 +4408,9 @@ commands:
         - --locationName
         - --mimeType
         - --name
+        - --output
         - --pos
+        - --query
         - --start
         - --urlSource
     - path:
@@ -4195,6 +4421,8 @@ commands:
         - post-cards-id-actions-comments
       summary: Add a new comment to a Card
       flags:
+        - --output
+        - --query
         - --text
     - path:
         - coily
@@ -4207,6 +4435,8 @@ commands:
         - --file
         - --mimeType
         - --name
+        - --output
+        - --query
         - --setCover
         - --url
     - path:
@@ -4219,7 +4449,9 @@ commands:
       flags:
         - --idChecklistSource
         - --name
+        - --output
         - --pos
+        - --query
     - path:
         - coily
         - ops
@@ -4228,6 +4460,8 @@ commands:
         - post-cards-id-idlabels
       summary: Add a Label to a Card
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -4237,6 +4471,8 @@ commands:
         - post-cards-id-idmembers
       summary: Add a Member to a Card
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -4248,6 +4484,8 @@ commands:
       flags:
         - --color
         - --name
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4255,6 +4493,9 @@ commands:
         - cards
         - post-cards-id-markassociatednotificationsread
       summary: Mark a Card's Notifications as read
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4265,6 +4506,8 @@ commands:
       flags:
         - --image
         - --left
+        - --output
+        - --query
         - --rotate
         - --top
         - --zIndex
@@ -4290,7 +4533,9 @@ commands:
         - --idMembers
         - --locationName
         - --name
+        - --output
         - --pos
+        - --query
         - --start
         - --subscribed
     - path:
@@ -4301,6 +4546,8 @@ commands:
         - put-cards-id-actions-idaction-comments
       summary: Update Comment Action on a Card
       flags:
+        - --output
+        - --query
         - --text
     - path:
         - coily
@@ -4315,7 +4562,9 @@ commands:
         - --idChecklist
         - --idMember
         - --name
+        - --output
         - --pos
+        - --query
         - --state
     - path:
         - coily
@@ -4326,6 +4575,8 @@ commands:
       summary: Update a Sticker on a Card
       flags:
         - --left
+        - --output
+        - --query
         - --rotate
         - --top
         - --zIndex
@@ -4337,7 +4588,9 @@ commands:
         - put-cards-idcard-checklist-idchecklist-checkitem-idcheckitem
       summary: Update Checkitem on Checklist on Card
       flags:
+        - --output
         - --pos
+        - --query
     - path:
         - coily
         - ops
@@ -4347,6 +4600,8 @@ commands:
       summary: Update Custom Field item on Card
       flags:
         - --body
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4356,6 +4611,8 @@ commands:
       summary: Update Multiple Custom Field items on Card
       flags:
         - --body
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4363,6 +4620,9 @@ commands:
         - checklists
         - delete-checklists-id
       summary: Delete a Checklist
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4370,6 +4630,9 @@ commands:
         - checklists
         - delete-checklists-id-checkitems-idcheckitem
       summary: Delete Checkitem from Checklist
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4382,6 +4645,8 @@ commands:
         - --checkItem_fields
         - --checkItems
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4391,6 +4656,8 @@ commands:
       summary: Get the Board the Checklist is on
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4398,6 +4665,9 @@ commands:
         - checklists
         - get-checklists-id-cards
       summary: Get the Card a Checklist is on
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4408,6 +4678,8 @@ commands:
       flags:
         - --fields
         - --filter
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4417,6 +4689,8 @@ commands:
       summary: Get a Checkitem on a Checklist
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4424,6 +4698,9 @@ commands:
         - checklists
         - get-checklists-id-field
       summary: Get field on a Checklist
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4435,7 +4712,9 @@ commands:
         - --idCard
         - --idChecklistSource
         - --name
+        - --output
         - --pos
+        - --query
     - path:
         - coily
         - ops
@@ -4449,7 +4728,9 @@ commands:
         - --dueReminder
         - --idMember
         - --name
+        - --output
         - --pos
+        - --query
     - path:
         - coily
         - ops
@@ -4458,6 +4739,8 @@ commands:
         - put-checklists-id-field
       summary: Update field on a Checklist
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -4468,7 +4751,9 @@ commands:
       summary: Update a Checklist
       flags:
         - --name
+        - --output
         - --pos
+        - --query
     - path:
         - coily
         - ops
@@ -4476,6 +4761,9 @@ commands:
         - custom-fields
         - delete-customfields-id
       summary: Delete a Custom Field definition
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4483,6 +4771,9 @@ commands:
         - custom-fields
         - delete-customfields-options-idcustomfieldoption
       summary: Delete Option of Custom Field dropdown
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4490,6 +4781,9 @@ commands:
         - custom-fields
         - get-customfields-id
       summary: Get a Custom Field
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4497,6 +4791,9 @@ commands:
         - custom-fields
         - get-customfields-id-options
       summary: Add Option to Custom Field dropdown
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4504,6 +4801,9 @@ commands:
         - custom-fields
         - get-customfields-options-idcustomfieldoption
       summary: Get Option of Custom Field dropdown
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4513,6 +4813,8 @@ commands:
       summary: Create a new Custom Field on a Board
       flags:
         - --body
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4520,6 +4822,9 @@ commands:
         - custom-fields
         - post-customfields-id-options
       summary: Get Options of Custom Field drop down
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4529,6 +4834,8 @@ commands:
       summary: Update a Custom Field definition
       flags:
         - --body
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4538,6 +4845,8 @@ commands:
       summary: List available Emoji
       flags:
         - --locale
+        - --output
+        - --query
         - --spritesheets
     - path:
         - coily
@@ -4546,6 +4855,9 @@ commands:
         - enterprises
         - delete-enterprises-id-organizations-idorg
       summary: Delete an Organization from an Enterprise.
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4557,6 +4869,8 @@ commands:
         - --board_fields
         - --fields
         - --organization_fields
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -4565,6 +4879,9 @@ commands:
         - enterprises
         - enterprises-id-organizations-idmember
       summary: Remove a Member as admin from Enterprise.
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4586,6 +4903,8 @@ commands:
         - --organization_memberships
         - --organization_paid_accounts
         - --organizations
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4595,6 +4914,8 @@ commands:
       summary: Get Enterprise admin Members
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4602,6 +4923,9 @@ commands:
         - enterprises
         - get-enterprises-id-auditlog
       summary: Get auditlog data for an Enterprise
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4615,6 +4939,8 @@ commands:
         - --inactiveSince
         - --limit
         - --name
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4628,6 +4954,8 @@ commands:
         - --fields
         - --filter
         - --organization_fields
+        - --output
+        - --query
         - --sort
         - --sortBy
         - --sortOrder
@@ -4643,6 +4971,8 @@ commands:
         - --board_fields
         - --fields
         - --organization_fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4654,6 +4984,8 @@ commands:
         - --count
         - --fields
         - --filter
+        - --output
+        - --query
         - --startIndex
     - path:
         - coily
@@ -4662,6 +4994,9 @@ commands:
         - enterprises
         - get-enterprises-id-organizations-bulk-id-organizations
       summary: Bulk accept a set of organizations to an Enterprise.
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4672,6 +5007,8 @@ commands:
       flags:
         - --activeSince
         - --inactiveSince
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4682,6 +5019,8 @@ commands:
       flags:
         - --authenticate
         - --confirmationAccepted
+        - --output
+        - --query
         - --returnUrl
         - --tosAccepted
     - path:
@@ -4691,6 +5030,9 @@ commands:
         - enterprises
         - get-enterprises-id-transferrable-bulk-id-organizations
       summary: Get a bulk list of organizations that can be transferred to an enterprise.
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4698,6 +5040,9 @@ commands:
         - enterprises
         - get-enterprises-id-transferrable-organization-id-organization
       summary: Get whether an organization can be transferred to an enterprise.
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4714,6 +5059,8 @@ commands:
         - --inactiveSince
         - --licensed
         - --managed
+        - --output
+        - --query
         - --search
     - path:
         - coily
@@ -4724,6 +5071,8 @@ commands:
       summary: Create an auth Token for an Enterprise.
       flags:
         - --expiration
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4731,6 +5080,9 @@ commands:
         - enterprises
         - put-enterprises-id-admins-idmember
       summary: Update Member to be admin of Enterprise
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4740,6 +5092,8 @@ commands:
       summary: Decline enterpriseJoinRequests from one organization or a bulk list of organizations.
       flags:
         - --idOrganizations
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4748,6 +5102,8 @@ commands:
         - put-enterprises-id-members-idmember-licensed
       summary: Update a Member's licensed status
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -4758,6 +5114,8 @@ commands:
       summary: Transfer an Organization to an Enterprise.
       flags:
         - --idOrganization
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4765,6 +5123,9 @@ commands:
         - labels
         - delete-labels-id
       summary: Delete a Label
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4774,6 +5135,8 @@ commands:
       summary: Get a Label
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4785,6 +5148,8 @@ commands:
         - --color
         - --idBoard
         - --name
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4795,6 +5160,8 @@ commands:
       flags:
         - --color
         - --name
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4803,6 +5170,8 @@ commands:
         - put-labels-id-field
       summary: Update a field on a label
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -4813,6 +5182,8 @@ commands:
       summary: Get a List
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4822,6 +5193,8 @@ commands:
       summary: Get Actions for a List
       flags:
         - --filter
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4831,6 +5204,8 @@ commands:
       summary: Get the Board a List is on
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4838,6 +5213,9 @@ commands:
         - lists
         - get-lists-id-cards
       summary: Get Cards in a List
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4849,7 +5227,9 @@ commands:
         - --idBoard
         - --idListSource
         - --name
+        - --output
         - --pos
+        - --query
     - path:
         - coily
         - ops
@@ -4857,6 +5237,9 @@ commands:
         - lists
         - post-lists-id-archiveallcards
       summary: Archive all Cards in List
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4867,6 +5250,8 @@ commands:
       flags:
         - --idBoard
         - --idList
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4875,6 +5260,8 @@ commands:
         - put-id-idboard
       summary: Move List to Board
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -4887,7 +5274,9 @@ commands:
         - --closed
         - --idBoard
         - --name
+        - --output
         - --pos
+        - --query
         - --subscribed
     - path:
         - coily
@@ -4897,6 +5286,8 @@ commands:
         - put-lists-id-closed
       summary: Archive or unarchive a list
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -4906,6 +5297,8 @@ commands:
         - put-lists-id-field
       summary: Update a field on a List
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -4914,6 +5307,9 @@ commands:
         - members
         - delete-members-id-boardbackgrounds-idbackground
       summary: Delete a Member's custom Board background
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4921,6 +5317,9 @@ commands:
         - members
         - delete-members-id-boardstars-idstar
       summary: Delete Star for Board
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4928,6 +5327,9 @@ commands:
         - members
         - delete-members-id-customboardbackgrounds-idbackground
       summary: Delete custom Board Background of Member
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4935,6 +5337,9 @@ commands:
         - members
         - delete-members-id-customstickers-idsticker
       summary: Delete a Member's custom Sticker
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4942,6 +5347,9 @@ commands:
         - members
         - delete-members-id-savedsearches-idsearch
       summary: Delete a saved search
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4967,7 +5375,9 @@ commands:
         - --organizations
         - --organizationsInvited
         - --organizationsInvited_fields
+        - --output
         - --paid_account
+        - --query
         - --savedSearches
         - --tokens
     - path:
@@ -4979,6 +5389,8 @@ commands:
       summary: Get a Member's Actions
       flags:
         - --filter
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4988,6 +5400,8 @@ commands:
       summary: Get Member's custom Board backgrounds
       flags:
         - --filter
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -4997,6 +5411,8 @@ commands:
       summary: Get a boardBackground of a Member
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5010,6 +5426,8 @@ commands:
         - --lists
         - --organization
         - --organization_fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5019,6 +5437,8 @@ commands:
       summary: Get Boards the Member has been invited to
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5026,6 +5446,9 @@ commands:
         - members
         - get-members-id-boardstars
       summary: Get a Member's boardStars
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5033,6 +5456,9 @@ commands:
         - members
         - get-members-id-boardstars-idstar
       summary: Get a boardStar of Member
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5042,6 +5468,8 @@ commands:
       summary: Get Cards the Member is on
       flags:
         - --filter
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5049,6 +5477,9 @@ commands:
         - members
         - get-members-id-customboardbackgrounds
       summary: Get a Member's custom Board Backgrounds
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5056,6 +5487,9 @@ commands:
         - members
         - get-members-id-customboardbackgrounds-idbackground
       summary: Get custom Board Background of Member
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5063,6 +5497,9 @@ commands:
         - members
         - get-members-id-customemoji
       summary: Get a Member's customEmojis
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5070,6 +5507,9 @@ commands:
         - members
         - get-members-id-customstickers
       summary: Get Member's custom Stickers
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5079,6 +5519,8 @@ commands:
       summary: Get a Member's custom Sticker
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5086,6 +5528,9 @@ commands:
         - members
         - get-members-id-field
       summary: Get a field on a Member
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5093,6 +5538,9 @@ commands:
         - members
         - get-members-id-notification-channel-settings
       summary: Get a Member's notification channel settings
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5100,6 +5548,9 @@ commands:
         - members
         - get-members-id-notification-channel-settings-channel
       summary: Get blocked notification keys of Member on this channel
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5116,7 +5567,9 @@ commands:
         - --limit
         - --memberCreator
         - --memberCreator_fields
+        - --output
         - --page
+        - --query
         - --read_filter
         - --since
     - path:
@@ -5129,7 +5582,9 @@ commands:
       flags:
         - --fields
         - --filter
+        - --output
         - --paid_account
+        - --query
     - path:
         - coily
         - ops
@@ -5139,6 +5594,8 @@ commands:
       summary: Get Organizations a Member has been invited to
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5146,6 +5603,9 @@ commands:
         - members
         - get-members-id-savedsearches
       summary: Get Member's saved searched
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5153,6 +5613,9 @@ commands:
         - members
         - get-members-id-savedsearches-idsearch
       summary: Get a saved search
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5161,6 +5624,8 @@ commands:
         - get-members-id-tokens
       summary: Get Member's Tokens
       flags:
+        - --output
+        - --query
         - --webhooks
     - path:
         - coily
@@ -5171,6 +5636,8 @@ commands:
       summary: Create Avatar for Member
       flags:
         - --file
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5180,6 +5647,8 @@ commands:
       summary: Create a new custom Board Background
       flags:
         - --file
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5189,6 +5658,8 @@ commands:
       summary: Get a Member's custom Emoji
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5198,6 +5669,8 @@ commands:
       summary: Upload new boardBackground for Member
       flags:
         - --file
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5207,7 +5680,9 @@ commands:
       summary: Create Star for Board
       flags:
         - --idBoard
+        - --output
         - --pos
+        - --query
     - path:
         - coily
         - ops
@@ -5218,6 +5693,8 @@ commands:
       flags:
         - --file
         - --name
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5227,6 +5704,8 @@ commands:
       summary: Create custom Sticker for Member
       flags:
         - --file
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5235,6 +5714,8 @@ commands:
         - post-members-id-onetimemessagesdismissed
       summary: Dismiss a message for Member
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -5245,6 +5726,7 @@ commands:
       summary: Create saved Search for Member
       flags:
         - --name
+        - --output
         - --pos
         - --query
     - path:
@@ -5259,9 +5741,11 @@ commands:
         - --bio
         - --fullName
         - --initials
+        - --output
         - --prefs/colorBlind
         - --prefs/locale
         - --prefs/minutesBetweenSummaries
+        - --query
         - --username
     - path:
         - coily
@@ -5272,6 +5756,8 @@ commands:
       summary: Update a Member's custom Board background
       flags:
         - --brightness
+        - --output
+        - --query
         - --tile
     - path:
         - coily
@@ -5281,7 +5767,9 @@ commands:
         - put-members-id-boardstars-idstar
       summary: Update the position of a boardStar of Member
       flags:
+        - --output
         - --pos
+        - --query
     - path:
         - coily
         - ops
@@ -5291,6 +5779,8 @@ commands:
       summary: Update custom Board Background of Member
       flags:
         - --brightness
+        - --output
+        - --query
         - --tile
     - path:
         - coily
@@ -5301,6 +5791,8 @@ commands:
       summary: Update blocked notification keys of Member on a channel
       flags:
         - --body
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5310,6 +5802,8 @@ commands:
       summary: Update blocked notification keys of Member on a channel
       flags:
         - --body
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5317,6 +5811,9 @@ commands:
         - members
         - put-members-id-notification-channel-settings-channel-blocked-keys-put3
       summary: Update blocked notification keys of Member on a channel
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5326,6 +5823,7 @@ commands:
       summary: Update a saved search
       flags:
         - --name
+        - --output
         - --pos
         - --query
     - path:
@@ -5350,6 +5848,8 @@ commands:
         - --member_fields
         - --organization
         - --organization_fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5359,6 +5859,8 @@ commands:
       summary: Get the Board a Notification is on
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5368,6 +5870,8 @@ commands:
       summary: Get the Card a Notification is on
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5375,6 +5879,9 @@ commands:
         - notifications
         - get-notifications-id-field
       summary: Get a field of a Notification
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5384,6 +5891,8 @@ commands:
       summary: Get the List a Notification is on
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5393,6 +5902,8 @@ commands:
       summary: Get the Member who created the Notification
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5402,6 +5913,8 @@ commands:
       summary: Get a Notification's associated Organization
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5411,6 +5924,8 @@ commands:
       summary: Get the Member a Notification is about (not the creator)
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5420,6 +5935,8 @@ commands:
       summary: Mark all Notifications as read
       flags:
         - --ids
+        - --output
+        - --query
         - --read
     - path:
         - coily
@@ -5429,6 +5946,8 @@ commands:
         - put-notifications-id
       summary: Update a Notification's read status
       flags:
+        - --output
+        - --query
         - --unread
     - path:
         - coily
@@ -5438,6 +5957,8 @@ commands:
         - put-notifications-id-unread
       summary: Update Notification's read status
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -5446,6 +5967,9 @@ commands:
         - organizations
         - delete-organizations-id
       summary: Delete an Organization
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5453,6 +5977,9 @@ commands:
         - organizations
         - delete-organizations-id-logo
       summary: Delete Logo for Organization
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5460,6 +5987,9 @@ commands:
         - organizations
         - delete-organizations-id-members
       summary: Remove a Member from an Organization
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5467,6 +5997,9 @@ commands:
         - organizations
         - delete-organizations-id-prefs-associateddomain
       summary: Remove the associated Google Apps domain from a Workspace
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5474,6 +6007,9 @@ commands:
         - organizations
         - delete-organizations-id-prefs-orginviterestrict
       summary: Delete the email domain restriction on who can be invited to the Workspace
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5481,6 +6017,9 @@ commands:
         - organizations
         - delete-organizations-id-tags-idtag
       summary: Delete an Organization's Tag
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5488,6 +6027,9 @@ commands:
         - organizations
         - get-organizations-id
       summary: Get an Organization
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5495,6 +6037,9 @@ commands:
         - organizations
         - get-organizations-id-actions
       summary: Get Actions for Organization
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5505,6 +6050,8 @@ commands:
       flags:
         - --fields
         - --filter
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5512,6 +6059,9 @@ commands:
         - organizations
         - get-organizations-id-exports
       summary: Retrieve Organization's Exports
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5519,6 +6069,9 @@ commands:
         - organizations
         - get-organizations-id-field
       summary: Get field on Organization
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5526,6 +6079,9 @@ commands:
         - organizations
         - get-organizations-id-members
       summary: Get the Members of an Organization
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5536,6 +6092,8 @@ commands:
       flags:
         - --filter
         - --member
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5545,6 +6103,8 @@ commands:
       summary: Get a Membership of an Organization
       flags:
         - --member
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5552,6 +6112,9 @@ commands:
         - organizations
         - get-organizations-id-newbillableguests-idboard
       summary: Get Organizations new billable guests
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5559,6 +6122,9 @@ commands:
         - organizations
         - get-organizations-id-plugindata
       summary: Get the pluginData Scoped to Organization
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5566,6 +6132,9 @@ commands:
         - organizations
         - get-organizations-id-tags
       summary: Get Tags of an Organization
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5573,6 +6142,9 @@ commands:
         - organizations
         - organizations-id-members-idmember-all
       summary: Remove a Member from an Organization and all Organization Boards
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5584,6 +6156,8 @@ commands:
         - --desc
         - --displayName
         - --name
+        - --output
+        - --query
         - --website
     - path:
         - coily
@@ -5594,6 +6168,8 @@ commands:
       summary: Create Export for Organizations
       flags:
         - --attachments
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5603,6 +6179,8 @@ commands:
       summary: Update logo for an Organization
       flags:
         - --file
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5610,6 +6188,9 @@ commands:
         - organizations
         - post-organizations-id-tags
       summary: Create a Tag in Organization
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5621,6 +6202,7 @@ commands:
         - --desc
         - --displayName
         - --name
+        - --output
         - --prefs/associatedDomain
         - --prefs/boardVisibilityRestrict/org
         - --prefs/boardVisibilityRestrict/private
@@ -5629,6 +6211,7 @@ commands:
         - --prefs/googleAppsVersion
         - --prefs/orgInviteRestrict
         - --prefs/permissionLevel
+        - --query
         - --website
     - path:
         - coily
@@ -5640,6 +6223,8 @@ commands:
       flags:
         - --email
         - --fullName
+        - --output
+        - --query
         - --type
     - path:
         - coily
@@ -5649,6 +6234,8 @@ commands:
         - put-organizations-id-members-idmember
       summary: Update a Member of an Organization
       flags:
+        - --output
+        - --query
         - --type
     - path:
         - coily
@@ -5658,6 +6245,8 @@ commands:
         - put-organizations-id-members-idmember-deactivated
       summary: Deactivate or reactivate a member of an Organization
       flags:
+        - --output
+        - --query
         - --value
     - path:
         - coily
@@ -5666,6 +6255,9 @@ commands:
         - plugins
         - get-plugins-id
       summary: Get a Plugin
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5673,6 +6265,9 @@ commands:
         - plugins
         - get-plugins-id-compliance-memberprivacy
       summary: Get Plugin's Member privacy compliance
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5682,6 +6277,8 @@ commands:
       summary: Create a Listing for Plugin
       flags:
         - --body
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5689,6 +6286,9 @@ commands:
         - plugins
         - put-plugins-id
       summary: Update a Plugin
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5698,6 +6298,8 @@ commands:
       summary: Updating Plugin's Listing
       flags:
         - --body
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5725,6 +6327,7 @@ commands:
         - --modelTypes
         - --organization_fields
         - --organizations_limit
+        - --output
         - --partial
         - --query
     - path:
@@ -5739,6 +6342,7 @@ commands:
         - --idOrganization
         - --limit
         - --onlyOrgMembers
+        - --output
         - --query
     - path:
         - coily
@@ -5747,6 +6351,9 @@ commands:
         - tokens
         - delete-token
       summary: Delete a Token
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5754,6 +6361,9 @@ commands:
         - tokens
         - delete-tokens-token-webhooks-idwebhook
       summary: Delete a Webhook created by Token
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5763,6 +6373,8 @@ commands:
       summary: Get a Token
       flags:
         - --fields
+        - --output
+        - --query
         - --webhooks
     - path:
         - coily
@@ -5773,6 +6385,8 @@ commands:
       summary: Get Token's Member
       flags:
         - --fields
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5780,6 +6394,9 @@ commands:
         - tokens
         - get-tokens-token-webhooks
       summary: Get Webhooks for Token
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5787,6 +6404,9 @@ commands:
         - tokens
         - get-tokens-token-webhooks-idwebhook
       summary: Get a Webhook belonging to a Token
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5798,6 +6418,8 @@ commands:
         - --callbackURL
         - --description
         - --idModel
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5809,6 +6431,8 @@ commands:
         - --callbackURL
         - --description
         - --idModel
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5816,6 +6440,9 @@ commands:
         - webhooks
         - delete-webhooks-id
       summary: Delete a Webhook
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5823,6 +6450,9 @@ commands:
         - webhooks
         - get-webhooks-id
       summary: Get a Webhook
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5835,6 +6465,8 @@ commands:
         - --callbackURL
         - --description
         - --idModel
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5847,6 +6479,8 @@ commands:
         - --callbackURL
         - --description
         - --idModel
+        - --output
+        - --query
     - path:
         - coily
         - ops
@@ -5854,6 +6488,9 @@ commands:
         - webhooks
         - webhooksidfield
       summary: Get a field on a Webhook
+      flags:
+        - --output
+        - --query
     - path:
         - coily
         - pkg

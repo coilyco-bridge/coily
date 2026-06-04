@@ -1575,13 +1575,13 @@ Flags: --number, --repo
 
 Add a comment to a forgejo issue.
 
-Flags: --body-file, --number, --repo
+Flags: --body, --body-file, --number, --repo
 
 ## `coily ops forgejo issue create`
 
 Create a forgejo issue via the API.
 
-Flags: --body-file, --repo, --title
+Flags: --body, --body-file, --repo, --title
 
 ## `coily ops forgejo issue delete`
 

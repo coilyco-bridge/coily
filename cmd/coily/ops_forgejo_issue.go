@@ -55,7 +55,8 @@ func (r *Runner) forgejoIssueCreateCommand() *cli.Command {
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "repo", Usage: "target repo as owner/name", Required: true},
 			&cli.StringFlag{Name: "title", Usage: "issue title", Required: true},
-			&cli.StringFlag{Name: "body-file", Usage: "path to the issue body markdown", Required: true},
+			&cli.StringFlag{Name: "body", Usage: "inline issue body markdown (mutually exclusive with --body-file)"},
+			&cli.StringFlag{Name: "body-file", Usage: "path to the issue body markdown (mutually exclusive with --body)"},
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
@@ -74,7 +75,7 @@ func (r *Runner) forgejoIssueCreateCommand() *cli.Command {
 					if title == "" {
 						return fmt.Errorf("ops forgejo issue create: --title is empty")
 					}
-					body, err := readForgejoBodyFile(c.String("body-file"), "ops forgejo issue create")
+					body, err := resolveForgejoBody(c, "ops forgejo issue create")
 					if err != nil {
 						return err
 					}
@@ -153,7 +154,7 @@ func (r *Runner) forgejoIssueViewCommand() *cli.Command {
 		Usage: "View a single forgejo issue.",
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "repo", Usage: "target repo as owner/name", Required: true},
-			&cli.IntFlag{Name: "number", Usage: "issue number", Required: true},
+			forgejoIssueNumberFlag(),
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
@@ -195,7 +196,7 @@ func (r *Runner) forgejoIssueEditCommand() *cli.Command {
 		Usage: "Edit an existing forgejo issue's title and/or body.",
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "repo", Usage: "target repo as owner/name", Required: true},
-			&cli.IntFlag{Name: "number", Usage: "issue number", Required: true},
+			forgejoIssueNumberFlag(),
 			&cli.StringFlag{Name: "title", Usage: "new issue title (optional)"},
 			&cli.StringFlag{Name: "body-file", Usage: "path to the new issue body markdown (optional)"},
 		},
@@ -255,8 +256,9 @@ func (r *Runner) forgejoIssueCommentCommand() *cli.Command {
 		Usage: "Add a comment to a forgejo issue.",
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "repo", Usage: "target repo as owner/name", Required: true},
-			&cli.IntFlag{Name: "number", Usage: "issue number", Required: true},
-			&cli.StringFlag{Name: "body-file", Usage: "path to the comment markdown", Required: true},
+			forgejoIssueNumberFlag(),
+			&cli.StringFlag{Name: "body", Usage: "inline comment markdown (mutually exclusive with --body-file)"},
+			&cli.StringFlag{Name: "body-file", Usage: "path to the comment markdown (mutually exclusive with --body)"},
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
@@ -265,6 +267,7 @@ func (r *Runner) forgejoIssueCommentCommand() *cli.Command {
 					return map[string]string{
 						"--repo":      c.String("repo"),
 						"--number":    strconv.Itoa(c.Int("number")),
+						"--body":      c.String("body"),
 						"--body-file": c.String("body-file"),
 					}, c.Args().Slice()
 				},
@@ -280,7 +283,7 @@ func (r *Runner) forgejoIssueCommentCommand() *cli.Command {
 					if err != nil {
 						return err
 					}
-					body, err := readForgejoBodyFile(c.String("body-file"), "ops forgejo issue comment")
+					body, err := resolveForgejoBody(c, "ops forgejo issue comment")
 					if err != nil {
 						return err
 					}
@@ -321,7 +324,7 @@ func (r *Runner) forgejoIssueStateCommand(name, state string) *cli.Command {
 		Usage: fmt.Sprintf("Set a forgejo issue's state to %s.", state),
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "repo", Usage: "target repo as owner/name", Required: true},
-			&cli.IntFlag{Name: "number", Usage: "issue number", Required: true},
+			forgejoIssueNumberFlag(),
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
@@ -367,7 +370,7 @@ func (r *Runner) forgejoIssueDeleteCommand() *cli.Command {
 		Usage: "Delete a forgejo issue (forgejo requires site-admin).",
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "repo", Usage: "target repo as owner/name", Required: true},
-			&cli.IntFlag{Name: "number", Usage: "issue number", Required: true},
+			forgejoIssueNumberFlag(),
 		},
 		Action: r.WrapVerb(
 			verb.Spec{
@@ -534,6 +537,30 @@ func (r *Runner) forgejoAPIToken(ctx context.Context, prefix, ssmPath string) (s
 		return "", fmt.Errorf("%s: %s resolved to empty value", prefix, ssmPath)
 	}
 	return v, nil
+}
+
+// resolveForgejoBody returns the body text for the create/comment verbs from
+// whichever of --body (inline) or --body-file (path) the operator passed,
+// enforcing exactly-one-of semantics. The inline --body alias exists so a
+// one-line comment doesn't force a temp-file dance (coilyco-bridge/coily#177);
+// --body-file stays for multi-line markdown. Both verbs route through here so
+// the mutual-exclusion and empty-body errors read identically.
+func resolveForgejoBody(c *cli.Command, prefix string) (string, error) {
+	inline := c.String("body")
+	bodyPath := c.String("body-file")
+	switch {
+	case inline != "" && bodyPath != "":
+		return "", fmt.Errorf("%s: --body and --body-file are mutually exclusive", prefix)
+	case inline != "":
+		if strings.TrimSpace(inline) == "" {
+			return "", fmt.Errorf("%s: --body is empty", prefix)
+		}
+		return inline, nil
+	case bodyPath != "":
+		return readForgejoBodyFile(bodyPath, prefix)
+	default:
+		return "", fmt.Errorf("%s: one of --body or --body-file is required", prefix)
+	}
 }
 
 // readForgejoBodyFile slurps a markdown body from disk and validates it
