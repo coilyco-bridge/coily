@@ -8,11 +8,13 @@ import (
 )
 
 // TestApplyWrapperAllows_AddsExplicitCoilyEntries pins the load-bearing
-// behavior from coilysiren/coily#115: every bare-binary deny that maps
-// to an audited coily wrapper gains an explicit `Bash(coily ...:*)`
-// allow alongside the umbrella `Bash(coily:*)`. Without this the auto-
-// mode classifier strips `coily ops gh` to `gh` and re-applies the
-// bare deny (#159), making the audited path unreachable.
+// behavior from coilysiren/coily#115 and coilyco-bridge/coily#43: every
+// audited coily wrapper gains an explicit `Bash(coily ...:*)` allow
+// alongside the umbrella `Bash(coily:*)`, UNCONDITIONALLY - regardless of
+// whether the matching bare deny is present in the canonical defaults.
+// The auto-mode classifier strips `coily ops gh` to `gh` and re-applies
+// the user-level bare deny (#43), so every wrapper needs the positive
+// allow as its sanction signal even when the per-repo deny is trimmed.
 func TestApplyWrapperAllows_AddsExplicitCoilyEntries(t *testing.T) {
 	d, err := lockdown.LoadDefaults()
 	if err != nil {
@@ -26,14 +28,8 @@ func TestApplyWrapperAllows_AddsExplicitCoilyEntries(t *testing.T) {
 	}
 
 	for deny, wantAllow := range wrapperAllows {
-		if !containsString(got.Deny, deny) {
-			// Deny isn't present in the canonical defaults; the mapping
-			// still ships the allow, but skip the parity assertion for
-			// this entry so a defaults.yaml change doesn't false-flag.
-			continue
-		}
 		if !have[wantAllow] {
-			t.Errorf("deny %q has no matching allow %q in augmented defaults", deny, wantAllow)
+			t.Errorf("wrapper allow %q (for deny %q) missing from augmented defaults", wantAllow, deny)
 		}
 	}
 }

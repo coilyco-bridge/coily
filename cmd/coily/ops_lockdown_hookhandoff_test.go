@@ -28,29 +28,53 @@ func TestApplyHookHandoffTrim_DropsWrappedBareDenies(t *testing.T) {
 	}
 }
 
-// TestApplyHookHandoffTrim_DropsExplicitWrapperAllows asserts the
-// counterweight allows added by applyWrapperAllows are also removed
-// for trimmed denies. Once the bare deny is gone, the auto-mode
-// classifier has nothing to flag, so the explicit `Bash(coily X:*)`
-// allow loses its purpose (coilysiren/coily#159).
-func TestApplyHookHandoffTrim_DropsExplicitWrapperAllows(t *testing.T) {
+// TestApplyHookHandoffTrim_PreservesExplicitWrapperAllows pins the
+// reversal from coilyco-bridge/coily#43: the explicit `Bash(coily X:*)`
+// allow MUST survive the hook-handoff trim. The auto-mode classifier
+// reasons off the user-level deny set (which keeps the full, untrimmed
+// `Bash(gh:*)` deny via the `--user`/ancestor merge), so it flags
+// `coily ops gh` as deny circumvention even after the per-repo bare deny
+// is trimmed. The positive allow is the explicit sanction that disarms
+// the classifier - trimming it (the old behavior) reopened #43.
+func TestApplyHookHandoffTrim_PreservesExplicitWrapperAllows(t *testing.T) {
 	d, err := lockdown.LoadDefaults()
 	if err != nil {
 		t.Fatalf("LoadDefaults: %v", err)
 	}
-	// Run through the same pipeline order lockdownOne uses, so the
-	// explicit allows are added before trim has a chance to drop them.
-	d = applyWrapperAllows(d)
-	got := applyHookHandoffTrim(d)
+	// Same pipeline order lockdownOne uses: trim runs first, then the
+	// explicit allows are added back. The end state must carry them.
+	got := applyWrapperAllows(applyHookHandoffTrim(d))
 	for token := range wrapperRecovery {
 		bareDeny := fmt.Sprintf("Bash(%s:*)", token)
 		wantedAllow, ok := wrapperAllows[bareDeny]
 		if !ok {
 			continue
 		}
-		if containsString(got.Allow, wantedAllow) {
-			t.Errorf("expected %q to be trimmed from allow list (its deny was trimmed), but it survived", wantedAllow)
+		if !containsString(got.Allow, wantedAllow) {
+			t.Errorf("expected %q to survive the hook handoff (it is the classifier's sanction signal), but it was dropped", wantedAllow)
 		}
+	}
+}
+
+// TestLockdownPipeline_GhWrapperSanctioned is the end-to-end regression
+// for coilyco-bridge/coily#43: after the full stampDefaults pipeline
+// (`applyWrapperAllows(applyHookHandoffTrim(...))`, the order lockdownAction
+// uses), the per-repo settings must carry the positive
+// `Bash(coily ops gh:*)` allow while the bare `Bash(gh:*)` deny is gone.
+// That combination is what stops the auto-mode classifier from reading
+// `coily ops gh` as circumvention of the user-level `gh:*` deny.
+func TestLockdownPipeline_GhWrapperSanctioned(t *testing.T) {
+	base, err := lockdown.LoadDefaults()
+	if err != nil {
+		t.Fatalf("LoadDefaults: %v", err)
+	}
+	got := applyWrapperAllows(applyHookHandoffTrim(base))
+
+	if !containsString(got.Allow, "Bash(coily ops gh:*)") {
+		t.Errorf("expected explicit Bash(coily ops gh:*) allow in stamped defaults, got allows: %v", got.Allow)
+	}
+	if containsString(got.Deny, "Bash(gh:*)") {
+		t.Errorf("expected bare Bash(gh:*) deny to be trimmed by the hook handoff, but it survived")
 	}
 }
 

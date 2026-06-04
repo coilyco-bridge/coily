@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/lockdown"
@@ -132,43 +133,37 @@ var wrapperAllows = map[string]string{
 	"Bash(bundle:*)":    "Bash(coily pkg bundle:*)",
 }
 
-// applyHookHandoffTrim drops `Bash(<token>:*)` deny entries (and the
-// matching `wrapperAllows` explicit allows) for every bare binary
-// coily's PreToolUse hook now gates via its routing-hint table.
-// The hook is the primary gate for those binaries; keeping the bare
-// deny in place makes Claude Code CLI's built-in deny matcher fire
+// applyHookHandoffTrim drops `Bash(<token>:*)` deny entries for every
+// bare binary coily's PreToolUse hook now gates via its routing-hint
+// table. The hook is the primary gate for those binaries; keeping the
+// bare deny in place makes Claude Code CLI's built-in deny matcher fire
 // first and clobber the hook's recovery hint, which was the audit-
 // shopping pattern documented in coilysiren/coily#183.
 //
 // Tokens covered: keys of wrapperRecovery (declared in
-// lockdown_driver.go). Tokens absent from wrapperRecovery keep their
-// bare deny + their wrapperAllows explicit-allow counterweight: the
-// auto-mode classifier still flags `coily ops flyctl` style wrappers
-// as deny circumvention (coilysiren/coily#159) when the bare deny is
-// in play, and the explicit allow tells the classifier the wrapped
-// path is sanctioned.
+// lockdown_driver.go). Only the bare DENY is trimmed - the matching
+// `wrapperAllows` explicit allow is deliberately preserved. The auto-
+// mode classifier reasons off the *user-level* deny set, which still
+// carries `Bash(gh:*)` (the ancestor/`--user` merge ships the full,
+// untrimmed deny list). With the per-repo bare deny trimmed but the
+// user-level deny intact, the classifier flagged `coily ops gh` as
+// deny circumvention even though no repo deny remained
+// (coilyco-bridge/coily#43, ex-coilysiren/coily#159). The explicit
+// `Bash(coily ops gh:*)` allow is the positive signal that tells the
+// classifier the wrapped path is sanctioned, so it must survive the
+// hook handoff. applyWrapperAllows ships it unconditionally.
 //
 // Order in the pipeline: this runs BEFORE applyWrapperAllows so the
-// explicit-allow pass only counterweights surviving bare denies.
+// explicit-allow pass re-adds the sanctioned wrappers after the bare
+// denies are gone.
 func applyHookHandoffTrim(d *lockdown.Defaults) *lockdown.Defaults {
 	trimDenies := make(map[string]bool, len(wrapperRecovery))
 	for token := range wrapperRecovery {
 		trimDenies[fmt.Sprintf("Bash(%s:*)", token)] = true
 	}
-	trimAllows := make(map[string]bool, len(trimDenies))
-	for deny := range trimDenies {
-		if allow, ok := wrapperAllows[deny]; ok {
-			trimAllows[allow] = true
-		}
-	}
 	out := &lockdown.Defaults{
-		Allow: make([]string, 0, len(d.Allow)),
+		Allow: append([]string(nil), d.Allow...),
 		Deny:  make([]string, 0, len(d.Deny)),
-	}
-	for _, a := range d.Allow {
-		if !trimAllows[a] {
-			out.Allow = append(out.Allow, a)
-		}
 	}
 	for _, dn := range d.Deny {
 		if !trimDenies[dn] {
@@ -178,15 +173,21 @@ func applyHookHandoffTrim(d *lockdown.Defaults) *lockdown.Defaults {
 	return out
 }
 
-// applyWrapperAllows augments the canonical allow list with explicit
-// `Bash(coily <wrapper>:*)` entries for every bare-binary deny that
-// has a sanctioned coily wrapper. See wrapperAllows. Returns a fresh
-// *Defaults so the cached embedded value is not mutated.
+// applyWrapperAllows augments the canonical allow list with an explicit
+// `Bash(coily <wrapper>:*)` entry for every sanctioned coily wrapper in
+// wrapperAllows. Returns a fresh *Defaults so the cached embedded value
+// is not mutated.
 //
-// After the hook handoff (coilysiren/coily#183), this only matters
-// for entries whose bare deny survives applyHookHandoffTrim
-// - currently `Bash(flyctl:*)` and any future wrapped verbs not yet
-// covered by coily's hook route table.
+// The explicit allow is shipped UNCONDITIONALLY - not gated on whether
+// the matching bare deny survived applyHookHandoffTrim. The auto-mode
+// classifier flags a wrapped invocation as deny circumvention whenever
+// it sees a deny for the bare binary anywhere in the effective rule set,
+// including the user-level `~/.claude/settings.json` deny that the
+// hook-handoff trim never touches (coilyco-bridge/coily#43). Pairing the
+// per-repo settings with a positive `Bash(coily ops gh:*)` allow is the
+// explicit sanction the classifier needs (issue #115 shape). It is
+// harmless when the bare deny is absent: an allow only matters when
+// something would otherwise prompt or deny.
 func applyWrapperAllows(d *lockdown.Defaults) *lockdown.Defaults {
 	out := &lockdown.Defaults{
 		Allow: append([]string(nil), d.Allow...),
@@ -196,9 +197,15 @@ func applyWrapperAllows(d *lockdown.Defaults) *lockdown.Defaults {
 	for _, a := range out.Allow {
 		have[a] = true
 	}
-	for _, deny := range out.Deny {
-		allow, ok := wrapperAllows[deny]
-		if !ok || have[allow] {
+	// Sort the wrapper allows so the rendered settings.json is stable
+	// regardless of Go's map iteration order (avoids spurious diffs).
+	allows := make([]string, 0, len(wrapperAllows))
+	for _, allow := range wrapperAllows {
+		allows = append(allows, allow)
+	}
+	sort.Strings(allows)
+	for _, allow := range allows {
+		if have[allow] {
 			continue
 		}
 		out.Allow = append(out.Allow, allow)
