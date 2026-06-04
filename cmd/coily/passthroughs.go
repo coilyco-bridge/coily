@@ -48,6 +48,13 @@ type ptEntry struct {
 	ReadCache      passthrough.ReadCacheClassifier
 	SecretResolver mcporter.SecretResolver
 	PreflightGate  func(argv []string) error
+	// PreflightGateBuilder is the runner-aware sibling of PreflightGate, for
+	// gates that need config or the audit writer to decide. passthroughCommand
+	// builds it from the live Runner and chains it after the static
+	// PreflightGate (both run; first non-nil error wins). The `ops aws`
+	// read-only gate uses this to read aws.sensitive_read_patterns and to
+	// write its denied/allowed audit row (coilyco-bridge/coily#54).
+	PreflightGateBuilder func(r *Runner) func(argv []string) error
 	// EnvFromSSM maps an env-var name the wrapped binary reads to the SSM path
 	// holding its value; resolved at exec time, injected into the child (parent-env value wins).
 	EnvFromSSM map[string]string
@@ -58,7 +65,7 @@ type ptEntry struct {
 // small. Audit verb names are stamped "ops.<bin>" so the log reflects the
 // user-visible path.
 var ptOps = []ptEntry{
-	{Bin: "aws", VerbName: "ops.aws", Egress: true},
+	{Bin: "aws", VerbName: "ops.aws", Egress: true, PreflightGateBuilder: (*Runner).awsReadGate},
 	{Bin: "gh", VerbName: "ops.gh", Egress: true, ArgvRewriter: rewriteGHForRESTAndJQFile, ReadCache: ghReadCacheClassifier, PreflightGate: ghPreflightGate},
 	{Bin: "kubectl", VerbName: "ops.kubectl", Egress: true},
 	{Bin: "flyctl", VerbName: "ops.flyctl", Egress: true},
@@ -156,10 +163,32 @@ func (r *Runner) passthroughCommand(e ptEntry) *cli.Command {
 		opts = append(opts, passthrough.WithEnvFunc(envFromSSMResolver(e.EnvFromSSM)))
 	}
 	cmd := passthrough.Command(e.Bin, r.Runner, r.Audit, opts...)
-	if e.PreflightGate != nil {
-		cmd.Action = withPreflightGate(cmd.Action, e.PreflightGate)
+	gate := e.PreflightGate
+	if e.PreflightGateBuilder != nil {
+		gate = chainPreflightGates(gate, e.PreflightGateBuilder(r))
+	}
+	if gate != nil {
+		cmd.Action = withPreflightGate(cmd.Action, gate)
 	}
 	return cmd
+}
+
+// chainPreflightGates composes two gates into one: each runs in order and
+// the first non-nil error wins. A nil gate is skipped, so chaining a static
+// PreflightGate with a runner-built one (or with nil) needs no special-case
+// at the call site.
+func chainPreflightGates(gates ...func(argv []string) error) func(argv []string) error {
+	return func(argv []string) error {
+		for _, g := range gates {
+			if g == nil {
+				continue
+			}
+			if err := g(argv); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
 }
 
 // withPreflightGate wraps a passthrough action so `gate` runs against the

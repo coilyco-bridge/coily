@@ -65,8 +65,19 @@ type KaiServer struct {
 // AWS holds the named profile that `coily ops aws` passes through to
 // the underlying aws CLI. Empty falls back to the aws CLI's own
 // resolution.
+//
+// SensitiveReadPatterns and AllowSensitiveReads drive the read-only
+// argv gate (awsReadGate, coilyco-bridge/coily#54). SensitiveReadPatterns,
+// when non-empty, replaces the baked-in default-deny globs wholesale so an
+// operator can scope the gate to exactly their resources; empty falls back
+// to defaultAWSSensitiveReadPatterns. AllowSensitiveReads is the persistent
+// explicit-allow: a read whose token matches one of these globs passes even
+// when it also matches a sensitive pattern (the per-invocation override is
+// the COILY_AWS_ALLOW_SENSITIVE_READ env var).
 type AWS struct {
-	Profile string `yaml:"profile"`
+	Profile               string   `yaml:"profile"`
+	SensitiveReadPatterns []string `yaml:"sensitive_read_patterns"`
+	AllowSensitiveReads   []string `yaml:"allow_sensitive_reads"`
 }
 
 // Eco is the local-side + remote-side config for `coily eco` verbs.

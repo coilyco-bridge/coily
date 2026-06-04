@@ -17,7 +17,7 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 
 **Built-in top level**: `coily whoami`, `coily version`, `coily --list` / `--tree`, `coily setup`, `coily install-completion`.
 
-**CLI passthroughs**: `coily ops aws|gh|kubectl`, `coily docker`, `coily tailscale`. kubectl has readonly/write gating via lockdown.
+**CLI passthroughs**: `coily ops aws|gh|kubectl`, `coily docker`, `coily tailscale`. kubectl has readonly/write gating via lockdown. `ops aws` also runs a read-only argv gate ([coily#54](https://forgejo.coilysiren.me/coilyco-bridge/coily/issues/54)): read-only verbs (`s3 ls`, `describe-*`, `list-*`, ...) touching a sensitive resource pattern (secrets / state / backup buckets, admin role ARNs) are denied pre-send, default-deny with explicit allow via `aws.allow_sensitive_reads` config or the `COILY_AWS_ALLOW_SENSITIVE_READ` env var. Denied and allowed reads each land their own audit row (`ops.aws.read.denied` / `ops.aws.read.allowed`).
 
 **git**: `coily git {status,log,diff,show,add,fetch,pull,push,branch,checkout,stash,restore}` are audited passthroughs. `coily git commit` is not - it is a dedicated, concurrency-safe verb ([coily#7](https://forgejo.coilysiren.me/coilyco-bridge/coily/issues/7)): it requires `coily git commit -m "msg" -- <path>...`, commits the named paths from the worktree against a private `GIT_INDEX_FILE` seeded from HEAD, and forbids the editor - so two sessions sharing one working tree cannot cross commit content or messages through the shared index / `COMMIT_EDITMSG`.
 
