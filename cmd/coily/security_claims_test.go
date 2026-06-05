@@ -269,6 +269,55 @@ func TestSecurityClaim_UserBinaryGateBlocksDevCoilyForCronStdin(t *testing.T) {
 	}
 }
 
+// TestSecurityClaim_InlineAuthoringBlocked covers the SECURITY.md claim that
+// the lockdown hook denies inline shell function definitions and eval -
+// inline program-authoring that runs with no on-disk artifact to inspect.
+// The leading-token model is blind to it (a function name and "eval" look
+// benign as leading tokens), so the check runs on the raw command before
+// the segment split, in renderHookHeader, covering both the per-repo and the
+// unconditional user-level hook. cli-guard#51.
+//
+// Drives the rendered user hook end-to-end: funcdef + eval -> blocked; a
+// plain loop and eval-as-argument -> allowed. Companion runtime pin for the
+// hook-generator change vendored from cli-guard.
+func TestSecurityClaim_InlineAuthoringBlocked(t *testing.T) {
+	if _, err := exec.LookPath("sh"); err != nil {
+		t.Skip("/bin/sh not available")
+	}
+	home := t.TempDir()
+	hookPath, _, err := lockdown.EnsureUserHook(home, coilyLockdownDriver())
+	if err != nil {
+		t.Fatalf("EnsureUserHook: %v", err)
+	}
+	cases := []struct {
+		name      string
+		command   string
+		wantBlock bool
+	}{
+		{"inline funcdef + call", `f() { ls; }; f`, true},
+		{"function-keyword def", `function f { ls; }`, true},
+		{"eval of var", `code=ls; eval "$code"`, true},
+		{"plain loop allowed", `for d in a b; do echo $d; done`, false},
+		{"eval as argument allowed", `grep eval notes.txt`, false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			cmdJSON, _ := json.Marshal(tc.command)
+			stdin := `{"tool_input":{"command":` + string(cmdJSON) + `}}`
+			cmd := exec.Command("sh", hookPath) //nolint:gosec // hookPath is generated under t.TempDir
+			cmd.Stdin = strings.NewReader(stdin)
+			out, runErr := cmd.CombinedOutput()
+			blocked := runErr != nil
+			if blocked != tc.wantBlock {
+				t.Fatalf("blocked=%v want %v; output: %s", blocked, tc.wantBlock, out)
+			}
+			if tc.wantBlock && !strings.Contains(string(out), "lockdown: blocked") {
+				t.Errorf("block did not name lockdown; got: %s", out)
+			}
+		})
+	}
+}
+
 // TestSecurityClaim_repo_verbs_require_clean_tree covers SECURITY.md's
 // claim that .coily/coily.yaml repo verbs refuse to run when the audit
 // row could not be reconstructed from git history. The gate exists so
