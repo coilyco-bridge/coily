@@ -1,5 +1,5 @@
-forgejo.coilysiren.me/coilyco-flight-deck/cli-guard v0.1.1-0.20260603095634-f9c9909aa981 h1:m9AeeC4QAczdDdUzCtGVCUBk3+9gU1udPKDhtpHg9xw=
-forgejo.coilysiren.me/coilyco-flight-deck/cli-guard v0.1.1-0.20260603095634-f9c9909aa981/go.mod h1:w3KtT+++pbXIcC9pxr9tz+S3pwQkoWD8xyWa78sRnHM=
+forgejo.coilysiren.me/coilyco-flight-deck/cli-guard v0.1.1-0.20260604065215-57e31f1d94c2 h1:RXtfv4zvnsitWyaEl24hvATCbbd1dpFrQEXZM3Z5Lm4=
+forgejo.coilysiren.me/coilyco-flight-deck/cli-guard v0.1.1-0.20260604065215-57e31f1d94c2/go.mod h1:w3KtT+++pbXIcC9pxr9tz+S3pwQkoWD8xyWa78sRnHM=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/clipperhouse/displaywidth v0.10.0 h1:GhBG8WuerxjFQQYeuZAeVTuyxuX+UraiZGD4HJQ3Y8g=
