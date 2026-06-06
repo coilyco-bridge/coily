@@ -98,40 +98,10 @@ func (r *Runner) lockdownSkillCommand() *cli.Command {
 	}
 }
 
-// wrapperAllows maps a bare binary deny entry (the deny-list shape baked
-// into cli-guard's defaults.yaml) to the explicit `Bash(coily ...:*)`
-// allow that names the audited route an agent should reach for instead.
-// The bare-deny is what we reject; the coily-prefixed allow is what we
-// sanction. Both must ship together. Per coilysiren/coily#115.
-//
-// The Claude Code auto-mode classifier strips `coily tailscale status`
-// back to `tailscale status` and re-applies the bare-binary deny rule
-// (#159), so the explicit allow tells the classifier "this exact form
-// is the audited path the deny was carved around" instead of relying on
-// the bare `Bash(coily:*)` umbrella allow.
-//
-// Maintenance: when a new wrapped verb lands, add it here AND to
-// defaults.yaml. TestWrapperAllowsParity asserts the two stay in sync.
-var wrapperAllows = map[string]string{
-	"Bash(tailscale:*)": "Bash(coily tailscale:*)",
-	"Bash(docker:*)":    "Bash(coily docker:*)",
-	"Bash(aws:*)":       "Bash(coily ops aws:*)",
-	"Bash(kubectl:*)":   "Bash(coily ops kubectl:*)",
-	"Bash(gh:*)":        "Bash(coily ops gh:*)",
-	"Bash(flyctl:*)":    "Bash(coily ops flyctl:*)",
-	"Bash(gcloud:*)":    "Bash(coily ops gcloud:*)",
-	"Bash(brew:*)":      "Bash(coily pkg brew:*)",
-	"Bash(npm:*)":       "Bash(coily pkg npm:*)",
-	"Bash(pnpm:*)":      "Bash(coily pkg pnpm:*)",
-	"Bash(yarn:*)":      "Bash(coily pkg yarn:*)",
-	"Bash(uv:*)":        "Bash(coily pkg uv:*)",
-	"Bash(pip:*)":       "Bash(coily pkg pip:*)",
-	"Bash(pipx:*)":      "Bash(coily pkg pipx:*)",
-	"Bash(poetry:*)":    "Bash(coily pkg poetry:*)",
-	"Bash(cargo:*)":     "Bash(coily pkg cargo:*)",
-	"Bash(gem:*)":       "Bash(coily pkg gem:*)",
-	"Bash(bundle:*)":    "Bash(coily pkg bundle:*)",
-}
+// wrapperAllows (the bare-binary-deny -> explicit-coily-allow map) is now
+// generated in wrapper_recovery.go from the same passthrough registries
+// wrapperRecovery is, so the deny-handoff and allow surfaces stay in lock
+// step. Issues #115, #43, #197.
 
 // applyHookHandoffTrim drops `Bash(<token>:*)` deny entries for every
 // bare binary coily's PreToolUse hook now gates via its routing-hint

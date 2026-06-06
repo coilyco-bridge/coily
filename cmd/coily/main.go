@@ -115,6 +115,16 @@ func run(r *Runner, argv []string) error {
 	builtIns := r.builtInCommands()
 	repoResult, execCmd := r.loadRepoExecCommand()
 
+	// `coily --tree --json [path]` is handled before urfave dispatch:
+	// urfave would route a trailing subtree name (`ops`) to that subcommand
+	// instead of treating it as a positional path arg to the root. The
+	// parser only fires on leading --tree --json, so a passthrough's
+	// verbatim argv (`coily ops gh --tree --json`) is never hijacked.
+	// coilyco-bridge/coily#197.
+	if path, ok := parseTreeJSONRequest(argv); ok {
+		return treeJSONCommand(builtIns, execCmd, repoResult, path)
+	}
+
 	// execCmd is always non-nil: loadRepoExecCommand returns a stub `exec`
 	// command with a UserError Action when no .coily/coily.yaml is in scope,
 	// so the verb is unconditionally visible in --help and --tree.
@@ -139,6 +149,13 @@ func run(r *Runner, argv []string) error {
 			&cli.BoolFlag{
 				Name:  "tree",
 				Usage: "print the full command tree (every subcommand, recursively) and exit",
+			},
+			&cli.BoolFlag{
+				Name: "json",
+				Usage: "with --tree, emit the command tree as JSON instead of " +
+					"the human rendering. Each passthrough leaf carries its " +
+					"underlying-binary mapping. An optional trailing path scopes " +
+					"to a subtree (coily --tree --json ops).",
 			},
 			&cli.BoolFlag{
 				Name: "audit-override-dirty",
@@ -177,6 +194,8 @@ func run(r *Runner, argv []string) error {
 				return nil
 			}
 			if c.Bool("tree") {
+				// The --json variant (incl. subtree path) is intercepted in
+				// run() before dispatch; reaching here means human --tree.
 				treeCommand(builtIns, execCmd, repoResult)
 				return nil
 			}

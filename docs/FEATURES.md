@@ -15,7 +15,7 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 
 ## Verb surface
 
-**Built-in top level**: `coily whoami`, `coily version`, `coily --list` / `--tree`, `coily setup`, `coily install-completion`.
+**Built-in top level**: `coily whoami`, `coily version`, `coily --list` / `--tree`, `coily setup`, `coily install-completion`. `coily --tree --json [subtree]` ([coily#197](https://forgejo.coilysiren.me/coilyco-bridge/coily/issues/197)) emits the command tree as JSON - each passthrough leaf carries its underlying-binary mapping (`ops kubectl -> kubectl`) - and an optional trailing path scopes to a subtree (`coily --tree --json ops`). It is the single source the recovery, allow, and SessionStart-index surfaces are generated from.
 
 **CLI passthroughs**: `coily ops aws|gh|kubectl`, `coily docker`, `coily tailscale`. kubectl has readonly/write gating via lockdown. `ops aws` also runs a read-only argv gate ([coily#54](https://forgejo.coilysiren.me/coilyco-bridge/coily/issues/54)): read-only verbs (`s3 ls`, `describe-*`, `list-*`, ...) touching a sensitive resource pattern (secrets / state / backup buckets, admin role ARNs) are denied pre-send, default-deny with explicit allow via `aws.allow_sensitive_reads` config or the `COILY_AWS_ALLOW_SENSITIVE_READ` env var. Denied and allowed reads each land their own audit row (`ops.aws.read.denied` / `ops.aws.read.allowed`).
 
@@ -46,6 +46,7 @@ Coily is a single-binary CLI security boundary. It wraps privileged ops (aws, gh
 - Metacharacter validator rejects `$`, backticks, `;`, `&&`, `||`, `|`, `>`, `<`, `$(`, `${`, `\`.
 - `policy.ValidateArg` on every string arg. `SkipPolicy` for SDK-routed tools; `SkipScope` for meta-verbs.
 - Lockdown defaults embedded at build. PreToolUse hook at `~/.claude/coily-binary-gate.sh` blocks non-homebrew coily binaries.
+- Two hook surfaces are generated from the command tree so they cannot drift from what coily fronts ([coily#197](https://forgejo.coilysiren.me/coilyco-bridge/coily/issues/197)). **Recovery** (PreToolUse): a denied bare `gh`/`aws`/`kubectl`/`mcporter`/... is met with `retry as coily ops <tool> ...`; the `wrapperRecovery`/`wrapperAllows` maps are projected from the passthrough registries (wrapper_recovery.go), with only the scoped pkg wrappers (brew, scoop) and build runners (make/just/task/invoke) hand-listed. **Awareness** (SessionStart): `coily hook session-start` injects a condensed capability index each session - `coily ops {...} | coily pkg {...} | service wrappers {...}` - so a session opens knowing what exists, paired with the standing doctrine **presence != working auth** (verify with a cheap read like `coily ops aws sts get-caller-identity` before asking the human or assuming). `coily lockdown` wires the SessionStart hook into each repo's `.claude/settings.json` alongside the PreToolUse hook.
 
 ## Configuration + secrets
 

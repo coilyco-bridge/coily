@@ -35,24 +35,23 @@ func TestApplyWrapperAllows_AddsExplicitCoilyEntries(t *testing.T) {
 }
 
 // TestWrapperAllowsParity_AllDenyEntriesCovered enforces the rule from
-// the issue: a new wrapped verb cannot ship without its allow rule. If
-// defaults.yaml denies a bare binary that has a `coily <wrapper>` form
-// on disk, wrapperAllows must carry the mapping. Catches the drift case
-// where someone adds a deny but forgets the allow.
+// the issue: a wrapped binary cannot ship without its allow rule. Every
+// listed bare-binary deny must have a `Bash(coily ...:*)` allow.
 //
-// The list of wrapped binaries is intentionally enumerated here rather
-// than auto-derived from the cli tree, because the cli tree has many
-// non-wrapping verbs (audit, lockdown, dispatch). The seam is intent:
-// "this deny exists because a coily wrapper takes its place."
+// wrapperAllows is now generated from the passthrough registries plus the
+// scoped pkg wrappers (wrapper_recovery.go, coily#197), so this list is a
+// belt-and-suspenders pin on the binaries that matter most - if the
+// generation regresses or a registry entry is dropped, the canonical set
+// still gets flagged here.
 func TestWrapperAllowsParity_AllDenyEntriesCovered(t *testing.T) {
 	wrappedBinDenies := []string{
 		"Bash(tailscale:*)", "Bash(docker:*)", "Bash(aws:*)",
 		"Bash(kubectl:*)", "Bash(gh:*)", "Bash(flyctl:*)",
-		"Bash(gcloud:*)",
-		"Bash(brew:*)",
+		"Bash(gcloud:*)", "Bash(mcporter:*)", "Bash(netlify:*)",
+		"Bash(brew:*)", "Bash(scoop:*)",
 		"Bash(npm:*)", "Bash(pnpm:*)", "Bash(yarn:*)",
 		"Bash(uv:*)", "Bash(pip:*)", "Bash(pipx:*)", "Bash(poetry:*)",
-		"Bash(cargo:*)", "Bash(gem:*)", "Bash(bundle:*)",
+		"Bash(cargo:*)", "Bash(gem:*)", "Bash(bundle:*)", "Bash(nix:*)",
 	}
 	for _, deny := range wrappedBinDenies {
 		allow, ok := wrapperAllows[deny]

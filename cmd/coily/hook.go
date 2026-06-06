@@ -13,10 +13,11 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// hookCommand groups Claude Code hook entry points. coily exposes one
-// subcommand today (pre-tool-use); the shape is extensible to other
-// hook events (PostToolUse, UserPromptSubmit) when there is a reason
-// to gate on them.
+// hookCommand groups Claude Code hook entry points. coily exposes
+// pre-tool-use (recovery: route a denied bare binary through its wrapper)
+// and session-start (awareness: inject the capability index). The shape is
+// extensible to other hook events (PostToolUse, UserPromptSubmit) when
+// there is a reason to gate on them.
 //
 // coilysiren/coily#248 + cli-guard#74: the per-repo lockdown-deny.sh
 // coily renders exec's `coily hook pre-tool-use`, which calls the
@@ -30,6 +31,7 @@ func (r *Runner) hookCommand() *cli.Command {
 		Usage: "Claude Code hook entry points.",
 		Commands: []*cli.Command{
 			r.hookPreToolUseCommand(),
+			r.hookSessionStartCommand(),
 		},
 	}
 }

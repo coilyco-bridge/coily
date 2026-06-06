@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
 
@@ -23,48 +25,9 @@ var coilyAllowedPaths = []string{
 	"/home/linuxbrew/.linuxbrew/bin/coily", // Linuxbrew default prefix
 }
 
-// wrapperRecovery maps a denied bare-binary leading-token to the coily
-// wrapper that should be used instead. When a deny rule fires for a
-// binary with a wrapper, the generated deny message names the wrapper
-// as the recovery path per AGENTS.md "opaque errors are design smells -
-// recovery messages should name the command or skill Kai can dictate
-// next." Issue #61.
-//
-// Source of truth for cross-repo recovery hints (issue #122). Every
-// coily wrapper that shadows a denied bare binary lands here so
-// `coily lockdown` renders the hint into each repo's lockdown-deny.sh,
-// replacing the prior per-repo hand-sync.
-var wrapperRecovery = map[string]string{
-	// ops pass-throughs.
-	"gh":        "coily ops gh",
-	"aws":       "coily ops aws",
-	"kubectl":   "coily ops kubectl",
-	"docker":    "coily docker",
-	"tailscale": "coily tailscale",
-
-	// Package managers. All wrapped under `coily pkg <pkgmgr>`.
-	"npm":    "coily pkg npm",
-	"pnpm":   "coily pkg pnpm",
-	"yarn":   "coily pkg yarn",
-	"bun":    "coily pkg bun",
-	"uv":     "coily pkg uv",
-	"pip":    "coily pkg pip",
-	"pipx":   "coily pkg pipx",
-	"poetry": "coily pkg poetry",
-	"cargo":  "coily pkg cargo",
-	"gem":    "coily pkg gem",
-	"bundle": "coily pkg bundle",
-	"nix":    "coily pkg nix",
-	"brew":   "coily pkg brew",
-	"scoop":  "coily pkg scoop",
-
-	// Build runners. The audited replacement is a named verb in
-	// .coily/coily.yaml dispatched via `coily exec <verb>`.
-	"make":   "coily exec <verb>",
-	"just":   "coily exec <verb>",
-	"task":   "coily exec <verb>",
-	"invoke": "coily exec <verb>",
-}
+// wrapperRecovery (the bare-binary -> coily-wrapper recovery map) is now
+// generated in wrapper_recovery.go from the passthrough registries, so it
+// tracks what coily actually fronts. Issues #61, #122, #197.
 
 // coilyRenderHookScript is the per-repo PreToolUse hook body written by
 // `coily lockdown`. Delegates to `coily hook pre-tool-use`, which calls
@@ -80,6 +43,75 @@ func coilyRenderHookScript(_ *lockdown.Defaults, _ *lockdown.Driver) (string, er
 		"exec coily hook pre-tool-use\n", nil
 }
 
+// coilySessionStartHookCommand is the settings.json hook command coily
+// lockdown installs under SessionStart. Emits the capability index
+// (surface map + presence!=auth doctrine) so every session in a
+// locked-down repo opens knowing what coily fronts. coilyco-bridge/coily#197.
+const coilySessionStartHookCommand = "coily hook session-start"
+
+// injectSessionStartHook adds the coily SessionStart capability-index hook
+// to a settings.json blob already built by cli-guard's BuildSettings (which
+// installs the PreToolUse Bash hook). Idempotent: a settings file that
+// already names the command is returned unchanged in content. Preserves the
+// two-space indent + trailing newline cli-guard writes so regeneration stays
+// diff-clean.
+func injectSessionStartHook(b []byte) ([]byte, error) {
+	var out map[string]any
+	if len(b) > 0 {
+		if err := json.Unmarshal(b, &out); err != nil {
+			return nil, fmt.Errorf("coily lockdown: parse settings for SessionStart hook: %w", err)
+		}
+	}
+	if out == nil {
+		out = map[string]any{}
+	}
+	hooks, _ := out["hooks"].(map[string]any)
+	if hooks == nil {
+		hooks = map[string]any{}
+		out["hooks"] = hooks
+	}
+	entries, _ := hooks["SessionStart"].([]any)
+	if !sessionStartHookPresent(entries) {
+		entries = append(entries, map[string]any{
+			"hooks": []any{
+				map[string]any{"type": "command", "command": coilySessionStartHookCommand},
+			},
+		})
+		hooks["SessionStart"] = entries
+	}
+	encoded, err := json.MarshalIndent(out, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("coily lockdown: marshal settings with SessionStart hook: %w", err)
+	}
+	return append(encoded, '\n'), nil
+}
+
+// sessionStartHookPresent reports whether any SessionStart entry already
+// installs the coily capability-index command, so regeneration does not
+// stack duplicate entries.
+func sessionStartHookPresent(entries []any) bool {
+	for _, e := range entries {
+		em, ok := e.(map[string]any)
+		if !ok {
+			continue
+		}
+		hs, ok := em["hooks"].([]any)
+		if !ok {
+			continue
+		}
+		for _, h := range hs {
+			hm, ok := h.(map[string]any)
+			if !ok {
+				continue
+			}
+			if cmd, _ := hm["command"].(string); cmd == coilySessionStartHookCommand {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // coilyLockdownDriver returns the ClaudeCode-shaped lockdown driver
 // for the coily binary. Called wherever the lockdown writer needs to
 // know which binary it is gating and which wrappers to mention in
@@ -87,6 +119,17 @@ func coilyRenderHookScript(_ *lockdown.Defaults, _ *lockdown.Driver) (string, er
 func coilyLockdownDriver() *lockdown.Driver {
 	drv := lockdown.ClaudeCode("coily", coilyAllowedPaths, wrapperRecovery)
 	drv.RenderHookScript = coilyRenderHookScript
+	// Wrap cli-guard's BuildSettings to also install the SessionStart
+	// capability-index hook (coilyco-bridge/coily#197). cli-guard owns the
+	// PreToolUse half; coily layers awareness on top without forking it.
+	baseBuild := drv.BuildSettings
+	drv.BuildSettings = func(existing []byte, d *lockdown.Defaults, dr *lockdown.Driver) ([]byte, error) {
+		out, err := baseBuild(existing, d, dr)
+		if err != nil {
+			return nil, err
+		}
+		return injectSessionStartHook(out)
+	}
 	// Phase 4 plumbing for #150: attach the resolved per-session
 	// Coordinate to the driver so phase 5's BuildSettings consumer can
 	// branch on it. Best-effort: a malformed override file leaves the

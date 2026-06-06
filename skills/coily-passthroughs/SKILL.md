@@ -307,6 +307,10 @@ git status - show the working tree state.
 
 PreToolUse hook for the Bash tool. Routes bare-binary invocations through coily wrappers with a recovery hint; rejects coily-binary invocations resolving outside the canonical install paths.
 
+## `coily hook session-start`
+
+SessionStart hook. Emits the coily capability index (surface map + presence!=auth doctrine) as additionalContext.
+
 ## `coily install-completion`
 
 Install shell tab-completion for coily.

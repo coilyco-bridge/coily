@@ -78,31 +78,38 @@ func TestLockdownPipeline_GhWrapperSanctioned(t *testing.T) {
 	}
 }
 
-// TestApplyHookHandoffTrim_PreservesUnwrappedDenies asserts that bare
-// denies for binaries with no coily hook route are preserved.
-// flyctl is the canonical example today: coily wraps it via
-// `coily ops flyctl`, but coily's hook route table does not yet
-// route flyctl. The bare deny must stay so an unwrapped invocation
-// still gets blocked.
+// TestApplyHookHandoffTrim_PreservesUnwrappedDenies asserts that a bare
+// deny for a binary with no coily wrapper (so no hook recovery route) is
+// preserved: the deny is the only protection. The unwrapped token is
+// chosen dynamically from defaults.yaml minus wrapperRecovery, so the test
+// stays valid as the wrapped set grows (every passthrough is now wrapped +
+// routed, coily#197, so the prior flyctl example no longer qualifies).
 func TestApplyHookHandoffTrim_PreservesUnwrappedDenies(t *testing.T) {
 	d, err := lockdown.LoadDefaults()
 	if err != nil {
 		t.Fatalf("LoadDefaults: %v", err)
 	}
 	got := applyHookHandoffTrim(d)
-	// flyctl is in wrapperAllows but not in wrapperRecovery, so the
-	// trim should leave its bare deny alone.
-	if _, isWrapped := wrapperRecovery["flyctl"]; isWrapped {
-		t.Fatalf("test premise broken: wrapperRecovery now covers flyctl; pick another unwrapped binary")
-	}
-	if !containsString(got.Deny, "Bash(flyctl:*)") {
-		// Only flag if flyctl was in the original deny list to begin
-		// with. If cli-guard's defaults.yaml dropped it, that's a
-		// different change.
-		hadFlyctl := containsString(d.Deny, "Bash(flyctl:*)")
-		if hadFlyctl {
-			t.Errorf("expected Bash(flyctl:*) to survive trim, but it was dropped")
+
+	// Find a bare single-token Bash deny whose token is not in
+	// wrapperRecovery. That deny has no recovery route, so the trim must
+	// leave it in place.
+	var unwrapped string
+	for _, dn := range d.Deny {
+		tok := strings.TrimSuffix(strings.TrimPrefix(dn, "Bash("), ":*)")
+		if tok == dn || strings.ContainsAny(tok, " (:") {
+			continue // not a simple Bash(<tok>:*) deny
 		}
+		if _, wrapped := wrapperRecovery[tok]; !wrapped {
+			unwrapped = dn
+			break
+		}
+	}
+	if unwrapped == "" {
+		t.Skip("no unwrapped bare-binary deny in defaults.yaml to exercise")
+	}
+	if !containsString(got.Deny, unwrapped) {
+		t.Errorf("expected unwrapped deny %q to survive trim, but it was dropped", unwrapped)
 	}
 }
 
