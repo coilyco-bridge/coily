@@ -44,14 +44,19 @@ class Coily < Formula
   end
 
   # Brew's post_install sandbox blocks writes outside the cellar, so the
-  # three home-dir-touching steps (completion, skill symlink, lockdown
-  # re-baseline) are wrapped behind `coily setup` and printed as a single
-  # caveat after each install/upgrade.
+  # home-dir-touching steps (completion, skill symlink, host-bootstrap) are
+  # wrapped behind `coily setup` and printed as a single caveat after each
+  # install/upgrade. Lockdown is deliberately NOT a setup step: fleet-wide
+  # lockdown convergence is an ansible rollout (infrastructure/ansible), per
+  # the authoring-vs-rollout rule. Brew installs the binary and stops.
   def caveats
     <<~EOS
-      Run once per upgrade to refresh completion, skill symlink, and lockdown:
+      Run once per upgrade to refresh completion and skill symlinks:
 
         coily setup
+
+      Lockdown is converged by ansible (`coily ansible-freshen`) on the fleet,
+      not by `coily setup`. For a one-off, run `coily lockdown` by hand.
     EOS
   end
 

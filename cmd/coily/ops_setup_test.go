@@ -372,7 +372,7 @@ func TestUserHookCleanup_AllThreeStates(t *testing.T) {
 
 // TestRunHostBootstrapStep_SkipsWhenBrewfileMissing pins coilysiren/coily#264:
 // no Brewfile under <lockdown-root>/agentic-os/brew means the step prints a
-// skip and returns nil. Same shape as runLockdownStep on a missing root.
+// skip and returns nil, keeping hosts without an agentic-os checkout silent.
 func TestRunHostBootstrapStep_SkipsWhenBrewfileMissing(t *testing.T) {
 	root := t.TempDir()
 	self := filepath.Join(root, "coily")

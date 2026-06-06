@@ -15,8 +15,14 @@ import (
 )
 
 // setupCommand runs the post-upgrade rituals brew's sandbox blocks from
-// post_install: tab-completion, skill symlinks, lockdown re-baseline, and
-// the user-level PreToolUse hook. Idempotent; safe to run any time.
+// post_install: tab-completion, skill symlinks, host-bootstrap, and the
+// user-hook cleanup. Idempotent; safe to run any time.
+//
+// Lockdown is NOT a setup step. Fleet-wide lockdown convergence is an ansible
+// rollout (infrastructure/ansible `lockdown` role), per the authoring-vs-rollout
+// rule in agentic-os/AGENTS.md: brew installs the binary and stops, ansible
+// converges the fleet. Run `coily lockdown` by hand for a one-off; the fleet
+// re-baselines on the next `coily ansible-freshen`.
 //
 // The skill-symlink step (issue #65) walks every coily-* directory the
 // brew formula stages under <prefix>/share/coily/skills/ and links each
@@ -26,42 +32,39 @@ import (
 func (r *Runner) setupCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "setup",
-		Usage: "Run the post-upgrade rituals: completion, lockdown re-baseline, and user hook.",
-		Description: `setup runs six idempotent steps in order:
+		Usage: "Run the post-upgrade rituals: completion, skill symlinks, host-bootstrap, and user-hook cleanup.",
+		Description: `setup runs four idempotent steps in order:
 
   1. coily install-completion         (refresh shell tab-completion)
   2. <prefix>/share/coily/skills/*    (symlink every staged coily-* skill
                                        into ~/.claude/skills/ so the harness
                                        picks them up)
   3. host-bootstrap                   (brew bundle install against
-                                       <lockdown-root>/agentic-os/brew/Brewfile
+                                       <root>/agentic-os/brew/Brewfile
                                        + uv tool install pre-commit; idempotent
                                        no-op on a satisfied host)
-  4. coily lockdown --recursive ...   (re-baseline allow/deny lists under the lockdown root)
-  5. coily lockdown --user            (merge canonical denies + prune shadowed
-                                       allows in ~/.claude/settings.json)
-  6. ~/.claude/coily-binary-gate.sh   (user-level PreToolUse hook that
-                                       rejects dev coily binaries from any
-                                       cwd; complements per-repo lockdown)
+  4. ~/.claude/coily-binary-gate.sh   (clean up the legacy user-level
+                                       PreToolUse hook; migration no-op once gone)
 
-Pass --lockdown-root or set $COILY_LOCKDOWN_ROOT to override the lockdown root
-(default: ~/projects/coilysiren). Skips the lockdown step if the root
-does not exist, which keeps fresh brew installs on hosts without the default
-tree (friends' machines, alternate layouts) silent.`,
+Lockdown is deliberately NOT here. Fleet-wide lockdown is an ansible rollout
+(infrastructure/ansible 'lockdown' role); run 'coily lockdown' by hand for a
+one-off.
+
+Pass --lockdown-root or set $COILY_LOCKDOWN_ROOT to point host-bootstrap at the
+projects root holding the agentic-os checkout (default: ~/projects/coilysiren).
+The flag name is retained for the $COILY_LOCKDOWN_ROOT contract; host-bootstrap
+skips silently when that root has no agentic-os/brew/Brewfile (friends'
+machines, alternate layouts).`,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "lockdown-root",
-				Usage:   "directory to scan recursively for git repos to lock down. Read from $COILY_LOCKDOWN_ROOT if unset.",
+				Usage:   "projects root holding the agentic-os checkout for host-bootstrap. Read from $COILY_LOCKDOWN_ROOT if unset.",
 				Value:   "",
 				Sources: cli.EnvVars("COILY_LOCKDOWN_ROOT"),
 			},
 			&cli.BoolFlag{
 				Name:  "skip-completion",
 				Usage: "skip the install-completion step",
-			},
-			&cli.BoolFlag{
-				Name:  "skip-lockdown",
-				Usage: "skip the lockdown re-baseline step",
 			},
 			&cli.BoolFlag{
 				Name:  "skip-skills",
@@ -115,12 +118,6 @@ func setupAction(ctx context.Context, c *cli.Command) error {
 	if !c.Bool("skip-host-bootstrap") {
 		fmt.Fprintln(os.Stderr, "==> host-bootstrap")
 		if err := runHostBootstrapStep(ctx, self, c.String("lockdown-root")); err != nil {
-			return err
-		}
-	}
-
-	if !c.Bool("skip-lockdown") {
-		if err := runLockdownStep(ctx, self, c.String("lockdown-root")); err != nil {
 			return err
 		}
 	}
@@ -431,9 +428,8 @@ func filepathHasPrefix(s, prefix string) bool {
 //  2. coily pkg uv tool install pre-commit --with pre-commit-uv
 //
 // Both inner commands run with cmd.Dir set to the agentic-os checkout. If the
-// Brewfile is missing the step
-// prints a skip and returns nil, same pattern as runLockdownStep on missing
-// lockdown roots — keeps friends' machines and alternate layouts silent.
+// Brewfile is missing the step prints a skip and returns nil, keeping friends'
+// machines and alternate layouts (no agentic-os checkout) silent.
 //
 // Per coilysiren/coily#264 and as step 4 of coilysiren/agentic-os-kai#615.
 // Run `coily setup` on kai-server itself; the SSH transport that once let
@@ -464,7 +460,7 @@ func runHostBootstrapStep(ctx context.Context, self, lockdownRoot string) error 
 		// coilysiren/coily#275: brew bundle commonly fails on a single
 		// pre-existing /opt/homebrew/bin/<name> symlink collision (e.g.
 		// trufflehog installed out-of-band). Surface the error as a
-		// warning so the remaining setup steps (uv, lockdown, user hook)
+		// warning so the remaining setup steps (uv, user-hook cleanup)
 		// still run. Operator decides whether to `brew link --overwrite`
 		// the conflicting formula or leave the unmanaged binary in place.
 		fmt.Fprintf(os.Stderr, "    warning: brew bundle install failed: %v\n", err)
@@ -480,55 +476,9 @@ func runHostBootstrapStep(ctx context.Context, self, lockdownRoot string) error 
 	uv.Stderr = os.Stderr
 	if err := uv.Run(); err != nil {
 		// Same shape as brew bundle above (coilysiren/coily#275): warn,
-		// don't abort, so lockdown + user-hook still land.
+		// don't abort, so the user-hook cleanup still lands.
 		fmt.Fprintf(os.Stderr, "    warning: uv tool install pre-commit failed: %v\n", err)
 		fmt.Fprintln(os.Stderr, "    continuing with remaining setup steps.")
-	}
-	return nil
-}
-
-// runLockdownStep runs both the recursive per-repo lockdown and the
-// user-level lockdown. coily#128 added the --user step.
-func runLockdownStep(ctx context.Context, self, lockdownRoot string) error {
-	fmt.Fprintln(os.Stderr, "==> lockdown")
-	if err := runRecursiveLockdown(ctx, self, lockdownRoot); err != nil {
-		return err
-	}
-	fmt.Fprintln(os.Stderr, "==> user-lockdown")
-	cmd := exec.CommandContext(ctx, self, "lockdown", "--apply", "--user")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("setup: user-lockdown: %w", err)
-	}
-	return nil
-}
-
-func runRecursiveLockdown(ctx context.Context, self, lockdownRoot string) error {
-	if lockdownRoot == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return fmt.Errorf("setup: home dir: %w", err)
-		}
-		lockdownRoot = filepath.Join(home, "projects", "coilysiren")
-	}
-	info, err := os.Stat(lockdownRoot)
-	if os.IsNotExist(err) {
-		fmt.Fprintf(os.Stderr, "    skipped: %s does not exist\n", lockdownRoot)
-		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("setup: stat lockdown root: %w", err)
-	}
-	if !info.IsDir() {
-		return fmt.Errorf("setup: lockdown root %s is not a directory", lockdownRoot)
-	}
-	cmd := exec.CommandContext(ctx, self, "lockdown",
-		"--recursive", "--apply", "--replace", "--path", lockdownRoot)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("setup: lockdown: %w", err)
 	}
 	return nil
 }
