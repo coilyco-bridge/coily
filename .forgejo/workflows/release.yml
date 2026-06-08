@@ -43,8 +43,8 @@ jobs:
 
       - id: tag
         uses: coilysiren/agentic-os/actions/tag-bump@main
-        with:
-          default_bump: patch
+        # No bump input: every push-to-main release is a minor bump. For a
+        # major, cut the vN.0.0 tag by hand; pushes resume minor from there.
 
       - id: create
         if: ${{ steps.tag.outputs.new_tag != '' }}
