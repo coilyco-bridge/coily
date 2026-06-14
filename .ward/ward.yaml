@@ -1,0 +1,63 @@
+# Per-repo command allowlist. Loaded at runtime by pkg/repocfg when coily is
+# invoked anywhere inside this checkout. See pkg/repocfg/repocfg.go for the
+# loader, SECURITY.md for the security story.
+#
+# Rules (enforced by `coily lint`):
+#   - Every commands.<verb>.run must be exactly `make <verb>`. The recipe
+#     lives in the Makefile so the two surfaces cannot drift.
+#   - The matching Makefile target must exist.
+#   - The verb description must match the Makefile target's `## desc`
+#     auto-help comment.
+#
+# General loader rules (enforced by pkg/repocfg):
+#   - Every token parses via strings.Fields and must pass policy.ValidateArg.
+#     No shell metacharacters anywhere. Pipes, redirects, and $(subshells)
+#     are rejected at load time.
+#   - Extra positional args appended at invocation are validated the same way.
+#   - Repo commands are invoked as `coily exec <name>`, so they cannot
+#     collide with or shadow built-in verbs.
+#
+# Commands that need shell features (heredocs, pipes, env munging) live in
+# the Makefile target body, not here.
+
+commands:
+  test:
+    run: make test
+    description: Run the unit test suite.
+  vet:
+    run: make vet
+    description: go vet across the tree.
+  lint:
+    run: make lint
+    description: Lint with golangci-lint.
+  lint-fix:
+    run: make lint-fix
+    description: Autofix lint issues where possible.
+  cover:
+    run: make cover
+    description: Unit tests with a coverage profile.
+  tidy:
+    run: make tidy
+    description: Run go mod tidy.
+  build:
+    run: make build
+    description: Build ./bin/coily (prod tags, for install).
+
+# Catalog metadata for the cross-repo knowledge graph.
+# Schema: coilysiren/agentic-os-kai#420 (tracker).
+catalog:
+  kind: Component
+  type: tool
+  system: coily-platform
+  owner: kai
+  lifecycle: production
+  description: "CLI security boundary for privileged ops, escape-hatch-resistant with an audit trail."
+  dependsOn:
+    - forgejo.coilysiren.me/coilysiren/cli-guard
+  deploy:
+    dev: local
+    staging:
+      mac: brew
+      windows: scoop
+    prod:
+      kai-server: linuxbrew
