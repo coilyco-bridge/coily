@@ -12,13 +12,13 @@ import (
 	"strconv"
 	"strings"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/egress"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/exitcode"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/gittree"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/repocfg"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/gittree"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/repocfg"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/shell"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/http/egress"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/pkg/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/pkg/exitcode"
 	"github.com/urfave/cli/v3"
 )
 

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"os"
-	"path/filepath"
 	"testing"
 )
 
@@ -30,38 +28,5 @@ func TestIsPrimaryOrg(t *testing.T) {
 		if isPrimaryOrg(orgs, o) {
 			t.Errorf("%q should not be a primary org", o)
 		}
-	}
-}
-
-// TestLocalRepoPathScan pins #173 part 2: a repo whose checkout lives under a
-// non-default primary org is found by scanning, and a missing repo falls back
-// to the historical coilysiren path (preserving the prior error shape).
-func TestLocalRepoPathScan(t *testing.T) {
-	home := t.TempDir()
-	t.Setenv("HOME", home)
-	// coily lives under coilyco-bridge post-rename, not coilysiren.
-	want := filepath.Join(home, "projects", "coilyco-bridge", "coily")
-	if err := os.MkdirAll(want, 0o755); err != nil {
-		t.Fatal(err)
-	}
-
-	r := &Runner{Cfg: &Config{PrimaryOrgs: defaultPrimaryOrgs()}}
-
-	got, err := r.localRepoPath("coily")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got != want {
-		t.Errorf("localRepoPath(coily) = %q, want %q (on-disk scan)", got, want)
-	}
-
-	// Missing repo: fall back to the historical coilysiren path.
-	missing, err := r.localRepoPath("nope")
-	if err != nil {
-		t.Fatal(err)
-	}
-	wantFallback := filepath.Join(home, "projects", "coilysiren", "nope")
-	if missing != wantFallback {
-		t.Errorf("missing repo fallback = %q, want %q", missing, wantFallback)
 	}
 }

@@ -3,8 +3,8 @@ package skillsmp
 import (
 	"testing"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/shell"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/pkg/audit"
 	"github.com/urfave/cli/v3"
 )
 

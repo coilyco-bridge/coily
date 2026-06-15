@@ -7,12 +7,24 @@ import (
 	"path/filepath"
 	"strings"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/decision"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/decision"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/shell"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/pkg/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/pkg/config"
 	"github.com/urfave/cli/v3"
 )
+
+// init registers coily's per-user app dir with cli-guard. Since cli-guard
+// v0.x the app-dir name is consumer-supplied (SetAppDir) rather than
+// hardcoded: unset, every per-user path (audit log, session sentinels, ttl
+// caches) falls back to ~/.cli-guard. coily owns ~/.coily, so set it once at
+// package init - this fires for both the production main() and the test binary
+// (which constructs Runners directly, never through main()), keeping the audit
+// and session-profile paths consistent across both.
+func init() {
+	config.SetAppDir(".coily")
+}
 
 // Runner owns the audit writer, shell runner, and loaded config.
 // Constructed once in main() and threaded into every cli.Command action via

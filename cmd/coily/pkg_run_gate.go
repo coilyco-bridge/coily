@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/scope"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/pkg/scope"
 	"github.com/urfave/cli/v3"
 )
 

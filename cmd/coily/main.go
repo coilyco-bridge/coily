@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"time"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/exitcode"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/pkg/exitcode"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )
@@ -225,7 +225,6 @@ func (r *Runner) builtInCommands() []*cli.Command {
 		r.systemctlCommand(),
 		r.auditCommand(),
 		r.gitCommand(),
-		r.dispatchCommand(),
 		r.pkgCommand(),
 		r.hookCommand(),
 		r.lintCommand(),

@@ -30,7 +30,7 @@ Field reference below.
 * `id` - UUIDv7. Sortable by creation time.
 * `ts` - Unix epoch seconds at row write.
 * `decision` - `accept` | `deny`. Gate outcome before any wrapped command runs.
-* `verb` - Canonical verb name (e.g. `ops.gh`, `dispatch.interactive`, `repo.<cmd>` for `coily exec` user verbs).
+* `verb` - Canonical verb name (e.g. `ops.gh`, `pkg.brew.bundle`, `repo.<cmd>` for `coily exec` user verbs).
 * `argv` - Argv as coily received it. Validated against the verb's allowlist before any subprocess starts.
 * `exit_code` - Wrapped command's exit code, or coily's own exit code if the gate denied.
 * `repo_root` - Git toplevel of cwd at invocation, or empty when cwd is outside any git repo. Forensic only: records where the invocation ran. `coily git audit-show --scope <repo> --since <ts>` filters rows by this field.

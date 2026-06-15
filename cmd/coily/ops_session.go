@@ -12,10 +12,10 @@ import (
 	"strings"
 	"syscall"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/config"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/exitcode"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/profiles"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/profiles"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/pkg/config"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/pkg/exitcode"
 	"github.com/urfave/cli/v3"
 )
 

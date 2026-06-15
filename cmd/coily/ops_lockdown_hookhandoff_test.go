@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/lockdown"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/lockdown"
 )
 
 // TestApplyHookHandoffTrim_DropsWrappedBareDenies pins the contract

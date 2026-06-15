@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/passthrough"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/passthrough"
 	"github.com/urfave/cli/v3"
 )
 

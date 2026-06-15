@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/pkg/audit"
 	"github.com/urfave/cli/v3"
 )
 

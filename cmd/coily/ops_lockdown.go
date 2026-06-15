@@ -8,10 +8,10 @@ import (
 	"sort"
 	"strings"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/lockdown"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/profiles"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/skillgen"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/lockdown"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/profiles"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/pkg/skillgen"
 	"github.com/urfave/cli/v3"
 )
 

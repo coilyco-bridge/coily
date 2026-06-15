@@ -43,52 +43,6 @@ Stream audit records as JSONL.
 
 Flags: --follow, --since
 
-## `coily dispatch cascade`
-
-Spawn a detached worker allowed to recursively dispatch sub-workers (bounded fan-out).
-
-Flags: --allowed-tools, --claims, --claude-bin, --depth, --dry-run, --permission-mode
-
-## `coily dispatch consult`
-
-Like interactive, but encouraged to pause and surface real judgment calls.
-
-Flags: --channel, --dry-run, --launch-name, --queue-dir, --surface
-
-## `coily dispatch headless`
-
-Spawn a detached `claude -p` against a real open issue.
-
-Flags: --allowed-tools, --claims, --claude-bin, --dry-run, --permission-mode
-
-## `coily dispatch interactive`
-
-Open a new Warp tab with `claude "Work on issue <ref>"` pre-submitted.
-
-Flags: --channel, --dry-run, --launch-name, --queue-dir, --surface
-
-## `coily dispatch reap`
-
-Remove dispatch worktrees whose branch is already merged into main.
-
-## `coily dispatch registry check`
-
-Check whether a path is claimed by an active sidequest.
-
-Flags: --json
-
-## `coily dispatch registry list`
-
-Print every active sidequest, oldest first.
-
-Flags: --json
-
-## `coily dispatch status`
-
-Show pid + log tail for a headless dispatch.
-
-Flags: --all, --follow, --pid, --since, --tail
-
 ## `coily docker`
 
 Pass-through to docker with argv validation + audit log.

@@ -1,6 +1,6 @@
 module forgejo.coilysiren.me/coilyco-bridge/coily
 
-go 1.25.0
+go 1.25.5
 
 require (
 	github.com/urfave/cli/v3 v3.9.0
@@ -8,7 +8,7 @@ require (
 )
 
 require (
-	forgejo.coilysiren.me/coilyco-flight-deck/cli-guard v0.1.1-0.20260603201743-f74613be983b
+	forgejo.coilysiren.me/coilyco-flight-deck/cli-guard v0.14.0
 	github.com/jmespath/go-jmespath v0.4.0
 	golang.org/x/net v0.53.0
 )

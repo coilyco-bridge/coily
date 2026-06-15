@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/ghcache"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/http/ghcache"
 )
 
 // invalidateGHWrite drops the ghcache entries a `method <path>` write

@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/egress"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/mcporter"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/passthrough"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/passthrough"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/http/egress"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/mcp/mcporter"
 	"github.com/urfave/cli/v3"
 )
 

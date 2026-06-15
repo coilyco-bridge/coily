@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/audit"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/pkg/audit"
 )
 
 func TestBuildDashboardView_GroupsByVerb(t *testing.T) {

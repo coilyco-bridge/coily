@@ -9,10 +9,10 @@ import (
 	"runtime"
 	"strings"
 
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/ghidcache"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/shell"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/stscache"
-	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/shell"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/cli/verb"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/http/ghidcache"
+	"forgejo.coilysiren.me/coilyco-flight-deck/cli-guard/http/stscache"
 	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )
