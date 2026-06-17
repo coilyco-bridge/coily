@@ -5,6 +5,12 @@ class Coily < Formula
   license "MIT"
   head "https://forgejo.coilysiren.me/coilysiren/coily.git", branch: "main"
 
+  # coily is deprecated and removed. disable! (not deprecate!) so `brew install`
+  # hard-fails with this message instead of building a dead tool. Fleet uninstall
+  # is the ansible homebrew_installed_packages_absent rollout, per authoring-vs-
+  # rollout. Nothing replaces coily.
+  disable! date: "2026-06-16", because: "coily is deprecated and removed; nothing replaces it"
+
   depends_on "go" => :build
 
   def install

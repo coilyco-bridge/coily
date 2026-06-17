@@ -1,5 +1,7 @@
 # coily
 
+> **Deprecated and removed (2026-06-16).** coily is no longer installed or maintained. The Homebrew formulae are `disable!`d, the release pipeline is retired, and the fleet uninstalls it via ansible (`homebrew_installed_packages_absent`). Nothing replaces it. This repo is kept read-only for history.
+
 🛡️ coily is a CLI security boundary for privileged ops, 🔒 escape-hatch-resistant and with an 📜 audit trail.
 
 Operator CLI for Kai's homelab (kai-server, coilysiren k3s cluster, AWS / Tailscale).

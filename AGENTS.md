@@ -26,7 +26,9 @@ For any GitHub op in Kai's workspace, reach for `coily ops gh ...` first. Same f
 
 ## Release framework
 
-Every push to `main` on forgejo triggers `.forgejo/workflows/release.yml`, fully automated. Forgejo is the canonical source of truth; the github mirror is read-only / archival.
+**Retired (2026-06-16).** coily is deprecated. `.forgejo/workflows/release.yml` was deleted, so pushes no longer cut tags or bump formulae. The Homebrew formulae are `disable!`d and the fleet uninstalls coily via ansible. The historical pipeline shape is described below for reference only.
+
+Every push to `main` on forgejo used to trigger `.forgejo/workflows/release.yml`, fully automated. Forgejo is the canonical source of truth; the github mirror is read-only / archival.
 
 1. `coilysiren/agentic-os/actions/tag-bump` parses conventional commits and computes the next semver. `default_bump: patch`: every push releases at least a patch. `feat:` -> minor, `feat!:` / `BREAKING CHANGE:` -> major. Tag is created via forgejo Tags API.
 2. `main.Version` set at build time via ldflags (brew formula); no source-tree version bump.
