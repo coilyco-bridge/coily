@@ -10,7 +10,7 @@ require (
 require (
 	forgejo.coilysiren.me/coilyco-flight-deck/cli-guard v0.14.0
 	github.com/jmespath/go-jmespath v0.4.0
-	golang.org/x/net v0.53.0
+	golang.org/x/net v0.55.0
 )
 
 require (
@@ -27,7 +27,7 @@ require (
 	github.com/olekukonko/ll v0.1.6 // indirect
 	github.com/olekukonko/tablewriter v1.1.4 // indirect
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
-	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )
